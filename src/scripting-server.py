@@ -51,3 +51,6 @@ def scriptor(mischo_url):
     perf_tar.extractall('/tmp')
     return Response(analyzer(perf_tar.getnames()), mimetype='text/plain')
 
+if __name__ == "__main__":
+    app.debug = True
+    app.run()
