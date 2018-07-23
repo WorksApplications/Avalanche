@@ -14,6 +14,6 @@ ADD src/scripting-server.py /usr/bin
 WORKDIR /
 
 # Assume /tmp
-CMD [ "/scripting-server.py" ]
+CMD [ "python" "/usr/bin/scripting-server.py" ]
 
 EXPOSE 8080
