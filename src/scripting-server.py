@@ -1,10 +1,17 @@
-from flask import Flask, Response
+from flask import Flask, Response, make_response
+import re
+import random
+import string
 import urllib2
 import os
 import subprocess
 import tarfile
 
 app = Flask(__name__)
+
+@app.route("/")
+def dummy():
+    return "<h1>THIS IS <i>SCRIPTING SERVER</i></h1> <h2>that generates perf-script from specified perf-map on mischo</h2>"
 
 @app.route("/<mischo_url>")
 def scriptor(mischo_url):
@@ -34,7 +41,7 @@ def scriptor(mischo_url):
         download_perf_archive(temporal_file)
 
     except urllib2.HTTPError as e:
-        return e.code
+        return make_response(e.reason, 404)
         
     perf_tar = tarfile.open(temporal_file, 'r')
     while len(filter(perf_map_regex.match, perf_tar.getnames())):
