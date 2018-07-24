@@ -1,5 +1,6 @@
 from flask import Flask, Response, make_response
 import re
+import time
 import random
 import string
 import urllib2
@@ -47,10 +48,11 @@ def scriptor(mischo_url):
     while len(filter(perf_map_regex.match, perf_tar.getnames())):
         """ map with same name is here! """
         """ do nothing while he alives """
+        time.sleep(0.3)
 
     perf_tar.extractall('/tmp')
     return Response(analyzer(perf_tar.getnames()), mimetype='text/plain')
 
 if __name__ == "__main__":
     app.debug = True
-    app.run()
+    app.run(threaded=True)
