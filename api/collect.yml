@@ -70,6 +70,14 @@ definitions:
         type: string
         format: date-time
 
+  replicas_request:
+    type: object
+    required:
+      - count
+    properties:
+      count:
+        type: integer
+
 
 paths:
   /apps:
@@ -96,7 +104,101 @@ paths:
           schema:
             $ref: "#/definitions/app"
               
+  /apps/{appid}/landscapes:
+    get:
+      parameters:
+        - name: appid
+          type: string
+          in: path
+          required: true
+      responses:
+        200:
+          description: |
+            "this returns list of landscapes"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/landscape"
 
+  /apps/{appid}/landscapes/{landscape}:
+    get:
+      parameters:
+        - name: appid
+          type: string
+          in: path
+          required: true
+        - name: landscape
+          type: string
+          in: path
+          required: true
+      responses:
+        200:
+          description: |
+            "this describes about the landscape"
+          schema:
+            $ref: "#/definitions/landscape"
+    patch:
+      parameters:
+        - name: appid
+          type: string
+          in: path
+          required: true
+        - name: landscape
+          type: string
+          in: path
+          required: true
+        - name: replicas
+          in: body
+          schema:
+            $ref: "#/definitions/replicas_request"
+      responses:
+        200:
+          description: |
+            "this changes the number of perf-ing replicas of app/landscape"
+          schema:
+            $ref: "#/definitions/landscape"
+
+  /apps/{appid}/landscapes/{landscape}/pods:
+    get:
+      parameters:
+        - name: appid
+          type: string
+          in: path
+          required: true
+        - name: landscape
+          type: string
+          in: path
+          required: true
+      responses:
+        200:
+          description: |
+            "this returns list of pods"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/pod"
+
+  /apps/{appid}/landscapes/{landscape}/pods/{pod}:
+    get:
+      parameters:
+        - name: appid
+          type: string
+          in: path
+          required: true
+        - name: landscape
+          type: string
+          in: path
+          required: true
+        - name: pod
+          type: string
+          in: path
+          required: true
+      responses:
+        200:
+          description: |
+            "this describes about the pod"
+          schema:
+            $ref: "#/definitions/pod"
           #  /apps/{appid}/landscapes: {}
           #  /apps/{appid}/landscapes/{landscapeid}: {}
           #/apps/{appid}/landscapes/{landscapeid}/pods: {}
