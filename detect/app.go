@@ -2,9 +2,9 @@ package main
 
 import (
 	"container/list"
-	"net/http"
-	"log"
 	"golang.org/x/net/html"
+	"log"
+	"net/http"
 	"strings"
 )
 
@@ -21,11 +21,11 @@ type App struct {
 }
 
 type Pod struct {
-	name string
-    link string
-    perfing bool
+	name    string
+	link    string
+	perfing bool
 	//node string
-    //namespace string
+	//namespace string
 }
 
 func findNode(z *html.Tokenizer) []string {
@@ -108,11 +108,11 @@ func followLink(sites []string) ([]string, error) {
 }
 
 func toPods(ls []string, applink string) []Pod {
-    pods := make([]Pod, len(ls))
-    for i, l := range ls {
-        pods[i] = Pod { strings.TrimRight(l, "/"), applink + l, false }
-    }
-    return pods
+	pods := make([]Pod, len(ls))
+	for i, l := range ls {
+		pods[i] = Pod{strings.TrimRight(l, "/"), applink + l, false}
+	}
+	return pods
 }
 
 func isNotFound(resp *http.Response) bool {
@@ -121,14 +121,14 @@ func isNotFound(resp *http.Response) bool {
 		tt := z.Next()
 		switch {
 		case tt == html.ErrorToken:
-            return false
+			return false
 		case tt == html.StartTagToken:
 			t := z.Token()
 			if t.Data == "title" {
-                z.Next()
-                if "404 Not Found" == string(z.Text()) {
-                    return true
-                }
+				z.Next()
+				if "404 Not Found" == string(z.Text()) {
+					return true
+				}
 			}
 		}
 	}
@@ -149,49 +149,49 @@ func (s Subscription) Scan() ([]App, error) {
 
 	/* Here it generates links like /acdev/log/kubernetes-10.207.5.30/msa/acdev/ */
 	logd, err := followLink(ns)
-    if err != nil {
-        log.Print(s.environment + "is not mounted")
-        return nil, err
-    }
+	if err != nil {
+		log.Print(s.environment + "is not mounted")
+		return nil, err
+	}
 
 	/* eg: /acdev/log/kubernetes-10.207.5.30/msa/acdev/develop/ */
 	log2, err := followLink(logd)
-    if err != nil {
-        log.Print(s.environment + "is closed")
-        return nil, err
-    }
+	if err != nil {
+		log.Print(s.environment + "is closed")
+		return nil, err
+	}
 
-    mapps := make(map[string][]Pod)
+	mapps := make(map[string][]Pod)
 	for _, l := range log2 {
 		ap, _ := findLink(l)
 		for _, name := range ap {
-            p, _ := findLink(l + name)
-            pods := toPods(p, l + name)
-            found, is := mapps[name]
-            if is {
-                pods = append(found, pods...)
-            }
-            mapps[name] = pods
+			p, _ := findLink(l + name)
+			pods := toPods(p, l+name)
+			found, is := mapps[name]
+			if is {
+				pods = append(found, pods...)
+			}
+			mapps[name] = pods
 		}
 	}
 
-    /* Check those pods are perf-enabled */
-    apps := make([]App, 0)
-    for name, pods := range mapps {
-        if strings.HasPrefix(name, "batch") {
-            continue
-        }
-        npds := make([]Pod, 0)
-        for _, pod := range pods {
-            con, err := http.Get(pod.link + "perf/")
-            defer con.Body.Close()
-            if err == nil && !isNotFound(con) {
-                npds = append(npds, pod)
-            }
-        }
+	/* Check those pods are perf-enabled */
+	apps := make([]App, 0)
+	for name, pods := range mapps {
+		if strings.HasPrefix(name, "batch") {
+			continue
+		}
+		npds := make([]Pod, 0)
+		for _, pod := range pods {
+			con, err := http.Get(pod.link + "perf/")
+			defer con.Body.Close()
+			if err == nil && !isNotFound(con) {
+				npds = append(npds, pod)
+			}
+		}
 
-        apps = append(apps, App{ name, npds })
-    }
+		apps = append(apps, App{name, npds})
+	}
 
 	return apps, nil
 }
@@ -202,8 +202,8 @@ func main() {
 	sxs.PushFront(s)
 
 	log.SetPrefix("detect:\t")
-    apps, _ := s.Scan()
-    log.Print(apps)
+	apps, _ := s.Scan()
+	log.Print(apps)
 	//http.HandleFunc("/subscription", s.Poll)
 	//log.Fatal(http.ListenAndServe(":8080", nil))
 }
