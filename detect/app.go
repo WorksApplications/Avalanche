@@ -56,7 +56,7 @@ func findNode(z *html.Tokenizer) []string {
 	return ns
 }
 
-func followLink(site string, debug bool) ([]string, error) {
+func findLink(site string, debug bool) ([]string, error) {
 	if debug {
 		log.Print(site)
 	}
@@ -87,6 +87,27 @@ func followLink(site string, debug bool) ([]string, error) {
 	return lxs, nil
 }
 
+func addPrefix(xs []string, prefix string) []string {
+	ret := make([]string, len(xs))
+	for i, x := range xs {
+		ret[i] = prefix + x
+	}
+	return ret
+}
+
+func followLink(sites []string, linkgen func(string) string) ([]string, error) {
+	ret := make([]string, 0)
+	for _, site := range sites {
+		link := linkgen(site)
+		next, err := findLink(link, false)
+		if err != nil {
+			return ret, err
+		}
+		ret = append(ret, addPrefix(next, link)...)
+	}
+	return ret, nil
+}
+
 func (s Subscription) Scan() (*App, error) {
 	resp, err := http.Get(prefix + s.environment + "/log")
 	if err != nil {
@@ -97,22 +118,19 @@ func (s Subscription) Scan() (*App, error) {
 	defer resp.Body.Close()
 	z := html.NewTokenizer(resp.Body)
 	log.Print("[Scan] " + s.environment)
-	ns := findNode(z)
+	ns := addPrefix(findNode(z), prefix+s.environment+"/log/")
 
-	/* See each node */
-	for i := 0; i < len(ns); i++ {
-		z := prefix + s.environment + "/log/" + ns[i] + "msa/"
-		tens, _ := followLink(z, false) /* Assume we have tenants */
+	/* Here it generates links like /acdev/log/kubernetes-10.207.5.30/msa/acdev/ */
+	logd, _ := followLink(ns, func(l string) string { return l + "msa/" })
 
-		for _, t := range tens {
-			z1 := z + t
-			ls, _ := followLink(z1, false)
-			for _, l := range ls {
-				apps, _ := followLink(z1+l, false)
-				for _, a := range apps {
-					log.Print(a)
-				}
-			}
+	/* eg: /acdev/log/kubernetes-10.207.5.30/msa/acdev/develop/ */
+	ls, _ := followLink(logd, func(l string) string { return l })
+
+	for _, l := range ls {
+		log.Print(l)
+		apps, _ := findLink(l, false)
+		for _, a := range apps {
+			log.Print(a)
 		}
 	}
 	return nil, nil
@@ -120,7 +138,7 @@ func (s Subscription) Scan() (*App, error) {
 
 func main() {
 	sxs := list.New()
-	s := Subscription{"jill-jack-k-single-jill", nil}
+	s := Subscription{"acdev", nil}
 	sxs.PushFront(s)
 
 	log.SetPrefix("collect:\t")
