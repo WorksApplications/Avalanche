@@ -1,0 +1,105 @@
+swagger: '2.0'
+info:
+  version: '0.1'
+  title: 'collective server for performance inspection'
+
+schemes:
+  - http
+
+consumes:
+  - application/json
+produces:
+  - application/json
+
+definitions:
+  app:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        minLength: 4
+      landscape:
+        type: array
+        items:
+          $ref: "#/definitions/landscape"
+
+  landscape:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        minLength: 4
+      pods:
+        type: array
+        items:
+          $ref: "#/definitions/pod"
+      live_count:
+          type: integer
+
+  pod:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        minLength: 4
+      snapshots:
+        type: array
+        items:
+          $ref: "#/definitions/snapshot_summary"
+      is_live:
+        type: boolean
+      created_at:
+        type: string
+        format: date-time
+
+  snapshot_summary:
+    type: object
+    required:
+      - id 
+    properties:
+      id:
+        type: string
+        minLength: 4
+      created_at:
+        type: string
+        format: date-time
+
+
+paths:
+  /apps:
+    get:
+      responses:
+        200:
+          description: |
+            "this returns list of apps"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/app"
+  /apps/{appid}:
+    get:
+      parameters:
+        - name: appid
+          type: string
+          in: path
+          required: true
+      responses:
+        200:
+          description: |
+            "this describes app"
+          schema:
+            $ref: "#/definitions/app"
+              
+
+          #  /apps/{appid}/landscapes: {}
+          #  /apps/{appid}/landscapes/{landscapeid}: {}
+          #/apps/{appid}/landscapes/{landscapeid}/pods: {}
+          #/apps/{appid}/landscapes/{landscapeid}/pods/{pods}:
+          #get: {}
+          #patch: {}
