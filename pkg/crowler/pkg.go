@@ -16,14 +16,14 @@ type Subscription struct {
 }
 
 type App struct {
-	name string
-	pods []Pod
+    Name string `json:"name"`
+    Pods []Pod `json:"pods"`
 }
 
 type Pod struct {
-	name    string
-	link    string
-	perfing bool
+    Name    string `json: "name"`
+    Link    string `json: "link"`
+    Perfing bool `json: "perfing"`
 	//node string
 	//namespace string
 }
@@ -151,7 +151,7 @@ func isNotFound(resp *http.Response) bool {
 
 }
 
-func (s Subscription) scan() ([]App, error) {
+func (s *Subscription) scan() ([]App, error) {
 	resp, err := http.Get(server + s.Env + "/log")
 	if err != nil {
 		log.Fatal(err)
@@ -199,7 +199,7 @@ func (s Subscription) scan() ([]App, error) {
 		}
 		npds := make([]Pod, 0)
 		for _, pod := range pods {
-			con, err := http.Get(pod.link + "perf/")
+			con, err := http.Get(pod.Link + "perf/")
 			defer con.Body.Close()
 			if err == nil && !isNotFound(con) {
 				npds = append(npds, pod)
@@ -216,6 +216,7 @@ func (s Subscription) scan() ([]App, error) {
 func ScheduleScan(ch chan *ScannerRequest) {
 	t := time.Tick(1 * time.Minute)
 	m := make(map[string]*Subscription)
+    empty := make([]App, 0)
 	for {
 		select {
 		case <-t:
@@ -226,21 +227,26 @@ func ScheduleScan(ch chan *ScannerRequest) {
 		case req := <-ch:
 			switch req.Req {
 			case ADD:
-				sub := Subscription{req.Sub.Env, nil}
+				sub := Subscription{req.Sub.Env, empty}
 				m[req.Sub.Env] = &sub
+                log.Printf("%s will be scanned", req.Sub.Env)
 			case DEL:
 				delete(m, req.Sub.Env)
+                log.Printf("%s won't be scanned", req.Sub.Env)
 			case SCAN:
 				sub, prs := m[req.Sub.Env]
 				if !prs {
-					sub = &Subscription{req.Sub.Env, nil}
+					sub = &Subscription{req.Sub.Env, empty}
 				}
-				sub.scan()
+                sub.scan()
+				m[req.Sub.Env] = sub
 			case PULL:
 				sub, prs := m[req.Sub.Env]
 				if !prs {
-					sub = &Subscription{req.Sub.Env, nil}
+                    log.Printf("Not found")
+					sub = &Subscription{req.Sub.Env, empty}
 				}
+                log.Printf("%s", sub.Apps)
                 ch <- &ScannerRequest{RET, sub}
 			}
 		}
