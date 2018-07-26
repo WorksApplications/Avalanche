@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
-    "time"
+	"time"
 )
 
 var server string = "http://mischo.internal.worksap.com/"
@@ -31,16 +31,16 @@ type Pod struct {
 type Request int
 
 const (
-    ADD Request = iota
-    DEL
-    SCAN
-    RUN 
-    CH
+	ADD Request = iota
+	DEL
+	SCAN
+	RUN
+	CH
 )
 
 type ScannerRequest struct {
-    req Request
-    sub string
+	req Request
+	sub string
 }
 
 func findNode(z *html.Tokenizer) []string {
@@ -208,32 +208,34 @@ func (s Subscription) scan() ([]App, error) {
 		apps = append(apps, App{name, npds})
 	}
 
-    s.apps = apps
+	s.apps = apps
 	return apps, nil
 }
 
 func ScheduleScan(ch chan *ScannerRequest) {
-    t := time.Tick(1 * time.Minute)
-    m := make(map[string] Subscription)
-    select {
-    case <-t:
-        log.Println("start batch scan")
-        for _, s := range m {
-            s.scan()
-        }
-    case req := <- ch:
-        switch req.req {
-        case ADD:
-            sub := Subscription{ req.sub, nil }
-            m[req.sub] = sub
-        case DEL:
-            delete(m, req.sub)
-        case SCAN:
-            sub, prs := m[req.sub]
-            if !prs {
-                sub = Subscription{ req.sub, nil }
-            }
-            sub.scan()
-        }
-    }
+	t := time.Tick(1 * time.Minute)
+	m := make(map[string]Subscription)
+	for {
+		select {
+		case <-t:
+			log.Println("start batch scan")
+			for _, s := range m {
+				s.scan()
+			}
+		case req := <-ch:
+			switch req.req {
+			case ADD:
+				sub := Subscription{req.sub, nil}
+				m[req.sub] = sub
+			case DEL:
+				delete(m, req.sub)
+			case SCAN:
+				sub, prs := m[req.sub]
+				if !prs {
+					sub = Subscription{req.sub, nil}
+				}
+				sub.scan()
+			}
+		}
+	}
 }
