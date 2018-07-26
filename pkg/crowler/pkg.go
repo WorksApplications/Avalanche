@@ -151,8 +151,8 @@ func isNotFound(resp *http.Response) bool {
 
 }
 
-func (s *Subscription) scan() ([]App, error) {
-	resp, err := http.Get(server + s.Env + "/log")
+func scan(env string) ([]App, error) {
+	resp, err := http.Get(server + env + "/log")
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
@@ -160,20 +160,20 @@ func (s *Subscription) scan() ([]App, error) {
 	/* Read mischo/environment */
 	defer resp.Body.Close()
 	z := html.NewTokenizer(resp.Body)
-	log.Print("[Scan] " + s.Env)
-	ns := suffix(prefix(findNode(z), server+s.Env+"/log/"), "msa/")
+	log.Print("[Scan] " + env)
+	ns := suffix(prefix(findNode(z), server+env+"/log/"), "msa/")
 
 	/* Here it generates links like /acdev/log/kubernetes-10.207.5.30/msa/acdev/ */
 	logd, err := followLink(ns)
 	if err != nil {
-		log.Print(s.Env + "is not mounted")
+		log.Print(env + "is not mounted")
 		return nil, err
 	}
 
 	/* eg: /acdev/log/kubernetes-10.207.5.30/msa/acdev/develop/ */
 	log2, err := followLink(logd)
 	if err != nil {
-		log.Print(s.Env + "is closed")
+		log.Print(env + "is closed")
 		return nil, err
 	}
 
@@ -209,20 +209,31 @@ func (s *Subscription) scan() ([]App, error) {
 		apps = append(apps, App{name, npds})
 	}
 
-	s.Apps = apps
 	return apps, nil
 }
 
-func ScheduleScan(ch chan *ScannerRequest) {
+func dispatch(ch chan Subscription) {
+    for s := range ch {
+        apps, _ := scan(s.Env)
+        sub := Subscription{s.Env, apps}
+        ch <- sub
+    }
+}
+
+func Exchange(ch chan *ScannerRequest) {
 	t := time.Tick(1 * time.Minute)
 	m := make(map[string]*Subscription)
     empty := make([]App, 0)
+    sc := make(chan Subscription, 64) //May have to be extended
+    go dispatch(sc)
 	for {
 		select {
+        case res := <- sc:
+            m[res.Env] = &res
 		case <-t:
 			log.Println("start batch scan")
 			for _, s := range m {
-				s.scan()
+                sc <- *s
 			}
 		case req := <-ch:
 			switch req.Req {
@@ -238,7 +249,10 @@ func ScheduleScan(ch chan *ScannerRequest) {
 				if !prs {
 					sub = &Subscription{req.Sub.Env, empty}
 				}
-                sub.scan()
+                log.Printf("test: %s", sub)
+                apps, _ := scan(sub.Env)
+                log.Printf("scan, %s", apps)
+                sub.Apps = apps
 				m[req.Sub.Env] = sub
 			case PULL:
 				sub, prs := m[req.Sub.Env]

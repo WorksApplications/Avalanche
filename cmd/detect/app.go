@@ -11,7 +11,7 @@ import (
 func main() {
 	log.SetPrefix("detect:\t")
 	x := detectService.HandlerClosure{make(chan *crowl.ScannerRequest)}
-	go crowl.ScheduleScan(x.Ch)
+	go crowl.Exchange(x.Ch)
 	//log.Print(apps)
 	http.HandleFunc("/subscription/", x.SubRunner)
 	http.HandleFunc("/subscription", x.Runner)
