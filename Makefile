@@ -1,5 +1,4 @@
 
-
 all: services
 
 services: collect  detect
@@ -8,8 +7,8 @@ collect:
 
 : -img
 
--img: /Dockerfile /src/scripting-server.py
-	docker build -f /Dockerfile --tag :latest 
+-img: image//Dockerfile /src/scripting-server.py
+	docker build -f image//Dockerfile --tag :latest 
 
 detect: detect-img
 
