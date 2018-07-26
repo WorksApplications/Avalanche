@@ -2,16 +2,17 @@ package main
 
 import (
 	"log"
-	//"net/http"
+	"net/http"
 	//"strings"
 	"../../pkg/crowler"
+	"../../pkg/detectHandler"
 )
 
 func main() {
 	log.SetPrefix("detect:\t")
-	scanch := make(chan *crowl.ScannerRequest)
-	crowl.ScheduleScan(scanch)
+	x := detectService.HandlerClosure{make(chan *crowl.ScannerRequest)}
+	go crowl.ScheduleScan(x.ch)
 	//log.Print(apps)
-	//http.HandleFunc("/subscription", s.Poll)
-	//log.Fatal(http.ListenAndServe(":8080", nil))
+	http.HandleFunc("/subscription/", x.runner)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

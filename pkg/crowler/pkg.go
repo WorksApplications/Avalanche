@@ -11,8 +11,8 @@ import (
 var server string = "http://mischo.internal.worksap.com/"
 
 type Subscription struct {
-	environment string
-	apps        []App
+	Env string
+	Apps        []App
 }
 
 type App struct {
@@ -35,12 +35,13 @@ const (
 	DEL
 	SCAN
 	RUN
-	CH
+    PULL
+    RET
 )
 
 type ScannerRequest struct {
-	req Request
-	sub string
+	Req Request
+	Sub *Subscription
 }
 
 func findNode(z *html.Tokenizer) []string {
@@ -151,7 +152,7 @@ func isNotFound(resp *http.Response) bool {
 }
 
 func (s Subscription) scan() ([]App, error) {
-	resp, err := http.Get(server + s.environment + "/log")
+	resp, err := http.Get(server + s.Env + "/log")
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
@@ -159,20 +160,20 @@ func (s Subscription) scan() ([]App, error) {
 	/* Read mischo/environment */
 	defer resp.Body.Close()
 	z := html.NewTokenizer(resp.Body)
-	log.Print("[Scan] " + s.environment)
-	ns := suffix(prefix(findNode(z), server+s.environment+"/log/"), "msa/")
+	log.Print("[Scan] " + s.Env)
+	ns := suffix(prefix(findNode(z), server+s.Env+"/log/"), "msa/")
 
 	/* Here it generates links like /acdev/log/kubernetes-10.207.5.30/msa/acdev/ */
 	logd, err := followLink(ns)
 	if err != nil {
-		log.Print(s.environment + "is not mounted")
+		log.Print(s.Env + "is not mounted")
 		return nil, err
 	}
 
 	/* eg: /acdev/log/kubernetes-10.207.5.30/msa/acdev/develop/ */
 	log2, err := followLink(logd)
 	if err != nil {
-		log.Print(s.environment + "is closed")
+		log.Print(s.Env + "is closed")
 		return nil, err
 	}
 
@@ -208,13 +209,13 @@ func (s Subscription) scan() ([]App, error) {
 		apps = append(apps, App{name, npds})
 	}
 
-	s.apps = apps
+	s.Apps = apps
 	return apps, nil
 }
 
 func ScheduleScan(ch chan *ScannerRequest) {
 	t := time.Tick(1 * time.Minute)
-	m := make(map[string]Subscription)
+	m := make(map[string]*Subscription)
 	for {
 		select {
 		case <-t:
@@ -223,18 +224,24 @@ func ScheduleScan(ch chan *ScannerRequest) {
 				s.scan()
 			}
 		case req := <-ch:
-			switch req.req {
+			switch req.Req {
 			case ADD:
-				sub := Subscription{req.sub, nil}
-				m[req.sub] = sub
+				sub := Subscription{req.Sub.Env, nil}
+				m[req.Sub.Env] = &sub
 			case DEL:
-				delete(m, req.sub)
+				delete(m, req.Sub.Env)
 			case SCAN:
-				sub, prs := m[req.sub]
+				sub, prs := m[req.Sub.Env]
 				if !prs {
-					sub = Subscription{req.sub, nil}
+					sub = &Subscription{req.Sub.Env, nil}
 				}
 				sub.scan()
+			case PULL:
+				sub, prs := m[req.Sub.Env]
+				if !prs {
+					sub = &Subscription{req.Sub.Env, nil}
+				}
+                ch <- &ScannerRequest{RET, sub}
 			}
 		}
 	}
