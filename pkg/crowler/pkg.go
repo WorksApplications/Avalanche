@@ -11,19 +11,19 @@ import (
 var server string = "http://mischo.internal.worksap.com/"
 
 type Subscription struct {
-	Env string
-	Apps        []App
+	Env  string
+	Apps []App
 }
 
 type App struct {
-    Name string `json:"name"`
-    Pods []Pod `json:"pods"`
+	Name string `json:"name"`
+	Pods []Pod  `json:"pods"`
 }
 
 type Pod struct {
-    Name    string `json: "name"`
-    Link    string `json: "link"`
-    Perfing bool `json: "perfing"`
+	Name    string `json: "name"`
+	Link    string `json: "link"`
+	Perfing bool   `json: "perfing"`
 	//node string
 	//namespace string
 }
@@ -35,8 +35,8 @@ const (
 	DEL
 	SCAN
 	RUN
-    PULL
-    RET
+	PULL
+	RET
 )
 
 type ScannerRequest struct {
@@ -152,6 +152,7 @@ func isNotFound(resp *http.Response) bool {
 }
 
 func scan(env string) ([]App, error) {
+	log.Print("[Scan] " + env)
 	resp, err := http.Get(server + env + "/log")
 	if err != nil {
 		log.Fatal(err)
@@ -160,7 +161,6 @@ func scan(env string) ([]App, error) {
 	/* Read mischo/environment */
 	defer resp.Body.Close()
 	z := html.NewTokenizer(resp.Body)
-	log.Print("[Scan] " + env)
 	ns := suffix(prefix(findNode(z), server+env+"/log/"), "msa/")
 
 	/* Here it generates links like /acdev/log/kubernetes-10.207.5.30/msa/acdev/ */
@@ -213,55 +213,53 @@ func scan(env string) ([]App, error) {
 }
 
 func dispatch(ch chan Subscription) {
-    for s := range ch {
-        apps, _ := scan(s.Env)
-        sub := Subscription{s.Env, apps}
-        ch <- sub
-    }
+	for s := range ch {
+        log.Printf("Start scan for %s", s.Env)
+		apps, err := scan(s.Env)
+		log.Printf("%s", err)
+		sub := Subscription{s.Env, apps}
+		ch <- sub
+	}
 }
 
 func Exchange(ch chan *ScannerRequest) {
 	t := time.Tick(1 * time.Minute)
 	m := make(map[string]*Subscription)
-    empty := make([]App, 0)
-    sc := make(chan Subscription, 64) //May have to be extended
-    go dispatch(sc)
+	empty := make([]App, 0)
+	sc := make(chan Subscription, 64) //May have to be extended
+	go dispatch(sc)
 	for {
 		select {
-        case res := <- sc:
-            m[res.Env] = &res
+		case res := <-sc:
+			m[res.Env] = &res
 		case <-t:
 			log.Println("start batch scan")
 			for _, s := range m {
-                sc <- *s
+				sc <- *s
 			}
 		case req := <-ch:
 			switch req.Req {
 			case ADD:
 				sub := Subscription{req.Sub.Env, empty}
 				m[req.Sub.Env] = &sub
-                log.Printf("%s will be scanned", req.Sub.Env)
+				log.Printf("%s will be scanned", req.Sub.Env)
 			case DEL:
 				delete(m, req.Sub.Env)
-                log.Printf("%s won't be scanned", req.Sub.Env)
+				log.Printf("%s won't be scanned", req.Sub.Env)
 			case SCAN:
 				sub, prs := m[req.Sub.Env]
 				if !prs {
 					sub = &Subscription{req.Sub.Env, empty}
 				}
-                log.Printf("test: %s", sub)
-                apps, _ := scan(sub.Env)
-                log.Printf("scan, %s", apps)
-                sub.Apps = apps
-				m[req.Sub.Env] = sub
+				sc <- *sub
 			case PULL:
 				sub, prs := m[req.Sub.Env]
 				if !prs {
-                    log.Printf("Not found")
+					log.Printf("Not found")
 					sub = &Subscription{req.Sub.Env, empty}
 				}
-                log.Printf("%s", sub.Apps)
-                ch <- &ScannerRequest{RET, sub}
+				log.Printf("%s", sub.Apps)
+				ch <- &ScannerRequest{RET, sub}
 			}
 		}
 	}
