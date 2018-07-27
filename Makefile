@@ -1,9 +1,10 @@
 UTIL = $(shell find pkg/util -name *.go)
 MODEL = $(shell find pkg/model -name *.go)
 
-all: services
+all: bin
 
-services: collect  detect
+images: collect  detect
+bin: collect-bin detect-bin
 
 collect: collect-img
 
@@ -16,7 +17,7 @@ collect-bin: $(shell find cmd/collect -name *.go) $(UTIL) $(MODEL) swagger-gen
 swagger-gen: swagger
 
 swagger: api/collect.yml
-	swagger generate server -f api/collect.yml generated_files
+	swagger generate server -f api/collect.yml -t generated_files
 
 : -img
 

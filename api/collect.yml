@@ -20,12 +20,12 @@ definitions:
       name:
         type: string
         minLength: 4
-      landscape:
+      environment:
         type: array
         items:
-          $ref: "#/definitions/landscape"
+          $ref: "#/definitions/environment"
 
-  landscape:
+  environment:
     type: object
     required:
       - name
@@ -78,6 +78,38 @@ definitions:
       count:
         type: integer
 
+  config:
+    type: object
+    required:
+      - date
+    properties:
+      date:
+        type: string
+        format: date-time
+      environment-config:
+        type: array
+        items:
+          $ref: "#/definitions/environment-config"
+
+  environment-config:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+      tenant:
+        type: string
+      version:
+        type: string
+      landscape:
+        type: string
+      mischo-url:
+        type: string
+      service-url:
+        type: string
+      is_multitenant:
+        type: boolean
 
 paths:
   /apps:
@@ -104,7 +136,7 @@ paths:
           schema:
             $ref: "#/definitions/app"
               
-  /apps/{appid}/landscapes:
+  /apps/{appid}/environments:
     get:
       parameters:
         - name: appid
@@ -114,36 +146,36 @@ paths:
       responses:
         200:
           description: |
-            "this returns list of landscapes"
+            "this returns list of environments"
           schema:
             type: array
             items:
-              $ref: "#/definitions/landscape"
+              $ref: "#/definitions/environment"
 
-  /apps/{appid}/landscapes/{landscape}:
+  /apps/{appid}/environments/{environment}:
     get:
       parameters:
         - name: appid
           type: string
           in: path
           required: true
-        - name: landscape
+        - name: environment
           type: string
           in: path
           required: true
       responses:
         200:
           description: |
-            "this describes about the landscape"
+            "this describes about the environment"
           schema:
-            $ref: "#/definitions/landscape"
+            $ref: "#/definitions/environment"
     patch:
       parameters:
         - name: appid
           type: string
           in: path
           required: true
-        - name: landscape
+        - name: environment
           type: string
           in: path
           required: true
@@ -154,18 +186,18 @@ paths:
       responses:
         200:
           description: |
-            "this changes the number of perf-ing replicas of app/landscape"
+            "this changes the number of perf-ing replicas of app/environment"
           schema:
-            $ref: "#/definitions/landscape"
+            $ref: "#/definitions/environment"
 
-  /apps/{appid}/landscapes/{landscape}/pods:
+  /apps/{appid}/environments/{environment}/pods:
     get:
       parameters:
         - name: appid
           type: string
           in: path
           required: true
-        - name: landscape
+        - name: environment
           type: string
           in: path
           required: true
@@ -178,14 +210,14 @@ paths:
             items:
               $ref: "#/definitions/pod"
 
-  /apps/{appid}/landscapes/{landscape}/pods/{pod}:
+  /apps/{appid}/environments/{environment}/pods/{pod}:
     get:
       parameters:
         - name: appid
           type: string
           in: path
           required: true
-        - name: landscape
+        - name: environment
           type: string
           in: path
           required: true
@@ -199,9 +231,30 @@ paths:
             "this describes about the pod"
           schema:
             $ref: "#/definitions/pod"
-          #  /apps/{appid}/landscapes: {}
-          #  /apps/{appid}/landscapes/{landscapeid}: {}
-          #/apps/{appid}/landscapes/{landscapeid}/pods: {}
-          #/apps/{appid}/landscapes/{landscapeid}/pods/{pods}:
+          #  /apps/{appid}/environments: {}
+          #  /apps/{appid}/environments/{environmentid}: {}
+          #/apps/{appid}/environments/{environmentid}/pods: {}
+          #/apps/{appid}/environments/{environmentid}/pods/{pods}:
           #get: {}
           #patch: {}
+  /config:
+    get:
+      responses:
+        200:
+          description: |
+            "this describes about the pod"
+          schema:
+            $ref: "#/definitions/config"
+  /config/environment/{environment}:
+    get:
+      parameters:
+        - name: environment
+          type: string
+          in: path
+          required: true
+      responses:
+        200:
+          description: |
+            "this describes about the pod"
+          schema:
+            $ref: "#/definitions/environment-config"
