@@ -1,23 +1,22 @@
-package detectService
+package server
 
 import (
 	"encoding/json"
 	"log"
 	"net/http"
-	//"strings"
 	"bytes"
 	"fmt"
 	"strings"
 	"time"
     "git.paas.workslan/resource_optimization/dynamic_analysis/pkg/model"
-    "git.paas.workslan/resource_optimization/dynamic_analysis/pkg/crowler"
+    "git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/util"
 )
 
 type HandlerClosure struct {
-	Ch chan *crowl.ScannerRequest
+	Ch chan *util.ScannerRequest
 }
 
-func subscribe(res http.ResponseWriter, req *http.Request, ch chan *crowl.ScannerRequest) {
+func subscribe(res http.ResponseWriter, req *http.Request, ch chan *util.ScannerRequest) {
 	buf := new(bytes.Buffer)
 	defer req.Body.Close()
 	r, e := buf.ReadFrom(req.Body)
@@ -30,7 +29,7 @@ func subscribe(res http.ResponseWriter, req *http.Request, ch chan *crowl.Scanne
 		return
 	}
 	sub := model.Subscription{buf.String(), nil}
-	sreq := crowl.ScannerRequest{crowl.SCAN, &sub}
+	sreq := util.ScannerRequest{util.SCAN, &sub}
 
 	t := time.NewTimer(20 * time.Second)
 
@@ -44,11 +43,11 @@ func subscribe(res http.ResponseWriter, req *http.Request, ch chan *crowl.Scanne
 	fmt.Fprintf(res, "%s", buf)
 }
 
-func get(res http.ResponseWriter, req *http.Request, ch chan *crowl.ScannerRequest) {
+func get(res http.ResponseWriter, req *http.Request, ch chan *util.ScannerRequest) {
 	env := strings.TrimPrefix(req.URL.Path, "/subscription/")
 	log.Printf("%s", env)
 	sub := model.Subscription{env, nil}
-	sreq := crowl.ScannerRequest{crowl.PULL, &sub}
+	sreq := util.ScannerRequest{util.PULL, &sub}
 
 	t := time.NewTimer(20 * time.Second)
 
