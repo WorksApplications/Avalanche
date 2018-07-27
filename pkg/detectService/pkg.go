@@ -5,11 +5,12 @@ import (
 	"log"
 	"net/http"
 	//"strings"
-	"../crowler"
 	"bytes"
 	"fmt"
 	"strings"
 	"time"
+    "git.paas.workslan/resource_optimization/dynamic_analysis/pkg/model"
+    "git.paas.workslan/resource_optimization/dynamic_analysis/pkg/crowler"
 )
 
 type HandlerClosure struct {
@@ -28,7 +29,7 @@ func subscribe(res http.ResponseWriter, req *http.Request, ch chan *crowl.Scanne
 		res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	sub := crowl.Subscription{buf.String(), nil}
+	sub := model.Subscription{buf.String(), nil}
 	sreq := crowl.ScannerRequest{crowl.SCAN, &sub}
 
 	t := time.NewTimer(20 * time.Second)
@@ -46,7 +47,7 @@ func subscribe(res http.ResponseWriter, req *http.Request, ch chan *crowl.Scanne
 func get(res http.ResponseWriter, req *http.Request, ch chan *crowl.ScannerRequest) {
 	env := strings.TrimPrefix(req.URL.Path, "/subscription/")
 	log.Printf("%s", env)
-	sub := crowl.Subscription{env, nil}
+	sub := model.Subscription{env, nil}
 	sreq := crowl.ScannerRequest{crowl.PULL, &sub}
 
 	t := time.NewTimer(20 * time.Second)

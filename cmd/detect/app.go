@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 	//"strings"
-	"../../pkg/crowler"
-	"../../pkg/detectService"
+    "git.paas.workslan/resource_optimization/dynamic_analysis/pkg/crowler"
+    "git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detectService"
 )
 
 func main() {

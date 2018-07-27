@@ -1,32 +1,16 @@
 package crowl
 
 import (
-	"golang.org/x/net/html"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+
+    "git.paas.workslan/resource_optimization/dynamic_analysis/pkg/model"
+	"golang.org/x/net/html"
 )
 
 var server string = "http://mischo.internal.worksap.com/"
-
-type Subscription struct {
-	Env  string
-	Apps []App
-}
-
-type App struct {
-	Name string `json:"name"`
-	Pods []Pod  `json:"pods"`
-}
-
-type Pod struct {
-	Name    string `json: "name"`
-	Link    string `json: "link"`
-	Perfing bool   `json: "perfing"`
-	//node string
-	//namespace string
-}
 
 type Request int
 
@@ -41,7 +25,7 @@ const (
 
 type ScannerRequest struct {
 	Req Request
-	Sub *Subscription
+	Sub *model.Subscription
 }
 
 func findNode(z *html.Tokenizer) []string {
@@ -123,10 +107,10 @@ func followLink(sites []string) ([]string, error) {
 	return ret, nil
 }
 
-func toPods(ls []string, applink string) []Pod {
-	pods := make([]Pod, len(ls))
+func toPods(ls []string, applink string) []model.Pod {
+	pods := make([]model.Pod, len(ls))
 	for i, l := range ls {
-		pods[i] = Pod{strings.TrimRight(l, "/"), applink + l, false}
+		pods[i] = model.Pod{strings.TrimRight(l, "/"), applink + l, false}
 	}
 	return pods
 }
@@ -151,7 +135,7 @@ func isNotFound(resp *http.Response) bool {
 
 }
 
-func scan(env string) ([]App, error) {
+func scan(env string) ([]model.App, error) {
 	log.Print("[Scan] " + env)
 	resp, err := http.Get(server + env + "/log")
 	if err != nil {
@@ -177,7 +161,7 @@ func scan(env string) ([]App, error) {
 		return nil, err
 	}
 
-	mapps := make(map[string][]Pod)
+	mapps := make(map[string][]model.Pod)
 	for _, l := range log2 {
 		ap, _ := findLink(l)
 		for _, name := range ap {
@@ -192,12 +176,12 @@ func scan(env string) ([]App, error) {
 	}
 
 	/* Check those pods are perf-enabled */
-	apps := make([]App, 0)
+	apps := make([]model.App, 0)
 	for name, pods := range mapps {
 		if strings.HasPrefix(name, "batch") {
 			continue
 		}
-		npds := make([]Pod, 0)
+		npds := make([]model.Pod, 0)
 		for _, pod := range pods {
 			con, err := http.Get(pod.Link + "perf/")
 			defer con.Body.Close()
@@ -206,27 +190,27 @@ func scan(env string) ([]App, error) {
 			}
 		}
 
-		apps = append(apps, App{name, npds})
+		apps = append(apps, model.App{name, npds})
 	}
 
 	return apps, nil
 }
 
-func dispatch(ch chan Subscription) {
+func dispatch(ch chan model.Subscription) {
 	for s := range ch {
         log.Printf("Start scan for %s", s.Env)
 		apps, err := scan(s.Env)
 		log.Printf("%s", err)
-		sub := Subscription{s.Env, apps}
+		sub := model.Subscription{s.Env, apps}
 		ch <- sub
 	}
 }
 
 func Exchange(ch chan *ScannerRequest) {
 	t := time.Tick(1 * time.Minute)
-	m := make(map[string]*Subscription)
-	empty := make([]App, 0)
-	sc := make(chan Subscription, 64) //May have to be extended
+	m := make(map[string]*model.Subscription)
+	empty := make([]model.App, 0)
+	sc := make(chan model.Subscription, 64) //May have to be extended
 	go dispatch(sc)
 	for {
 		select {
@@ -240,7 +224,7 @@ func Exchange(ch chan *ScannerRequest) {
 		case req := <-ch:
 			switch req.Req {
 			case ADD:
-				sub := Subscription{req.Sub.Env, empty}
+				sub := model.Subscription{req.Sub.Env, empty}
 				m[req.Sub.Env] = &sub
 				log.Printf("%s will be scanned", req.Sub.Env)
 			case DEL:
@@ -249,14 +233,14 @@ func Exchange(ch chan *ScannerRequest) {
 			case SCAN:
 				sub, prs := m[req.Sub.Env]
 				if !prs {
-					sub = &Subscription{req.Sub.Env, empty}
+					sub = &model.Subscription{req.Sub.Env, empty}
 				}
 				sc <- *sub
 			case PULL:
 				sub, prs := m[req.Sub.Env]
 				if !prs {
 					log.Printf("Not found")
-					sub = &Subscription{req.Sub.Env, empty}
+					sub = &model.Subscription{req.Sub.Env, empty}
 				}
 				log.Printf("%s", sub.Apps)
 				ch <- &ScannerRequest{RET, sub}
