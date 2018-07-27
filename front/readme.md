@@ -12,9 +12,26 @@
 
 + [Preact](https://preactjs.com/)
 + [preact-redux](https://github.com/developit/preact-redux)
-+ Webpack 4+
 + SCSS (though I hate node-sass)
 + CSS Modules
 + TypeScript 3.x
++ TSLint
++ Prettier
++ Jest
++ Webpack 4+ (with webpack-serve)
 + Workbox (in the future)
 + Web Components (in the future... I wish)
+
+# Start developing
+
+```bash
+$ yarn start
+```
+
+# Build for distribute
+
+```bash
+$ yarn build
+```
+
+This command generates "public" directory and files.
