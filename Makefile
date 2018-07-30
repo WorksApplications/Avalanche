@@ -4,14 +4,14 @@ MODEL = $(shell find pkg/model -name *.go)
 all: bin
 
 images: collect  detect
-bin: collect-bin detect-bin
+bin: bin/*
 
 collect: collect-img
 
-collect-img: collect-bin
+collect-img: bin/collect
 	docker build -f image/collect/Dockerfile --tag collect:latest .
 
-collect-bin: $(shell find cmd/collect -name *.go) $(UTIL) $(MODEL) generated_files
+bin/collect: $(shell find cmd/collect -name *.go) $(UTIL) $(MODEL) generated_files
 	go build -o bin/collect cmd/collect/app.go
 
 generated_files: api/collect.yml
@@ -24,9 +24,9 @@ generated_files: api/collect.yml
 
 detect: detect-img
 
-detect-img: detect-bin image/detect/Dockerfile
+detect-img: bin/detect image/detect/Dockerfile
 	docker build --no-cache -f image/detect/Dockerfile --tag detect:latest .
 
-detect-bin: $(shell find cmd/detect -name *.go) $(UTIL) $(MODEL)
+bin/detect: $(shell find cmd/detect -name *.go) $(UTIL) $(MODEL)
 	go build -o bin/detect cmd/detect/app.go
 

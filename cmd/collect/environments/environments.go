@@ -8,13 +8,6 @@ import (
 	"time"
 )
 
-type Env struct {
-	id   int    `json:"id"`
-	name string `json:"name"`
-	pods *[]Pod `json:"pods"`
-	live int    `json:"live_count"`
-}
-
 type Pod struct {
 	id         int            `json:"id"`
 	name       string         `json:"name"`
