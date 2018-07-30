@@ -1,6 +1,5 @@
 package layout
 
-
 import(
     "fmt"
     "log"
@@ -11,6 +10,7 @@ type Layout struct {
     Id int64
     AppId int64
     EnvId int64
+    Lives int64
 }
 
 func InitTable(db *sql.DB) {
@@ -18,15 +18,16 @@ func InitTable(db *sql.DB) {
 		"CREATE TABLE layout(" +
 			"id MEDIUMINT NOT NULL AUTO_INCREMENT, " +
 			"name CHAR(80) NOT NULL, " +
-			"appId int, " +
-			"envId int, " +
+			"appid int, " +
+			"envid int, " +
+			"lives int, " +
 			"PRIMARY KEY (id) " +
 			")")
 	log.Println(row)
 }
 
 func of(where string, db *sql.DB) *[]*Layout {
-	rows, err := db.Query("SELECT id, name, appId, lives FROM layout ?", where)
+	rows, err := db.Query("SELECT id, name, appid, envid, lives FROM layout ?", where)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,13 +35,14 @@ func of(where string, db *sql.DB) *[]*Layout {
 	lays := make([]*Layout, 0)
 	for rows.Next() {
 		var id int64
-		var appId int64
-		var envId int64
-		err = rows.Scan(&id, &appId, &envId)
+		var aid int64
+		var eid int64
+        var lives int64
+		err = rows.Scan(&id, &aid, &eid, &lives)
 		if err != nil {
 			log.Print(err)
 		}
-		lays = append(lays, &Layout{id, appId, envId})
+		lays = append(lays, &Layout{id, aid, eid, lives})
 	}
 	return &lays 
 }

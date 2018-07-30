@@ -6,21 +6,7 @@ import (
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"log"
-	"time"
 )
-
-type Pod struct {
-	id         int            `json:"id"`
-	name       string         `json:"name"`
-	snapshots  *[]SnapSummary `json:"snapshots"`
-	is_live    bool           `json:"is_live"`
-	created_at time.Time      `json:"created_at"`
-}
-
-type SnapSummary struct {
-	id         int       `json:"id"`
-	created_at time.Time `json:"created_at"`
-}
 
 /* +--+----+---------------------------+
    |id|name|app_id                     |
@@ -31,14 +17,13 @@ func InitTable(db *sql.DB) {
 		"CREATE TABLE environ(" +
 			"id MEDIUMINT NOT NULL AUTO_INCREMENT, " +
 			"name CHAR(32) NOT NULL, " +
-			"appId int, " +
-			"lives int, " +
+            "addr TEXT, " +
 			"PRIMARY KEY (id) " +
 			")")
 }
 
 func list(db *sql.DB, where *string) []*models.Environment {
-	rows, err := db.Query("SELECT id, name, appId, lives FROM environ ?", where)
+	rows, err := db.Query("SELECT id, name, FROM environ ?", where)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -47,14 +32,16 @@ func list(db *sql.DB, where *string) []*models.Environment {
 	for rows.Next() {
 		var id int64
 		var name string
-		var appId int64
-		var lives int64
-		err = rows.Scan(&id, &name, &appId, &lives)
+		err = rows.Scan(&id, &name)
 		if err != nil {
 			log.Print(err)
 		}
-		envs = append(envs, &models.Environment{appId, &id, lives, &name, nil})
-		//apps = append(apps, &models.App{nil, &id, strfmt.DateTime(date), &name})
+        lays := layout.OfEnv(id, db)
+        lsum := 0
+        for _, l := range *lays {
+            lsum = lsum + int(l.Lives)
+        }
+		envs = append(envs, &models.Environment{&id, int64(lsum), &name, nil})
 	}
 	return envs
 }

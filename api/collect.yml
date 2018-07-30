@@ -39,8 +39,6 @@ definitions:
     properties:
       id:
         type: integer
-      appid:
-        type: integer
       name:
         type: string
         minLength: 4
