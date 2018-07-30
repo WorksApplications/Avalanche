@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"log"
 	"time"
 )
@@ -36,7 +37,7 @@ func InitTable(db *sql.DB) {
 			")")
 }
 
-func List(db *sql.DB, where *string) []*models.Environment {
+func list(db *sql.DB, where *string) []*models.Environment {
 	rows, err := db.Query("SELECT id, name, appId, lives FROM environ ?", where)
 	if err != nil {
 		log.Fatal(err)
@@ -64,7 +65,7 @@ func fill(s *models.Environment, db *sql.DB) {
 }
 
 func ListAll(db *sql.DB) []*models.Environment {
-	envs := List(db, nil)
+	envs := list(db, nil)
 	for _, env := range envs {
 		fill(env, db)
 	}
@@ -73,7 +74,16 @@ func ListAll(db *sql.DB) []*models.Environment {
 
 func Describe(db *sql.DB, n *string) *models.Environment {
 	name := fmt.Sprintf("WHERE name = %s", n)
-	envs := List(db, &name)
+	envs := list(db, &name)
+	for _, env := range envs {
+		fill(env, db)
+	}
+	return envs[0]
+}
+
+func FromLayout(db *sql.DB, lay *layout.Layout) *models.Environment {
+	where := fmt.Sprintf("WHERE id = %s", lay.EnvId)
+	envs := list(db, &where)
 	for _, env := range envs {
 		fill(env, db)
 	}

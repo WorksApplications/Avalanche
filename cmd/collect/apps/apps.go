@@ -3,6 +3,7 @@ package app
 import (
 	"database/sql"
 	"fmt"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/environments"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 	"github.com/go-openapi/strfmt"
@@ -47,8 +48,12 @@ func list(db *sql.DB, where *string) []*models.App {
 }
 
 func fill(s *models.App, db *sql.DB) {
-	idwhere := fmt.Sprintf("WHERE appId = %s", s.ID)
-	s.Environments = environ.List(db, &idwhere)
+    lays := layout.OfApp(*s.ID, db)
+    envs := make([]*models.Environment, 0)
+    for _, lay := range *lays {
+        envs = append(envs, environ.FromLayout(db, lay))
+    }
+	s.Environments = envs
 }
 
 func ListAll(db *sql.DB) []*models.App {
