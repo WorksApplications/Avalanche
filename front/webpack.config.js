@@ -16,6 +16,16 @@ module.exports = env => {
     entry: {
       app: index
     },
+    resolve: {
+      extensions: [
+        ".mjs",
+        ".ts",
+        ".tsx",
+        ".js",
+        ".json",
+        ".jsx"
+      ]
+    },
     module: {
       rules: [
         {
