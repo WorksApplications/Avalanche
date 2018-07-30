@@ -20,16 +20,22 @@ definitions:
       name:
         type: string
         minLength: 4
-      environment:
+      environments:
         type: array
         items:
           $ref: "#/definitions/environment"
+      lastseen:
+        type: string
+        format: date-time
 
   environment:
     type: object
     required:
+      - id
       - name
     properties:
+      id:
+        type: integer
       name:
         type: string
         minLength: 4
@@ -261,4 +267,4 @@ paths:
             "this describes about the pod"
           schema:
             $ref: "#/definitions/environment-config"
-      operationId: describeEnvironment
+      operationId: getEnvironmentConfig
