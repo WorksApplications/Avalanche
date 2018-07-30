@@ -1,9 +1,11 @@
 package environ
 
 import (
+	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
     "database/sql"
     "time"
     "log"
+    "fmt"
 )
 
 type Env struct {
@@ -41,36 +43,47 @@ func InitTable(db *sql.DB) {
         ")")
 }
 
-func List(db *sql.DB, where *string) *[]Env {
+func List(db *sql.DB, where *string) []*models.Environment {
     rows, err := db.Query("SELECT id, name, appId, lives FROM environ ?", where)
     if err != nil {
         log.Fatal(err)
     }
     defer rows.Close()
-    envs := make([]Env, 0)
+    envs := make([]*models.Environment, 0)
     for rows.Next() {
-        var id int
+        var id int64
         var name string
-        var appId int
-        var lives int
+        var appId int64
+        var lives int64
         err = rows.Scan(&id, &name, &appId, &lives)
         if err != nil {
             log.Print(err)
         }
-        envs = append(envs, Env{id, name, nil, lives})
+        envs = append(envs, &models.Environment{appId, &id, lives, &name, nil})
+        //apps = append(apps, &models.App{nil, &id, strfmt.DateTime(date), &name})
     }
-    return &envs
+    return envs 
 }
 
-func (s *Env) fill() {
-    // fill pod infos
+func fill(s *models.Environment, db *sql.DB) {
+    //idwhere := fmt.Sprintf("WHERE appId = %s", s.ID)
+    //s.Environments = environ.List(db, &idwhere)
 }
 
-func ListAll(db *sql.DB) *[]Env {
-    env := List(db, nil)
-    for _,env := range *env {
-        env.fill()
+func ListAll(db *sql.DB) []*models.Environment {
+    envs := List(db, nil)
+    for _, env := range envs {
+        fill(env, db)
     }
-    return env 
+    return envs
+}
+
+func Describe(db *sql.DB, n *string) *models.Environment {
+    name := fmt.Sprintf("WHERE name = %s", n)
+    envs := List(db, &name)
+    for _, env := range envs {
+        fill(env, db)
+    }
+    return envs[0]
 }
 

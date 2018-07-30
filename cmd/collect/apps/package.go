@@ -3,19 +3,12 @@ package app
 import (
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/environments"
-	"encoding/json"
+    "github.com/go-openapi/strfmt"
     "database/sql"
     "time"
     "log"
     "fmt"
 )
-
-type App struct {
-    id       int `json:"id"`
-    name     string `json:"name"`
-    envs     *[]environ.Env `json:"environments"`
-    lastseen time.Time `json:"lastseen"`
-}
 
 /* +--+----+---------------------------+
    |id|name|lastseen                   |
@@ -39,42 +32,38 @@ func list(db *sql.DB, where *string) []*models.App {
         log.Fatal(err)
     }
     defer rows.Close()
-    apps := make([]models.App, 0)
+    apps := make([]*models.App, 0)
     for rows.Next() {
-        var id int
+        var id int64
         var name string
         var date time.Time
         err = rows.Scan(&id, &name, &date)
         if err != nil {
             log.Print(err)
         }
-        apps = append(apps, models.App{id, name, nil, date})
+        apps = append(apps, &models.App{nil, &id, strfmt.DateTime(date), &name})
     }
-    return &apps
+    return apps
 }
 
-func (s *App) fill(db *sql.DB) {
-    idwhere := fmt.Sprintf("WHERE appId = %s", s.id)
-    s.envs = environ.List(db, &idwhere)
+func fill(s *models.App, db *sql.DB) {
+    idwhere := fmt.Sprintf("WHERE appId = %s", s.ID)
+    s.Environments = environ.List(db, &idwhere)
 }
 
-func ListAll(db *sql.DB) *Apps {
+func ListAll(db *sql.DB) []*models.App {
     apps := list(db, nil)
-    for _,app := range *apps {
-        app.fill(db)
+    for _,app := range apps {
+        fill(app, db)
     }
-    a := Apps(*apps)
-    return &a
+    return apps
 }
 
 func Describe(db *sql.DB, n *string) *models.App {
     name := fmt.Sprintf("WHERE name = %s", n)
     apps := list(db, &name)
-    for _,app := range *apps {
-        app.fill(db)
+    for _,app := range apps {
+        fill(app, db)
     }
-    return &(*apps)[0]
+    return apps[0]
 }
-
-type Apps []App
-

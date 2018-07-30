@@ -25,7 +25,7 @@ func (s *ServerCtx) getAppHandler(_ operations.GetAppsParams) middleware.Respond
 }
 
 func (s *ServerCtx) describeAppHandler(params operations.DescribeAppParams) middleware.Responder {
-    body := string(app.Describe(s.Db, &params.Appid).ToJson())
+    body := app.Describe(s.Db, &params.Appid)
     return operations.NewDescribeAppOK().WithPayload(body)
 }
 
