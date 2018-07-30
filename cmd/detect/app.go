@@ -1,10 +1,10 @@
 package main
 
 import (
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/server"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/util"
 	"log"
 	"net/http"
-    "git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/server"
-    "git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/util"
 )
 
 func main() {

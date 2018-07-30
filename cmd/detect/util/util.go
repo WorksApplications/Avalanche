@@ -1,11 +1,11 @@
 package util
 
 import (
-    "log"
-    "time"
+	"log"
+	"time"
 
-    "git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/parser"
-    "git.paas.workslan/resource_optimization/dynamic_analysis/pkg/model"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/parser"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/model"
 )
 
 type Request int
@@ -26,7 +26,7 @@ type ScannerRequest struct {
 
 func dispatch(ch chan model.Subscription) {
 	for s := range ch {
-        log.Printf("Start scan for %s", s.Env)
+		log.Printf("Start scan for %s", s.Env)
 		apps, err := parser.Scan(s.Env)
 		log.Printf("%s", err)
 		sub := model.Subscription{s.Env, apps}
@@ -76,4 +76,3 @@ func Exchange(ch chan *ScannerRequest) {
 		}
 	}
 }
-

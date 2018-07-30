@@ -17,4 +17,3 @@ type Pod struct {
 	//node string
 	//namespace string
 }
-

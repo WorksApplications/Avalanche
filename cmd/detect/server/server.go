@@ -1,15 +1,15 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/util"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/model"
 	"log"
 	"net/http"
-	"bytes"
-	"fmt"
 	"strings"
 	"time"
-    "git.paas.workslan/resource_optimization/dynamic_analysis/pkg/model"
-    "git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/util"
 )
 
 type HandlerClosure struct {

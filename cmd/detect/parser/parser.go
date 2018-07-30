@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-    "git.paas.workslan/resource_optimization/dynamic_analysis/pkg/model"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/model"
 	"golang.org/x/net/html"
 )
 
