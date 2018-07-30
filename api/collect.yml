@@ -122,6 +122,7 @@ paths:
             type: array
             items:
               $ref: "#/definitions/app"
+      operationId: getApps
   /apps/{appid}:
     get:
       parameters:
@@ -135,6 +136,7 @@ paths:
             "this describes app"
           schema:
             $ref: "#/definitions/app"
+      operationId: describeApp
               
   /apps/{appid}/environments:
     get:
@@ -151,6 +153,7 @@ paths:
             type: array
             items:
               $ref: "#/definitions/environment"
+      operationId: getEnvironments
 
   /apps/{appid}/environments/{environment}:
     get:
@@ -169,6 +172,7 @@ paths:
             "this describes about the environment"
           schema:
             $ref: "#/definitions/environment"
+      operationId: describeEnvironment
     patch:
       parameters:
         - name: appid
@@ -209,6 +213,7 @@ paths:
             type: array
             items:
               $ref: "#/definitions/pod"
+      operationId: getPods
 
   /apps/{appid}/environments/{environment}/pods/{pod}:
     get:
@@ -231,20 +236,18 @@ paths:
             "this describes about the pod"
           schema:
             $ref: "#/definitions/pod"
-          #  /apps/{appid}/environments: {}
-          #  /apps/{appid}/environments/{environmentid}: {}
-          #/apps/{appid}/environments/{environmentid}/pods: {}
-          #/apps/{appid}/environments/{environmentid}/pods/{pods}:
-          #get: {}
-          #patch: {}
+      operationId: describePod
+
   /config:
     get:
       responses:
         200:
           description: |
-            "this describes about the pod"
+            "this shows configuration overview"
           schema:
             $ref: "#/definitions/config"
+      operationId: getConfigs
+
   /config/environment/{environment}:
     get:
       parameters:
@@ -258,3 +261,4 @@ paths:
             "this describes about the pod"
           schema:
             $ref: "#/definitions/environment-config"
+      operationId: describeEnvironment
