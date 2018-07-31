@@ -6,12 +6,14 @@ import (
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/restapi"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/restapi/operations"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 	loads "github.com/go-openapi/loads"
 	middleware "github.com/go-openapi/runtime/middleware"
 
 	"database/sql"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/apps"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/environments"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -29,9 +31,28 @@ func (s *ServerCtx) describeAppHandler(params operations.DescribeAppParams) midd
 	return operations.NewDescribeAppOK().WithPayload(body)
 }
 
+func (s *ServerCtx) getEnvionmentsHandler(params operations.GetEnvironmentsParams) middleware.Responder {
+    app := app.Describe(s.Db, &params.Appid)
+    lays := layout.OfApp(*app.ID, s.Db)
+    body := make([]*models.Environment, len(*lays))
+    for _, l := range *lays {
+        body = append(body, environ.FromLayout(s.Db, l))
+    }
+	return operations.NewGetEnvironmentsOK().WithPayload(body)
+}
+
+func (s *ServerCtx) describeEnvionmentHandler(params operations.DescribeEnvironmentParams) middleware.Responder {
+    app := app.Describe(s.Db, &params.Appid)
+    env := environ.Get(s.Db, &params.Environment)
+    lays := layout.OfBoth(*app.ID, *env.ID, s.Db)
+    body := environ.FromLayout(s.Db, (*lays)[0])
+	return operations.NewDescribeEnvironmentOK().WithPayload(body)
+}
+
 func (s *ServerCtx) initHandle() {
 	app.InitTable(s.Db)
 	environ.InitTable(s.Db)
+	layout.InitTable(s.Db)
 }
 
 func establishDBConn(dn string) *sql.DB {

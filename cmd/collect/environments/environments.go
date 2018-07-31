@@ -36,19 +36,25 @@ func list(db *sql.DB, where *string) []*models.Environment {
 		if err != nil {
 			log.Print(err)
 		}
+        /*
         lays := layout.OfEnv(id, db)
         lsum := 0
         for _, l := range *lays {
             lsum = lsum + int(l.Lives)
-        }
-		envs = append(envs, &models.Environment{&id, int64(lsum), &name, nil})
+        }*/
+		//envs = append(envs, &models.Environment{&id, int64(lsum), &name, nil})
+		envs = append(envs, &models.Environment{&id, 0, &name, nil})
 	}
 	return envs
 }
 
 func fill(s *models.Environment, db *sql.DB) {
-	//idwhere := fmt.Sprintf("WHERE appId = %s", s.ID)
-	//s.Environments = environ.List(db, &idwhere)
+    lays := layout.OfEnv(*s.ID, db)
+    lsum := 0
+    for _, l := range *lays {
+        lsum = lsum + int(l.Lives)
+    }
+    s.LiveCount = int64(lsum)
 }
 
 func ListAll(db *sql.DB) []*models.Environment {
@@ -57,6 +63,12 @@ func ListAll(db *sql.DB) []*models.Environment {
 		fill(env, db)
 	}
 	return envs
+}
+
+func Get(db *sql.DB, n *string) *models.Environment {
+	name := fmt.Sprintf("WHERE name = %s", n)
+	envs := list(db, &name)
+	return envs[0]
 }
 
 func Describe(db *sql.DB, n *string) *models.Environment {

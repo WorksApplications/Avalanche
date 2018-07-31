@@ -53,6 +53,11 @@ func OfApp(appid int64, db *sql.DB) *[]*Layout {
 }
 
 func OfEnv(envid int64, db *sql.DB) *[]*Layout {
-	where := fmt.Sprintf("WHERE envId = %s", envid)
+	where := fmt.Sprintf("WHERE envid = %s", envid)
+    return of(where, db)
+}
+
+func OfBoth(envid int64, appid int64, db *sql.DB) *[]*Layout {
+	where := fmt.Sprintf("WHERE envid = %s AND appid = %s", envid, appid)
     return of(where, db)
 }
