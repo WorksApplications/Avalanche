@@ -12,6 +12,13 @@ produces:
   - application/json
 
 definitions:
+  error:
+    type: object
+    required:
+      - message
+    properties:
+      message:
+        type: string
   app:
     type: object
     required:
@@ -145,6 +152,10 @@ paths:
             "this describes app"
           schema:
             $ref: "#/definitions/app"
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/error"
       operationId: describeApp
               
   /apps/{appid}/environments:

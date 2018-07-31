@@ -11,10 +11,10 @@ collect: collect-img
 collect-img: bin/collect
 	docker build -f image/collect/Dockerfile --tag collect:latest .
 
-bin/collect: $(shell find cmd/collect -name *.go) $(UTIL) $(MODEL) generated_files
+bin/collect: $(shell find cmd/collect -name *.go) $(UTIL) $(MODEL) generated_files/stub
 	go build -o bin/collect cmd/collect/server.go
 
-generated_files: api/collect.yml
+generated_files/stub: api/collect.yml
 	swagger generate server -f api/collect.yml -t generated_files -A collect
 	touch generated_files/stub
 

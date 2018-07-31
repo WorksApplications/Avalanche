@@ -30,7 +30,7 @@ func InitTable(db *sql.DB) {
 }
 
 func list(db *sql.DB, where *string) *[]*models.Pod {
-	rows, err := db.Query("SELECT id, name, appid, envid, layid, live, created FROM pod ?", where)
+	rows, err := db.Query(fmt.Sprintf("SELECT id, name, appid, envid, layid, live, created FROM pod %s", *where))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -74,7 +74,7 @@ func Describe(db *sql.DB, n *string) *models.Pod {
 }
 
 func FromLayout(db *sql.DB, lay *layout.Layout) *[]*models.Pod {
-	where := fmt.Sprintf("WHERE layid = %s", lay.EnvId)
+	where := fmt.Sprintf("WHERE layid = %s", lay.Id)
 	pods := list(db, &where)
 	for _, pod := range *pods {
 		fill(pod, db)

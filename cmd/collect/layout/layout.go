@@ -14,7 +14,7 @@ type Layout struct {
 }
 
 func InitTable(db *sql.DB) {
-	row := db.QueryRow(
+    res, err := db.Exec(
 		"CREATE TABLE layout(" +
 			"id MEDIUMINT NOT NULL AUTO_INCREMENT, " +
 			"name CHAR(80) NOT NULL, " +
@@ -23,13 +23,13 @@ func InitTable(db *sql.DB) {
 			"lives int, " +
 			"PRIMARY KEY (id) " +
 			")")
-	log.Println(row)
+	log.Println(res, err)
 }
 
-func of(where string, db *sql.DB) *[]*Layout {
-	rows, err := db.Query("SELECT id, name, appid, envid, lives FROM layout ?", where)
+func of(where *string, db *sql.DB) []*Layout {
+	rows, err := db.Query(fmt.Sprintf("SELECT id, name, appid, envid, lives FROM layout %s", *where))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("LAYOUT", err)
 	}
 	defer rows.Close()
 	lays := make([]*Layout, 0)
@@ -44,20 +44,20 @@ func of(where string, db *sql.DB) *[]*Layout {
 		}
 		lays = append(lays, &Layout{id, aid, eid, lives})
 	}
-	return &lays 
+	return lays 
 }
 
-func OfApp(appid int64, db *sql.DB) *[]*Layout {
+func OfApp(appid int64, db *sql.DB) []*Layout {
 	where := fmt.Sprintf("WHERE appId = %s", appid)
-    return of(where, db)
+    return of(&where, db)
 }
 
-func OfEnv(envid int64, db *sql.DB) *[]*Layout {
+func OfEnv(envid int64, db *sql.DB) []*Layout {
 	where := fmt.Sprintf("WHERE envid = %s", envid)
-    return of(where, db)
+    return of(&where, db)
 }
 
-func OfBoth(envid int64, appid int64, db *sql.DB) *[]*Layout {
+func OfBoth(envid int64, appid int64, db *sql.DB) []*Layout {
 	where := fmt.Sprintf("WHERE envid = %s AND appid = %s", envid, appid)
-    return of(where, db)
+    return of(&where, db)
 }
