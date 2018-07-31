@@ -17,20 +17,20 @@ import (
 */
 
 func InitTable(db *sql.DB) {
-	row := db.QueryRow(
+    res, err := db.Exec(
 		"CREATE TABLE app(" +
 			"id MEDIUMINT NOT NULL AUTO_INCREMENT, " +
 			"name CHAR(80) NOT NULL, " +
 			"lastseen DATETIME, " +
 			"PRIMARY KEY (id) " +
 			")")
-	log.Println(row)
+	log.Println(res, err)
 }
 
 func list(db *sql.DB, where *string) []*models.App {
-	rows, err := db.Query("SELECT id, name, lastseen FROM app ?", where)
+	rows, err := db.Query(fmt.Sprintf("SELECT id, name, lastseen FROM app %s", *where))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("APP", err)
 	}
 	defer rows.Close()
 	apps := make([]*models.App, 0)
@@ -50,7 +50,7 @@ func list(db *sql.DB, where *string) []*models.App {
 func fill(s *models.App, db *sql.DB) {
     lays := layout.OfApp(*s.ID, db)
     envs := make([]*models.Environment, 0)
-    for _, lay := range *lays {
+    for _, lay := range lays {
         envs = append(envs, environ.FromLayout(db, lay))
     }
 	s.Environments = envs
@@ -65,10 +65,15 @@ func ListAll(db *sql.DB) []*models.App {
 }
 
 func Describe(db *sql.DB, n *string) *models.App {
-	name := fmt.Sprintf("WHERE name = %s", n)
+	name := fmt.Sprintf("WHERE name = \"%s\"", *n)
+    log.Println(fmt.Sprintf("%s", name))
 	apps := list(db, &name)
 	for _, app := range apps {
 		fill(app, db)
 	}
-	return apps[0]
+    if len(apps) != 0 {
+        return apps[0]
+    } else {
+        return nil
+    }
 }
