@@ -16,6 +16,7 @@ bin/collect: $(shell find cmd/collect -name *.go) $(UTIL) $(MODEL) generated_fil
 
 generated_files: api/collect.yml
 	swagger generate server -f api/collect.yml -t generated_files -A collect
+	touch generated_files/stub
 
 : -img
 

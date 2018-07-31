@@ -14,6 +14,7 @@ import (
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/apps"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/environments"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/pod"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -21,7 +22,7 @@ type ServerCtx struct {
 	Db *sql.DB
 }
 
-func (s *ServerCtx) getAppHandler(_ operations.GetAppsParams) middleware.Responder {
+func (s *ServerCtx) getAppsHandler(_ operations.GetAppsParams) middleware.Responder {
 	body := app.ListAll(s.Db)
 	return operations.NewGetAppsOK().WithPayload(body)
 }
@@ -31,7 +32,7 @@ func (s *ServerCtx) describeAppHandler(params operations.DescribeAppParams) midd
 	return operations.NewDescribeAppOK().WithPayload(body)
 }
 
-func (s *ServerCtx) getEnvionmentsHandler(params operations.GetEnvironmentsParams) middleware.Responder {
+func (s *ServerCtx) getEnvironmentsHandler(params operations.GetEnvironmentsParams) middleware.Responder {
     app := app.Describe(s.Db, &params.Appid)
     lays := layout.OfApp(*app.ID, s.Db)
     body := make([]*models.Environment, len(*lays))
@@ -41,7 +42,7 @@ func (s *ServerCtx) getEnvionmentsHandler(params operations.GetEnvironmentsParam
 	return operations.NewGetEnvironmentsOK().WithPayload(body)
 }
 
-func (s *ServerCtx) describeEnvionmentHandler(params operations.DescribeEnvironmentParams) middleware.Responder {
+func (s *ServerCtx) describeEnvironmentHandler(params operations.DescribeEnvironmentParams) middleware.Responder {
     app := app.Describe(s.Db, &params.Appid)
     env := environ.Get(s.Db, &params.Environment)
     lays := layout.OfBoth(*app.ID, *env.ID, s.Db)
@@ -49,10 +50,19 @@ func (s *ServerCtx) describeEnvionmentHandler(params operations.DescribeEnvironm
 	return operations.NewDescribeEnvironmentOK().WithPayload(body)
 }
 
+func (s *ServerCtx) getPodsHandler(params operations.GetPodsParams) middleware.Responder {
+    app := app.Describe(s.Db, &params.Appid)
+    env := environ.Get(s.Db, &params.Environment)
+    lays := layout.OfBoth(*app.ID, *env.ID, s.Db)
+    body := pod.FromLayout(s.Db, (*lays)[0])
+	return operations.NewGetPodsOK().WithPayload(*body)
+}
+
 func (s *ServerCtx) initHandle() {
 	app.InitTable(s.Db)
 	environ.InitTable(s.Db)
 	layout.InitTable(s.Db)
+	pod.InitTable(s.Db)
 }
 
 func establishDBConn(dn string) *sql.DB {
@@ -79,8 +89,11 @@ func main() {
 	db := establishDBConn("test")
 	ctx := ServerCtx{db}
 
-	api.GetAppsHandler = operations.GetAppsHandlerFunc(ctx.getAppHandler)
+	api.GetAppsHandler = operations.GetAppsHandlerFunc(ctx.getAppsHandler)
 	api.DescribeAppHandler = operations.DescribeAppHandlerFunc(ctx.describeAppHandler)
+
+	api.GetEnvironmentsHandler = operations.GetEnvironmentsHandlerFunc(ctx.getEnvironmentsHandler)
+	api.DescribeEnvironmentHandler = operations.DescribeEnvironmentHandlerFunc(ctx.describeEnvironmentHandler)
 
 	if *flag.Bool("init", false, "Initialize?") {
 		ctx.initHandle()

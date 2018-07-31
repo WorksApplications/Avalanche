@@ -3,9 +3,11 @@ package environ
 import (
 	"database/sql"
 	"fmt"
+	"log"
+
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
-	"log"
+	//"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/pod"
 )
 
 /* +--+----+---------------------------+
@@ -36,13 +38,6 @@ func list(db *sql.DB, where *string) []*models.Environment {
 		if err != nil {
 			log.Print(err)
 		}
-        /*
-        lays := layout.OfEnv(id, db)
-        lsum := 0
-        for _, l := range *lays {
-            lsum = lsum + int(l.Lives)
-        }*/
-		//envs = append(envs, &models.Environment{&id, int64(lsum), &name, nil})
 		envs = append(envs, &models.Environment{&id, 0, &name, nil})
 	}
 	return envs

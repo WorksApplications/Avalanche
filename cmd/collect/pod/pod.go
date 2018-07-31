@@ -2,20 +2,13 @@ package pod
 
 import (
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"github.com/go-openapi/strfmt"
 	"database/sql"
 	"log"
 	"time"
 	"fmt"
 )
-
-type Pod struct {
-	id         int            `json:"id"`
-	name       string         `json:"name"`
-	snapshots  *[]SnapSummary `json:"snapshots"`
-	is_live    bool           `json:"is_live"`
-	created_at time.Time      `json:"created_at"`
-}
 
 type SnapSummary struct {
 	id         int       `json:"id"`
@@ -36,7 +29,7 @@ func InitTable(db *sql.DB) {
 			")")
 }
 
-func List(db *sql.DB, where *string) *[]*models.Pod {
+func list(db *sql.DB, where *string) *[]*models.Pod {
 	rows, err := db.Query("SELECT id, name, appid, envid, layid, live, created FROM pod ?", where)
 	if err != nil {
 		log.Fatal(err)
@@ -55,17 +48,17 @@ func List(db *sql.DB, where *string) *[]*models.Pod {
 		if err != nil {
 			log.Print(err)
 		}
-		pods = append(pods, &models.Pod{&strfmt.DateTime(created), &live, &name, nil})
+		pods = append(pods, &models.Pod{strfmt.DateTime(created), live, &name, nil})
 	}
-	return pods
+	return &pods
 }
 
 func fill(s *models.Pod, db *sql.DB) {
 }
 
-func ListAll(db *sql.DB) []*models.Pod {
-	pods := List(db, nil)
-	for _, pod := range pods {
+func ListAll(db *sql.DB) *[]*models.Pod {
+	pods := list(db, nil)
+	for _, pod := range *pods {
 		fill(pod, db)
 	}
 	return pods 
@@ -73,17 +66,17 @@ func ListAll(db *sql.DB) []*models.Pod {
 
 func Describe(db *sql.DB, n *string) *models.Pod {
 	name := fmt.Sprintf("WHERE name = %s", n)
-	pods := List(db, &name)
-	for _, pod := range pods {
+	pods := list(db, &name)
+	for _, pod := range *pods {
 		fill(pod, db)
 	}
-	return pods[0]
+	return (*pods)[0]
 }
 
 func FromLayout(db *sql.DB, lay *layout.Layout) *[]*models.Pod {
 	where := fmt.Sprintf("WHERE layid = %s", lay.EnvId)
 	pods := list(db, &where)
-	for _, pod := range pods {
+	for _, pod := range *pods {
 		fill(pod, db)
 	}
 	return pods
