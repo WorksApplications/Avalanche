@@ -5,8 +5,8 @@ import (
 )
 
 type Subscription struct {
-	Env  string
-	Apps []App
+	Env  string `json:"environment"`
+	Apps []App  `json:"apps"`
 }
 
 type App struct {

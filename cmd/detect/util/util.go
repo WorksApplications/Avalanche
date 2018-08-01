@@ -15,13 +15,14 @@ const (
 	DEL
 	SCAN
 	RUN
-	PULL
+	DESC
 	RET
 )
 
 type ScannerRequest struct {
 	Req Request
-	Sub *model.Subscription
+	Env *string
+	Ret chan<- *model.Subscription
 }
 
 func dispatch(ch chan *model.Subscription) {
@@ -53,28 +54,41 @@ func Exchange(ch chan *ScannerRequest) {
 				sc <- s
 			}
 		case req := <-ch:
+			env := req.Env
+			if env == nil && req.Req != DESC {
+				log.Printf("WARN: nil exception was almost there! req.Req=%s", req.Req)
+			}
 			switch req.Req {
 			case ADD:
-				sub := model.Subscription{req.Sub.Env, empty}
-				m[req.Sub.Env] = &sub
-				log.Printf("%s will be scanned", req.Sub.Env)
+				sub := model.Subscription{*env, empty}
+				m[*env] = &sub
+				log.Printf("%s will be scanned", *env)
 			case DEL:
-				delete(m, req.Sub.Env)
-				log.Printf("%s won't be scanned", req.Sub.Env)
+				delete(m, *env)
+				log.Printf("%s won't be scanned", *env)
 			case SCAN:
-				sub, prs := m[req.Sub.Env]
+				sub, prs := m[*env]
 				if !prs {
-					sub = &model.Subscription{req.Sub.Env, empty}
+					sub = &model.Subscription{*env, empty}
+					// If this line is enabled, you don't have to receive result from dispatch.
+					// However, you will return empty list which is empty because it is not scanned yet
+					// m[*env] = sub
 				}
 				sc <- sub
-			case PULL:
-				sub, prs := m[req.Sub.Env]
-				if !prs {
-					log.Printf("Not found")
-					sub = &model.Subscription{req.Sub.Env, empty}
+			case DESC:
+				if env == nil {
+					for _, sub := range m {
+						req.Ret <- sub
+					}
+				} else {
+					sub, prs := m[*env]
+					if !prs {
+						log.Printf("Not found %s", *env)
+					} else {
+						req.Ret <- sub
+					}
 				}
-				log.Printf("%s", sub.Apps)
-				ch <- &ScannerRequest{RET, sub}
+				close(req.Ret)
 			}
 		}
 	}

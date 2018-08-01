@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"net/http"
 	"time"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
@@ -87,6 +88,7 @@ func (s *ServerCtx) pollPodInfo() {
 	go func() {
 		for t := range ticker.C {
 			log.Printf("start to pull pods' information from %s|%s", s.detect, t)
+			http.Get(s.detect)
 			//pullDetect(s.Db)
 		}
 	}()
