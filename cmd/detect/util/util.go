@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/parser"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/model"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
 )
 
 type Request int
@@ -22,10 +22,10 @@ const (
 type ScannerRequest struct {
 	Req Request
 	Env *string
-	Ret chan<- *model.Subscription
+	Ret chan<- *detect.Subscription
 }
 
-func dispatch(ch chan *model.Subscription) {
+func dispatch(ch chan *detect.Subscription) {
 	for s := range ch {
 		log.Printf("[Dispatched worker] Start scan for %s", s.Env)
 		apps, err := parser.Scan(s.Env)
@@ -40,9 +40,9 @@ func dispatch(ch chan *model.Subscription) {
 
 func Exchange(ch chan *ScannerRequest) {
 	t := time.Tick(5 * time.Minute)
-	m := make(map[string]*model.Subscription)
-	empty := make([]model.App, 0)
-	sc := make(chan *model.Subscription, 64) // XXX: May have to be extended
+	m := make(map[string]*detect.Subscription)
+	empty := make([]detect.App, 0)
+	sc := make(chan *detect.Subscription, 64) // XXX: May have to be extended
 	go dispatch(sc)
 	for {
 		select {
@@ -60,7 +60,7 @@ func Exchange(ch chan *ScannerRequest) {
 			}
 			switch req.Req {
 			case ADD:
-				sub := model.Subscription{*env, empty}
+				sub := detect.Subscription{*env, empty}
 				m[*env] = &sub
 				log.Printf("%s will be scanned", *env)
 			case DEL:
@@ -69,7 +69,7 @@ func Exchange(ch chan *ScannerRequest) {
 			case SCAN:
 				sub, prs := m[*env]
 				if !prs {
-					sub = &model.Subscription{*env, empty}
+					sub = &detect.Subscription{*env, empty}
 					// If this line is enabled, you don't have to receive result from dispatch.
 					// However, you will return empty list which is empty because it is not scanned yet
 					// m[*env] = sub

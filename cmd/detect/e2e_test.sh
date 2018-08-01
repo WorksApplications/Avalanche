@@ -17,3 +17,5 @@ check GET subscription "[]"
 check GET subscription/ "[]"
 check GET subscription/jilll "[]"
 
+curl -X 'POST' http://localhost:8080/subscription --data 'jilll'
+

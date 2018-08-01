@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -17,6 +19,8 @@ import (
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/environments"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/pod"
+
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -82,14 +86,39 @@ func (s *ServerCtx) getPodsHandler(params operations.GetPodsParams) middleware.R
 	return operations.NewGetPodsOK().WithPayload(*body)
 }
 
+func (s *ServerCtx) pull() {
+	log.Printf("start to pull pods' information from %s", s.detect)
+	r, err := http.Get(s.detect + "/subscription/")
+	defer r.Body.Close()
+	d, er2 := ioutil.ReadAll(r.Body)
+	if err != nil || er2 != nil {
+		log.Println("Poll failed!")
+		return
+	}
+	var p []model.Subscription
+	err = json.Unmarshal(d, &p)
+	if err != nil || er2 != nil {
+		log.Println("Unmarshal failed!")
+		return
+	}
+	log.Printf("res: %+v", p)
+}
+
 func (s *ServerCtx) pollPodInfo() {
 	/* If the retrieving schedule is invoked by detect, the place to post new data is unknown on testing. */
-	ticker := time.NewTicker(2 * time.Minute)
+	t := time.NewTicker(1 * time.Minute)
+	once := make(chan int, 1)
+	once <- 1
 	go func() {
-		for t := range ticker.C {
-			log.Printf("start to pull pods' information from %s|%s", s.detect, t)
-			http.Get(s.detect)
-			//pullDetect(s.Db)
+		for {
+			select {
+			case <-once:
+				close(once)
+				once = nil
+				s.pull()
+			case <-t.C:
+				s.pull()
+			}
 		}
 	}()
 }
@@ -122,7 +151,7 @@ func main() {
 	init := flag.Bool("init", false, "Initialize?")
 	dbconf := flag.String("db", "example:example@localhost", "DB connexion")
 	port := flag.Int("port", 4981, "Port for this server")
-	detect := flag.String("detect", "http://localhost:8081/", "\"detect\" service address")
+	detect := flag.String("detect", "http://localhost:8080", "\"detect\" service address")
 
 	flag.Parse()
 	args := flag.Args()
@@ -134,6 +163,8 @@ func main() {
 
 	db := establishDBConn(*dbconf)
 	ctx := ServerCtx{db, *detect}
+
+	ctx.pollPodInfo()
 
 	api.GetAppsHandler = operations.GetAppsHandlerFunc(ctx.getAppsHandler)
 	api.DescribeAppHandler = operations.DescribeAppHandlerFunc(ctx.describeAppHandler)

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/util"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/model"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
 	"log"
 	"net/http"
 	"strings"
@@ -48,7 +48,7 @@ func subscribe(res http.ResponseWriter, req *http.Request, ch chan<- *util.Scann
 }
 
 func get(res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest, env *string) {
-	resc := make(chan *model.Subscription)
+	resc := make(chan *detect.Subscription)
 	// Expect it to be closed by remote, so I won't defer close(resc)
 	sreq := util.ScannerRequest{util.DESC, env, resc}
 
@@ -60,7 +60,7 @@ func get(res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequ
 		res.WriteHeader(http.StatusRequestTimeout)
 	case ch <- &sreq:
 		/* Request is written. Wait for all the answer */
-		subs := make([]*model.Subscription, 0)
+		subs := make([]*detect.Subscription, 0)
 		for sub := range resc {
 			subs = append(subs, sub)
 		}
