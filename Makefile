@@ -13,8 +13,11 @@ pushi: images
 
 all: bin
 
-images: collect  detect
+images: collect  detect static-nginx
 bin: bin/detect bin/collect front/public
+
+static-nginx: front/public/app.js
+	docker build -f image/static/Dockerfile --tag ${
 
 collect: collect-img
 
@@ -41,7 +44,7 @@ detect-img: bin/detect image/detect/Dockerfile
 bin/detect: $(shell find cmd/detect -name *.go) $(MODEL)
 	go build -o bin/detect cmd/detect/app.go
 
-front/public:
+front/public/app.js:
 	cd front && yarn build
 
 clean:
