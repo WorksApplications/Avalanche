@@ -26,13 +26,13 @@ type ScannerRequest struct {
 
 func dispatch(ch chan *model.Subscription) {
 	for s := range ch {
-	log.Printf("[Dispatched worker] Start scan for %s", s.Env)
+		log.Printf("[Dispatched worker] Start scan for %s", s.Env)
 		apps, err := parser.Scan(s.Env)
-        if err != nil {
-           log.Printf("Error in the scan for %s", err)
-        }
-        log.Printf("[Dispatched worker] Scan for %s ended.", s.Env)
-        s.Apps = apps
+		if err != nil {
+			log.Printf("Error in the scan for %s", err)
+		}
+		log.Printf("[Dispatched worker] Scan for %s ended.", s.Env)
+		s.Apps = apps
 		ch <- s
 	}
 }
@@ -41,7 +41,7 @@ func Exchange(ch chan *ScannerRequest) {
 	t := time.Tick(5 * time.Minute)
 	m := make(map[string]*model.Subscription)
 	empty := make([]model.App, 0)
-	sc := make(chan *model.Subscription, 64) //May have to be extended
+	sc := make(chan *model.Subscription, 64) // XXX: May have to be extended
 	go dispatch(sc)
 	for {
 		select {
@@ -79,4 +79,3 @@ func Exchange(ch chan *ScannerRequest) {
 		}
 	}
 }
-

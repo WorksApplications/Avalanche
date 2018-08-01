@@ -1,13 +1,13 @@
 package pod
 
 import (
-	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
-	"github.com/go-openapi/strfmt"
 	"database/sql"
+	"fmt"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
+	"github.com/go-openapi/strfmt"
 	"log"
 	"time"
-	"fmt"
 )
 
 type SnapSummary struct {
@@ -22,9 +22,9 @@ func InitTable(db *sql.DB) {
 			"name CHAR(128) NOT NULL, " +
 			"appid int, " +
 			"envid int, " +
-            "layid int, " +
+			"layid int, " +
 			"live boolean, " +
-            "created DATETIME, " +
+			"created DATETIME, " +
 			"PRIMARY KEY (id) " +
 			")")
 }
@@ -42,7 +42,7 @@ func list(db *sql.DB, where *string) *[]*models.Pod {
 		var appid int64
 		var envid int64
 		var layid int64
-        var created time.Time
+		var created time.Time
 		var live bool
 		err = rows.Scan(&id, &name, &appid, &envid, &layid, &live, &created)
 		if err != nil {
@@ -61,7 +61,7 @@ func ListAll(db *sql.DB) *[]*models.Pod {
 	for _, pod := range *pods {
 		fill(pod, db)
 	}
-	return pods 
+	return pods
 }
 
 func Describe(db *sql.DB, n *string) *models.Pod {

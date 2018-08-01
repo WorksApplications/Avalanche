@@ -3,8 +3,8 @@ package app
 import (
 	"database/sql"
 	"fmt"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/environments"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 	"github.com/go-openapi/strfmt"
 	"log"
@@ -17,7 +17,7 @@ import (
 */
 
 func InitTable(db *sql.DB) {
-    res, err := db.Exec(
+	res, err := db.Exec(
 		"CREATE TABLE app(" +
 			"id MEDIUMINT NOT NULL AUTO_INCREMENT, " +
 			"name CHAR(80) NOT NULL, " +
@@ -48,11 +48,11 @@ func list(db *sql.DB, where *string) []*models.App {
 }
 
 func fill(s *models.App, db *sql.DB) {
-    lays := layout.OfApp(*s.ID, db)
-    envs := make([]*models.Environment, 0)
-    for _, lay := range lays {
-        envs = append(envs, environ.FromLayout(db, lay))
-    }
+	lays := layout.OfApp(*s.ID, db)
+	envs := make([]*models.Environment, 0)
+	for _, lay := range lays {
+		envs = append(envs, environ.FromLayout(db, lay))
+	}
 	s.Environments = envs
 }
 
@@ -66,14 +66,14 @@ func ListAll(db *sql.DB) []*models.App {
 
 func Describe(db *sql.DB, n *string) *models.App {
 	name := fmt.Sprintf("WHERE name = \"%s\"", *n)
-    log.Println(fmt.Sprintf("%s", name))
+	log.Println(fmt.Sprintf("%s", name))
 	apps := list(db, &name)
 	for _, app := range apps {
 		fill(app, db)
 	}
-    if len(apps) != 0 {
-        return apps[0]
-    } else {
-        return nil
-    }
+	if len(apps) != 0 {
+		return apps[0]
+	} else {
+		return nil
+	}
 }

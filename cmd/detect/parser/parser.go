@@ -2,9 +2,9 @@ package parser
 
 import (
 	"log"
-	"time"
-	"strings"
 	"net/http"
+	"strings"
+	"time"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/model"
 	"golang.org/x/net/html"

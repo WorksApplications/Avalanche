@@ -33,4 +33,5 @@ bin/detect: $(shell find cmd/detect -name *.go) $(MODEL)
 	go build -o bin/detect cmd/detect/app.go
 
 fmt:	
-	for i in $(find . -name "*.go"); do go fmt $i; done
+	go fmt ./cmd/...
+	go fmt ./pkg/...

@@ -1,5 +1,5 @@
 FROM scratch
 
-ADD bin/collect /collect
+COPY bin/collect /collect
 
 CMD ["/collect"]

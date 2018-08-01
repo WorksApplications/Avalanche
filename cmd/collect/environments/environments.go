@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 	//"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/pod"
 )
 
@@ -15,11 +15,11 @@ import (
    +--+----+---------------------------+
 */
 func InitTable(db *sql.DB) {
-    res, err := db.Exec(
+	res, err := db.Exec(
 		"CREATE TABLE environ(" +
 			"id MEDIUMINT NOT NULL AUTO_INCREMENT, " +
 			"name CHAR(32) NOT NULL, " +
-            "addr TEXT, " +
+			"addr TEXT, " +
 			"PRIMARY KEY (id) " +
 			")")
 	log.Println(res, err)
@@ -45,12 +45,12 @@ func list(db *sql.DB, where *string) []*models.Environment {
 }
 
 func fill(s *models.Environment, db *sql.DB) {
-    lays := layout.OfEnv(*s.ID, db)
-    lsum := 0
-    for _, l := range lays {
-        lsum = lsum + int(l.Lives)
-    }
-    s.LiveCount = int64(lsum)
+	lays := layout.OfEnv(*s.ID, db)
+	lsum := 0
+	for _, l := range lays {
+		lsum = lsum + int(l.Lives)
+	}
+	s.LiveCount = int64(lsum)
 }
 
 func ListAll(db *sql.DB) []*models.Environment {
@@ -64,11 +64,11 @@ func ListAll(db *sql.DB) []*models.Environment {
 func Get(db *sql.DB, n *string) *models.Environment {
 	name := fmt.Sprintf("WHERE name = %s", *n)
 	envs := list(db, &name)
-    if len(envs) != 0 {
-        return envs[0]
-    } else {
-        return nil
-    }
+	if len(envs) != 0 {
+		return envs[0]
+	} else {
+		return nil
+	}
 }
 
 func Describe(db *sql.DB, n *string) *models.Environment {
@@ -77,11 +77,11 @@ func Describe(db *sql.DB, n *string) *models.Environment {
 	for _, env := range envs {
 		fill(env, db)
 	}
-    if len(envs) != 0 {
-        return envs[0]
-    } else {
-        return nil
-    }
+	if len(envs) != 0 {
+		return envs[0]
+	} else {
+		return nil
+	}
 }
 
 func FromLayout(db *sql.DB, lay *layout.Layout) *models.Environment {
@@ -90,9 +90,9 @@ func FromLayout(db *sql.DB, lay *layout.Layout) *models.Environment {
 	for _, env := range envs {
 		fill(env, db)
 	}
-    if len(envs) != 0 {
-        return envs[0]
-    } else {
-        return nil
-    }
+	if len(envs) != 0 {
+		return envs[0]
+	} else {
+		return nil
+	}
 }
