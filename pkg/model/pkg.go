@@ -1,5 +1,9 @@
 package model
 
+import (
+	"time"
+)
+
 type Subscription struct {
 	Env  string
 	Apps []App
@@ -8,6 +12,7 @@ type Subscription struct {
 type App struct {
 	Name string `json:"name"`
 	Pods []Pod  `json:"pods"`
+    Seen time.Time `json:"last_seen"`
 }
 
 type Pod struct {
@@ -17,3 +22,4 @@ type Pod struct {
 	//node string
 	//namespace string
 }
+

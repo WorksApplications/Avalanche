@@ -24,30 +24,33 @@ type ScannerRequest struct {
 	Sub *model.Subscription
 }
 
-func dispatch(ch chan model.Subscription) {
+func dispatch(ch chan *model.Subscription) {
 	for s := range ch {
-		log.Printf("Start scan for %s", s.Env)
+	log.Printf("[Dispatched worker] Start scan for %s", s.Env)
 		apps, err := parser.Scan(s.Env)
-		log.Printf("%s", err)
-		sub := model.Subscription{s.Env, apps}
-		ch <- sub
+        if err != nil {
+           log.Printf("Error in the scan for %s", err)
+        }
+        log.Printf("[Dispatched worker] Scan for %s ended.", s.Env)
+        s.Apps = apps
+		ch <- s
 	}
 }
 
 func Exchange(ch chan *ScannerRequest) {
-	t := time.Tick(1 * time.Minute)
+	t := time.Tick(5 * time.Minute)
 	m := make(map[string]*model.Subscription)
 	empty := make([]model.App, 0)
-	sc := make(chan model.Subscription, 64) //May have to be extended
+	sc := make(chan *model.Subscription, 64) //May have to be extended
 	go dispatch(sc)
 	for {
 		select {
 		case res := <-sc:
-			m[res.Env] = &res
+			m[res.Env] = res
 		case <-t:
 			log.Println("start batch scan")
 			for _, s := range m {
-				sc <- *s
+				sc <- s
 			}
 		case req := <-ch:
 			switch req.Req {
@@ -63,7 +66,7 @@ func Exchange(ch chan *ScannerRequest) {
 				if !prs {
 					sub = &model.Subscription{req.Sub.Env, empty}
 				}
-				sc <- *sub
+				sc <- sub
 			case PULL:
 				sub, prs := m[req.Sub.Env]
 				if !prs {
@@ -76,3 +79,4 @@ func Exchange(ch chan *ScannerRequest) {
 		}
 	}
 }
+

@@ -2,8 +2,9 @@ package parser
 
 import (
 	"log"
-	"net/http"
+	"time"
 	"strings"
+	"net/http"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/model"
 	"golang.org/x/net/html"
@@ -173,7 +174,7 @@ func Scan(env string) ([]model.App, error) {
 			}
 		}
 
-		apps = append(apps, model.App{name, npds})
+		apps = append(apps, model.App{name, npds, time.Now()})
 	}
 
 	return apps, nil
