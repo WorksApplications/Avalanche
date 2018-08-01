@@ -1,5 +1,7 @@
 MODEL = $(shell find pkg/model -name *.go)
 
+.PHONY:fmt
+
 all: bin
 
 images: collect  detect
@@ -30,3 +32,5 @@ detect-img: bin/detect image/detect/Dockerfile
 bin/detect: $(shell find cmd/detect -name *.go) $(MODEL)
 	go build -o bin/detect cmd/detect/app.go
 
+fmt:	
+	for i in $(find . -name "*.go"); do go fmt $i; done
