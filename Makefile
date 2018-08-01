@@ -1,17 +1,27 @@
-UTIL = $(shell find pkg/util -name *.go)
 MODEL = $(shell find pkg/model -name *.go)
+
+
+.PHONY: default clean
+
+default: bin
+
+pushi: images
+	docker push ${
+	docker push ${
+	docker push ${
+	docker push ${
 
 all: bin
 
 images: collect  detect
-bin: bin/*
+bin: bin/detect bin/collect front/public
 
 collect: collect-img
 
 collect-img: bin/collect
-	docker build -f image/collect/Dockerfile --tag collect:latest .
+	docker build -f image/collect/Dockerfile --tag ${
 
-bin/collect: $(shell find cmd/collect -name *.go) $(UTIL) $(MODEL) generated_files/stub
+bin/collect: $(shell find cmd/collect -name *.go) $(MODEL) generated_files/stub
 	go build -o bin/collect cmd/collect/server.go
 
 generated_files/stub: api/collect.yml
@@ -21,13 +31,18 @@ generated_files/stub: api/collect.yml
 : -img
 
 -img: image//Dockerfile /src/scripting-server.py
-	docker build -f image//Dockerfile --tag :latest 
+	docker build -f image//Dockerfile --tag ${
 
 detect: detect-img
 
 detect-img: bin/detect image/detect/Dockerfile
-	docker build --no-cache -f image/detect/Dockerfile --tag detect:latest .
+	docker build --no-cache -f image/detect/Dockerfile --tag ${
 
-bin/detect: $(shell find cmd/detect -name *.go) $(UTIL) $(MODEL)
+bin/detect: $(shell find cmd/detect -name *.go) $(MODEL)
 	go build -o bin/detect cmd/detect/app.go
 
+front/public:
+	cd front && yarn build
+
+clean:
+	\rm -r front/public/; rm -r bin/; rm -r generated_files/cmd; rm -r generated_files/models; rm -r generated_files/restapi
