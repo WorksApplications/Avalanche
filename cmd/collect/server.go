@@ -95,13 +95,22 @@ func (s *ServerCtx) pull() {
 		log.Println("Poll failed!")
 		return
 	}
-	var p []model.Subscription
+	var p []detect.Subscription
 	err = json.Unmarshal(d, &p)
 	if err != nil || er2 != nil {
 		log.Println("Unmarshal failed!")
 		return
 	}
+	recursiveInsert(p, s.Db)
 	log.Printf("res: %+v", p)
+}
+
+func recursiveInsert(p detect.Subscription, db *sql.DB) {
+	e := environ.Get(db, p.Env)
+	if e == nil {
+		// add new row for e
+		e = environ.Get(db, p.Env)
+	}
 }
 
 func (s *ServerCtx) pollPodInfo() {

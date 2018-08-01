@@ -71,6 +71,10 @@ func Get(db *sql.DB, n *string) *models.Environment {
 	}
 }
 
+func Set(db *sql.DB, e *models.Environment) {
+	db.Query("INSERT INTO environ(name) values (?)", e.name)
+}
+
 func Describe(db *sql.DB, n *string) *models.Environment {
 	name := fmt.Sprintf("WHERE name = %s", *n)
 	envs := list(db, &name)

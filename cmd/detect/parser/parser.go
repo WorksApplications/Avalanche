@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/model"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
 	"golang.org/x/net/html"
 )
 
@@ -91,10 +91,10 @@ func followLink(sites []string) ([]string, error) {
 	return ret, nil
 }
 
-func toPods(ls []string, applink string) []model.Pod {
-	pods := make([]model.Pod, len(ls))
+func toPods(ls []string, applink string) []detect.Pod {
+	pods := make([]detect.Pod, len(ls))
 	for i, l := range ls {
-		pods[i] = model.Pod{strings.TrimRight(l, "/"), applink + l, false}
+		pods[i] = detect.Pod{strings.TrimRight(l, "/"), applink + l, false}
 	}
 	return pods
 }
@@ -119,7 +119,7 @@ func isNotFound(resp *http.Response) bool {
 
 }
 
-func Scan(env string) ([]model.App, error) {
+func Scan(env string) ([]detect.App, error) {
 	log.Print("[Scan] " + env)
 	resp, err := http.Get(server + env + "/log")
 	if err != nil {
@@ -145,7 +145,7 @@ func Scan(env string) ([]model.App, error) {
 		return nil, err
 	}
 
-	mapps := make(map[string][]model.Pod)
+	mapps := make(map[string][]detect.Pod)
 	for _, l := range log2 {
 		ap, _ := findLink(l)
 		for _, name := range ap {
@@ -160,12 +160,12 @@ func Scan(env string) ([]model.App, error) {
 	}
 
 	/* Check those pods are perf-enabled */
-	apps := make([]model.App, 0)
+	apps := make([]detect.App, 0)
 	for name, pods := range mapps {
 		if strings.HasPrefix(name, "batch") {
 			continue
 		}
-		npds := make([]model.Pod, 0)
+		npds := make([]detect.Pod, 0)
 		for _, pod := range pods {
 			con, err := http.Get(pod.Link + "perf/")
 			defer con.Body.Close()
@@ -174,7 +174,7 @@ func Scan(env string) ([]model.App, error) {
 			}
 		}
 
-		apps = append(apps, model.App{name, npds, time.Now()})
+		apps = append(apps, detect.App{name, npds, time.Now()})
 	}
 
 	return apps, nil
