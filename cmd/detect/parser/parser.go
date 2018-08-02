@@ -2,9 +2,9 @@ package parser
 
 import (
 	"log"
-	"net/http"
-	"strings"
 	"time"
+	"strings"
+	"net/http"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
 	"golang.org/x/net/html"
@@ -116,12 +116,13 @@ func isNotFound(resp *http.Response) bool {
 			}
 		}
 	}
-
 }
 
 func Scan(env string) ([]detect.App, error) {
 	log.Print("[Scan] " + env)
 	resp, err := http.Get(server + env + "/log")
+    requested := 1
+    defer func() { log.Printf("total request: %d", requested) }()
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
@@ -133,6 +134,7 @@ func Scan(env string) ([]detect.App, error) {
 
 	/* Here it generates links like /acdev/log/kubernetes-10.207.5.30/msa/acdev/ */
 	logd, err := followLink(ns)
+    requested += len(logd)
 	if err != nil {
 		log.Print(env + "is not mounted")
 		return nil, err
@@ -140,6 +142,7 @@ func Scan(env string) ([]detect.App, error) {
 
 	/* eg: /acdev/log/kubernetes-10.207.5.30/msa/acdev/develop/ */
 	log2, err := followLink(logd)
+    requested += len(log2)
 	if err != nil {
 		log.Print(env + "is closed")
 		return nil, err
@@ -167,6 +170,7 @@ func Scan(env string) ([]detect.App, error) {
 		}
 		npds := make([]detect.Pod, 0)
 		for _, pod := range pods {
+            requested += 1
 			con, err := http.Get(pod.Link + "perf/")
 			defer con.Body.Close()
 			if err == nil && !isNotFound(con) {

@@ -1,15 +1,15 @@
 package server
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/util"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
 	"log"
 	"net/http"
+	"bytes"
+	"fmt"
 	"strings"
 	"time"
+    "git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
+    "git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/util"
 )
 
 type HandlerClosure struct {
@@ -21,24 +21,24 @@ func subscribe(res http.ResponseWriter, req *http.Request, ch chan<- *util.Scann
 	defer req.Body.Close()
 	r, e := buf.ReadFrom(req.Body)
 	if e != nil {
-		/* reading response failed */
+        /* reading response failed */
 		res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	if req.URL.Path != "/subscription" || r == 0 {
-		/* URL is invalid */
+        /* URL is invalid */
 		res.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	env := buf.String()
+    env := buf.String()
 	sreq := util.ScannerRequest{util.SCAN, &env, nil}
 
 	t := time.NewTimer(20 * time.Second)
 
 	select {
 	case <-t.C:
-		/* Couldn't write the request within a period(maybe Exchange() is gone). Inform this failure to him */
+        /* Couldn't write the request within a period(maybe Exchange() is gone). Inform this failure to him */
 		res.WriteHeader(http.StatusRequestTimeout)
 	case ch <- &sreq:
 		res.WriteHeader(http.StatusOK)
@@ -48,22 +48,22 @@ func subscribe(res http.ResponseWriter, req *http.Request, ch chan<- *util.Scann
 }
 
 func get(res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest, env *string) {
-	resc := make(chan *detect.Subscription)
-	// Expect it to be closed by remote, so I won't defer close(resc)
+    resc := make(chan *detect.Subscription, 16)
+    // Expect it to be closed by remote, so I won't defer close(resc)
 	sreq := util.ScannerRequest{util.DESC, env, resc}
 
 	t := time.NewTimer(20 * time.Second)
 
 	select {
 	case <-t.C:
-		/* Couldn't write the request within a period(maybe Exchange() is gone). Inform this failure to him */
+        /* Couldn't write the request within a period(maybe Exchange() is gone). Inform this failure to him */
 		res.WriteHeader(http.StatusRequestTimeout)
 	case ch <- &sreq:
-		/* Request is written. Wait for all the answer */
-		subs := make([]*detect.Subscription, 0)
-		for sub := range resc {
-			subs = append(subs, sub)
-		}
+        /* Request is written. Wait for all the answer */
+        subs := make([]*detect.Subscription, 0)
+        for sub := range resc {
+            subs = append(subs, sub)
+        }
 		reply, e := json.Marshal(&subs)
 		if e != nil {
 			res.WriteHeader(http.StatusInternalServerError)
@@ -74,25 +74,25 @@ func get(res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequ
 }
 
 func (s HandlerClosure) SubRunner(res http.ResponseWriter, req *http.Request) {
-	/* Has trailing slash or sub-location */
-	log.Printf("S: %s %s", req.Method, req.URL.Path)
+    /* Has trailing slash or sub-location */
+    log.Printf("S: %s %s", req.Method, req.URL.Path)
 	switch req.Method {
 	case "GET":
-		env := strings.TrimPrefix(req.URL.Path, "/subscription/")
-		if env == "" {
-			get(res, req, s.Ch, nil)
-		} else {
-			get(res, req, s.Ch, &env)
-		}
+        env := strings.TrimPrefix(req.URL.Path, "/subscription/")
+        if env == "" {
+            get(res, req, s.Ch, nil)
+        } else {
+            get(res, req, s.Ch, &env)
+        }
 	case "DELETE":
 	}
 }
 
 func (s HandlerClosure) Runner(res http.ResponseWriter, req *http.Request) {
-	log.Printf("R: %s %s", req.Method, req.URL.Path)
+    log.Printf("R: %s %s", req.Method, req.URL.Path)
 	switch req.Method {
-	case "GET":
-		get(res, req, s.Ch, nil /* indicates "gimme-all" */)
+    case "GET":
+        get(res, req, s.Ch, nil /* indicates "gimme-all" */)
 	case "POST":
 		subscribe(res, req, s.Ch)
 	case "DELETE":
