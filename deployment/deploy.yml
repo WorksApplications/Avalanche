@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: detect
-        image: /resource_optimization/detect:v1
+        image: /resource_optimization/detect:v2
         ports:
         - containerPort: 8080
 ---
