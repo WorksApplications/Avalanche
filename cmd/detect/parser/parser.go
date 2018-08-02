@@ -168,6 +168,8 @@ func Scan(env string) ([]detect.App, error) {
 		if strings.HasPrefix(name, "batch") {
 			continue
 		}
+        name = strings.TrimRight(name, "/")
+
 		npds := make([]detect.Pod, 0)
 		for _, pod := range pods {
 			requested += 1
