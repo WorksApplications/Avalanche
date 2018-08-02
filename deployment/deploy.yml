@@ -55,7 +55,7 @@ spec:
     spec:
       containers:
       - name: extract
-        image: /resource_optimization/extract:v1
+        image: /resource_optimization/extract:v1.1
         ports:
         - containerPort: 5000
 
