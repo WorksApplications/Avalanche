@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/parser"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/model"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
 )
 
 type Request int
@@ -15,63 +15,80 @@ const (
 	DEL
 	SCAN
 	RUN
-	PULL
+	DESC
 	RET
 )
 
 type ScannerRequest struct {
 	Req Request
-	Sub *model.Subscription
+	Env *string
+	Ret chan<- *detect.Subscription
 }
 
-func dispatch(ch chan model.Subscription) {
+func dispatch(ch chan *detect.Subscription) {
 	for s := range ch {
-		log.Printf("Start scan for %s", s.Env)
+		log.Printf("[Dispatched worker] Start scan for %s", s.Env)
 		apps, err := parser.Scan(s.Env)
-		log.Printf("%s", err)
-		sub := model.Subscription{s.Env, apps}
-		ch <- sub
+		if err != nil {
+			log.Printf("Error in the scan for %s", err)
+		}
+		log.Printf("[Dispatched worker] Scan for %s ended.", s.Env)
+		s.Apps = apps
+		ch <- s
 	}
 }
 
 func Exchange(ch chan *ScannerRequest) {
-	t := time.Tick(1 * time.Minute)
-	m := make(map[string]*model.Subscription)
-	empty := make([]model.App, 0)
-	sc := make(chan model.Subscription, 64) //May have to be extended
+	t := time.Tick(5 * time.Minute)
+	m := make(map[string]*detect.Subscription)
+	empty := make([]detect.App, 0)
+	sc := make(chan *detect.Subscription, 64) // XXX: May have to be extended
 	go dispatch(sc)
 	for {
 		select {
 		case res := <-sc:
-			m[res.Env] = &res
+			m[res.Env] = res
 		case <-t:
 			log.Println("start batch scan")
 			for _, s := range m {
-				sc <- *s
+				sc <- s
 			}
 		case req := <-ch:
+			env := req.Env
+			if env == nil && req.Req != DESC {
+				log.Printf("WARN: nil exception was almost there! req.Req=%s", req.Req)
+			}
 			switch req.Req {
 			case ADD:
-				sub := model.Subscription{req.Sub.Env, empty}
-				m[req.Sub.Env] = &sub
-				log.Printf("%s will be scanned", req.Sub.Env)
+				sub := detect.Subscription{*env, empty}
+				m[*env] = &sub
+				log.Printf("%s will be scanned", *env)
 			case DEL:
-				delete(m, req.Sub.Env)
-				log.Printf("%s won't be scanned", req.Sub.Env)
+				delete(m, *env)
+				log.Printf("%s won't be scanned", *env)
 			case SCAN:
-				sub, prs := m[req.Sub.Env]
+				sub, prs := m[*env]
 				if !prs {
-					sub = &model.Subscription{req.Sub.Env, empty}
+					sub = &detect.Subscription{*env, empty}
+					// If this line is enabled, you don't have to receive result from dispatch.
+					// However, you will return empty list which is empty because it is not scanned yet
+					// m[*env] = sub
 				}
-				sc <- *sub
-			case PULL:
-				sub, prs := m[req.Sub.Env]
-				if !prs {
-					log.Printf("Not found")
-					sub = &model.Subscription{req.Sub.Env, empty}
+				sc <- sub
+			case DESC:
+				if env == nil {
+					for _, sub := range m {
+						req.Ret <- sub
+					}
+				} else {
+					sub, prs := m[*env]
+					if !prs {
+						log.Printf("Not found %s", *env)
+					} else {
+						req.Ret <- sub
+					}
 				}
-				log.Printf("%s", sub.Apps)
-				ch <- &ScannerRequest{RET, sub}
+				close(req.Ret)
 			}
 		}
 	}

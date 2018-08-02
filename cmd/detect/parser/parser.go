@@ -4,8 +4,9 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/model"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
 	"golang.org/x/net/html"
 )
 
@@ -90,10 +91,10 @@ func followLink(sites []string) ([]string, error) {
 	return ret, nil
 }
 
-func toPods(ls []string, applink string) []model.Pod {
-	pods := make([]model.Pod, len(ls))
+func toPods(ls []string, applink string) []detect.Pod {
+	pods := make([]detect.Pod, len(ls))
 	for i, l := range ls {
-		pods[i] = model.Pod{strings.TrimRight(l, "/"), applink + l, false}
+		pods[i] = detect.Pod{strings.TrimRight(l, "/"), applink + l, false}
 	}
 	return pods
 }
@@ -115,12 +116,13 @@ func isNotFound(resp *http.Response) bool {
 			}
 		}
 	}
-
 }
 
-func Scan(env string) ([]model.App, error) {
+func Scan(env string) ([]detect.App, error) {
 	log.Print("[Scan] " + env)
 	resp, err := http.Get(server + env + "/log")
+	requested := 1
+	defer func() { log.Printf("total request: %d", requested) }()
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
@@ -132,6 +134,7 @@ func Scan(env string) ([]model.App, error) {
 
 	/* Here it generates links like /acdev/log/kubernetes-10.207.5.30/msa/acdev/ */
 	logd, err := followLink(ns)
+	requested += len(logd)
 	if err != nil {
 		log.Print(env + "is not mounted")
 		return nil, err
@@ -139,12 +142,13 @@ func Scan(env string) ([]model.App, error) {
 
 	/* eg: /acdev/log/kubernetes-10.207.5.30/msa/acdev/develop/ */
 	log2, err := followLink(logd)
+	requested += len(log2)
 	if err != nil {
 		log.Print(env + "is closed")
 		return nil, err
 	}
 
-	mapps := make(map[string][]model.Pod)
+	mapps := make(map[string][]detect.Pod)
 	for _, l := range log2 {
 		ap, _ := findLink(l)
 		for _, name := range ap {
@@ -159,13 +163,14 @@ func Scan(env string) ([]model.App, error) {
 	}
 
 	/* Check those pods are perf-enabled */
-	apps := make([]model.App, 0)
+	apps := make([]detect.App, 0)
 	for name, pods := range mapps {
 		if strings.HasPrefix(name, "batch") {
 			continue
 		}
-		npds := make([]model.Pod, 0)
+		npds := make([]detect.Pod, 0)
 		for _, pod := range pods {
+			requested += 1
 			con, err := http.Get(pod.Link + "perf/")
 			defer con.Body.Close()
 			if err == nil && !isNotFound(con) {
@@ -173,7 +178,7 @@ func Scan(env string) ([]model.App, error) {
 			}
 		}
 
-		apps = append(apps, model.App{name, npds})
+		apps = append(apps, detect.App{name, npds, time.Now()})
 	}
 
 	return apps, nil

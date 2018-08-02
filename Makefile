@@ -1,7 +1,7 @@
-MODEL = $(shell find pkg/model -name *.go)
+PKG = $(shell find pkg -name *.go)
 
 
-.PHONY: default clean
+.PHONY: default clean fmt
 
 default: bin
 
@@ -24,7 +24,7 @@ collect: collect-img
 collect-img: bin/collect
 	docker build -f image/collect/Dockerfile --tag ${
 
-bin/collect: $(shell find cmd/collect -name *.go) $(MODEL) generated_files/stub
+bin/collect: $(shell find cmd/collect -name *.go) $(PKG) generated_files/stub
 	go build -o bin/collect cmd/collect/server.go
 
 generated_files/stub: api/collect.yml
@@ -41,11 +41,14 @@ detect: detect-img
 detect-img: bin/detect image/detect/Dockerfile
 	docker build --no-cache -f image/detect/Dockerfile --tag ${
 
-bin/detect: $(shell find cmd/detect -name *.go) $(MODEL)
-	go build -o bin/detect cmd/detect/app.go
-
 front/public/app.js:
 	cd front && yarn build
 
 clean:
 	\rm -r front/public/; rm -r bin/; rm -r generated_files/cmd; rm -r generated_files/models; rm -r generated_files/restapi
+bin/detect: $(shell find cmd/detect -name *.go) $(PKG)
+	go build -o bin/detect cmd/detect/app.go
+
+fmt:	
+	go fmt ./cmd/...
+	go fmt ./pkg/...
