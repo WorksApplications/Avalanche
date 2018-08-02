@@ -65,10 +65,10 @@ func (s *ServerCtx) describeEnvironmentHandler(params operations.DescribeEnviron
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	lays := layout.OfBoth(s.Db, *app.ID, *env.ID)
-	if len(lays) == 0 {
+	if lays == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	body := environ.FromLayout(s.Db, lays[0])
+	body := environ.FromLayout(s.Db, lays)
 	return operations.NewDescribeEnvironmentOK().WithPayload(body)
 }
 
@@ -79,10 +79,10 @@ func (s *ServerCtx) getPodsHandler(params operations.GetPodsParams) middleware.R
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	lays := layout.OfBoth(s.Db, *app.ID, *env.ID)
-	if len(lays) == 0 {
+	if lays == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	body := pod.FromLayout(s.Db, lays[0])
+	body := pod.FromLayout(s.Db, lays)
 	return operations.NewGetPodsOK().WithPayload(body)
 }
 
@@ -111,7 +111,7 @@ func recursiveInsert(db *sql.DB, p *detect.Subscription) {
 	en := environ.Assign(db, &p.Env)
 	for _, a := range p.Apps {
 		an := app.Assign(db, &a.Name, &a.Seen)
-		l := layout.Assign(db, *en.ID, *an.ID)[0]
+		l := layout.Assign(db, *en.ID, *an.ID)
 		for _, p := range a.Pods {
 			pod.Assign(db, &p.Name, *en.ID, *an.ID, l.Id)
 		}

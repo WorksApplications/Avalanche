@@ -24,13 +24,13 @@ func InitTable(db *sql.DB) {
 			"lastseen DATETIME, " +
 			"PRIMARY KEY (id) " +
 			")")
-	log.Println(res, err)
+	log.Println("[DB/App]", res, err)
 }
 
 func list(db *sql.DB, where *string) []*models.App {
 	rows, err := db.Query(fmt.Sprintf("SELECT id, name, lastseen FROM app %s", *where))
 	if err != nil {
-		log.Fatal("APP", err)
+		log.Fatal("[DB/App] ", err)
 	}
 	defer rows.Close()
 	apps := make([]*models.App, 0)
@@ -40,7 +40,7 @@ func list(db *sql.DB, where *string) []*models.App {
 		var date time.Time
 		err = rows.Scan(&id, &name, &date)
 		if err != nil {
-			log.Print(err)
+			log.Print("[DB/App] Scan", err)
 		}
 		apps = append(apps, &models.App{nil, &id, strfmt.DateTime(date), &name})
 	}
@@ -57,6 +57,7 @@ func fill(db *sql.DB, s *models.App) {
 }
 
 func add(db *sql.DB, n *string, d *time.Time) {
+	log.Printf("[DB/App] Storing (%s, %s)", n, d)
 	db.Query("INSERT INTO app(name, lastseen) values (?, ?)", n, d)
 }
 
@@ -79,7 +80,7 @@ func Assign(db *sql.DB, n *string, d *time.Time) *models.App {
 
 func Get(db *sql.DB, n *string) *models.App {
 	name := fmt.Sprintf("WHERE name = \"%s\"", *n)
-	log.Println(fmt.Sprintf("%s", name))
+	log.Println("[DB/App]", fmt.Sprintf("%s", name))
 	apps := list(db, &name)
 	if len(apps) != 0 {
 		return apps[0]

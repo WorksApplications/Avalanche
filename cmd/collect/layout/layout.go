@@ -17,19 +17,19 @@ func InitTable(db *sql.DB) {
 	res, err := db.Exec(
 		"CREATE TABLE layout(" +
 			"id MEDIUMINT NOT NULL AUTO_INCREMENT, " +
-			"name CHAR(80) NOT NULL, " +
-			"appid int, " +
+			"name CHAR(80), " +
 			"envid int, " +
+			"appid int, " +
 			"lives int, " +
 			"PRIMARY KEY (id) " +
 			")")
-	log.Println(res, err)
+	log.Println("[DB/Layout]", res, err)
 }
 
 func of(db *sql.DB, where *string) []*Layout {
 	rows, err := db.Query(fmt.Sprintf("SELECT id, name, appid, envid, lives FROM layout %s", *where))
 	if err != nil {
-		log.Fatal("LAYOUT", err)
+		log.Fatal("[DB/Layout] ", err)
 	}
 	defer rows.Close()
 	lays := make([]*Layout, 0)
@@ -38,9 +38,10 @@ func of(db *sql.DB, where *string) []*Layout {
 		var aid int64
 		var eid int64
 		var lives int64
-		err = rows.Scan(&id, &aid, &eid, &lives)
+		var name string
+		err = rows.Scan(&id, &name, &aid, &eid, &lives)
 		if err != nil {
-			log.Print(err)
+			log.Print("[DB/Layout] Scan", err)
 		}
 		lays = append(lays, &Layout{id, aid, eid, lives})
 	}
@@ -48,20 +49,36 @@ func of(db *sql.DB, where *string) []*Layout {
 }
 
 func OfApp(db *sql.DB, appid int64) []*Layout {
-	where := fmt.Sprintf("WHERE appId = %s", appid)
+	where := fmt.Sprintf("WHERE appId = \"%d\"", appid)
 	return of(db, &where)
 }
 
 func OfEnv(db *sql.DB, envid int64) []*Layout {
-	where := fmt.Sprintf("WHERE envid = %s", envid)
+	where := fmt.Sprintf("WHERE envid = \"%d\"", envid)
 	return of(db, &where)
 }
 
-func Assign(db *sql.DB, envid int64, appid int64) []*Layout {
-	where := fmt.Sprintf("WHERE envid = %s AND appid = %s", envid, appid)
-	return of(db, &where)
+func add(db *sql.DB, envid int64, appid int64) {
+	log.Printf("[DB/Layout] Storing (%d, %d)", envid, appid)
+	db.Query("INSERT INTO layout(envid, appid, lives) values (?, ?, ?)", envid, appid, 0)
 }
-func OfBoth(db *sql.DB, envid int64, appid int64) []*Layout {
-	where := fmt.Sprintf("WHERE envid = %s AND appid = %s", envid, appid)
-	return of(db, &where)
+
+func Assign(db *sql.DB, envid int64, appid int64) *Layout {
+	l := OfBoth(db, envid, appid)
+	if l == nil {
+		add(db, envid, appid)
+		l = OfBoth(db, envid, appid)
+	}
+	return l
+}
+func OfBoth(db *sql.DB, envid int64, appid int64) *Layout {
+	where := fmt.Sprintf("WHERE envid = \"%d\" AND appid = \"%d\"", envid, appid)
+	l := of(db, &where)
+	if len(l) > 1 {
+		log.Printf("[DB/Layout] @@@@INCONSISTENT@@@@: couple of env: %d, app: %d has %s pairs!", envid, appid, len(l))
+	}
+	if len(l) == 0 {
+		return nil
+	}
+	return l[0]
 }

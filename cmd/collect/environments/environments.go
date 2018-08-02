@@ -22,13 +22,13 @@ func InitTable(db *sql.DB) {
 			"addr TEXT, " +
 			"PRIMARY KEY (id) " +
 			")")
-	log.Println(res, err)
+	log.Println("[DB/Env]", res, err)
 }
 
 func list(db *sql.DB, where *string) []*models.Environment {
-	rows, err := db.Query(fmt.Sprintf("SELECT id, name, FROM environ %s", *where))
+	rows, err := db.Query(fmt.Sprintf("SELECT id, name FROM environ %s", *where))
 	if err != nil {
-		log.Fatal("ENV", err)
+		log.Fatal("[DB/Env] ", err)
 	}
 	defer rows.Close()
 	envs := make([]*models.Environment, 0)
@@ -37,7 +37,7 @@ func list(db *sql.DB, where *string) []*models.Environment {
 		var name string
 		err = rows.Scan(&id, &name)
 		if err != nil {
-			log.Print(err)
+			log.Println("[DB/Env] Scan", err)
 		}
 		envs = append(envs, &models.Environment{&id, 0, &name, nil})
 	}
@@ -62,7 +62,7 @@ func ListAll(db *sql.DB) []*models.Environment {
 }
 
 func Get(db *sql.DB, n *string) *models.Environment {
-	name := fmt.Sprintf("WHERE name = %s", *n)
+	name := fmt.Sprintf("WHERE name = \"%s\"", *n)
 	envs := list(db, &name)
 	if len(envs) != 0 {
 		return envs[0]
@@ -72,20 +72,16 @@ func Get(db *sql.DB, n *string) *models.Environment {
 }
 
 func add(db *sql.DB, e *string) {
+	log.Printf("[DB/Env] Storing %s\n", e)
 	db.Query("INSERT INTO environ(name) values (?)", e)
 }
 
 func Describe(db *sql.DB, n *string) *models.Environment {
-	name := fmt.Sprintf("WHERE name = %s", *n)
-	envs := list(db, &name)
-	for _, env := range envs {
-		fill(db, env)
+	g := Get(db, n)
+	if g != nil {
+		fill(db, g)
 	}
-	if len(envs) != 0 {
-		return envs[0]
-	} else {
-		return nil
-	}
+	return g
 }
 
 func Assign(db *sql.DB, e *string) *models.Environment {
@@ -98,7 +94,7 @@ func Assign(db *sql.DB, e *string) *models.Environment {
 }
 
 func FromLayout(db *sql.DB, lay *layout.Layout) *models.Environment {
-	where := fmt.Sprintf("WHERE id = %s", lay.EnvId)
+	where := fmt.Sprintf("WHERE id = \"%s\"", lay.EnvId)
 	envs := list(db, &where)
 	for _, env := range envs {
 		fill(db, env)
