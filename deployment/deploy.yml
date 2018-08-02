@@ -34,6 +34,7 @@ spec:
     protocol: TCP
     nodePort: 31000
     name: content
+  type: NodePort
   selector:
     run: detect
 
@@ -75,6 +76,7 @@ spec:
     protocol: TCP
     nodePort: 31001
     name: content
+  type: NodePort
   selector:
     run: extract
 
@@ -100,7 +102,7 @@ spec:
         image: /resource_optimization/collect:alpha
         ports:
         - containerPort: 8080
-      imagePullPolicy: Always
+        imagePullPolicy: Always
 
 ---
 
@@ -118,6 +120,7 @@ spec:
     protocol: TCP
     name: content
     nodePort: 31002
+  type: NodePort
   selector:
     run: collect
 
@@ -159,5 +162,6 @@ spec:
     protocol: TCP
     name: content
     nodePort: 31003
+  type: NodePort
   selector:
     run: static
