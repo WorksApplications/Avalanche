@@ -44,8 +44,8 @@ func list(db *sql.DB, where *string) []*models.Environment {
 	return envs
 }
 
-func fill(s *models.Environment, db *sql.DB) {
-	lays := layout.OfEnv(*s.ID, db)
+func fill(db *sql.DB, s *models.Environment) {
+	lays := layout.OfEnv(db, *s.ID)
 	lsum := 0
 	for _, l := range lays {
 		lsum = lsum + int(l.Lives)
@@ -56,7 +56,7 @@ func fill(s *models.Environment, db *sql.DB) {
 func ListAll(db *sql.DB) []*models.Environment {
 	envs := list(db, nil)
 	for _, env := range envs {
-		fill(env, db)
+		fill(db, env)
 	}
 	return envs
 }
@@ -71,15 +71,15 @@ func Get(db *sql.DB, n *string) *models.Environment {
 	}
 }
 
-func Set(db *sql.DB, e *models.Environment) {
-	db.Query("INSERT INTO environ(name) values (?)", e.name)
+func add(db *sql.DB, e *string) {
+	db.Query("INSERT INTO environ(name) values (?)", e)
 }
 
 func Describe(db *sql.DB, n *string) *models.Environment {
 	name := fmt.Sprintf("WHERE name = %s", *n)
 	envs := list(db, &name)
 	for _, env := range envs {
-		fill(env, db)
+		fill(db, env)
 	}
 	if len(envs) != 0 {
 		return envs[0]
@@ -88,11 +88,20 @@ func Describe(db *sql.DB, n *string) *models.Environment {
 	}
 }
 
+func Assign(db *sql.DB, e *string) *models.Environment {
+	g := Get(db, e)
+	if g == nil {
+		add(db, e)
+		g = Get(db, e)
+	}
+	return g
+}
+
 func FromLayout(db *sql.DB, lay *layout.Layout) *models.Environment {
 	where := fmt.Sprintf("WHERE id = %s", lay.EnvId)
 	envs := list(db, &where)
 	for _, env := range envs {
-		fill(env, db)
+		fill(db, env)
 	}
 	if len(envs) != 0 {
 		return envs[0]

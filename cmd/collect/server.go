@@ -47,7 +47,7 @@ func (s *ServerCtx) getEnvironmentsHandler(params operations.GetEnvironmentsPara
 	if app == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	lays := layout.OfApp(*app.ID, s.Db)
+	lays := layout.OfApp(s.Db, *app.ID)
 	if len(lays) == 0 {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
@@ -64,7 +64,7 @@ func (s *ServerCtx) describeEnvironmentHandler(params operations.DescribeEnviron
 	if app == nil || env == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	lays := layout.OfBoth(*app.ID, *env.ID, s.Db)
+	lays := layout.OfBoth(s.Db, *app.ID, *env.ID)
 	if len(lays) == 0 {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
@@ -78,12 +78,12 @@ func (s *ServerCtx) getPodsHandler(params operations.GetPodsParams) middleware.R
 	if app == nil || env == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	lays := layout.OfBoth(*app.ID, *env.ID, s.Db)
+	lays := layout.OfBoth(s.Db, *app.ID, *env.ID)
 	if len(lays) == 0 {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	body := pod.FromLayout(s.Db, lays[0])
-	return operations.NewGetPodsOK().WithPayload(*body)
+	return operations.NewGetPodsOK().WithPayload(body)
 }
 
 func (s *ServerCtx) pull() {
@@ -101,15 +101,20 @@ func (s *ServerCtx) pull() {
 		log.Println("Unmarshal failed!")
 		return
 	}
-	recursiveInsert(p, s.Db)
+	for _, e := range p {
+		recursiveInsert(s.Db, &e)
+	}
 	log.Printf("res: %+v", p)
 }
 
-func recursiveInsert(p detect.Subscription, db *sql.DB) {
-	e := environ.Get(db, p.Env)
-	if e == nil {
-		// add new row for e
-		e = environ.Get(db, p.Env)
+func recursiveInsert(db *sql.DB, p *detect.Subscription) {
+	en := environ.Assign(db, &p.Env)
+	for _, a := range p.Apps {
+		an := app.Assign(db, &a.Name, &a.Seen)
+		l := layout.Assign(db, *en.ID, *an.ID)[0]
+		for _, p := range a.Pods {
+			pod.Assign(db, &p.Name, *en.ID, *an.ID, l.Id)
+		}
 	}
 }
 

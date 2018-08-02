@@ -47,8 +47,8 @@ func list(db *sql.DB, where *string) []*models.App {
 	return apps
 }
 
-func fill(s *models.App, db *sql.DB) {
-	lays := layout.OfApp(*s.ID, db)
+func fill(db *sql.DB, s *models.App) {
+	lays := layout.OfApp(db, *s.ID)
 	envs := make([]*models.Environment, 0)
 	for _, lay := range lays {
 		envs = append(envs, environ.FromLayout(db, lay))
@@ -56,24 +56,42 @@ func fill(s *models.App, db *sql.DB) {
 	s.Environments = envs
 }
 
+func add(db *sql.DB, n *string, d *time.Time) {
+	db.Query("INSERT INTO app(name, lastseen) values (?, ?)", n, d)
+}
+
 func ListAll(db *sql.DB) []*models.App {
 	apps := list(db, nil)
 	for _, app := range apps {
-		fill(app, db)
+		fill(db, app)
 	}
 	return apps
 }
 
-func Describe(db *sql.DB, n *string) *models.App {
+func Assign(db *sql.DB, n *string, d *time.Time) *models.App {
+	g := Get(db, n)
+	if g == nil && d != nil {
+		add(db, n, d)
+		g = Get(db, n)
+	}
+	return g
+}
+
+func Get(db *sql.DB, n *string) *models.App {
 	name := fmt.Sprintf("WHERE name = \"%s\"", *n)
 	log.Println(fmt.Sprintf("%s", name))
 	apps := list(db, &name)
-	for _, app := range apps {
-		fill(app, db)
-	}
 	if len(apps) != 0 {
 		return apps[0]
 	} else {
 		return nil
 	}
+}
+
+func Describe(db *sql.DB, n *string) *models.App {
+	g := Get(db, n)
+	if g != nil {
+		fill(db, g)
+	}
+	return g
 }

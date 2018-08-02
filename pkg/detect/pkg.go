@@ -5,10 +5,10 @@ import (
 )
 
 type ScanInfo struct {
-    Date     time.Time       `json:"start_time"`
-    Duration time.Duration   `json:"scan_duration"`
-    Period   time.Duration   `json:"period"`
-    Subs     []*Subscription `json:"environments"`
+	Date     time.Time       `json:"start_time"`
+	Duration time.Duration   `json:"scan_duration"`
+	Period   time.Duration   `json:"period"`
+	Subs     []*Subscription `json:"environments"`
 }
 
 type Subscription struct {

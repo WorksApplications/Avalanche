@@ -26,7 +26,7 @@ func InitTable(db *sql.DB) {
 	log.Println(res, err)
 }
 
-func of(where *string, db *sql.DB) []*Layout {
+func of(db *sql.DB, where *string) []*Layout {
 	rows, err := db.Query(fmt.Sprintf("SELECT id, name, appid, envid, lives FROM layout %s", *where))
 	if err != nil {
 		log.Fatal("LAYOUT", err)
@@ -47,17 +47,21 @@ func of(where *string, db *sql.DB) []*Layout {
 	return lays
 }
 
-func OfApp(appid int64, db *sql.DB) []*Layout {
+func OfApp(db *sql.DB, appid int64) []*Layout {
 	where := fmt.Sprintf("WHERE appId = %s", appid)
-	return of(&where, db)
+	return of(db, &where)
 }
 
-func OfEnv(envid int64, db *sql.DB) []*Layout {
+func OfEnv(db *sql.DB, envid int64) []*Layout {
 	where := fmt.Sprintf("WHERE envid = %s", envid)
-	return of(&where, db)
+	return of(db, &where)
 }
 
-func OfBoth(envid int64, appid int64, db *sql.DB) []*Layout {
+func Assign(db *sql.DB, envid int64, appid int64) []*Layout {
 	where := fmt.Sprintf("WHERE envid = %s AND appid = %s", envid, appid)
-	return of(&where, db)
+	return of(db, &where)
+}
+func OfBoth(db *sql.DB, envid int64, appid int64) []*Layout {
+	where := fmt.Sprintf("WHERE envid = %s AND appid = %s", envid, appid)
+	return of(db, &where)
 }
