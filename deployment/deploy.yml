@@ -1,0 +1,163 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: detect
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      run: detect
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: detect
+    spec:
+      containers:
+      - name: detect
+        image: /resource_optimization/detect:v2
+        ports:
+        - containerPort: 8080
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: detect
+  name: detect
+  namespace: default
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    nodePort: 31000
+    name: content
+  selector:
+    run: detect
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: extract
+spec:
+  selector:
+    matchLabels:
+      run: extract
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: extract
+    spec:
+      containers:
+      - name: extract
+        image: /resource_optimization/extract:v1.1
+        ports:
+        - containerPort: 5000
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: extract
+  name: extract
+  namespace: default
+spec:
+  ports:
+  - port: 8080
+    targetPort: 5000
+    protocol: TCP
+    nodePort: 31001
+    name: content
+  selector:
+    run: extract
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: collect
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      run: collect
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: collect
+    spec:
+      containers:
+      - name: collect
+        image: /resource_optimization/collect:alpha
+        ports:
+        - containerPort: 8080
+      imagePullPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: collect
+  name: collect
+  namespace: default
+spec:
+  ports:
+  - port: 8080
+    targetPort: 5000
+    protocol: TCP
+    name: content
+    nodePort: 31002
+  selector:
+    run: collect
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: static
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      run: static
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: static
+    spec:
+      containers:
+      - name: static
+        image: /resource_optimization/static:alpha
+        ports:
+        - containerPort: 80
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: static
+  name: static
+  namespace: default
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: content
+    nodePort: 31003
+  selector:
+    run: static
