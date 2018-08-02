@@ -16,18 +16,20 @@ type SnapSummary struct {
 }
 
 func InitTable(db *sql.DB) {
-	db.QueryRow(
+	log.Println("making pod table")
+	res, err := db.Exec(
 		"CREATE TABLE pod(" +
 			"id MEDIUMINT NOT NULL AUTO_INCREMENT, " +
 			"name CHAR(128) NOT NULL, " +
 			"appid int, " +
 			"envid int, " +
 			"layid int, " +
-			"address string, " +
+			"address TEXT, " +
 			"live boolean, " +
 			"created DATETIME, " +
 			"PRIMARY KEY (id) " +
 			")")
+	log.Println("[DB/Pod]", res, err)
 }
 
 func list(db *sql.DB, where *string) []*models.Pod {
@@ -59,7 +61,8 @@ func fill(db *sql.DB, s *models.Pod) {
 }
 
 func ListAll(db *sql.DB) []*models.Pod {
-	pods := list(db, nil)
+	where := ""
+	pods := list(db, &where)
 	for _, pod := range pods {
 		fill(db, pod)
 	}

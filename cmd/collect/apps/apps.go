@@ -62,7 +62,8 @@ func add(db *sql.DB, n *string, d *time.Time) {
 }
 
 func ListAll(db *sql.DB) []*models.App {
-	apps := list(db, nil)
+	where := ""
+	apps := list(db, &where)
 	for _, app := range apps {
 		fill(db, app)
 	}

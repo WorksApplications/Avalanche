@@ -29,6 +29,10 @@ type ServerCtx struct {
 	detect string /* detect address */
 }
 
+func (s *ServerCtx) healthzHandler(_ operations.HealthzParams) middleware.Responder {
+	return operations.NewHealthzOK().WithPayload("Vaer sa godt")
+}
+
 func (s *ServerCtx) getAppsHandler(_ operations.GetAppsParams) middleware.Responder {
 	body := app.ListAll(s.Db)
 	return operations.NewGetAppsOK().WithPayload(body)
@@ -89,12 +93,13 @@ func (s *ServerCtx) getPodsHandler(params operations.GetPodsParams) middleware.R
 func (s *ServerCtx) pull() {
 	log.Printf("start to pull pods' information from %s", s.detect)
 	r, err := http.Get(s.detect + "/subscription/")
-	defer r.Body.Close()
 	d, er2 := ioutil.ReadAll(r.Body)
 	if err != nil || er2 != nil {
 		log.Println("Poll failed!")
 		return
 	}
+	defer r.Body.Close()
+
 	var p []detect.Subscription
 	err = json.Unmarshal(d, &p)
 	if err != nil || er2 != nil {
@@ -138,10 +143,10 @@ func (s *ServerCtx) pollPodInfo() {
 }
 
 func (s *ServerCtx) initHandle() {
-	app.InitTable(s.Db)
 	environ.InitTable(s.Db)
 	layout.InitTable(s.Db)
 	pod.InitTable(s.Db)
+	app.InitTable(s.Db)
 }
 
 func establishDBConn(dn string) *sql.DB {
@@ -178,6 +183,11 @@ func main() {
 	db := establishDBConn(*dbconf)
 	ctx := ServerCtx{db, *detect}
 
+	if *init {
+		ctx.initHandle()
+		log.Fatal("Initialize end")
+	}
+
 	ctx.pollPodInfo()
 
 	api.GetAppsHandler = operations.GetAppsHandlerFunc(ctx.getAppsHandler)
@@ -185,10 +195,8 @@ func main() {
 
 	api.GetEnvironmentsHandler = operations.GetEnvironmentsHandlerFunc(ctx.getEnvironmentsHandler)
 	api.DescribeEnvironmentHandler = operations.DescribeEnvironmentHandlerFunc(ctx.describeEnvironmentHandler)
-	if *init {
-		ctx.initHandle()
-		log.Fatal("Initialize end")
-	}
+
+	api.HealthzHandler = operations.HealthzHandlerFunc(ctx.healthzHandler)
 
 	if err := server.Serve(); err != nil {
 		log.Fatalln(err)
