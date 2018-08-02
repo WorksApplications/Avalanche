@@ -163,7 +163,7 @@ func main() {
 	api := operations.NewCollectAPI(swaggerSpec)
 
 	init := flag.Bool("init", false, "Initialize?")
-	dbconf := flag.String("db", "example:example@localhost", "DB connexion")
+	dbconf := flag.String("db", "example:example@localhost?parseTime=True", "DB connexion")
 	port := flag.Int("port", 4981, "Port for this server")
 	detect := flag.String("detect", "http://localhost:8080", "\"detect\" service address")
 
