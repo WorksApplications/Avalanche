@@ -98,13 +98,13 @@ func (s *ServerCtx) pull() {
 	var p []detect.Subscription
 	err = json.Unmarshal(d, &p)
 	if err != nil || er2 != nil {
-		log.Println("Unmarshal failed!")
+		log.Println("Unmarshal failed!", err, er2)
+		log.Printf("res: %+v", p)
 		return
 	}
 	for _, e := range p {
 		recursiveInsert(s.Db, &e)
 	}
-	log.Printf("res: %+v", p)
 }
 
 func recursiveInsert(db *sql.DB, p *detect.Subscription) {
