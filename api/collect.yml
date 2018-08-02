@@ -128,6 +128,15 @@ definitions:
         type: boolean
 
 paths:
+  /healthz:
+    get:
+      responses:
+        200:
+          description: "For readiness probe"
+          schema:
+            type: string
+      operationId: healthz
+
   /apps:
     get:
       responses:
@@ -139,6 +148,7 @@ paths:
             items:
               $ref: "#/definitions/app"
       operationId: getApps
+
   /apps/{appid}:
     get:
       parameters:
