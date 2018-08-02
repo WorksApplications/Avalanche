@@ -91,7 +91,7 @@ spec:
   selector:
     matchLabels:
       run: collect
-  replicas: 1
+  replicas: 3
   template:
     metadata:
       labels:
@@ -103,6 +103,11 @@ spec:
         ports:
         - containerPort: 8080
         imagePullPolicy: Always
+        command:
+          - /collect
+          - --port=8080
+          - --detect=http://detect:8080
+          - --db=example:example@tcp(mariadb)/collekt?parseTime=True
 
 ---
 
@@ -116,7 +121,7 @@ metadata:
 spec:
   ports:
   - port: 8080
-    targetPort: 5000
+    targetPort: 8080
     protocol: TCP
     name: content
     nodePort: 31002
@@ -165,3 +170,14 @@ spec:
   type: NodePort
   selector:
     run: static
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: flamescope.internal.worksap.com
