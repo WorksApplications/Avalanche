@@ -15,8 +15,10 @@ class NavigationView extends Component {
             onValueChanged={this.onAppChanged.bind(this)}
           />
         </div>
-        <div>
-          <div>Target List</div>
+        <div className={styles.viewList}>
+          <div className={[styles.viewItem, styles.selected].join(" ")}>
+            Snapshots
+          </div>
         </div>
         {/* This will be config & login */}
       </div>
