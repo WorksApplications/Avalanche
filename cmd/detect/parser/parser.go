@@ -168,14 +168,16 @@ func Scan(env string) ([]detect.App, error) {
 		if strings.HasPrefix(name, "batch") {
 			continue
 		}
-        name = strings.TrimRight(name, "/")
+		name = strings.TrimRight(name, "/")
 
 		npds := make([]detect.Pod, 0)
 		for _, pod := range pods {
 			requested += 1
-			con, err := http.Get(pod.Link + "perf/")
+			con, err := http.Get(pod.Link + "perf-record/")
+			/* BUG this can cause SEGV */
 			defer con.Body.Close()
 			if err == nil && !isNotFound(con) {
+				pod.Perfing = true
 				npds = append(npds, pod)
 			}
 		}

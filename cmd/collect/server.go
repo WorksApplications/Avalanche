@@ -90,6 +90,16 @@ func (s *ServerCtx) getPodsHandler(params operations.GetPodsParams) middleware.R
 	return operations.NewGetPodsOK().WithPayload(body)
 }
 
+func (s *ServerCtx) describePodHandler(params operations.DescribePodParams) middleware.Responder {
+	app := app.Describe(s.Db, &params.Appid)
+	env := environ.Get(s.Db, &params.Environment)
+	if app == nil || env == nil {
+		return operations.NewDescribeAppDefault(404).WithPayload(nil)
+	}
+	body := pod.Get(s.Db, &params.Pod, env.ID, app.ID)
+	return operations.NewDescribePodOK().WithPayload(body)
+}
+
 func (s *ServerCtx) pull() {
 	log.Printf("start to pull pods' information from %s", s.detect)
 	r, err := http.Get(s.detect + "/subscription/")
@@ -100,6 +110,7 @@ func (s *ServerCtx) pull() {
 	}
 	defer r.Body.Close()
 
+	/* BUG XXX don't update existing info now! It is a bug XXX */
 	var p []detect.Subscription
 	err = json.Unmarshal(d, &p)
 	if err != nil || er2 != nil {
@@ -195,6 +206,9 @@ func main() {
 
 	api.GetEnvironmentsHandler = operations.GetEnvironmentsHandlerFunc(ctx.getEnvironmentsHandler)
 	api.DescribeEnvironmentHandler = operations.DescribeEnvironmentHandlerFunc(ctx.describeEnvironmentHandler)
+
+	api.GetPodsHandler = operations.GetPodsHandlerFunc(ctx.getPodsHandler)
+	api.DescribePodHandler = operations.DescribePodHandlerFunc(ctx.describePodHandler)
 
 	api.HealthzHandler = operations.HealthzHandlerFunc(ctx.healthzHandler)
 

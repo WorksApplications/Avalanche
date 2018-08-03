@@ -69,7 +69,7 @@ func ListAll(db *sql.DB) []*models.Pod {
 	return pods
 }
 
-func Get(db *sql.DB, n *string) *models.Pod {
+func Get(db *sql.DB, n *string, eid *int64, aid *int64) *models.Pod {
 	name := fmt.Sprintf("WHERE name = \"%s\"", n)
 	pods := list(db, &name)
 	if len(pods) == 0 {
@@ -83,8 +83,8 @@ func add(db *sql.DB, p *string, e int64, a int64, l int64) {
 	db.Query("INSERT INTO pod(name, envid, appid, layid) values (?, ?, ?, ?)", p, e, a, l)
 }
 
-func Describe(db *sql.DB, n *string) *models.Pod {
-	name := fmt.Sprintf("WHERE name = \"%s\"", n)
+func Describe(db *sql.DB, id int) *models.Pod {
+	name := fmt.Sprintf("WHERE id = \"%d\"", id)
 	pods := list(db, &name)
 	if len(pods) == 0 {
 		return nil
@@ -94,10 +94,10 @@ func Describe(db *sql.DB, n *string) *models.Pod {
 }
 
 func Assign(db *sql.DB, p *string, e int64, a int64, l int64) *models.Pod {
-	g := Get(db, p)
+	g := Get(db, p, &e, &a)
 	if g == nil {
 		add(db, p, e, a, l)
-		g = Get(db, p)
+		g = Get(db, p, &e, &a)
 	}
 	return g
 }
