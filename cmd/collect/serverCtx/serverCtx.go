@@ -16,14 +16,16 @@ import (
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/environments"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/pod"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/snapshot"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type ServerCtx struct {
-	Db     *sql.DB
-	Detect string /* detect address */
+	Db      *sql.DB
+	Detect  string /* detect address */
+	Pvmount string
 }
 
 func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Responder {
@@ -97,6 +99,21 @@ func (s *ServerCtx) DescribePodHandler(params operations.DescribePodParams) midd
 	return operations.NewDescribePodOK().WithPayload(body)
 }
 
+func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) middleware.Responder {
+	app := app.Describe(s.Db, &params.Appid)
+	env := environ.Get(s.Db, &params.Environment)
+	if app == nil || env == nil {
+		return operations.NewDescribeAppDefault(404).WithPayload(nil)
+	}
+	lays := layout.OfBoth(s.Db, *app.ID, *env.ID)
+	if lays == nil {
+		return operations.NewDescribeAppDefault(404).WithPayload(nil)
+	}
+	pod := pod.Get(s.Db, &params.Pod, env.ID, app.ID)
+	body := snapshot.New(s.Pvmount, s.Db, pod, lay)
+	return operations.NewNewSnapshotOK().WithPayload(body)
+}
+
 func (s *ServerCtx) pull() {
 	log.Printf("start to pull pods' information from %s", s.Detect)
 	r, err := http.Get(s.Detect + "/subscription/")
@@ -107,7 +124,7 @@ func (s *ServerCtx) pull() {
 	}
 	defer r.Body.Close()
 
-    /* BUG XXX don't update existing info now! It is a bug XXX */
+	/* BUG XXX don't update existing info now! It is a bug XXX */
 	var p []detect.Subscription
 	err = json.Unmarshal(d, &p)
 	if err != nil || er2 != nil {
@@ -156,4 +173,3 @@ func (s *ServerCtx) InitHandle() {
 	pod.InitTable(s.Db)
 	app.InitTable(s.Db)
 }
-

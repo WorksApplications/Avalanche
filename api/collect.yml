@@ -77,14 +77,34 @@ definitions:
   snapshot_summary:
     type: object
     required:
-      - id 
+      - uuid 
     properties:
-      id:
+      uuid:
         type: string
-        minLength: 4
+        minLength: 36
+        maxLength: 36
       created_at:
         type: string
         format: date-time
+
+  snapshot:
+    type: object
+    required:
+      - uuid 
+    properties:
+      uuid:
+        type: string
+        minLength: 36
+        maxLength: 36
+      created_at:
+        type: string
+        format: date-time
+      pod:
+        type: string
+      environment:
+        type: string
+      flamescope_link:
+        type: string
 
   replicas_request:
     type: object
@@ -267,6 +287,29 @@ paths:
           schema:
             $ref: "#/definitions/pod"
       operationId: describePod
+
+  /apps/{appid}/environments/{environment}/pods/{pod}/snapshots:
+    post:
+      parameters:
+        - name: appid
+          type: string
+          in: path
+          required: true
+        - name: environment
+          type: string
+          in: path
+          required: true
+        - name: pod
+          type: string
+          in: path
+          required: true
+      responses:
+        200:
+          description: |
+            "this makes a new snapshot"
+          schema:
+            $ref: "#/definitions/snapshot"
+      operationId: newSnapshot
 
   /config:
     get:

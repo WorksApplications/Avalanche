@@ -78,9 +78,9 @@ func Get(db *sql.DB, n *string, eid *int64, aid *int64) *models.Pod {
 	return pods[0]
 }
 
-func add(db *sql.DB, p *string, e int64, a int64, l int64) {
-	log.Printf("[DB/Pod] Storing %s, %d, %d, %d", p, e, a, l)
-	db.Query("INSERT INTO pod(name, envid, appid, layid) values (?, ?, ?, ?)", p, e, a, l)
+func add(db *sql.DB, p *string, e int64, a int64, l int64, addr string) {
+	log.Printf("[DB/Pod] Storing %s, %d, %d, %d", p, e, a, l, addr)
+	db.Query("INSERT INTO pod(name, envid, appid, layid, addr) values (?, ?, ?, ?, ?)", p, e, a, l, addr)
 }
 
 func Describe(db *sql.DB, id int) *models.Pod {

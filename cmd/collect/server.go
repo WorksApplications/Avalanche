@@ -36,6 +36,7 @@ func main() {
 	dbconf := flag.String("db", "example:example@localhost?parseTime=True", "DB connexion")
 	port := flag.Int("port", 4981, "Port for this server")
 	detect := flag.String("detect", "http://localhost:8080", "\"detect\" service address")
+	ssstore := flag.String("persistent", "/tmp/debug-collect", "mount point of persistent volume for snapshot")
 
 	flag.Parse()
 	args := flag.Args()
@@ -46,7 +47,7 @@ func main() {
 	defer server.Shutdown()
 
 	db := establishDBConn(*dbconf)
-	ctx := serverCtx.ServerCtx{db, *detect}
+	ctx := serverCtx.ServerCtx{db, *detect, *ssstore}
 
 	if *init {
 		ctx.InitHandle()
@@ -63,6 +64,8 @@ func main() {
 
 	api.GetPodsHandler = operations.GetPodsHandlerFunc(ctx.GetPodsHandler)
 	api.DescribePodHandler = operations.DescribePodHandlerFunc(ctx.DescribePodHandler)
+
+	api.NewSnapshotsHandler = operations.NewSnapshotHandlerFunc(ctx.NewSnapshotHandler)
 
 	api.HealthzHandler = operations.HealthzHandlerFunc(ctx.HealthzHandler)
 
