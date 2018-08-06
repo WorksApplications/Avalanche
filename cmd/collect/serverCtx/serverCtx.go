@@ -162,7 +162,7 @@ func recursiveInsert(db *sql.DB, p *detect.Subscription) {
 		an := app.Assign(db, &a.Name, &a.Seen)
 		l := layout.Assign(db, *en.ID, *an.ID)
 		for _, p := range a.Pods {
-			pod.Assign(db, &p.Name, *en.ID, *an.ID, l.Id)
+			pod.Assign(db, &p.Name, *en.ID, *an.ID, l.Id, p.Link)
 		}
 	}
 }

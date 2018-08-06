@@ -52,7 +52,7 @@ func list(db *sql.DB, where *string) []*models.Pod {
 			log.Print(err)
 			log.Print("[DB/Pod] Scan", err)
 		}
-		pods = append(pods, &models.Pod{strfmt.DateTime(created), live, &name, nil})
+		pods = append(pods, &models.Pod{strfmt.DateTime(created), id, live, &name, nil})
 	}
 	return pods
 }
@@ -78,9 +78,9 @@ func Get(db *sql.DB, n *string, eid *int64, aid *int64) *models.Pod {
 	return pods[0]
 }
 
-func add(db *sql.DB, p *string, e int64, a int64, l int64, addr string) {
-	log.Printf("[DB/Pod] Storing %s, %d, %d, %d", p, e, a, l, addr)
-	db.Query("INSERT INTO pod(name, envid, appid, layid, addr) values (?, ?, ?, ?, ?)", p, e, a, l, addr)
+func add(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) {
+	log.Printf("[DB/Pod] Storing %s, %d, %d, %d, %s", p, e, a, l, addr)
+	db.Query("INSERT INTO pod(name, envid, appid, layid, addr) values (?, ?, ?, ?, ?)", p, e, a, l, *addr)
 }
 
 func Describe(db *sql.DB, id int) *models.Pod {
@@ -93,10 +93,10 @@ func Describe(db *sql.DB, id int) *models.Pod {
 	return pods[0]
 }
 
-func Assign(db *sql.DB, p *string, e int64, a int64, l int64) *models.Pod {
+func Assign(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) *models.Pod {
 	g := Get(db, p, &e, &a)
 	if g == nil {
-		add(db, p, e, a, l)
+		add(db, p, e, a, l, addr)
 		g = Get(db, p, &e, &a)
 	}
 	return g
@@ -109,4 +109,13 @@ func FromLayout(db *sql.DB, lay *layout.Layout) []*models.Pod {
 		fill(db, pod)
 	}
 	return pods
+}
+
+func ToLogAddress(db *sql.DB, id int64) string {
+	var addr string
+	err := db.QueryRow("SELECT address FROM pod WHERE id = ?", id).Scan(&addr)
+	if err != nil {
+		log.Fatal("[DB/Pod] To Address", err)
+	}
+	return addr
 }

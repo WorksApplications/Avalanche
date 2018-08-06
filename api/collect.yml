@@ -61,6 +61,8 @@ definitions:
     required:
       - name
     properties:
+      id:
+        type: integer
       name:
         type: string
         minLength: 4

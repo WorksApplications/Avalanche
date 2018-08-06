@@ -8,11 +8,11 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/google/uuid"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/pod"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 )
@@ -27,20 +27,20 @@ func InitTable(db *sql.DB) {
 			"appid int, " +
 			"layid int, " +
 			"lives int, " +
-			"disloc CHAR(80), " +
+			"pvloc CHAR(80), " +
 			"PRIMARY KEY (id) " +
 			")")
 	log.Println("[DB/Snapshot]", res, err)
 }
 
-func getSS(pvmountp *string, envlink *string, pod *string) string {
-	g, eg := http.Get(*envlink + *pod)
+func getSS(pvmountp *string, link *string, pname *string) string {
+	g, eg := http.Get(*link)
 	if g.StatusCode != http.StatusOK || eg != nil {
-		log.Print("[Snapshot/error in retrieving]", eg, *envlink, *pod, g)
+		log.Print("[Snapshot/error in retrieving]", eg, *link, g)
 		return ""
 	}
 	defer g.Body.Close()
-	f, ef := ioutil.TempFile("/tmp", "SNPSCHT-"+*pod+"-")
+	f, ef := ioutil.TempFile("/tmp", "SNPSCHT-"+*pname+"-")
 	if ef != nil {
 		log.Print("[Snapshot/error in TempFile]", ef)
 		return ""
@@ -91,6 +91,7 @@ func getSS(pvmountp *string, envlink *string, pod *string) string {
 
 func New(m *string, db *sql.DB, p *models.Pod, l *layout.Layout) {
 	log.Printf("[DB/Snapshot] Storing (%d @ %d: %d)", l.AppId, l.EnvId)
-	g := getSS(m, p)
-	db.Query("INSERT INTO snapshot(name, appid, lives) values (?, ?, ?)", envid, appid, 0)
+	k := pod.ToLogAddress(db, p.ID)
+	g := getSS(m, &k, p.Name)
+	db.QueryRow("INSERT INTO snapshot(name, pvloc, appid, envid, layid) values (?, ?, ?, ?, ?)", p.Name, g, l.AppId, l.EnvId, l.Id)
 }
