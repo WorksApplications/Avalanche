@@ -117,9 +117,13 @@ func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) midd
 func (s *ServerCtx) pull() {
 	log.Printf("start to pull pods' information from %s", s.Detect)
 	r, err := http.Get(s.Detect + "/subscription/")
-	d, er2 := ioutil.ReadAll(r.Body)
-	if err != nil || er2 != nil {
+	if err != nil {
 		log.Println("Poll failed!")
+		return
+	}
+	d, er2 := ioutil.ReadAll(r.Body)
+	if er2 != nil {
+		log.Println("Poll f-ed up!")
 		return
 	}
 	defer r.Body.Close()
