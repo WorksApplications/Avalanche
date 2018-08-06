@@ -105,13 +105,13 @@ func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) midd
 	if app == nil || env == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	lays := layout.OfBoth(s.Db, *app.ID, *env.ID)
-	if lays == nil {
+	lay := layout.OfBoth(s.Db, *app.ID, *env.ID)
+	if lay == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	pod := pod.Get(s.Db, &params.Pod, env.ID, app.ID)
-	body := snapshot.New(s.Pvmount, s.Db, pod, lay)
-	return operations.NewNewSnapshotOK().WithPayload(body)
+	body := snapshot.New(&s.Pvmount, s.Db, pod, lay)
+	return operations.NewNewSnapshotOK().WithPayload(&body)
 }
 
 func (s *ServerCtx) pull() {
@@ -162,7 +162,7 @@ func recursiveInsert(db *sql.DB, p *detect.Subscription) {
 		an := app.Assign(db, &a.Name, &a.Seen)
 		l := layout.Assign(db, *en.ID, *an.ID)
 		for _, p := range a.Pods {
-			pod.Assign(db, &p.Name, *en.ID, *an.ID, l.Id, p.Link)
+			pod.Assign(db, &p.Name, *en.ID, *an.ID, l.Id, &p.Link)
 		}
 	}
 }

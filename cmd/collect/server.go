@@ -65,7 +65,7 @@ func main() {
 	api.GetPodsHandler = operations.GetPodsHandlerFunc(ctx.GetPodsHandler)
 	api.DescribePodHandler = operations.DescribePodHandlerFunc(ctx.DescribePodHandler)
 
-	api.NewSnapshotsHandler = operations.NewSnapshotHandlerFunc(ctx.NewSnapshotHandler)
+	api.NewSnapshotHandler = operations.NewSnapshotHandlerFunc(ctx.NewSnapshotHandler)
 
 	api.HealthzHandler = operations.HealthzHandlerFunc(ctx.HealthzHandler)
 

@@ -8,7 +8,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/go-openapi/strfmt"
 	"github.com/google/uuid"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
@@ -87,11 +89,40 @@ func getSS(pvmountp *string, link *string, pname *string) string {
 	AppId int64
 	EnvId int64
 	Lives int64
+
+	// created at
+	// Format: date-time
+	CreatedAt strfmt.DateTime `json:"created_at,omitempty"`
+
+	// environment
+	Environment string `json:"environment,omitempty"`
+
+	// flamescope link
+	FlamescopeLink string `json:"flamescope_link,omitempty"`
+
+	// pod
+	Pod string `json:"pod,omitempty"`
+
+	// uuid
+	// Required: true
+	// Max Length: 36
+	// Min Length: 36
+	UUID *string `json:"uuid"`
 */
 
-func New(m *string, db *sql.DB, p *models.Pod, l *layout.Layout) {
+func New(m *string, db *sql.DB, p *models.Pod, l *layout.Layout) models.Snapshot {
 	log.Printf("[DB/Snapshot] Storing (%d @ %d: %d)", l.AppId, l.EnvId)
 	k := pod.ToLogAddress(db, p.ID)
 	g := getSS(m, &k, p.Name)
+	/* Fuck you */
+	t := time.Now()
+	log.Println("Fuck you", t)
 	db.QueryRow("INSERT INTO snapshot(name, pvloc, appid, envid, layid) values (?, ?, ?, ?, ?)", p.Name, g, l.AppId, l.EnvId, l.Id)
+	return models.Snapshot{
+		strfmt.DateTime(t),
+		"",
+		"",
+		*p.Name,
+		&g,
+	}
 }
