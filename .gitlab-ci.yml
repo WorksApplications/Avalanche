@@ -1,13 +1,11 @@
-before_script:
-    - mkdir -p /go/src/git.paas.workslan/resource_optimization
-    - ln -s ${CI_PROJECT_DIR} /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
-    - ls
-    - ls /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
-    - cd /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
-    - make dep
-
 build:
     image: golang:1.9
     stage: build
     script:
+        - mkdir -p /go/src/git.paas.workslan/resource_optimization
+        - ln -s ${CI_PROJECT_DIR} /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
+        - ls
+        - ls /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
+        - cd /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
+        - make dep
         - make
