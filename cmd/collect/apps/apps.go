@@ -47,6 +47,24 @@ func list(db *sql.DB, where *string) []*models.App {
 	return apps
 }
 
+func ListNames(db *sql.DB) []string {
+	rows, err := db.Query("SELECT name FROM app")
+	if err != nil {
+		log.Fatal("[DB/App] ListName: ", err)
+	}
+	defer rows.Close()
+	apps := make([]string, 0)
+	for rows.Next() {
+		var name string
+		err = rows.Scan(&name)
+		if err != nil {
+			log.Print("[DB/App] Name Scan", err)
+		}
+		apps = append(apps, name)
+	}
+	return apps
+}
+
 func fill(db *sql.DB, s *models.App) {
 	lays := layout.OfApp(db, *s.ID)
 	envs := make([]*models.Environment, 0)
@@ -56,13 +74,27 @@ func fill(db *sql.DB, s *models.App) {
 	s.Environments = envs
 }
 
-func add(db *sql.DB, n *string, d *time.Time) {
+func add(db *sql.DB, n *string, d *time.Time) error {
 	log.Printf("[DB/App] Storing (%s, %s)", n, d)
-	db.Query("INSERT INTO app(name, lastseen) values (?, ?)", n, d)
+	_, err := db.Exec("INSERT INTO app(name, lastseen) values (?, ?)", n, d)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func update(db *sql.DB, id int64, d *time.Time) error {
+	log.Printf("[DB/App] Update %d with lastseen = %s)", id, d)
+	_, err := db.Exec("UPDATE app lastseen = ? WHERE id = ?", d, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func ListAll(db *sql.DB) []*models.App {
-	apps := list(db, nil)
+	where := ""
+	apps := list(db, &where)
 	for _, app := range apps {
 		fill(db, app)
 	}
@@ -74,6 +106,13 @@ func Assign(db *sql.DB, n *string, d *time.Time) *models.App {
 	if g == nil && d != nil {
 		add(db, n, d)
 		g = Get(db, n)
+	} else {
+		err := update(db, *g.ID, d)
+		if err != nil {
+			log.Printf("[DB/App] Error to update %s", *n)
+			return nil
+		}
+		g.Lastseen = strfmt.DateTime(*d)
 	}
 	return g
 }

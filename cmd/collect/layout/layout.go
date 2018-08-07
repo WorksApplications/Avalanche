@@ -38,7 +38,7 @@ func of(db *sql.DB, where *string) []*Layout {
 		var aid int64
 		var eid int64
 		var lives int64
-		var name string
+		var name *string
 		err = rows.Scan(&id, &name, &aid, &eid, &lives)
 		if err != nil {
 			log.Print("[DB/Layout] Scan", err)
@@ -71,6 +71,7 @@ func Assign(db *sql.DB, envid int64, appid int64) *Layout {
 	}
 	return l
 }
+
 func OfBoth(db *sql.DB, envid int64, appid int64) *Layout {
 	where := fmt.Sprintf("WHERE envid = \"%d\" AND appid = \"%d\"", envid, appid)
 	l := of(db, &where)
