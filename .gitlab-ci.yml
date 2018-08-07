@@ -1,6 +1,6 @@
-build:
-    image: golang:1.9
+backend-build:
     stage: build
+    image: golang:1.9
     script:
         - mkdir -p /go/src/git.paas.workslan/resource_optimization
         - ln -s ${CI_PROJECT_DIR} /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
@@ -10,3 +10,10 @@ build:
         - swagger generate server -f api/collect.yml -t generated_files -A collect
         - make dep
         - make backend
+        - cp ${GOPATH}
+
+front-build:
+    stage: build
+    image: node:10.8.0
+    script:
+        - make front
