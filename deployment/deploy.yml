@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: detect
-        image: /resource_optimization/detect:v2
+        image: /resource_optimization/detect:v4.1
         ports:
         - containerPort: 8080
 ---
@@ -34,6 +34,7 @@ spec:
     protocol: TCP
     nodePort: 31000
     name: content
+  type: NodePort
   selector:
     run: detect
 
@@ -55,7 +56,7 @@ spec:
     spec:
       containers:
       - name: extract
-        image: /resource_optimization/extract:v1
+        image: /resource_optimization/extract:v1.1
         ports:
         - containerPort: 5000
 
@@ -75,6 +76,7 @@ spec:
     protocol: TCP
     nodePort: 31001
     name: content
+  type: NodePort
   selector:
     run: extract
 
@@ -89,7 +91,7 @@ spec:
   selector:
     matchLabels:
       run: collect
-  replicas: 1
+  replicas: 3
   template:
     metadata:
       labels:
@@ -100,7 +102,12 @@ spec:
         image: /resource_optimization/collect:alpha
         ports:
         - containerPort: 8080
-      imagePullPolicy: Always
+        imagePullPolicy: Always
+        command:
+          - /collect
+          - --port=8080
+          - --detect=http://detect:8080
+          - --db=example:example@tcp(mariadb)/collekt?parseTime=True
 
 ---
 
@@ -114,10 +121,11 @@ metadata:
 spec:
   ports:
   - port: 8080
-    targetPort: 5000
+    targetPort: 8080
     protocol: TCP
     name: content
     nodePort: 31002
+  type: NodePort
   selector:
     run: collect
 
@@ -159,5 +167,17 @@ spec:
     protocol: TCP
     name: content
     nodePort: 31003
+  type: NodePort
   selector:
     run: static
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: flamescope.internal.worksap.com

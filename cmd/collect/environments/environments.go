@@ -54,7 +54,8 @@ func fill(db *sql.DB, s *models.Environment) {
 }
 
 func ListAll(db *sql.DB) []*models.Environment {
-	envs := list(db, nil)
+	where := ""
+	envs := list(db, &where)
 	for _, env := range envs {
 		fill(db, env)
 	}
@@ -94,7 +95,7 @@ func Assign(db *sql.DB, e *string) *models.Environment {
 }
 
 func FromLayout(db *sql.DB, lay *layout.Layout) *models.Environment {
-	where := fmt.Sprintf("WHERE id = \"%s\"", lay.EnvId)
+	where := fmt.Sprintf("WHERE id = \"%d\"", lay.EnvId)
 	envs := list(db, &where)
 	for _, env := range envs {
 		fill(db, env)

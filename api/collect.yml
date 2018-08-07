@@ -19,6 +19,7 @@ definitions:
     properties:
       message:
         type: string
+
   app:
     type: object
     required:
@@ -61,6 +62,8 @@ definitions:
     required:
       - name
     properties:
+      id:
+        type: integer
       name:
         type: string
         minLength: 4
@@ -77,14 +80,34 @@ definitions:
   snapshot_summary:
     type: object
     required:
-      - id 
+      - uuid 
     properties:
-      id:
+      uuid:
         type: string
-        minLength: 4
+        minLength: 36
+        maxLength: 36
       created_at:
         type: string
         format: date-time
+
+  snapshot:
+    type: object
+    required:
+      - uuid 
+    properties:
+      uuid:
+        type: string
+        minLength: 36
+        maxLength: 36
+      created_at:
+        type: string
+        format: date-time
+      pod:
+        type: string
+      environment:
+        type: string
+      flamescope_link:
+        type: string
 
   replicas_request:
     type: object
@@ -128,17 +151,27 @@ definitions:
         type: boolean
 
 paths:
+  /healthz:
+    get:
+      responses:
+        200:
+          description: "For readiness probe"
+          schema:
+            type: string
+      operationId: healthz
+
   /apps:
     get:
       responses:
         200:
           description: |
-            "this returns list of apps"
+            "this returns list of name of apps"
           schema:
             type: array
             items:
-              $ref: "#/definitions/app"
+              type: string
       operationId: getApps
+
   /apps/{appid}:
     get:
       parameters:
@@ -257,6 +290,41 @@ paths:
           schema:
             $ref: "#/definitions/pod"
       operationId: describePod
+
+  /apps/{appid}/environments/{environment}/pods/{pod}/snapshots:
+    post:
+      parameters:
+        - name: appid
+          type: string
+          in: path
+          required: true
+        - name: environment
+          type: string
+          in: path
+          required: true
+        - name: pod
+          type: string
+          in: path
+          required: true
+      responses:
+        200:
+          description: |
+            "this makes a new snapshot"
+          schema:
+            $ref: "#/definitions/snapshot"
+      operationId: newSnapshot
+
+  /available-pods:
+    get:
+      responses:
+        200:
+          description: |
+            "this makes a new snapshot"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/pod"
+      operationId: listAvailablePods
 
   /config:
     get:
