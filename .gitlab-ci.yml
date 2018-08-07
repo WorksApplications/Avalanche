@@ -6,9 +6,11 @@ before_script:
     - ls
     - ls /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
     - cd /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
-    - make dep
+    - go get -u github.com/go-swagger/cmd/swagger
 
 build:
     stage: build
     script:
+        - make swagger
+        - make dep
         - make
