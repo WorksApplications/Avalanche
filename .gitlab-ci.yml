@@ -4,8 +4,7 @@ build:
     script:
         - mkdir -p /go/src/git.paas.workslan/resource_optimization
         - ln -s ${CI_PROJECT_DIR} /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
-        - ls
-        - ls /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
         - cd /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
+        - make swagger
         - make dep
-        - make
+        - make backend
