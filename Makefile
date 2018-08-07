@@ -1,7 +1,7 @@
 PKG = $(shell find pkg -name *.go)
 
 
-.PHONY: default clean fmt make_stub
+.PHONY: default clean fmt make_stub dep
 
 default: bin
 
@@ -56,3 +56,6 @@ bin/detect: $(shell find cmd/detect -name *.go) $(PKG)
 fmt:	
 	go fmt ./cmd/...
 	go fmt ./pkg/...
+
+dep:
+	go get -v -d ./...
