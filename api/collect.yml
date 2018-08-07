@@ -19,6 +19,7 @@ definitions:
     properties:
       message:
         type: string
+
   app:
     type: object
     required:
@@ -164,11 +165,11 @@ paths:
       responses:
         200:
           description: |
-            "this returns list of apps"
+            "this returns list of name of apps"
           schema:
             type: array
             items:
-              $ref: "#/definitions/app"
+              type: string
       operationId: getApps
 
   /apps/{appid}:

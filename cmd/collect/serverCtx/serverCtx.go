@@ -34,7 +34,7 @@ func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Respon
 }
 
 func (s *ServerCtx) GetAppsHandler(_ operations.GetAppsParams) middleware.Responder {
-	body := app.ListAll(s.Db)
+	body := app.ListNames(s.Db)
 	return operations.NewGetAppsOK().WithPayload(body)
 }
 

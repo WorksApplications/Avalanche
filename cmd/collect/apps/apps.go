@@ -47,6 +47,24 @@ func list(db *sql.DB, where *string) []*models.App {
 	return apps
 }
 
+func ListNames(db *sql.DB) []string {
+	rows, err := db.Query("SELECT name FROM app")
+	if err != nil {
+		log.Fatal("[DB/App] ListName: ", err)
+	}
+	defer rows.Close()
+	apps := make([]string, 0)
+	for rows.Next() {
+		var name string
+		err = rows.Scan(&name)
+		if err != nil {
+			log.Print("[DB/App] Name Scan", err)
+		}
+		apps = append(apps, name)
+	}
+	return apps
+}
+
 func fill(db *sql.DB, s *models.App) {
 	lays := layout.OfApp(db, *s.ID)
 	envs := make([]*models.Environment, 0)
