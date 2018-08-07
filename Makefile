@@ -1,7 +1,7 @@
 PKG = $(shell find pkg -name *.go)
 
 
-.PHONY: default clean fmt make_stub dep
+.PHONY: default clean fmt make_stub dep swagger
 
 default: bin
 
@@ -26,6 +26,9 @@ collect-img: bin/collect
 
 bin/collect: $(shell find cmd/collect -name *.go) $(PKG) generated_files/stub
 	CGO_ENABLED=0 go build -o bin/collect cmd/collect/server.go
+
+swagger:
+	swagger generate server -f api/collect.yml -t generated_files -A collect
 
 generated_files/stub: api/collect.yml
 	swagger generate server -f api/collect.yml -t generated_files -A collect
