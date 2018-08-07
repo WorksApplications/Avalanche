@@ -1,7 +1,7 @@
 image: golang:1.9
 
 before_script:
-    - mkdir -p /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
+    - mkdir -p /go/src/git.paas.workslan/resource_optimization
     - ln -s /go/src/git.paas.workslan/resource_optimization/dynamic_analysis $CI_PROJECT_DIR
     - ls
     - ls /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
