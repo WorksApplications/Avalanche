@@ -1,7 +1,7 @@
 PKG = $(shell find pkg -name *.go)
 
 
-.PHONY: default clean fmt make_stub dep swagger
+.PHONY: default clean fmt make_stub dep swagger backend
 
 default: bin
 
@@ -15,6 +15,7 @@ all: bin
 
 images: collect  detect static-nginx
 bin: bin/detect bin/collect front/public/app.js
+backend: bin/detect bin/collect
 
 static-nginx: front/public/app.js
 	docker build -f image/static/Dockerfile --tag ${
