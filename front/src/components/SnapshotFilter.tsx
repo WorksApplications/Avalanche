@@ -1,7 +1,7 @@
 import { h } from "preact";
-// @ts-ignore
-import styles from "./AppSelector.scss";
 import SelectorBase, { IProperty, IStyles } from "./SelectorBase";
+// @ts-ignore
+import styles from "./SnapshotFilter.scss";
 
 export default (props: IProperty) => {
   const bindingStyles: IStyles = {
@@ -9,6 +9,7 @@ export default (props: IProperty) => {
     opened: styles.opened,
     optionItem: styles.option,
     optionList: styles.optionView,
+    placeholder: styles.placeholder,
     selector: styles.selector,
     wrap: styles.wrap
   };

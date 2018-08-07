@@ -13,6 +13,7 @@ class NavigationView extends Component {
           <AppSelector
             options={tmpData}
             onValueChanged={this.onAppChanged.bind(this)}
+            placeholder="Select landscape"
           />
         </div>
         <div className={styles.viewList}>
