@@ -47,7 +47,7 @@ func main() {
 	defer server.Shutdown()
 
 	db := establishDBConn(*dbconf)
-	ctx := serverCtx.ServerCtx{db, *detect, *ssstore}
+	ctx := serverCtx.ServerCtx{db, *detect, *ssstore, make([]int64, 0)}
 
 	if *init {
 		ctx.InitHandle()

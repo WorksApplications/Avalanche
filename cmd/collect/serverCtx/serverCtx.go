@@ -26,6 +26,7 @@ type ServerCtx struct {
 	Db      *sql.DB
 	Detect  string /* detect address */
 	Pvmount string
+	Perfing []int64
 }
 
 func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Responder {
@@ -128,7 +129,6 @@ func (s *ServerCtx) pull() {
 	}
 	defer r.Body.Close()
 
-	/* BUG XXX don't update existing info now! It is a bug XXX */
 	var p []detect.Subscription
 	err = json.Unmarshal(d, &p)
 	if err != nil || er2 != nil {
@@ -136,9 +136,12 @@ func (s *ServerCtx) pull() {
 		log.Printf("res: %+v", p)
 		return
 	}
+	found := make([]int64, 16)
 	for _, e := range p {
-		recursiveInsert(s.Db, &e)
+		f := recursiveInsert(s.Db, &e)
+		found = append(found, f...)
 	}
+	s.Perfing = found
 }
 
 func (s *ServerCtx) PollPodInfo() {
@@ -160,15 +163,22 @@ func (s *ServerCtx) PollPodInfo() {
 	}()
 }
 
-func recursiveInsert(db *sql.DB, p *detect.Subscription) {
+func recursiveInsert(db *sql.DB, p *detect.Subscription) []int64 {
+	found := make([]int64, 4)
+	/* BUG XXX It doesn't update existing environ/pod! It is a bug XXX */
 	en := environ.Assign(db, &p.Env)
 	for _, a := range p.Apps {
 		an := app.Assign(db, &a.Name, &a.Seen)
+		if an == nil {
+			continue
+		}
 		l := layout.Assign(db, *en.ID, *an.ID)
 		for _, p := range a.Pods {
-			pod.Assign(db, &p.Name, *en.ID, *an.ID, l.Id, &p.Link)
+			p := pod.Assign(db, &p.Name, *en.ID, *an.ID, l.Id, &p.Link)
+			found = append(found, p.ID)
 		}
 	}
+	return found
 }
 
 func (s *ServerCtx) InitHandle() {
