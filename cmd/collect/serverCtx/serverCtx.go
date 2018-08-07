@@ -33,6 +33,14 @@ func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Respon
 	return operations.NewHealthzOK().WithPayload("Vaer sa godt")
 }
 
+func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) middleware.Responder {
+	body := make([]*models.Pod, len(s.Perfing))
+	for i, pfing := range s.Perfing {
+		body[i] = pod.FromId(s.Db, pfing)
+	}
+	return operations.NewListAvailablePodsOK().WithPayload(body)
+}
+
 func (s *ServerCtx) GetAppsHandler(_ operations.GetAppsParams) middleware.Responder {
 	body := app.ListNames(s.Db)
 	return operations.NewGetAppsOK().WithPayload(body)
@@ -96,7 +104,11 @@ func (s *ServerCtx) DescribePodHandler(params operations.DescribePodParams) midd
 	if app == nil || env == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	body := pod.Get(s.Db, &params.Pod, env.ID, app.ID)
+	lay := layout.OfBoth(s.Db, *app.ID, *env.ID)
+	if lay == nil {
+		return operations.NewDescribeAppDefault(404).WithPayload(nil)
+	}
+	body := pod.Get(s.Db, &params.Pod, lay.Id)
 	return operations.NewDescribePodOK().WithPayload(body)
 }
 
@@ -110,7 +122,7 @@ func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) midd
 	if lay == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	pod := pod.Get(s.Db, &params.Pod, env.ID, app.ID)
+	pod := pod.Get(s.Db, &params.Pod, lay.Id)
 	body := snapshot.New(&s.Pvmount, s.Db, pod, lay)
 	return operations.NewNewSnapshotOK().WithPayload(&body)
 }

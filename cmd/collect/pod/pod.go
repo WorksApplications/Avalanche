@@ -69,9 +69,18 @@ func ListAll(db *sql.DB) []*models.Pod {
 	return pods
 }
 
-func Get(db *sql.DB, n *string, eid *int64, aid *int64) *models.Pod {
-	name := fmt.Sprintf("WHERE name = \"%s\"", n)
+func Get(db *sql.DB, n *string, layid int64) *models.Pod {
+	name := fmt.Sprintf("WHERE name = \"%s\" AND layid = \"%s\"", n, layid)
 	pods := list(db, &name)
+	if len(pods) == 0 {
+		return nil
+	}
+	return pods[0]
+}
+
+func FromId(db *sql.DB, id int64) *models.Pod {
+	wh := fmt.Sprintf("WHERE id = \"%d\"", id)
+	pods := list(db, &wh)
 	if len(pods) == 0 {
 		return nil
 	}
@@ -94,10 +103,10 @@ func Describe(db *sql.DB, id int) *models.Pod {
 }
 
 func Assign(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) *models.Pod {
-	g := Get(db, p, &e, &a)
+	g := Get(db, p, l)
 	if g == nil {
 		add(db, p, e, a, l, addr)
-		g = Get(db, p, &e, &a)
+		g = Get(db, p, l)
 	}
 	return g
 }

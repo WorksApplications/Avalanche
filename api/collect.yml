@@ -314,6 +314,18 @@ paths:
             $ref: "#/definitions/snapshot"
       operationId: newSnapshot
 
+  /available-pods:
+    get:
+      responses:
+        200:
+          description: |
+            "this makes a new snapshot"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/pod"
+      operationId: listAvailablePods
+
   /config:
     get:
       responses:
