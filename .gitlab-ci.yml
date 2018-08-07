@@ -6,9 +6,12 @@ before_script:
     - ls
     - ls /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
     - cd /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
-    - make dep
+    - curl https://github.com/go-swagger/go-swagger/releases/download/0.15.0/swagger_linux_amd64 -L > /go/bin/swagger
+    - chmod +x /go/bin/swagger
+    - swagger generate server -f api/collect.yml -t generated_files -A collect
 
 build:
     stage: build
     script:
-        - make
+        - make dep
+        - make backend
