@@ -14,4 +14,4 @@ build:
     stage: build
     script:
         - make dep
-        - make
+        - make backend
