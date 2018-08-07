@@ -1,9 +1,8 @@
 image: golang:1.9
 
 before_script:
-    - mkdir -p /go/src/git.paas.workslan/resource_optimization/dynamic_analysis /go/src/_/builds
-    - cp -r $CI_PROJECT_DIR /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
-    - ln -s /go/src/git.paas.workslan/resource_optimization/dynamic_analysis /go/src/_/builds/dynamic_analysis
+    - mkdir -p /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
+    - ln -s /go/src/git.paas.workslan/resource_optimization/dynamic_analysis $CI_PROJECT_DIR
     - make dep
 
 build:
