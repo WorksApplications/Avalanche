@@ -103,11 +103,19 @@ spec:
         ports:
         - containerPort: 8080
         imagePullPolicy: Always
+        volumeMounts:
+          - name: collected-extract
+            mountPath: /var/spool/collect
+        volumes:
+          - name: collected-extract
+            PersistentVolumeClaim:
+              claimName: collect-pvc
         command:
           - /collect
           - --port=8080
           - --detect=http://detect:8080
           - --db=example:example@tcp(mariadb)/collekt?parseTime=True
+          - --persistent=/var/spool/collect
 
 ---
 
@@ -181,3 +189,18 @@ metadata:
 spec:
   type: ExternalName
   externalName: flamescope.internal.worksap.com
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: collect-pvc
+  namespace: default
+spec:
+  accessModes:
+    ReadWriteMany
+  resouces:
+    requests:
+      storage: 1Gi
+
