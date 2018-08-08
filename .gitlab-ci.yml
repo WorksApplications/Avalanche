@@ -16,5 +16,4 @@ front-build:
     image: node:10.8.0
     script:
         - yarn add --dev webpack webpack-cli
-        - yarn add -D
         - PATH=$PATH:/node_modules/.bin make front
