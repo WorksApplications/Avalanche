@@ -99,7 +99,7 @@ spec:
     spec:
       containers:
       - name: collect
-        image: /resource_optimization/collect:alpha
+        image: /resource_optimization/collect:v1
         ports:
         - containerPort: 8080
         imagePullPolicy: Always
@@ -202,5 +202,5 @@ spec:
     - ReadWriteMany
   resources:
     requests:
-      storage: 1Gi
+      storage: 10Gi
 
