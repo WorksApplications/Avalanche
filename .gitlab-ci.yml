@@ -40,6 +40,8 @@ front-build:
         expire_in: 1 day
 
 push-images:
+    only:
+        - master
     stage: deploy
     image: docker:stable
     script:
@@ -48,5 +50,4 @@ push-images:
         - ls -lR
         - apk add make
         - make pushi
-        - env
 
