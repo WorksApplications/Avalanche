@@ -17,6 +17,10 @@ backend-build:
             - /go/src/golang.org
             - /go/src/google.golang.org
             - /go/src/gopkg.in
+    artifacts:
+        paths:
+            - bin/collect
+            - bin/detect
 
 front-build:
     stage: build
@@ -30,6 +34,12 @@ front-build:
         key: react
         paths:
             - front/node_modules
+    artifacts:
+        paths:
+            - front/public/app.js
+            - front/public/app.css
+            - front/public/app.js.map
+            - front/public/index.html
 
 push-images:
     stage: deploy
