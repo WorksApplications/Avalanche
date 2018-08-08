@@ -12,6 +12,7 @@ backend-build:
         - make dep
         - make backend
         - tar cf cache-go.tar.gz $GOPATH/src/github.com $GOPATH/src/golang.org $GOPATH/src/google.golang.org $GOPATH/src/gopkg.in || true
+        - sleep 120
     cache:
         key: golang
         paths:
