@@ -89,7 +89,10 @@ func FromId(db *sql.DB, id int64) *models.Pod {
 
 func add(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) {
 	log.Printf("[DB/Pod] Storing %s, %d, %d, %d, %s", p, e, a, l, addr)
-	db.Query("INSERT INTO pod(name, envid, appid, layid, addr) values (?, ?, ?, ?, ?)", p, e, a, l, *addr)
+    _, err := db.Query("INSERT INTO pod(name, envid, appid, layid, addr) values (?, ?, ?, ?, ?)", p, e, a, l, *addr)
+    if err != nil {
+        log.Print("[DB/Pod] Error EADD", err)
+    }
 }
 
 func Describe(db *sql.DB, id int) *models.Pod {
