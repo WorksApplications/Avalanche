@@ -91,7 +91,7 @@ spec:
   selector:
     matchLabels:
       run: collect
-  replicas: 3
+  replicas: 1
   template:
     metadata:
       labels:
@@ -114,7 +114,7 @@ spec:
           - --persistent=/var/spool/collect
       volumes:
         - name: collected-extract
-          PersistentVolumeClaim:
+          persistentVolumeClaim:
             claimName: collect-pvc
 
 ---
@@ -199,8 +199,8 @@ metadata:
   namespace: default
 spec:
   accessModes:
-    ReadWriteMany
-  resouces:
+    - ReadWriteMany
+  resources:
     requests:
       storage: 1Gi
 
