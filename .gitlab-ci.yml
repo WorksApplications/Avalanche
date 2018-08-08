@@ -21,6 +21,7 @@ backend-build:
         paths:
             - bin/collect
             - bin/detect
+        expire_in: 1 day
 
 front-build:
     stage: build
@@ -36,10 +37,8 @@ front-build:
             - front/node_modules
     artifacts:
         paths:
-            - front/public/app.js
-            - front/public/app.css
-            - front/public/app.js.map
-            - front/public/index.html
+            - front/public/
+        expire_in: 1 day
 
 push-images:
     stage: deploy
