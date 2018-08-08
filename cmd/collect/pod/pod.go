@@ -58,7 +58,7 @@ func list(db *sql.DB, where *string, fil bool) []*models.Pod {
         a := ""
         if fil {
             e = *environ.FromId(db, envid).Name
-            a = *app.FromId(db, envid).Name
+            a = *app.FromId(db, appid).Name
         }
 		pods = append(pods,
         &models.Pod{
