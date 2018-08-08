@@ -18,6 +18,9 @@ front-build:
         - yarn add --dev webpack webpack-cli
         - PATH=$PATH:$(pwd)/node_modules/.bin make front
 
-variables:
-    DOCKER_HOST: tcp://docker:
-
+build-images:
+    stage: release
+    image: docker:stable
+    script:
+        - docker info
+        - ls -lR
