@@ -3,10 +3,10 @@ package pod
 import (
 	"database/sql"
 	"fmt"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/apps"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/environments"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/environments"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/apps"
 	"github.com/go-openapi/strfmt"
 	"log"
 	"time"
@@ -53,21 +53,21 @@ func list(db *sql.DB, where *string, fil bool) []*models.Pod {
 			log.Print(err)
 			log.Print("[DB/Pod] Scan", err)
 		}
-        e := ""
-        a := ""
-        if fil {
-            e = *environ.FromId(db, envid).Name
-            a = *app.FromId(db, appid).Name
-        }
+		e := ""
+		a := ""
+		if fil {
+			e = *environ.FromId(db, envid).Name
+			a = *app.FromId(db, appid).Name
+		}
 		pods = append(pods,
-        &models.Pod{
-            ID: id,
-            Name: &name,
-            CreatedAt: strfmt.DateTime(created),
-            IsLive: false,
-            App: a,
-            Env: e,
-            Snapshots: nil})
+			&models.Pod{
+				ID:        id,
+				Name:      &name,
+				CreatedAt: strfmt.DateTime(created),
+				IsLive:    false,
+				App:       a,
+				Env:       e,
+				Snapshots: nil})
 	}
 	return pods
 }
@@ -107,12 +107,13 @@ func Describe(db *sql.DB, id int64) *models.Pod {
 
 func add(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) {
 	log.Printf("[DB/Pod] Storing %s, %d, %d, %d, %s", *p, e, a, l, *addr)
-    now := time.Now()
-    res, err := db.Exec("INSERT INTO pod(name, envid, appid, layid, address, created) values (?, ?, ?, ?, ?, ?)", *p, e, a, l, *addr, now)
-    if err != nil {
-        log.Print("[DB/Pod] Error EADD", err)
-    }
-    log.Print("[DB/Pod] OKADD", res)
+	/* created means the time when it is seen firstly */
+	now := time.Now()
+	res, err := db.Exec("INSERT INTO pod(name, envid, appid, layid, address, created) values (?, ?, ?, ?, ?, ?)", *p, e, a, l, *addr, now)
+	if err != nil {
+		log.Print("[DB/Pod] Error EADD", err)
+	}
+	log.Print("[DB/Pod] OKADD", res)
 }
 
 func Assign(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) *models.Pod {

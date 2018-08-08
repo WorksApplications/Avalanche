@@ -34,10 +34,17 @@ func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Respon
 }
 
 func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) middleware.Responder {
-	body := make([]*models.Pod, len(s.Perfing))
-	for i, pfing := range s.Perfing {
-		body[i] = pod.Describe(s.Db, pfing)
-        body[i].IsLive = true
+	body := make([]*models.Pod, 0)
+	for _, pfing := range s.Perfing {
+		p := pod.Describe(s.Db, pfing)
+		if p == nil {
+			operations.NewDescribeAppDefault(503).WithPayload(nil)
+		}
+		p.IsLive = true
+		body = append(body, p)
+	}
+	if len(body) == 0 {
+		operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	return operations.NewListAvailablePodsOK().WithPayload(body)
 }
@@ -149,12 +156,13 @@ func (s *ServerCtx) pull() {
 		log.Printf("res: %+v", p)
 		return
 	}
-	found := make([]int64, 16)
+	found := make([]int64, 0, 8)
 	for _, e := range p {
 		f := recursiveInsert(s.Db, &e)
 		found = append(found, f...)
 	}
 	s.Perfing = found
+	log.Print("[Discovery] Found:", s.Perfing)
 }
 
 func (s *ServerCtx) PollPodInfo() {
@@ -177,7 +185,7 @@ func (s *ServerCtx) PollPodInfo() {
 }
 
 func recursiveInsert(db *sql.DB, p *detect.Subscription) []int64 {
-	found := make([]int64, 4)
+	found := make([]int64, 0, 2)
 	/* BUG XXX It doesn't update existing environ/pod! It is a bug XXX */
 	en := environ.Assign(db, &p.Env)
 	for _, a := range p.Apps {

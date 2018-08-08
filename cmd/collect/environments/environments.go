@@ -115,4 +115,3 @@ func FromId(db *sql.DB, id int64) *models.Environment {
 	}
 	return envs[0]
 }
-
