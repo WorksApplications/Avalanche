@@ -18,7 +18,6 @@ backend-build:
             - /go/src/google.golang.org
             - /go/src/gopkg.in
 
-
 front-build:
     stage: build
     image: node:10.8.0
@@ -27,6 +26,10 @@ front-build:
         - yarn add --dev webpack webpack-cli
         - npm install
         - PATH=$PATH:$(pwd)/node_modules/.bin yarn build
+    cache:
+        key: react
+        paths:
+            - front/node_modules
 
 push-images:
     stage: deploy
@@ -34,6 +37,7 @@ push-images:
     script:
         - docker info
         - ls -lR
+        - apk add make
         - make pushi
         - env
 
