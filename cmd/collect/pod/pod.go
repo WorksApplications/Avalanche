@@ -35,7 +35,7 @@ func InitTable(db *sql.DB) {
 }
 
 func list(db *sql.DB, where *string, fil bool) []*models.Pod {
-	rows, err := db.Query(fmt.Sprintf("SELECT id, name, appid, envid, layid, live, created FROM pod %s", *where))
+	rows, err := db.Query(fmt.Sprintf("SELECT id, name, appid, envid, layid, created FROM pod %s", *where))
 	if err != nil {
 		log.Fatal("[DB/Pod] ", err)
 	}
@@ -48,8 +48,7 @@ func list(db *sql.DB, where *string, fil bool) []*models.Pod {
 		var envid int64
 		var layid int64
 		var created time.Time
-		var live bool
-		err = rows.Scan(&id, &name, &appid, &envid, &layid, &live, &created)
+		err = rows.Scan(&id, &name, &appid, &envid, &layid, &created)
 		if err != nil {
 			log.Print(err)
 			log.Print("[DB/Pod] Scan", err)
@@ -65,7 +64,7 @@ func list(db *sql.DB, where *string, fil bool) []*models.Pod {
             ID: id,
             Name: &name,
             CreatedAt: strfmt.DateTime(created),
-            IsLive: live,
+            IsLive: false,
             App: a,
             Env: e,
             Snapshots: nil})
@@ -108,7 +107,8 @@ func Describe(db *sql.DB, id int64) *models.Pod {
 
 func add(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) {
 	log.Printf("[DB/Pod] Storing %s, %d, %d, %d, %s", *p, e, a, l, *addr)
-    res, err := db.Exec("INSERT INTO pod(name, envid, appid, layid, address) values (?, ?, ?, ?, ?)", *p, e, a, l, *addr)
+    now := time.Now()
+    res, err := db.Exec("INSERT INTO pod(name, envid, appid, layid, address, created) values (?, ?, ?, ?, ?, ?)", *p, e, a, l, *addr, now)
     if err != nil {
         log.Print("[DB/Pod] Error EADD", err)
     }

@@ -37,6 +37,7 @@ func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) midd
 	body := make([]*models.Pod, len(s.Perfing))
 	for i, pfing := range s.Perfing {
 		body[i] = pod.Describe(s.Db, pfing)
+        body[i].IsLive = true
 	}
 	return operations.NewListAvailablePodsOK().WithPayload(body)
 }
