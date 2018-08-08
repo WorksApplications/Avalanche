@@ -15,5 +15,5 @@ front-build:
     stage: build
     image: node:10.8.0
     script:
-        - yarn add webpack --dev
+        - yarn add --dev webpack webpack-dev-server
         - make front
