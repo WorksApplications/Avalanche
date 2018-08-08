@@ -85,7 +85,7 @@ func add(db *sql.DB, n *string, d *time.Time) error {
 
 func update(db *sql.DB, id int64, d *time.Time) error {
 	log.Printf("[DB/App] Update %d with lastseen = %s)", id, d)
-	_, err := db.Exec("UPDATE app lastseen = ? WHERE id = ?", d, id)
+	_, err := db.Exec("UPDATE app SET lastseen = ? WHERE id = ?", d, id)
 	if err != nil {
 		return err
 	}
