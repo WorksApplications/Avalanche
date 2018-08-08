@@ -2,7 +2,7 @@ backend-build:
     stage: build
     image: golang:1.9
     script:
-        - tar xf cache-go.tar.gz -C / || true
+        - tar xvf cache-go.tar.gz -C / || true
         - mkdir -p /go/src/git.paas.workslan/resource_optimization
         - ln -s ${CI_PROJECT_DIR} /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
         - cd /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
@@ -11,8 +11,7 @@ backend-build:
         - swagger generate server -f api/collect.yml -t generated_files -A collect
         - make dep
         - make backend
-        - tar cf cache-go.tar.gz $GOPATH/src/github.com $GOPATH/src/golang.org $GOPATH/src/google.golang.org $GOPATH/src/gopkg.in || true
-        - sleep 120
+        - tar czf cache-go.tar.gz $GOPATH/src/github.com $GOPATH/src/golang.org $GOPATH/src/google.golang.org $GOPATH/src/gopkg.in || true
     cache:
         key: golang
         paths:
