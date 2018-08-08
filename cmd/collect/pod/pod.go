@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/environments"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/apps"
 	"github.com/go-openapi/strfmt"
 	"log"
 	"time"
@@ -32,7 +34,7 @@ func InitTable(db *sql.DB) {
 	log.Println("[DB/Pod]", res, err)
 }
 
-func list(db *sql.DB, where *string) []*models.Pod {
+func list(db *sql.DB, where *string, fil bool) []*models.Pod {
 	rows, err := db.Query(fmt.Sprintf("SELECT id, name, appid, envid, layid, live, created FROM pod %s", *where))
 	if err != nil {
 		log.Fatal("[DB/Pod] ", err)
@@ -52,34 +54,34 @@ func list(db *sql.DB, where *string) []*models.Pod {
 			log.Print(err)
 			log.Print("[DB/Pod] Scan", err)
 		}
+        e := ""
+        a := ""
+        if fil {
+            e = *environ.FromId(db, envid).Name
+            a = *app.FromId(db, envid).Name
+        }
 		pods = append(pods,
         &models.Pod{
             ID: id,
             Name: &name,
             CreatedAt: strfmt.DateTime(created),
             IsLive: live,
-            App: "",
-            Env: "",
+            App: a,
+            Env: e,
             Snapshots: nil})
 	}
 	return pods
 }
 
-func fill(db *sql.DB, s *models.Pod) {
-}
-
 func ListAll(db *sql.DB) []*models.Pod {
 	where := ""
-	pods := list(db, &where)
-	for _, pod := range pods {
-		fill(db, pod)
-	}
+	pods := list(db, &where, true)
 	return pods
 }
 
 func Get(db *sql.DB, n *string, layid int64) *models.Pod {
 	name := fmt.Sprintf("WHERE name = \"%s\" AND layid = \"%d\"", *n, layid)
-	pods := list(db, &name)
+	pods := list(db, &name, false)
 	if len(pods) == 0 {
 		return nil
 	}
@@ -88,7 +90,16 @@ func Get(db *sql.DB, n *string, layid int64) *models.Pod {
 
 func FromId(db *sql.DB, id int64) *models.Pod {
 	wh := fmt.Sprintf("WHERE id = \"%d\"", id)
-	pods := list(db, &wh)
+	pods := list(db, &wh, false)
+	if len(pods) == 0 {
+		return nil
+	}
+	return pods[0]
+}
+
+func Describe(db *sql.DB, id int64) *models.Pod {
+	name := fmt.Sprintf("WHERE id = \"%d\"", id)
+	pods := list(db, &name, true)
 	if len(pods) == 0 {
 		return nil
 	}
@@ -97,21 +108,11 @@ func FromId(db *sql.DB, id int64) *models.Pod {
 
 func add(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) {
 	log.Printf("[DB/Pod] Storing %s, %d, %d, %d, %s", *p, e, a, l, *addr)
-    res, err := db.Query("INSERT INTO pod(name, envid, appid, layid, address) values (?, ?, ?, ?, ?)", *p, e, a, l, *addr)
+    res, err := db.Exec("INSERT INTO pod(name, envid, appid, layid, address) values (?, ?, ?, ?, ?)", *p, e, a, l, *addr)
     if err != nil {
         log.Print("[DB/Pod] Error EADD", err)
     }
     log.Print("[DB/Pod] OKADD", res)
-}
-
-func Describe(db *sql.DB, id int) *models.Pod {
-	name := fmt.Sprintf("WHERE id = \"%d\"", id)
-	pods := list(db, &name)
-	if len(pods) == 0 {
-		return nil
-	}
-	fill(db, pods[0])
-	return pods[0]
 }
 
 func Assign(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) *models.Pod {
@@ -125,10 +126,7 @@ func Assign(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) *mod
 
 func FromLayout(db *sql.DB, lay *layout.Layout) []*models.Pod {
 	where := fmt.Sprintf("WHERE layid = \"%s\"", lay.Id)
-	pods := list(db, &where)
-	for _, pod := range pods {
-		fill(db, pod)
-	}
+	pods := list(db, &where, true)
 	return pods
 }
 

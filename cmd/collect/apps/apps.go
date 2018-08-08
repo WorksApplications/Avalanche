@@ -135,3 +135,12 @@ func Describe(db *sql.DB, n *string) *models.App {
 	}
 	return g
 }
+
+func FromId(db *sql.DB, id int64) *models.App {
+	wh := fmt.Sprintf("WHERE id = \"%d\"", id)
+	apps := list(db, &wh)
+	if len(apps) == 0 {
+		return nil
+	}
+	return apps[0]
+}

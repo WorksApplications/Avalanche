@@ -36,7 +36,7 @@ func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Respon
 func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) middleware.Responder {
 	body := make([]*models.Pod, len(s.Perfing))
 	for i, pfing := range s.Perfing {
-		body[i] = pod.FromId(s.Db, pfing)
+		body[i] = pod.Describe(s.Db, pfing)
 	}
 	return operations.NewListAvailablePodsOK().WithPayload(body)
 }

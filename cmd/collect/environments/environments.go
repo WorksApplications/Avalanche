@@ -106,3 +106,13 @@ func FromLayout(db *sql.DB, lay *layout.Layout) *models.Environment {
 		return nil
 	}
 }
+
+func FromId(db *sql.DB, id int64) *models.Environment {
+	wh := fmt.Sprintf("WHERE id = \"%d\"", id)
+	envs := list(db, &wh)
+	if len(envs) == 0 {
+		return nil
+	}
+	return envs[0]
+}
+
