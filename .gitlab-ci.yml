@@ -17,6 +17,7 @@ backend-build:
             - /go/src/golang.org
             - /go/src/google.golang.org
             - /go/src/gopkg.in
+            - /go/bin/swagger
     artifacts:
         paths:
             - bin/collect
