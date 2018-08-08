@@ -106,16 +106,16 @@ spec:
         volumeMounts:
           - name: collected-extract
             mountPath: /var/spool/collect
-        volumes:
-          - name: collected-extract
-            PersistentVolumeClaim:
-              claimName: collect-pvc
         command:
           - /collect
           - --port=8080
           - --detect=http://detect:8080
           - --db=example:example@tcp(mariadb)/collekt?parseTime=True
           - --persistent=/var/spool/collect
+    volumes:
+      - name: collected-extract
+        PersistentVolumeClaim:
+          claimName: collect-pvc
 
 ---
 
