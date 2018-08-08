@@ -70,7 +70,7 @@ func ListAll(db *sql.DB) []*models.Pod {
 }
 
 func Get(db *sql.DB, n *string, layid int64) *models.Pod {
-	name := fmt.Sprintf("WHERE name = \"%s\" AND layid = \"%s\"", n, layid)
+	name := fmt.Sprintf("WHERE name = \"%s\" AND layid = \"%d\"", *n, layid)
 	pods := list(db, &name)
 	if len(pods) == 0 {
 		return nil
@@ -89,10 +89,11 @@ func FromId(db *sql.DB, id int64) *models.Pod {
 
 func add(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) {
 	log.Printf("[DB/Pod] Storing %s, %d, %d, %d, %s", *p, e, a, l, *addr)
-    _, err := db.Query("INSERT INTO pod(name, envid, appid, layid, address) values (?, ?, ?, ?, ?)", *p, e, a, l, *addr)
+    res, err := db.Query("INSERT INTO pod(name, envid, appid, layid, address) values (?, ?, ?, ?, ?)", *p, e, a, l, *addr)
     if err != nil {
         log.Print("[DB/Pod] Error EADD", err)
     }
+    log.Print("[DB/Pod] OKADD", res)
 }
 
 func Describe(db *sql.DB, id int) *models.Pod {
