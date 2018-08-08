@@ -44,6 +44,7 @@ push-images:
     image: docker:stable
     script:
         - docker info
+        - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} 
         - ls -lR
         - apk add make
         - make pushi
