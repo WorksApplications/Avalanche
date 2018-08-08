@@ -109,7 +109,7 @@ func Assign(db *sql.DB, n *string, d *time.Time) *models.App {
 	} else {
 		err := update(db, *g.ID, d)
 		if err != nil {
-			log.Printf("[DB/App] Error to update %s", *n)
+			log.Printf("[DB/App] Error to update %s", *n, err)
 			return nil
 		}
 		g.Lastseen = strfmt.DateTime(*d)
