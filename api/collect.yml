@@ -76,6 +76,10 @@ definitions:
       created_at:
         type: string
         format: date-time
+      app:
+        type: string
+      env:
+        type: string
 
   snapshot_summary:
     type: object

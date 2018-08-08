@@ -52,7 +52,15 @@ func list(db *sql.DB, where *string) []*models.Pod {
 			log.Print(err)
 			log.Print("[DB/Pod] Scan", err)
 		}
-		pods = append(pods, &models.Pod{strfmt.DateTime(created), id, live, &name, nil})
+		pods = append(pods,
+        &models.Pod{
+            ID: id,
+            Name: &name,
+            CreatedAt: strfmt.DateTime(created),
+            IsLive: live,
+            App: "",
+            Env: "",
+            Snapshots: nil})
 	}
 	return pods
 }
