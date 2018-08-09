@@ -75,7 +75,7 @@ func (s *ServerCtx) GetEnvironmentsHandler(params operations.GetEnvironmentsPara
 	if len(lays) == 0 {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	body := make([]*models.Environment, len(lays))
+	body := make([]*models.Environment, 0, len(lays))
 	for _, l := range lays {
 		body = append(body, environ.FromLayout(s.Db, l))
 	}
