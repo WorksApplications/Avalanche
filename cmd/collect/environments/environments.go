@@ -50,7 +50,7 @@ func fill(db *sql.DB, s *models.Environment, lay *layout.Layout) {
 		lays = layout.OfEnv(db, *s.ID)
 	} else {
 		lays = make([]*layout.Layout, 1)
-		lays[1] = lay
+		lays[0] = lay
 	}
 	lsum := 0
 	pods := make([]*models.Pod, 0)
