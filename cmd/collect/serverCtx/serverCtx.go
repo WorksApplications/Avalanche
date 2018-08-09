@@ -36,7 +36,7 @@ func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Respon
 func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) middleware.Responder {
 	body := make([]*models.Pod, 0)
 	for _, pfing := range s.Perfing {
-		p := pod.Describe(s.Db, pfing)
+		p := pod.Describe(s.Db, pfing).ToResponse()
 		if p == nil {
 			operations.NewDescribeAppDefault(503).WithPayload(nil)
 		}
@@ -102,7 +102,11 @@ func (s *ServerCtx) GetPodsHandler(params operations.GetPodsParams) middleware.R
 	if lays == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	body := pod.FromLayout(s.Db, lays)
+	ps := pod.FromLayout(s.Db, lays)
+	body := make([]*models.Pod, 0, len(ps))
+	for i, p := range ps {
+		body[i] = p.ToResponse()
+	}
 	return operations.NewGetPodsOK().WithPayload(body)
 }
 
@@ -116,7 +120,7 @@ func (s *ServerCtx) DescribePodHandler(params operations.DescribePodParams) midd
 	if lay == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	body := pod.Get(s.Db, &params.Pod, lay.Id)
+	body := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
 	return operations.NewDescribePodOK().WithPayload(body)
 }
 
@@ -130,7 +134,7 @@ func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) midd
 	if lay == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	pod := pod.Get(s.Db, &params.Pod, lay.Id)
+	pod := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
 	body := snapshot.New(&s.Pvmount, s.Db, pod, lay)
 	return operations.NewNewSnapshotOK().WithPayload(&body)
 }
@@ -195,7 +199,7 @@ func recursiveInsert(db *sql.DB, p *detect.Subscription) []int64 {
 		}
 		l := layout.Assign(db, *en.ID, *an.ID)
 		for _, p := range a.Pods {
-			p := pod.Assign(db, &p.Name, *en.ID, *an.ID, l.Id, &p.Link)
+			p := pod.Assign(db, &p.Name, *en.ID, *an.ID, l.Id, &p.Link).ToResponse()
 			found = append(found, p.ID)
 		}
 	}

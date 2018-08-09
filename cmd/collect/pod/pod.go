@@ -33,10 +33,11 @@ func InitTable(db *sql.DB) {
 }
 
 type PodInternal struct {
+	Appid int64
+	Envid int64
+
 	id      int64
 	name    string
-	appid   int64
-	envid   int64
 	layid   int64
 	created time.Time
 }
@@ -61,7 +62,7 @@ func list(db *sql.DB, where *string, fil bool) []*PodInternal {
 	pods := make([]*PodInternal, 0)
 	for rows.Next() {
 		p := PodInternal{}
-		err = rows.Scan(&p.id, &p.name, &p.appid, &p.envid, &p.layid, &p.created)
+		err = rows.Scan(&p.id, &p.name, &p.Appid, &p.Envid, &p.layid, &p.created)
 		if err != nil {
 			log.Print(err)
 			log.Print("[DB/Pod] Scan", err)
@@ -71,41 +72,37 @@ func list(db *sql.DB, where *string, fil bool) []*PodInternal {
 	return pods
 }
 
-func ListAll(db *sql.DB) []*models.Pod {
+func ListAll(db *sql.DB) []*PodInternal {
 	where := ""
 	pods := list(db, &where, true)
-	rs := make([]*models.Pod, len(pods))
-	for i, p := range pods {
-		rs[i] = p.ToResponse()
-	}
-	return rs
+	return pods
 }
 
-func Get(db *sql.DB, n *string, layid int64) *models.Pod {
+func Get(db *sql.DB, n *string, layid int64) *PodInternal {
 	name := fmt.Sprintf("WHERE name = \"%s\" AND layid = \"%d\"", *n, layid)
 	pods := list(db, &name, false)
 	if len(pods) == 0 {
 		return nil
 	}
-	return pods[0].ToResponse()
+	return pods[0]
 }
 
-func FromId(db *sql.DB, id int64) *models.Pod {
+func FromId(db *sql.DB, id int64) *PodInternal {
 	wh := fmt.Sprintf("WHERE id = \"%d\"", id)
 	pods := list(db, &wh, false)
 	if len(pods) == 0 {
 		return nil
 	}
-	return pods[0].ToResponse()
+	return pods[0]
 }
 
-func Describe(db *sql.DB, id int64) *models.Pod {
+func Describe(db *sql.DB, id int64) *PodInternal {
 	name := fmt.Sprintf("WHERE id = \"%d\"", id)
 	pods := list(db, &name, true)
 	if len(pods) == 0 {
 		return nil
 	}
-	return pods[0].ToResponse()
+	return pods[0]
 }
 
 func add(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) {
@@ -119,7 +116,7 @@ func add(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) {
 	log.Print("[DB/Pod] OKADD", res)
 }
 
-func Assign(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) *models.Pod {
+func Assign(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) *PodInternal {
 	g := Get(db, p, l)
 	if g == nil {
 		add(db, p, e, a, l, addr)
@@ -128,14 +125,10 @@ func Assign(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) *mod
 	return g
 }
 
-func FromLayout(db *sql.DB, lay *layout.Layout) []*models.Pod {
+func FromLayout(db *sql.DB, lay *layout.Layout) []*PodInternal {
 	where := fmt.Sprintf("WHERE layid = \"%s\"", lay.Id)
 	pods := list(db, &where, true)
-	rs := make([]*models.Pod, len(pods))
-	for i, p := range pods {
-		rs[i] = p.ToResponse()
-	}
-	return rs
+	return pods
 }
 
 func ToLogAddress(db *sql.DB, id int64) string {

@@ -56,8 +56,12 @@ func fill(db *sql.DB, s *models.Environment, lay *layout.Layout) {
 	pods := make([]*models.Pod, 0)
 	for _, l := range lays {
 		lsum = lsum + int(l.Lives)
-		p := pod.FromLayout(db, l)
-		pods = append(pods, p...)
+		ps := pod.FromLayout(db, l)
+		rs := make([]*models.Pod, 0, len(ps))
+		for i, p := range ps {
+			rs[i] = p.ToResponse()
+		}
+		pods = append(pods, rs...)
 	}
 	s.LiveCount = int64(lsum)
 }
