@@ -78,7 +78,7 @@ definitions:
         format: date-time
       app:
         type: string
-      env:
+      environment:
         type: string
 
   snapshot_summary:

@@ -36,12 +36,16 @@ func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Respon
 func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) middleware.Responder {
 	body := make([]*models.Pod, 0)
 	for _, pfing := range s.Perfing {
-		p := pod.Describe(s.Db, pfing).ToResponse()
+		p := pod.Describe(s.Db, pfing)
 		if p == nil {
 			operations.NewDescribeAppDefault(503).WithPayload(nil)
 		}
-		p.IsLive = true
-		body = append(body, p)
+		r := p.ToResponse()
+		r.App = *app.FromId(s.Db, p.AppId).Name
+		r.Environment = *environ.FromId(s.Db, p.EnvId).Name
+
+		r.IsLive = true
+		body = append(body, r)
 	}
 	if len(body) == 0 {
 		operations.NewDescribeAppDefault(404).WithPayload(nil)
