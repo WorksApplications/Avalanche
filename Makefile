@@ -1,7 +1,7 @@
 PKG = $(shell find pkg -name *.go)
 
 
-.PHONY: default clean fmt make_stub
+.PHONY: default clean fmt make_stub dep swagger backend front
 
 default: bin
 
@@ -15,6 +15,8 @@ all: bin
 
 images: collect  detect static-nginx
 bin: bin/detect bin/collect front/public/app.js
+backend: bin/detect bin/collect
+front: front/public/app.js
 
 static-nginx: front/public/app.js
 	docker build -f image/static/Dockerfile --tag ${
@@ -26,6 +28,9 @@ collect-img: bin/collect
 
 bin/collect: $(shell find cmd/collect -name *.go) $(PKG) generated_files/stub
 	CGO_ENABLED=0 go build -o bin/collect cmd/collect/server.go
+
+swagger:
+	swagger generate server -f api/collect.yml -t generated_files -A collect
 
 generated_files/stub: api/collect.yml
 	swagger generate server -f api/collect.yml -t generated_files -A collect
@@ -56,3 +61,6 @@ bin/detect: $(shell find cmd/detect -name *.go) $(PKG)
 fmt:	
 	go fmt ./cmd/...
 	go fmt ./pkg/...
+
+dep:
+	go get -v -d ./...

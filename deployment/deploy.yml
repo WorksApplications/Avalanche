@@ -99,12 +99,12 @@ spec:
     spec:
       containers:
       - name: collect
-        image: /resource_optimization/collect:v1.5.5
+        image: /resource_optimization/collect:v2
         ports:
         - containerPort: 8080
         imagePullPolicy: Always
         volumeMounts:
-          - name: collected-extract
+          - name: perftank
             mountPath: /var/spool/collect
         command:
           - /collect
@@ -113,9 +113,9 @@ spec:
           - --db=example:example@tcp(mariadb)/collekt?parseTime=True
           - --persistent=/var/spool/collect
       volumes:
-        - name: collected-extract
+        - name: perftank
           persistentVolumeClaim:
-            claimName: collect-pvc
+            claimName: perftank-pvc
 
 ---
 
@@ -195,7 +195,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: collect-pvc
+  name: perftank-pvc
   namespace: default
 spec:
   accessModes:

@@ -1,0 +1,53 @@
+backend-build:
+    stage: build
+    image: golang:1.9
+    script:
+        - tar xf cache-go.tar.gz -C / || true
+        - mkdir -p /go/src/git.paas.workslan/resource_optimization
+        - ln -s ${CI_PROJECT_DIR} /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
+        - cd /go/src/git.paas.workslan/resource_optimization/dynamic_analysis
+        - curl -sS https://github.com/go-swagger/go-swagger/releases/download/0.15.0/swagger_linux_amd64 -L > /go/bin/swagger
+        - chmod +x /go/bin/swagger
+        - swagger generate server -f api/collect.yml -t generated_files -A collect
+        - make dep
+        - make backend
+        - tar czf cache-go.tar.gz $GOPATH/src/github.com $GOPATH/src/golang.org $GOPATH/src/google.golang.org $GOPATH/src/gopkg.in || true
+    cache:
+        key: golang
+        paths:
+            - cache-go.tar.gz
+    artifacts:
+        paths:
+            - bin/collect
+            - bin/detect
+        expire_in: 1 day
+
+front-build:
+    stage: build
+    image: node:10.8.0
+    script:
+        - cd front
+        - yarn add --dev webpack webpack-cli
+        - npm install
+        - PATH=$PATH:$(pwd)/node_modules/.bin yarn build
+    cache:
+        key: react
+        paths:
+            - front/node_modules
+    artifacts:
+        paths:
+            - front/public/
+        expire_in: 1 day
+
+push-images:
+    only:
+        - master
+    stage: deploy
+    image: docker:stable
+    script:
+        - docker info
+        - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} 
+        - ls -lR
+        - apk add make
+        - make pushi
+
