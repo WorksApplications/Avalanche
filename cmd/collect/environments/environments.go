@@ -47,7 +47,7 @@ func list(db *sql.DB, where *string) []*models.Environment {
 func fill(db *sql.DB, s *models.Environment, lay *layout.Layout) {
 	var lays []*layout.Layout
 	if lay == nil {
-		lays = layout.OfEnv(db, *s.ID)
+		lays = layout.OfEnv(db, s)
 	} else {
 		lays = make([]*layout.Layout, 1)
 		lays[0] = lay

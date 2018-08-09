@@ -66,7 +66,7 @@ func ListNames(db *sql.DB) []string {
 }
 
 func fill(db *sql.DB, s *models.App) {
-	lays := layout.OfApp(db, *s.ID)
+	lays := layout.OfApp(db, s)
 	envs := make([]*models.Environment, 0)
 	for _, lay := range lays {
 		envs = append(envs, environ.FromLayout(db, lay))
