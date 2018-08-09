@@ -82,7 +82,7 @@ func New(extr *string, m *string, db *sql.DB, p *models.Pod, l *layout.Layout) *
 		return nil
 	}
 	/* XXX fix to point perf data location XXX */
-	link := *extr + "/?resource=" + k.Path + "perf-data/" + p.Name + "-perf.tar.gz"
+	link := *extr + "/?resource=" + k.Path + "perf-data/" + *p.Name + "-perf.tar.gz"
 	log.Printf("LINK ADDRESS: %s", link)
 	g, err := getSS(m, &link, p.Name)
 	if err != nil {

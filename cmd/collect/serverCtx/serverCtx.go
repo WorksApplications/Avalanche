@@ -238,4 +238,5 @@ func (s *ServerCtx) InitHandle() {
 	layout.InitTable(s.Db)
 	pod.InitTable(s.Db)
 	app.InitTable(s.Db)
+	snapshot.InitTable(s.Db)
 }
