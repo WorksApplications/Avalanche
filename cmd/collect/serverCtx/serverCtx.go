@@ -71,7 +71,7 @@ func (s *ServerCtx) GetEnvironmentsHandler(params operations.GetEnvironmentsPara
 	if app == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	lays := layout.OfApp(s.Db, *app.ID)
+	lays := layout.OfApp(s.Db, app)
 	if len(lays) == 0 {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
@@ -86,9 +86,10 @@ func (s *ServerCtx) DescribeEnvironmentHandler(params operations.DescribeEnviron
 	app := app.Describe(s.Db, &params.Appid)
 	env := environ.Get(s.Db, &params.Environment)
 	if app == nil || env == nil {
+        log.Print("Describe Enviroment failed with 404", &params.Appid, &params.Environment, app, env)
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	lays := layout.OfBoth(s.Db, *app.ID, *env.ID)
+	lays := layout.OfBoth(s.Db, env, app)
 	if lays == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
@@ -102,7 +103,7 @@ func (s *ServerCtx) GetPodsHandler(params operations.GetPodsParams) middleware.R
 	if app == nil || env == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	lays := layout.OfBoth(s.Db, *app.ID, *env.ID)
+	lays := layout.OfBoth(s.Db, env, app)
 	if lays == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
@@ -120,7 +121,7 @@ func (s *ServerCtx) DescribePodHandler(params operations.DescribePodParams) midd
 	if app == nil || env == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	lay := layout.OfBoth(s.Db, *app.ID, *env.ID)
+	lay := layout.OfBoth(s.Db, env, app)
 	if lay == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
@@ -134,7 +135,7 @@ func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) midd
 	if app == nil || env == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	lay := layout.OfBoth(s.Db, *app.ID, *env.ID)
+	lay := layout.OfBoth(s.Db, env, app)
 	if lay == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
@@ -201,7 +202,7 @@ func recursiveInsert(db *sql.DB, p *detect.Subscription) []int64 {
 		if an == nil {
 			continue
 		}
-		l := layout.Assign(db, *en.ID, *an.ID)
+		l := layout.Assign(db, en, an)
 		for _, p := range a.Pods {
 			p := pod.Assign(db, &p.Name, *en.ID, *an.ID, l.Id, &p.Link).ToResponse()
 			found = append(found, p.ID)
