@@ -129,7 +129,7 @@ func Assign(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) *Pod
 }
 
 func FromLayout(db *sql.DB, lay *layout.Layout) []*PodInternal {
-	where := fmt.Sprintf("WHERE layid = \"%s\"", lay.Id)
+	where := fmt.Sprintf("WHERE layid = \"%d\"", lay.Id)
 	pods := list(db, &where, true)
 	return pods
 }
