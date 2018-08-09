@@ -34,6 +34,7 @@ spec:
     protocol: TCP
     nodePort: 31000
     name: content
+  type: NodePort
   selector:
     run: detect
 
@@ -75,6 +76,7 @@ spec:
     protocol: TCP
     nodePort: 31001
     name: content
+  type: NodePort
   selector:
     run: extract
 
@@ -97,9 +99,23 @@ spec:
     spec:
       containers:
       - name: collect
-        image: /resource_optimization/collect:v1
+        image: /resource_optimization/collect:v2
         ports:
         - containerPort: 8080
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: perftank
+            mountPath: /var/spool/collect
+        command:
+          - /collect
+          - --port=8080
+          - --detect=http://detect:8080
+          - --db=example:example@tcp(mariadb)/collekt?parseTime=True
+          - --persistent=/var/spool/collect
+      volumes:
+        - name: perftank
+          persistentVolumeClaim:
+            claimName: perftank-pvc
 
 ---
 
@@ -113,10 +129,11 @@ metadata:
 spec:
   ports:
   - port: 8080
-    targetPort: 5000
+    targetPort: 8080
     protocol: TCP
     name: content
     nodePort: 31002
+  type: NodePort
   selector:
     run: collect
 
@@ -158,5 +175,32 @@ spec:
     protocol: TCP
     name: content
     nodePort: 31003
+  type: NodePort
   selector:
     run: static
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: flamescope.internal.worksap.com
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: perftank-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+
