@@ -32,55 +32,76 @@ func InitTable(db *sql.DB) {
 	log.Println("[DB/Pod]", res, err)
 }
 
-func list(db *sql.DB, where *string) []*models.Pod {
-	rows, err := db.Query(fmt.Sprintf("SELECT id, name, appid, envid, layid, live, created FROM pod %s", *where))
+type PodInternal struct {
+	AppId int64
+	EnvId int64
+
+	id      int64
+	name    string
+	layId   int64
+	created time.Time
+}
+
+func (p *PodInternal) ToResponse() *models.Pod {
+	if p == nil {
+		return nil
+	}
+	r := models.Pod{
+		ID:        p.id,
+		Name:      &p.name,
+		CreatedAt: strfmt.DateTime(p.created),
+		IsLive:    false,
+		Snapshots: nil,
+	}
+	return &r
+}
+
+func list(db *sql.DB, where *string, fil bool) []*PodInternal {
+	rows, err := db.Query(fmt.Sprintf("SELECT id, name, appid, envid, layid, created FROM pod %s", *where))
 	if err != nil {
 		log.Fatal("[DB/Pod] ", err)
 	}
 	defer rows.Close()
-	pods := make([]*models.Pod, 0)
+	pods := make([]*PodInternal, 0)
 	for rows.Next() {
-		var id int64
-		var name string
-		var appid int64
-		var envid int64
-		var layid int64
-		var created time.Time
-		var live bool
-		err = rows.Scan(&id, &name, &appid, &envid, &layid, &live, &created)
+		p := PodInternal{}
+		err = rows.Scan(&p.id, &p.name, &p.AppId, &p.EnvId, &p.layId, &p.created)
 		if err != nil {
 			log.Print(err)
 			log.Print("[DB/Pod] Scan", err)
 		}
-		pods = append(pods, &models.Pod{strfmt.DateTime(created), id, live, &name, nil})
+		pods = append(pods, &p)
 	}
 	return pods
 }
 
-func fill(db *sql.DB, s *models.Pod) {
-}
-
-func ListAll(db *sql.DB) []*models.Pod {
+func ListAll(db *sql.DB) []*PodInternal {
 	where := ""
-	pods := list(db, &where)
-	for _, pod := range pods {
-		fill(db, pod)
-	}
+	pods := list(db, &where, true)
 	return pods
 }
 
-func Get(db *sql.DB, n *string, layid int64) *models.Pod {
-	name := fmt.Sprintf("WHERE name = \"%s\" AND layid = \"%s\"", n, layid)
-	pods := list(db, &name)
+func Get(db *sql.DB, n *string, layid int64) *PodInternal {
+	name := fmt.Sprintf("WHERE name = \"%s\" AND layid = \"%d\"", *n, layid)
+	pods := list(db, &name, false)
 	if len(pods) == 0 {
 		return nil
 	}
 	return pods[0]
 }
 
-func FromId(db *sql.DB, id int64) *models.Pod {
+func FromId(db *sql.DB, id int64) *PodInternal {
 	wh := fmt.Sprintf("WHERE id = \"%d\"", id)
-	pods := list(db, &wh)
+	pods := list(db, &wh, false)
+	if len(pods) == 0 {
+		return nil
+	}
+	return pods[0]
+}
+
+func Describe(db *sql.DB, id int64) *PodInternal {
+	name := fmt.Sprintf("WHERE id = \"%d\"", id)
+	pods := list(db, &name, true)
 	if len(pods) == 0 {
 		return nil
 	}
@@ -88,21 +109,17 @@ func FromId(db *sql.DB, id int64) *models.Pod {
 }
 
 func add(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) {
-	log.Printf("[DB/Pod] Storing %s, %d, %d, %d, %s", p, e, a, l, addr)
-	db.Query("INSERT INTO pod(name, envid, appid, layid, addr) values (?, ?, ?, ?, ?)", p, e, a, l, *addr)
-}
-
-func Describe(db *sql.DB, id int) *models.Pod {
-	name := fmt.Sprintf("WHERE id = \"%d\"", id)
-	pods := list(db, &name)
-	if len(pods) == 0 {
-		return nil
+	log.Printf("[DB/Pod] Storing %s, %d, %d, %d, %s", *p, e, a, l, *addr)
+	/* created means the time when it is seen firstly */
+	now := time.Now()
+	res, err := db.Exec("INSERT INTO pod(name, envid, appid, layid, address, created) values (?, ?, ?, ?, ?, ?)", *p, e, a, l, *addr, now)
+	if err != nil {
+		log.Print("[DB/Pod] Error EADD", err)
 	}
-	fill(db, pods[0])
-	return pods[0]
+	log.Print("[DB/Pod] OKADD", res)
 }
 
-func Assign(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) *models.Pod {
+func Assign(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) *PodInternal {
 	g := Get(db, p, l)
 	if g == nil {
 		add(db, p, e, a, l, addr)
@@ -111,12 +128,9 @@ func Assign(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) *mod
 	return g
 }
 
-func FromLayout(db *sql.DB, lay *layout.Layout) []*models.Pod {
+func FromLayout(db *sql.DB, lay *layout.Layout) []*PodInternal {
 	where := fmt.Sprintf("WHERE layid = \"%s\"", lay.Id)
-	pods := list(db, &where)
-	for _, pod := range pods {
-		fill(db, pod)
-	}
+	pods := list(db, &where, true)
 	return pods
 }
 
