@@ -57,15 +57,15 @@ func fill(db *sql.DB, s *models.Environment, lay *layout.Layout) {
 	for _, l := range lays {
 		lsum = lsum + int(l.Lives)
 		ps := pod.FromLayout(db, l)
-        log.Print(l, ps)
+		log.Print(l, ps)
 		rs := make([]*models.Pod, len(ps))
-        /* XXX assert is_live if it is really alive XXX */
+		/* XXX assert is_live if it is really alive XXX */
 		for i, p := range ps {
 			rs[i] = p.ToResponse()
 		}
 		pods = append(pods, rs...)
 	}
-    s.Pods = pods
+	s.Pods = pods
 	s.LiveCount = int64(lsum)
 }
 

@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -33,27 +34,28 @@ func InitTable(db *sql.DB) {
 			"pvloc CHAR(80), " +
 			"PRIMARY KEY (id) " +
 			")")
-	log.Println("[DB/Snapshot]", res, err)
+	log.Println("[DB/Snapshot] Initiate: ", res, err)
 }
 
-func getSS(pvmountp *string, link *string, pname *string) string {
+func getSS(pvmountp *string, link *string, pname *string) (string, error) {
+	/* try access to the "perf.tar.gz" file */
 	g, eg := http.Get(*link)
 	if g.StatusCode != http.StatusOK || eg != nil {
 		log.Print("[Snapshot/error in retrieving]", eg, *link, g)
-		return ""
+		return "", fmt.Errorf("Snapshot wasn't retrievable! err:%+v, link:%s", eg, *link)
 	}
 	defer g.Body.Close()
 	f, ef := ioutil.TempFile("/tmp", "SNPSCHT-"+*pname+"-")
 	if ef != nil {
 		log.Print("[Snapshot/error in TempFile]", ef)
-		return ""
+		return "", fmt.Errorf("Temporal Snapshot file is failed to be created!: %+v", ef)
 	}
 	defer f.Close()
 	/* Dump the response into tempfile instead of persistent volume not to save incomplete files. */
 	_, ec := io.Copy(f, g.Body)
 	if ec != nil {
 		log.Print("[Snapshot/error in Saving]", ec)
-		return ""
+		return "", fmt.Errorf("Snapshot wasn't saved even temporarily!: %+v", ef)
 	}
 	log.Print("[Snapshot] download OK at ", f.Name())
 
@@ -62,26 +64,42 @@ func getSS(pvmountp *string, link *string, pname *string) string {
 	   This is better for human eyes because they tend to use first or last bytes for filtering.
 	   Also note that the Node part is the _random_ part. */
 	d := fmt.Sprintf("%s/%x/", *pvmountp, uuid.NodeID()[3])
+	/* ... and pave the path */
+	os.MkdirAll(d, 0755)
 
 	er := os.Rename(f.Name(), d+uuid.String())
 	if er != nil {
-		log.Print("[Snapshot/error] Saving to persistent volume failed", d, f.Name(), er)
+		log.Print("[Snapshot/error] Saving to persistent volume failed:", d, "|||", f.Name(), ":::", er)
+		return "", fmt.Errorf("Saving to persistent volume failed:", d, "|||", f.Name(), ":::", er)
 	}
-	return uuid.String()
+	return uuid.String(), nil
 }
 
-func New(m *string, db *sql.DB, p *models.Pod, l *layout.Layout) models.Snapshot {
+func New(extr *string, m *string, db *sql.DB, p *models.Pod, l *layout.Layout) *models.Snapshot {
 	log.Printf("[DB/Snapshot] Storing (%d @ %d: %d)", l.AppId, l.EnvId)
-	k := pod.ToLogAddress(db, p.ID)
-	g := getSS(m, &k, p.Name)
+	k, err := url.Parse(pod.ToLogAddress(db, p.ID))
+	if err != nil {
+		return nil
+	}
+	/* XXX fix to point perf data location XXX */
+	link := *extr + "/?resource=" + k.Path + "perf-data/" + p.Name + "-perf.tar.gz"
+	log.Printf("LINK ADDRESS: %s", link)
+	g, err := getSS(m, &link, p.Name)
+	if err != nil {
+		return nil
+	}
 	t := time.Now()
-	log.Println("Fuck you", t)
-	db.QueryRow("INSERT INTO snapshot(name, pvloc, appid, envid, layid, created) values (?, ?, ?, ?, ?, ?)", p.Name, g, l.AppId, l.EnvId, l.Id, t)
-	return models.Snapshot{
+	res, err := db.Exec("INSERT INTO snapshot(name, pvloc, appid, envid, layid, created) values (?, ?, ?, ?, ?, ?)", p.Name, g, l.AppId, l.EnvId, l.Id, t)
+	log.Println("[DB/Snapshot] NEW: ", res, err)
+	if err != nil {
+		return nil
+	}
+	ss := models.Snapshot{
 		strfmt.DateTime(t),
 		"",
 		"",
 		*p.Name,
 		&g,
 	}
+	return &ss
 }
