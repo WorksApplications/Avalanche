@@ -3,8 +3,6 @@ package pod
 import (
 	"database/sql"
 	"fmt"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/apps"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/environments"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 	"github.com/go-openapi/strfmt"
@@ -44,6 +42,7 @@ func list(db *sql.DB, where *string, fil bool) []*models.Pod {
 	for rows.Next() {
 		var id int64
 		var name string
+		/* XXX Move them! XXX */
 		var appid int64
 		var envid int64
 		var layid int64
@@ -53,20 +52,12 @@ func list(db *sql.DB, where *string, fil bool) []*models.Pod {
 			log.Print(err)
 			log.Print("[DB/Pod] Scan", err)
 		}
-		e := ""
-		a := ""
-		if fil {
-			e = *environ.FromId(db, envid).Name
-			a = *app.FromId(db, appid).Name
-		}
 		pods = append(pods,
 			&models.Pod{
 				ID:        id,
 				Name:      &name,
 				CreatedAt: strfmt.DateTime(created),
 				IsLive:    false,
-				App:       a,
-				Env:       e,
 				Snapshots: nil})
 	}
 	return pods

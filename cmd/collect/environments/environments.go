@@ -6,8 +6,8 @@ import (
 	"log"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/pod"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
-	//"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/pod"
 )
 
 /* +--+----+---------------------------+
@@ -44,23 +44,34 @@ func list(db *sql.DB, where *string) []*models.Environment {
 	return envs
 }
 
-func fill(db *sql.DB, s *models.Environment) {
-	lays := layout.OfEnv(db, *s.ID)
+func fill(db *sql.DB, s *models.Environment, lay *layout.Layout) {
+	var lays []*layout.Layout
+	if lay == nil {
+		lays = layout.OfEnv(db, *s.ID)
+	} else {
+		lays = make([]*layout.Layout, 1)
+		lays[1] = lay
+	}
 	lsum := 0
+	pods := make([]*models.Pod, 0)
 	for _, l := range lays {
 		lsum = lsum + int(l.Lives)
+		p := pod.FromLayout(db, l)
+		pods = append(pods, p...)
 	}
 	s.LiveCount = int64(lsum)
 }
 
+/*
 func ListAll(db *sql.DB) []*models.Environment {
 	where := ""
 	envs := list(db, &where)
 	for _, env := range envs {
-		fill(db, env)
+		fill(db, env, nil)
 	}
 	return envs
 }
+*/
 
 func Get(db *sql.DB, n *string) *models.Environment {
 	name := fmt.Sprintf("WHERE name = \"%s\"", *n)
@@ -77,13 +88,15 @@ func add(db *sql.DB, e *string) {
 	db.Query("INSERT INTO environ(name) values (?)", e)
 }
 
+/*
 func Describe(db *sql.DB, n *string) *models.Environment {
 	g := Get(db, n)
 	if g != nil {
-		fill(db, g)
+		fill(db, g, nil)
 	}
 	return g
 }
+*/
 
 func Assign(db *sql.DB, e *string) *models.Environment {
 	g := Get(db, e)
@@ -98,7 +111,7 @@ func FromLayout(db *sql.DB, lay *layout.Layout) *models.Environment {
 	where := fmt.Sprintf("WHERE id = \"%d\"", lay.EnvId)
 	envs := list(db, &where)
 	for _, env := range envs {
-		fill(db, env)
+		fill(db, env, lay)
 	}
 	if len(envs) != 0 {
 		return envs[0]
