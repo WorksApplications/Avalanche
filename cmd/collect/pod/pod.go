@@ -32,6 +32,15 @@ func InitTable(db *sql.DB) {
 	log.Println("[DB/Pod]", res, err)
 }
 
+type PodSpecific struct {
+	id      int64
+	name    string
+	appid   int64
+	envid   int64
+	layid   int64
+	created time.Time
+}
+
 func list(db *sql.DB, where *string, fil bool) []*models.Pod {
 	rows, err := db.Query(fmt.Sprintf("SELECT id, name, appid, envid, layid, created FROM pod %s", *where))
 	if err != nil {
@@ -40,23 +49,17 @@ func list(db *sql.DB, where *string, fil bool) []*models.Pod {
 	defer rows.Close()
 	pods := make([]*models.Pod, 0)
 	for rows.Next() {
-		var id int64
-		var name string
-		/* XXX Move them! XXX */
-		var appid int64
-		var envid int64
-		var layid int64
-		var created time.Time
-		err = rows.Scan(&id, &name, &appid, &envid, &layid, &created)
+		p := PodSpecific{}
+		err = rows.Scan(&p.id, &p.name, &p.appid, &p.envid, &p.layid, &p.created)
 		if err != nil {
 			log.Print(err)
 			log.Print("[DB/Pod] Scan", err)
 		}
 		pods = append(pods,
 			&models.Pod{
-				ID:        id,
-				Name:      &name,
-				CreatedAt: strfmt.DateTime(created),
+				ID:        p.id,
+				Name:      &p.name,
+				CreatedAt: strfmt.DateTime(p.created),
 				IsLive:    false,
 				Snapshots: nil})
 	}
