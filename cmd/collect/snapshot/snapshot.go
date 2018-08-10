@@ -106,7 +106,7 @@ func getSS(pvmountp *string, link *string, pname *string) (string, string, error
 	}
 	defer g.Body.Close()
 	log.Print("[Snapshot] Found perf archive for ", *pname)
-	f, ef := ioutil.TempFile("/tmp", "SNPSCHT-"+*pname+"-")
+	f, ef := ioutil.TempFile("/", "SNPSCHT-"+*pname+"-")
 	if ef != nil {
 		log.Print("[Snapshot/error in TempFile]", ef)
 		return "", "", fmt.Errorf("Temporal Snapshot file is failed to be created!: %+v", ef)
