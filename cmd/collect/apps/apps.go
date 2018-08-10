@@ -84,9 +84,9 @@ func add(db *sql.DB, n *string, d *time.Time) error {
 }
 
 func update(db *sql.DB, id int64, d *time.Time) error {
-	log.Printf("[DB/App] Update %d with lastseen = %s)", id, d)
 	_, err := db.Exec("UPDATE app SET lastseen = ? WHERE id = ?", d, id)
 	if err != nil {
+        log.Printf("[DB/App] Update failure: %d with lastseen = %s)", id, d)
 		return err
 	}
 	return nil
@@ -119,7 +119,6 @@ func Assign(db *sql.DB, n *string, d *time.Time) *models.App {
 
 func Get(db *sql.DB, n *string) *models.App {
 	name := fmt.Sprintf("WHERE name = \"%s\"", *n)
-	log.Println("[DB/App]", fmt.Sprintf("%s", name))
 	apps := list(db, &name)
 	if len(apps) != 0 {
 		return apps[0]
