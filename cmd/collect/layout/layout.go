@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+
+	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 )
 
 type Layout struct {
@@ -12,6 +14,11 @@ type Layout struct {
 	EnvId int64
 	Lives int64
 }
+
+/* LAYOUT is intended to keep tuples of appid and envid, because there is app x env possibilities,
+   even though the API endpoint seems to be organized /apps/<app>/envs/<env> thus environment is included by application.
+   The database structure follows the real _physical_ constraint of those target applications,
+   and our server returns a structure which is "resolved" as if they are inclusive relation.  */
 
 func InitTable(db *sql.DB) {
 	res, err := db.Exec(
@@ -48,35 +55,35 @@ func of(db *sql.DB, where *string) []*Layout {
 	return lays
 }
 
-func OfApp(db *sql.DB, appid int64) []*Layout {
-	where := fmt.Sprintf("WHERE appId = \"%d\"", appid)
+func OfApp(db *sql.DB, app *models.App) []*Layout {
+	where := fmt.Sprintf("WHERE appId = \"%d\"", *app.ID)
 	return of(db, &where)
 }
 
-func OfEnv(db *sql.DB, envid int64) []*Layout {
-	where := fmt.Sprintf("WHERE envid = \"%d\"", envid)
+func OfEnv(db *sql.DB, env *models.Environment) []*Layout {
+	where := fmt.Sprintf("WHERE envid = \"%d\"", *env.ID)
 	return of(db, &where)
 }
 
-func add(db *sql.DB, envid int64, appid int64) {
-	log.Printf("[DB/Layout] Storing (%d, %d)", envid, appid)
-	db.Query("INSERT INTO layout(envid, appid, lives) values (?, ?, ?)", envid, appid, 0)
+func add(db *sql.DB, env *models.Environment, app *models.App) {
+	log.Printf("[DB/Layout] Storing (%d, %d)", *env.ID, *app.ID)
+	db.Query("INSERT INTO layout(envid, appid, lives) values (?, ?, ?)", *env.ID, *app.ID, 0)
 }
 
-func Assign(db *sql.DB, envid int64, appid int64) *Layout {
-	l := OfBoth(db, envid, appid)
+func Assign(db *sql.DB, env *models.Environment, app *models.App) *Layout {
+	l := OfBoth(db, env, app)
 	if l == nil {
-		add(db, envid, appid)
-		l = OfBoth(db, envid, appid)
+		add(db, env, app)
+		l = OfBoth(db, env, app)
 	}
 	return l
 }
 
-func OfBoth(db *sql.DB, envid int64, appid int64) *Layout {
-	where := fmt.Sprintf("WHERE envid = \"%d\" AND appid = \"%d\"", envid, appid)
+func OfBoth(db *sql.DB, env *models.Environment, app *models.App) *Layout {
+	where := fmt.Sprintf("WHERE envid = \"%d\" AND appid = \"%d\"", *env.ID, *app.ID)
 	l := of(db, &where)
 	if len(l) > 1 {
-		log.Printf("[DB/Layout] @@@@INCONSISTENT@@@@: couple of env: %d, app: %d has %s pairs!", envid, appid, len(l))
+		log.Printf("[DB/Layout] @@@@INCONSISTENT@@@@: couple of env: %d, app: %d has %s pairs!", *env.ID, *app.ID, len(l))
 	}
 	if len(l) == 0 {
 		return nil

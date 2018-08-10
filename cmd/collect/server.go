@@ -36,6 +36,7 @@ func main() {
 	dbconf := flag.String("db", "example:example@localhost?parseTime=True", "DB connexion")
 	port := flag.Int("port", 4981, "Port for this server")
 	detect := flag.String("detect", "http://localhost:8080", "\"detect\" service address")
+	extract := flag.String("extract", "http://localhost:8080", "\"extract\" service address")
 	ssstore := flag.String("persistent", "/tmp/debug-collect", "mount point of persistent volume for snapshot")
 
 	flag.Parse()
@@ -47,7 +48,7 @@ func main() {
 	defer server.Shutdown()
 
 	db := establishDBConn(*dbconf)
-	ctx := serverCtx.ServerCtx{db, *detect, *ssstore, make([]int64, 0)}
+	ctx := serverCtx.ServerCtx{db, *detect, *extract, *ssstore, make([]int64, 0)}
 
 	if *init {
 		ctx.InitHandle()
@@ -66,6 +67,8 @@ func main() {
 	api.DescribePodHandler = operations.DescribePodHandlerFunc(ctx.DescribePodHandler)
 
 	api.NewSnapshotHandler = operations.NewSnapshotHandlerFunc(ctx.NewSnapshotHandler)
+	api.ListSnapshotsHandler = operations.ListSnapshotsHandlerFunc(ctx.ListSnapshotsHandler)
+
 	api.ListAvailablePodsHandler = operations.ListAvailablePodsHandlerFunc(ctx.ListAvailablePods)
 	api.HealthzHandler = operations.HealthzHandlerFunc(ctx.HealthzHandler)
 
