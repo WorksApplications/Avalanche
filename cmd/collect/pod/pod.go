@@ -35,9 +35,9 @@ func InitTable(db *sql.DB) {
 type PodInternal struct {
 	AppId int64
 	EnvId int64
+	Name    string
 
 	id      int64
-	name    string
 	layId   int64
 	created time.Time
 }
@@ -48,7 +48,7 @@ func (p *PodInternal) ToResponse() *models.Pod {
 	}
 	r := models.Pod{
 		ID:        p.id,
-		Name:      &p.name,
+		Name:      &p.Name,
 		CreatedAt: strfmt.DateTime(p.created),
 		IsLive:    false,
 		Snapshots: nil,
@@ -65,7 +65,7 @@ func list(db *sql.DB, where *string, fil bool) []*PodInternal {
 	pods := make([]*PodInternal, 0)
 	for rows.Next() {
 		p := PodInternal{}
-		err = rows.Scan(&p.id, &p.name, &p.AppId, &p.EnvId, &p.layId, &p.created)
+		err = rows.Scan(&p.id, &p.Name, &p.AppId, &p.EnvId, &p.layId, &p.created)
 		if err != nil {
 			log.Print(err)
 			log.Print("[DB/Pod] Scan", err)

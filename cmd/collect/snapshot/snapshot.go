@@ -14,6 +14,8 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/google/uuid"
 
+    /* XXX Refactor environments -> enviroment */
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/environments"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/pod"
 
@@ -28,7 +30,7 @@ func InitTable(db *sql.DB) {
 			"envid int, " +
 			"appid int, " +
 			"layid int, " +
-			"podid int, " +
+            "podid int, " +
 			"created DATETIME, " +
 			"pvloc CHAR(80), " +
 			"PRIMARY KEY (id) " +
@@ -36,22 +38,28 @@ func InitTable(db *sql.DB) {
 	log.Println("[DB/Snapshot] Initiate: ", res, err)
 }
 
-func List(db *sql.DB, where *string) []*models.Snapshot {
-	rows, err := db.Query(fmt.Sprintf("SELECT uuid, created, appid, envid, layid, pvloc FROM snapshot %s", *where))
+type SnapshotInternal struct {
+    UUID    string
+    appid   int64
+    podid   int64
+    envid   int64
+    layid   int64
+    link    string
+    created time.Time
+}
+
+func list(db *sql.DB, where *string) []*SnapshotInternal {
+	rows, err := db.Query(fmt.Sprintf("SELECT uuid, created, appid, podid, envid, layid, pvloc FROM snapshot %s", *where))
 	if err != nil {
 		log.Fatal("[DB/Snapshot] ", err)
 		return nil
 	}
 	defer rows.Close()
 
-	sxs := make([]*models.Snapshot, 0)
+	sxs := make([]*SnapshotInternal, 0)
 	for rows.Next() {
-		sx := models.Snapshot{}
-		var appid int64
-		var envid int64
-		var layid int64
-		var link string
-		err = rows.Scan(&sx.UUID, &sx.CreatedAt, &appid, &envid, &layid, &link)
+        sx := SnapshotInternal{}
+		err = rows.Scan(&sx.UUID, &sx.created, &sx.appid, &sx.podid, &sx.envid, &sx.layid, &sx.link)
 		if err != nil {
 			log.Print("[DB/Snapshot] Scan", err)
 		}
@@ -60,35 +68,55 @@ func List(db *sql.DB, where *string) []*models.Snapshot {
 	return sxs
 }
 
-func FromPod(db *sql.DB, p *models.Pod) []*models.Snapshot {
+func FromPod(db *sql.DB, p *models.Pod) []*SnapshotInternal {
 	wh := fmt.Sprintf("WHERE podid = \"%d\"", p.ID)
-	return List(db, &wh)
+    return list(db, &wh)
 }
 
-func getSS(pvmountp *string, link *string, pname *string) (string, error) {
+func (s *SnapshotInternal) ToResponse(db *sql.DB) *models.Snapshot {
+	if s == nil {
+		return nil
+	}
+    p := ""
+    e := ""
+    if db != nil {
+        p = pod.FromId(db, s.podid).Name
+        e = *environ.FromId(db, s.envid).Name
+    }
+	r := models.Snapshot {
+		UUID: &s.UUID,
+		CreatedAt: strfmt.DateTime(s.created),
+        Pod: p,
+        Environment: e,
+	}
+	return &r
+}
+
+func getSS(pvmountp *string, link *string, pname *string) (string, string, error) {
 	/* try access to the "perf.tar.gz" file for extract */
 	g, eg := http.Get(*link)
 	if eg != nil || g.StatusCode != http.StatusOK {
-		remo_msg := ""
-		if eg == nil {
-			msg, _ := ioutil.ReadAll(g.Body)
-			remo_msg = string(msg)
-		}
+        remo_msg := ""
+        if eg == nil {
+            msg, _ := ioutil.ReadAll(g.Body)
+            remo_msg = string(msg)
+        }
 		log.Print("[Snapshot/error in retrieving]", eg, *link, g, remo_msg)
-		return "", fmt.Errorf("Snapshot wasn't retrievable! Check mischo: err:%+v, link:%s", eg, *link)
+        return "", "", fmt.Errorf("Snapshot wasn't retrievable! Check mischo: err:%+v, link:%s", eg, *link)
 	}
 	defer g.Body.Close()
+    log.Print("[Snapshot] Found perf archive for ", *pname)
 	f, ef := ioutil.TempFile("/tmp", "SNPSCHT-"+*pname+"-")
 	if ef != nil {
 		log.Print("[Snapshot/error in TempFile]", ef)
-		return "", fmt.Errorf("Temporal Snapshot file is failed to be created!: %+v", ef)
+		return "", "", fmt.Errorf("Temporal Snapshot file is failed to be created!: %+v", ef)
 	}
 	defer f.Close()
 	/* Dump the response into tempfile instead of persistent volume not to save incomplete files. */
 	_, ec := io.Copy(f, g.Body)
 	if ec != nil {
 		log.Print("[Snapshot/error in Saving]", ec)
-		return "", fmt.Errorf("Snapshot wasn't saved even temporarily!: %+v", ef)
+		return "", "", fmt.Errorf("Snapshot wasn't saved even temporarily!: %+v", ef)
 	}
 	log.Print("[Snapshot] download OK at ", f.Name())
 
@@ -103,10 +131,10 @@ func getSS(pvmountp *string, link *string, pname *string) (string, error) {
 	er := os.Rename(f.Name(), d+uuid.String())
 	if er != nil {
 		log.Print("[Snapshot/error] Saving to persistent volume failed:", d, "|||", f.Name(), ":::", er)
-		return "", fmt.Errorf("Saving to persistent volume failed:", d, "|||", f.Name(), ":::", er)
+		return "", "", fmt.Errorf("Saving to persistent volume failed:", d, "|||", f.Name(), ":::", er)
 	}
 	log.Print("[Snapshot] data moved to ", d+uuid.String())
-	return uuid.String(), nil
+	return uuid.String(), d+uuid.String(), nil
 }
 
 func New(extr *string, m *string, db *sql.DB, a *models.App, p *models.Pod, l *layout.Layout) *models.Snapshot {
@@ -114,18 +142,20 @@ func New(extr *string, m *string, db *sql.DB, a *models.App, p *models.Pod, l *l
 	if err != nil {
 		return nil
 	}
-	/* XXX fix to point perf data location XXX */
 	link := *extr + "/?resource=" + k.Path + "perf-record/perf-" + *a.Name + ".tar.gz"
 	log.Printf("LINK ADDRESS: %s", link)
-	g, err := getSS(m, &link, p.Name)
+	g, loc, err := getSS(m, &link, p.Name)
 	if err != nil {
-		log.Printf("[Snapshot] Couldn't get snapshot")
+        log.Printf("[Snapshot] Couldn't get snapshot")
 		return nil
 	}
-	log.Printf("[DB/Snapshot] Storing (%d @ %d: %d)", l.AppId, l.EnvId)
+	log.Printf("[DB/Snapshot] Storing (%d @ %d: %s)", l.AppId, l.EnvId, g)
 	t := time.Now()
-	res, err := db.Exec("INSERT INTO snapshot(name, pvloc, appid, envid, podid, layid, created) values (?, ?, ?, ?, ?, ?, ?)", p.Name, g, l.AppId, l.EnvId, p.ID, l.Id, t)
-	log.Println("[DB/Snapshot] NEW: ", res, err)
+	res, err := db.Exec("INSERT INTO snapshot(uuid, pvloc, appid, envid, podid, layid, created) values (?, ?, ?, ?, ?, ?, ?)",
+        g, loc, l.AppId, l.EnvId, p.ID, l.Id, t)
+
+    log.Printf("[DB/Snapshot] NEW: %+v, err: %s", res, err)
+
 	if err != nil {
 		return nil
 	}

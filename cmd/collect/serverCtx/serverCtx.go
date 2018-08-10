@@ -156,14 +156,16 @@ func (s *ServerCtx) ListSnapshotsHandler(params operations.ListSnapshotsParams) 
 	}
 	lay := layout.OfBoth(s.Db, env, app)
 	if lay == nil {
+        return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	/* XXX WAIT IT IS NOT IMPLEMENTED XXX */
-	return operations.NewDescribeAppDefault(404).WithPayload(nil)
-	/*
-		pod := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
-		body := snapshot.New(&s.Pvmount, s.Db, pod, lay)
-		return operations.NewListSnapshotsOK().WithPayload(&body)
-	*/
+	pod := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
+	sxs := snapshot.FromPod(s.Db, pod)
+    body := make([]*models.Snapshot, 0, len(sxs))
+    for i, ss := range sxs {
+        body[i] = ss.ToResponse(s.Db)
+    }
+ 
+    return operations.NewListSnapshotsOK().WithPayload(body)
 }
 
 func (s *ServerCtx) pull() {
