@@ -1,17 +1,16 @@
 package main
 
 import (
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/server"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/util"
 	"log"
 	"net/http"
-	//"strings"
-	"../../pkg/crowler"
-	"../../pkg/detectService"
 )
 
 func main() {
 	log.SetPrefix("detect:\t")
-	x := detectService.HandlerClosure{make(chan *crowl.ScannerRequest)}
-	go crowl.Exchange(x.Ch)
+	x := server.HandlerClosure{make(chan *util.ScannerRequest)}
+	go util.Exchange(x.Ch)
 	//log.Print(apps)
 	http.HandleFunc("/subscription/", x.SubRunner)
 	http.HandleFunc("/subscription", x.Runner)

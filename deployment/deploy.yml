@@ -1,0 +1,207 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: detect
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      run: detect
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: detect
+    spec:
+      containers:
+      - name: detect
+        image: /resource_optimization/detect:v4.1
+        ports:
+        - containerPort: 8080
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: detect
+  name: detect
+  namespace: default
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    nodePort: 31000
+    name: content
+  type: NodePort
+  selector:
+    run: detect
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: extract
+spec:
+  selector:
+    matchLabels:
+      run: extract
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: extract
+    spec:
+      containers:
+      - name: extract
+        image: /resource_optimization/extract:v1.2
+        ports:
+        - containerPort: 5000
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: extract
+  name: extract
+  namespace: default
+spec:
+  ports:
+  - port: 8080
+    targetPort: 5000
+    protocol: TCP
+    nodePort: 31001
+    name: content
+  type: NodePort
+  selector:
+    run: extract
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: collect
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      run: collect
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: collect
+    spec:
+      containers:
+      - name: collect
+        image: /resource_optimization/collect:v4
+        ports:
+        - containerPort: 8080
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: perftank
+            mountPath: /var/spool/collect
+        command:
+          - /collect
+          - --port=8080
+          - --detect=http://detect:8080
+          - --extract=http://extract:8080
+          - --db=example:example@tcp(mariadb)/collekt?parseTime=True
+          - --persistent=/var/spool/collect
+      volumes:
+        - name: perftank
+          persistentVolumeClaim:
+            claimName: perftank-pvc
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: collect
+  name: collect
+  namespace: default
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: content
+    nodePort: 31002
+  type: NodePort
+  selector:
+    run: collect
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: static
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      run: static
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: static
+    spec:
+      containers:
+      - name: static
+        image: /resource_optimization/static:alpha
+        ports:
+        - containerPort: 80
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: static
+  name: static
+  namespace: default
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: content
+    nodePort: 31003
+  type: NodePort
+  selector:
+    run: static
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: flamescope.internal.worksap.com
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: perftank-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+
