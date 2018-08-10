@@ -220,6 +220,7 @@ func (s *ServerCtx) PollPodInfo() {
 func recursiveInsert(db *sql.DB, p *detect.Subscription) []int64 {
 	found := make([]int64, 0, 2)
 	/* BUG XXX It doesn't update existing environ/pod! It is a bug XXX */
+    /* Is it still so? */
 	en := environ.Assign(db, &p.Env)
 	for _, a := range p.Apps {
 		an := app.Assign(db, &a.Name, &a.Seen)

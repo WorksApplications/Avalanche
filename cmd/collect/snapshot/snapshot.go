@@ -124,17 +124,18 @@ func getSS(pvmountp *string, link *string, pname *string) (string, string, error
 	/* midst byte is used for choosing directory-as-prefix.
 	   This is better for human eyes because they tend to use first or last bytes for filtering.
 	   Also note that the Node part is the _random_ part. */
-	d := fmt.Sprintf("%s/%x/", *pvmountp, uuid.NodeID()[3])
+	d := fmt.Sprintf("%s/%s/%x/", *pvmountp, *pname, uuid.NodeID()[3])
 	/* ... and pave the path */
 	os.MkdirAll(d, 0755)
+    fn := d+uuid.String()
 
-	er := os.Rename(f.Name(), d+uuid.String())
+	er := os.Rename(f.Name(), fn)
 	if er != nil {
 		log.Print("[Snapshot/error] Saving to persistent volume failed:", d, "|||", f.Name(), ":::", er)
 		return "", "", fmt.Errorf("Saving to persistent volume failed:", d, "|||", f.Name(), ":::", er)
 	}
-	log.Print("[Snapshot] data moved to ", d+uuid.String())
-	return uuid.String(), d + uuid.String(), nil
+	log.Print("[Snapshot] data moved to ", fn)
+	return uuid.String(), fn, nil
 }
 
 func New(extr *string, m *string, db *sql.DB, a *models.App, p *models.Pod, l *layout.Layout) *models.Snapshot {
