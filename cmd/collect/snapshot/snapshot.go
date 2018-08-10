@@ -72,17 +72,18 @@ func getSS(pvmountp *string, link *string, pname *string) (string, error) {
 		log.Print("[Snapshot/error] Saving to persistent volume failed:", d, "|||", f.Name(), ":::", er)
 		return "", fmt.Errorf("Saving to persistent volume failed:", d, "|||", f.Name(), ":::", er)
 	}
+	log.Print("[Snapshot] data moved to ", d+uuid.String())
 	return uuid.String(), nil
 }
 
-func New(extr *string, m *string, db *sql.DB, p *models.Pod, l *layout.Layout) *models.Snapshot {
+func New(extr *string, m *string, db *sql.DB, a *models.App, p *models.Pod, l *layout.Layout) *models.Snapshot {
 	log.Printf("[DB/Snapshot] Storing (%d @ %d: %d)", l.AppId, l.EnvId)
 	k, err := url.Parse(pod.ToLogAddress(db, p.ID))
 	if err != nil {
 		return nil
 	}
 	/* XXX fix to point perf data location XXX */
-	link := *extr + "/?resource=" + k.Path + "perf-data/" + *p.Name + "-perf.tar.gz"
+	link := *extr + "/?resource=" + k.Path + "perf-record/perf-" + *a.Name + ".tar.gz"
 	log.Printf("LINK ADDRESS: %s", link)
 	g, err := getSS(m, &link, p.Name)
 	if err != nil {

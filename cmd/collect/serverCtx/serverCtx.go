@@ -144,7 +144,7 @@ func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) midd
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	pod := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
-	body := snapshot.New(&s.Extract, &s.Pvmount, s.Db, pod, lay)
+	body := snapshot.New(&s.Extract, &s.Pvmount, s.Db, app, pod, lay)
 	return operations.NewNewSnapshotOK().WithPayload(body)
 }
 
