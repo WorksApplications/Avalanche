@@ -105,7 +105,6 @@ func getSS(pvmountp *string, link *string, pname *string) (string, error) {
 }
 
 func New(extr *string, m *string, db *sql.DB, a *models.App, p *models.Pod, l *layout.Layout) *models.Snapshot {
-	log.Printf("[DB/Snapshot] Storing (%d @ %d: %d)", l.AppId, l.EnvId)
 	k, err := url.Parse(pod.ToLogAddress(db, p.ID))
 	if err != nil {
 		return nil
@@ -115,8 +114,10 @@ func New(extr *string, m *string, db *sql.DB, a *models.App, p *models.Pod, l *l
 	log.Printf("LINK ADDRESS: %s", link)
 	g, err := getSS(m, &link, p.Name)
 	if err != nil {
+		log.Printf("[Snapshot] Couldn't get snapshot")
 		return nil
 	}
+	log.Printf("[DB/Snapshot] Storing (%d @ %d: %d)", l.AppId, l.EnvId)
 	t := time.Now()
 	res, err := db.Exec("INSERT INTO snapshot(name, pvloc, appid, envid, podid, layid, created) values (?, ?, ?, ?, ?, ?, ?)", p.Name, g, l.AppId, l.EnvId, p.ID, l.Id, t)
 	log.Println("[DB/Snapshot] NEW: ", res, err)
