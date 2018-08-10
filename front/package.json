@@ -12,6 +12,7 @@
     "test": "tslint -p tsconfig.json | jest"
   },
   "dependencies": {
+    "@types/node": "^10.5.7",
     "preact": "^8.2.9",
     "preact-redux": "^2.0.3",
     "redux": "^4.0.0"

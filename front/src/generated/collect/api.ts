@@ -1,4 +1,3 @@
-/// <reference path="./custom.d.ts" />
 // tslint:disable
 /**
  * collective server for performance inspection
