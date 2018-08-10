@@ -14,7 +14,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/google/uuid"
 
-    /* XXX Refactor environments -> enviroment */
+	/* XXX Refactor environments -> enviroment */
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/environments"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/pod"
@@ -30,7 +30,7 @@ func InitTable(db *sql.DB) {
 			"envid int, " +
 			"appid int, " +
 			"layid int, " +
-            "podid int, " +
+			"podid int, " +
 			"created DATETIME, " +
 			"pvloc CHAR(80), " +
 			"PRIMARY KEY (id) " +
@@ -39,13 +39,13 @@ func InitTable(db *sql.DB) {
 }
 
 type SnapshotInternal struct {
-    UUID    string
-    appid   int64
-    podid   int64
-    envid   int64
-    layid   int64
-    link    string
-    created time.Time
+	UUID    string
+	appid   int64
+	podid   int64
+	envid   int64
+	layid   int64
+	link    string
+	created time.Time
 }
 
 func list(db *sql.DB, where *string) []*SnapshotInternal {
@@ -58,7 +58,7 @@ func list(db *sql.DB, where *string) []*SnapshotInternal {
 
 	sxs := make([]*SnapshotInternal, 0)
 	for rows.Next() {
-        sx := SnapshotInternal{}
+		sx := SnapshotInternal{}
 		err = rows.Scan(&sx.UUID, &sx.created, &sx.appid, &sx.podid, &sx.envid, &sx.layid, &sx.link)
 		if err != nil {
 			log.Print("[DB/Snapshot] Scan", err)
@@ -70,24 +70,24 @@ func list(db *sql.DB, where *string) []*SnapshotInternal {
 
 func FromPod(db *sql.DB, p *models.Pod) []*SnapshotInternal {
 	wh := fmt.Sprintf("WHERE podid = \"%d\"", p.ID)
-    return list(db, &wh)
+	return list(db, &wh)
 }
 
 func (s *SnapshotInternal) ToResponse(db *sql.DB) *models.Snapshot {
 	if s == nil {
 		return nil
 	}
-    p := ""
-    e := ""
-    if db != nil {
-        p = pod.FromId(db, s.podid).Name
-        e = *environ.FromId(db, s.envid).Name
-    }
-	r := models.Snapshot {
-		UUID: &s.UUID,
-		CreatedAt: strfmt.DateTime(s.created),
-        Pod: p,
-        Environment: e,
+	p := ""
+	e := ""
+	if db != nil {
+		p = pod.FromId(db, s.podid).Name
+		e = *environ.FromId(db, s.envid).Name
+	}
+	r := models.Snapshot{
+		UUID:        &s.UUID,
+		CreatedAt:   strfmt.DateTime(s.created),
+		Pod:         p,
+		Environment: e,
 	}
 	return &r
 }
@@ -96,16 +96,16 @@ func getSS(pvmountp *string, link *string, pname *string) (string, string, error
 	/* try access to the "perf.tar.gz" file for extract */
 	g, eg := http.Get(*link)
 	if eg != nil || g.StatusCode != http.StatusOK {
-        remo_msg := ""
-        if eg == nil {
-            msg, _ := ioutil.ReadAll(g.Body)
-            remo_msg = string(msg)
-        }
+		remo_msg := ""
+		if eg == nil {
+			msg, _ := ioutil.ReadAll(g.Body)
+			remo_msg = string(msg)
+		}
 		log.Print("[Snapshot/error in retrieving]", eg, *link, g, remo_msg)
-        return "", "", fmt.Errorf("Snapshot wasn't retrievable! Check mischo: err:%+v, link:%s", eg, *link)
+		return "", "", fmt.Errorf("Snapshot wasn't retrievable! Check mischo: err:%+v, link:%s", eg, *link)
 	}
 	defer g.Body.Close()
-    log.Print("[Snapshot] Found perf archive for ", *pname)
+	log.Print("[Snapshot] Found perf archive for ", *pname)
 	f, ef := ioutil.TempFile("/tmp", "SNPSCHT-"+*pname+"-")
 	if ef != nil {
 		log.Print("[Snapshot/error in TempFile]", ef)
@@ -134,7 +134,7 @@ func getSS(pvmountp *string, link *string, pname *string) (string, string, error
 		return "", "", fmt.Errorf("Saving to persistent volume failed:", d, "|||", f.Name(), ":::", er)
 	}
 	log.Print("[Snapshot] data moved to ", d+uuid.String())
-	return uuid.String(), d+uuid.String(), nil
+	return uuid.String(), d + uuid.String(), nil
 }
 
 func New(extr *string, m *string, db *sql.DB, a *models.App, p *models.Pod, l *layout.Layout) *models.Snapshot {
@@ -146,15 +146,15 @@ func New(extr *string, m *string, db *sql.DB, a *models.App, p *models.Pod, l *l
 	log.Printf("LINK ADDRESS: %s", link)
 	g, loc, err := getSS(m, &link, p.Name)
 	if err != nil {
-        log.Printf("[Snapshot] Couldn't get snapshot")
+		log.Printf("[Snapshot] Couldn't get snapshot")
 		return nil
 	}
 	log.Printf("[DB/Snapshot] Storing (%d @ %d: %s)", l.AppId, l.EnvId, g)
 	t := time.Now()
 	res, err := db.Exec("INSERT INTO snapshot(uuid, pvloc, appid, envid, podid, layid, created) values (?, ?, ?, ?, ?, ?, ?)",
-        g, loc, l.AppId, l.EnvId, p.ID, l.Id, t)
+		g, loc, l.AppId, l.EnvId, p.ID, l.Id, t)
 
-    log.Printf("[DB/Snapshot] NEW: %+v, err: %s", res, err)
+	log.Printf("[DB/Snapshot] NEW: %+v, err: %s", res, err)
 
 	if err != nil {
 		return nil

@@ -35,7 +35,7 @@ func InitTable(db *sql.DB) {
 type PodInternal struct {
 	AppId int64
 	EnvId int64
-	Name    string
+	Name  string
 
 	id      int64
 	layId   int64
