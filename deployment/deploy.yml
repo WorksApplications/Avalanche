@@ -99,7 +99,7 @@ spec:
     spec:
       containers:
       - name: collect
-        image: /resource_optimization/collect:v4
+        image: /resource_optimization/collect:v5
         ports:
         - containerPort: 8080
         imagePullPolicy: Always

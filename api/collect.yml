@@ -317,13 +317,36 @@ paths:
           schema:
             $ref: "#/definitions/snapshot"
       operationId: newSnapshot
+    get:
+      parameters:
+        - name: appid
+          type: string
+          in: path
+          required: true
+        - name: environment
+          type: string
+          in: path
+          required: true
+        - name: pod
+          type: string
+          in: path
+          required: true
+      responses:
+        200:
+          description: |
+            "this shows snapshots"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/snapshot"
+      operationId: listSnapshots
 
   /available-pods:
     get:
       responses:
         200:
           description: |
-            "this makes a new snapshot"
+            "this shows list of currently perf-enabled pods"
           schema:
             type: array
             items:

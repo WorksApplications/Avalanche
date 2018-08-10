@@ -15,6 +15,11 @@ type Layout struct {
 	Lives int64
 }
 
+/* LAYOUT is intended to keep tuples of appid and envid, because there is app x env possibilities,
+   even though the API endpoint seems to be organized /apps/<app>/envs/<env> thus environment is included by application.
+   The database structure follows the real _physical_ constraint of those target applications,
+   and our server returns a structure which is "resolved" as if they are inclusive relation.  */
+
 func InitTable(db *sql.DB) {
 	res, err := db.Exec(
 		"CREATE TABLE layout(" +

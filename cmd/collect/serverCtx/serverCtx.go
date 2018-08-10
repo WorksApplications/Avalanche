@@ -25,6 +25,7 @@ import (
 type ServerCtx struct {
 	Db      *sql.DB
 	Detect  string /* detect address */
+	Extract string /* extract address */
 	Pvmount string
 	Perfing []int64
 }
@@ -86,11 +87,12 @@ func (s *ServerCtx) DescribeEnvironmentHandler(params operations.DescribeEnviron
 	app := app.Describe(s.Db, &params.Appid)
 	env := environ.Get(s.Db, &params.Environment)
 	if app == nil || env == nil {
-        log.Print("Describe Enviroment failed with 404", &params.Appid, &params.Environment, app, env)
+		log.Print("Describe Enviroment failed with 404", &params.Appid, &params.Environment, app, env)
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	lays := layout.OfBoth(s.Db, env, app)
 	if lays == nil {
+		log.Print("non")
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	body := environ.FromLayout(s.Db, lays)
@@ -101,14 +103,16 @@ func (s *ServerCtx) GetPodsHandler(params operations.GetPodsParams) middleware.R
 	app := app.Describe(s.Db, &params.Appid)
 	env := environ.Get(s.Db, &params.Environment)
 	if app == nil || env == nil {
+		log.Print("mya")
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	lays := layout.OfBoth(s.Db, env, app)
 	if lays == nil {
+		log.Print("myu")
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	ps := pod.FromLayout(s.Db, lays)
-	body := make([]*models.Pod, 0, len(ps))
+	body := make([]*models.Pod, len(ps))
 	for i, p := range ps {
 		body[i] = p.ToResponse()
 	}
@@ -140,8 +144,28 @@ func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) midd
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	pod := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
-	body := snapshot.New(&s.Pvmount, s.Db, pod, lay)
-	return operations.NewNewSnapshotOK().WithPayload(&body)
+	body := snapshot.New(&s.Extract, &s.Pvmount, s.Db, app, pod, lay)
+	return operations.NewNewSnapshotOK().WithPayload(body)
+}
+
+func (s *ServerCtx) ListSnapshotsHandler(params operations.ListSnapshotsParams) middleware.Responder {
+	app := app.Describe(s.Db, &params.Appid)
+	env := environ.Get(s.Db, &params.Environment)
+	if app == nil || env == nil {
+		return operations.NewDescribeAppDefault(404).WithPayload(nil)
+	}
+	lay := layout.OfBoth(s.Db, env, app)
+	if lay == nil {
+		return operations.NewDescribeAppDefault(404).WithPayload(nil)
+	}
+	pod := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
+	sxs := snapshot.FromPod(s.Db, pod)
+	body := make([]*models.Snapshot, len(sxs))
+	for i, ss := range sxs {
+		body[i] = ss.ToResponse(s.Db)
+	}
+
+	return operations.NewListSnapshotsOK().WithPayload(body)
 }
 
 func (s *ServerCtx) pull() {
@@ -216,4 +240,5 @@ func (s *ServerCtx) InitHandle() {
 	layout.InitTable(s.Db)
 	pod.InitTable(s.Db)
 	app.InitTable(s.Db)
+	snapshot.InitTable(s.Db)
 }
