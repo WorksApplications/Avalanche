@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
@@ -23,11 +24,12 @@ import (
 )
 
 type ServerCtx struct {
-	Db      *sql.DB
-	Detect  string /* detect address */
-	Extract string /* extract address */
-	Pvmount string
-	Perfing []int64
+	Db        *sql.DB
+	Detect    string /* detect address */
+	Extract   string /* extract address */
+	Pvmount   string
+	Temporald string
+	Perfing   []int64
 }
 
 func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Responder {
@@ -143,8 +145,9 @@ func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) midd
 	if lay == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
+	os.MkdirAll(s.Temporald, 0755)
 	pod := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
-	body := snapshot.New(&s.Extract, &s.Pvmount, s.Db, app, pod, lay)
+	body := snapshot.New(&s.Extract, &s.Pvmount, &s.Temporald, s.Db, app, pod, lay)
 	return operations.NewNewSnapshotOK().WithPayload(body)
 }
 
@@ -220,7 +223,7 @@ func (s *ServerCtx) PollPodInfo() {
 func recursiveInsert(db *sql.DB, p *detect.Subscription) []int64 {
 	found := make([]int64, 0, 2)
 	/* BUG XXX It doesn't update existing environ/pod! It is a bug XXX */
-    /* Is it still so? */
+	/* Is it still so? */
 	en := environ.Assign(db, &p.Env)
 	for _, a := range p.Apps {
 		an := app.Assign(db, &a.Name, &a.Seen)

@@ -37,6 +37,7 @@ func main() {
 	port := flag.Int("port", 4981, "Port for this server")
 	detect := flag.String("detect", "http://localhost:8080", "\"detect\" service address")
 	extract := flag.String("extract", "http://localhost:8080", "\"extract\" service address")
+	tempd := flag.String("volatile", "/tmp/debug-collect/collect-volatile", "\"directory for temporal file\"")
 	ssstore := flag.String("persistent", "/tmp/debug-collect", "mount point of persistent volume for snapshot")
 
 	flag.Parse()
@@ -48,7 +49,7 @@ func main() {
 	defer server.Shutdown()
 
 	db := establishDBConn(*dbconf)
-	ctx := serverCtx.ServerCtx{db, *detect, *extract, *ssstore, make([]int64, 0)}
+	ctx := serverCtx.ServerCtx{db, *detect, *extract, *ssstore, *tempd, make([]int64, 0)}
 
 	if *init {
 		ctx.InitHandle()
