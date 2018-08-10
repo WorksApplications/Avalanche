@@ -56,7 +56,7 @@ spec:
     spec:
       containers:
       - name: extract
-        image: /resource_optimization/extract:v1.2
+        image: /resource_optimization/extract:v2
         ports:
         - containerPort: 5000
 
@@ -110,7 +110,6 @@ spec:
           - /collect
           - --port=8080
           - --detect=http://detect:8080
-          - --extract=http://extract:8080
           - --db=example:example@tcp(mariadb)/collekt?parseTime=True
           - --persistent=/var/spool/collect
       volumes:
