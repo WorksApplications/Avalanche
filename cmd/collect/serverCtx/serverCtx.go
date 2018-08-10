@@ -160,7 +160,7 @@ func (s *ServerCtx) ListSnapshotsHandler(params operations.ListSnapshotsParams) 
 	}
 	pod := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
 	sxs := snapshot.FromPod(s.Db, pod)
-    body := make([]*models.Snapshot, 0, len(sxs))
+    body := make([]*models.Snapshot, len(sxs))
     for i, ss := range sxs {
         body[i] = ss.ToResponse(s.Db)
     }
