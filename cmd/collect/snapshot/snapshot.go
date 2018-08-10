@@ -24,12 +24,11 @@ func InitTable(db *sql.DB) {
 	res, err := db.Exec(
 		"CREATE TABLE snapshot(" +
 			"id MEDIUMINT NOT NULL AUTO_INCREMENT, " +
-			"name CHAR(80), " +
 			"uuid CHAR(80), " +
 			"envid int, " +
 			"appid int, " +
 			"layid int, " +
-			"lives int, " +
+			"podid int, " +
 			"created DATETIME, " +
 			"pvloc CHAR(80), " +
 			"PRIMARY KEY (id) " +
@@ -37,10 +36,39 @@ func InitTable(db *sql.DB) {
 	log.Println("[DB/Snapshot] Initiate: ", res, err)
 }
 
+func List(db *sql.DB, where *string) []*models.Snapshot {
+	rows, err := db.Query(fmt.Sprintf("SELECT uuid, created, appid, envid, layid, pvloc FROM snapshot %s", *where))
+	if err != nil {
+		log.Fatal("[DB/Snapshot] ", err)
+		return nil
+	}
+	defer rows.Close()
+
+	sxs := make([]*models.Snapshot, 0)
+	for rows.Next() {
+		sx := models.Snapshot{}
+		var appid int64
+		var envid int64
+		var layid int64
+		var link string
+		err = rows.Scan(&sx.UUID, &sx.CreatedAt, &appid, &envid, &layid, &link)
+		if err != nil {
+			log.Print("[DB/Snapshot] Scan", err)
+		}
+		sxs = append(sxs, &sx)
+	}
+	return sxs
+}
+
+func FromPod(db *sql.DB, p *models.Pod) []*models.Snapshot {
+	wh := fmt.Sprintf("WHERE podid = \"%d\"", p.ID)
+	return List(db, &wh)
+}
+
 func getSS(pvmountp *string, link *string, pname *string) (string, error) {
 	/* try access to the "perf.tar.gz" file */
 	g, eg := http.Get(*link)
-	if g.StatusCode != http.StatusOK || eg != nil {
+	if eg != nil || g.StatusCode != http.StatusOK {
 		log.Print("[Snapshot/error in retrieving]", eg, *link, g)
 		return "", fmt.Errorf("Snapshot wasn't retrievable! err:%+v, link:%s", eg, *link)
 	}
@@ -90,7 +118,7 @@ func New(extr *string, m *string, db *sql.DB, a *models.App, p *models.Pod, l *l
 		return nil
 	}
 	t := time.Now()
-	res, err := db.Exec("INSERT INTO snapshot(name, pvloc, appid, envid, layid, created) values (?, ?, ?, ?, ?, ?)", p.Name, g, l.AppId, l.EnvId, l.Id, t)
+	res, err := db.Exec("INSERT INTO snapshot(name, pvloc, appid, envid, podid, layid, created) values (?, ?, ?, ?, ?, ?, ?)", p.Name, g, l.AppId, l.EnvId, p.ID, l.Id, t)
 	log.Println("[DB/Snapshot] NEW: ", res, err)
 	if err != nil {
 		return nil
