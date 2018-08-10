@@ -66,11 +66,16 @@ func FromPod(db *sql.DB, p *models.Pod) []*models.Snapshot {
 }
 
 func getSS(pvmountp *string, link *string, pname *string) (string, error) {
-	/* try access to the "perf.tar.gz" file */
+	/* try access to the "perf.tar.gz" file for extract */
 	g, eg := http.Get(*link)
 	if eg != nil || g.StatusCode != http.StatusOK {
-		log.Print("[Snapshot/error in retrieving]", eg, *link, g)
-		return "", fmt.Errorf("Snapshot wasn't retrievable! err:%+v, link:%s", eg, *link)
+		remo_msg := ""
+		if eg == nil {
+			msg, _ := ioutil.ReadAll(g.Body)
+			remo_msg = string(msg)
+		}
+		log.Print("[Snapshot/error in retrieving]", eg, *link, g, remo_msg)
+		return "", fmt.Errorf("Snapshot wasn't retrievable! Check mischo: err:%+v, link:%s", eg, *link)
 	}
 	defer g.Body.Close()
 	f, ef := ioutil.TempFile("/tmp", "SNPSCHT-"+*pname+"-")
