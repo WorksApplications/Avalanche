@@ -30,7 +30,7 @@ type ServerCtx struct {
 	Pvmount   string
 	Temporald string
 	Perfing   map[int64]struct{}
-    IsMaster  bool
+	IsMaster  bool
 }
 
 func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Responder {
@@ -39,7 +39,7 @@ func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Respon
 
 func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) middleware.Responder {
 	body := make([]*models.Pod, 0)
-    log.Printf("%+v", s.Perfing)
+	log.Printf("%+v", s.Perfing)
 	for pf, _ := range s.Perfing {
 		p := pod.Describe(s.Db, pf)
 		if p == nil {
@@ -195,12 +195,19 @@ func (s *ServerCtx) pull() {
 	for _, e := range p {
 		/* Enlist live pods in this environment */
 		fs := recursiveInsert(s.Db, &e)
-        for _, f := range(fs) {
-            found[f] = struct{}{}
-        }
+		for _, f := range fs {
+			found[f] = struct{}{}
+		}
 	}
 	s.Perfing = found
 	log.Print("[Discovery] Found:", len(s.Perfing))
+}
+
+func mapIsLiveFlag(ps []*models.Pod, alive map[int64]struct{}) {
+    for _, p := range(ps) {
+        _, prs := alive[p.ID]
+        p.IsLive = prs
+    }
 }
 
 func (s *ServerCtx) PollPodInfo() {
