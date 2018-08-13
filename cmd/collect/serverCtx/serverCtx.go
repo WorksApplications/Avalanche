@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
@@ -13,7 +14,7 @@ import (
 
 	"database/sql"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/apps"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/environments"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/pod"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/snapshot"
@@ -23,11 +24,13 @@ import (
 )
 
 type ServerCtx struct {
-	Db      *sql.DB
-	Detect  string /* detect address */
-	Extract string /* extract address */
-	Pvmount string
-	Perfing []int64
+	Db        *sql.DB
+	Detect    string /* detect address */
+	Extract   string /* extract address */
+	Pvmount   string
+	Temporald string
+	Perfing   map[int64]struct{}
+	IsMaster  bool
 }
 
 func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Responder {
@@ -36,8 +39,9 @@ func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Respon
 
 func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) middleware.Responder {
 	body := make([]*models.Pod, 0)
-	for _, pfing := range s.Perfing {
-		p := pod.Describe(s.Db, pfing)
+	log.Printf("%+v", s.Perfing)
+	for pf, _ := range s.Perfing {
+		p := pod.Describe(s.Db, pf)
 		if p == nil {
 			operations.NewDescribeAppDefault(503).WithPayload(nil)
 		}
@@ -64,11 +68,14 @@ func (s *ServerCtx) DescribeAppHandler(params operations.DescribeAppParams) midd
 	if body == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
+	for _, e := range body.Environments {
+		mapIsLiveFlag(e.Pods, s.Perfing)
+	}
 	return operations.NewDescribeAppOK().WithPayload(body)
 }
 
 func (s *ServerCtx) GetEnvironmentsHandler(params operations.GetEnvironmentsParams) middleware.Responder {
-	app := app.Describe(s.Db, &params.Appid)
+	app := app.Get(s.Db, &params.Appid)
 	if app == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
@@ -80,6 +87,9 @@ func (s *ServerCtx) GetEnvironmentsHandler(params operations.GetEnvironmentsPara
 	for _, l := range lays {
 		body = append(body, environ.FromLayout(s.Db, l))
 	}
+	for _, e := range body {
+		mapIsLiveFlag(e.Pods, s.Perfing)
+	}
 	return operations.NewGetEnvironmentsOK().WithPayload(body)
 }
 
@@ -87,15 +97,15 @@ func (s *ServerCtx) DescribeEnvironmentHandler(params operations.DescribeEnviron
 	app := app.Describe(s.Db, &params.Appid)
 	env := environ.Get(s.Db, &params.Environment)
 	if app == nil || env == nil {
-		log.Print("Describe Enviroment failed with 404", &params.Appid, &params.Environment, app, env)
+		log.Print("Describe Environment failed with 404", &params.Appid, &params.Environment, app, env)
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	lays := layout.OfBoth(s.Db, env, app)
 	if lays == nil {
-		log.Print("non")
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	body := environ.FromLayout(s.Db, lays)
+	mapIsLiveFlag(body.Pods, s.Perfing)
 	return operations.NewDescribeEnvironmentOK().WithPayload(body)
 }
 
@@ -103,12 +113,10 @@ func (s *ServerCtx) GetPodsHandler(params operations.GetPodsParams) middleware.R
 	app := app.Describe(s.Db, &params.Appid)
 	env := environ.Get(s.Db, &params.Environment)
 	if app == nil || env == nil {
-		log.Print("mya")
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	lays := layout.OfBoth(s.Db, env, app)
 	if lays == nil {
-		log.Print("myu")
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	ps := pod.FromLayout(s.Db, lays)
@@ -116,6 +124,7 @@ func (s *ServerCtx) GetPodsHandler(params operations.GetPodsParams) middleware.R
 	for i, p := range ps {
 		body[i] = p.ToResponse()
 	}
+	mapIsLiveFlag(body, s.Perfing)
 	return operations.NewGetPodsOK().WithPayload(body)
 }
 
@@ -130,6 +139,7 @@ func (s *ServerCtx) DescribePodHandler(params operations.DescribePodParams) midd
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	body := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
+	_, body.IsLive = s.Perfing[body.ID]
 	return operations.NewDescribePodOK().WithPayload(body)
 }
 
@@ -143,8 +153,9 @@ func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) midd
 	if lay == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
+	os.MkdirAll(s.Temporald, 0755)
 	pod := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
-	body := snapshot.New(&s.Extract, &s.Pvmount, s.Db, app, pod, lay)
+	body := snapshot.New(&s.Extract, &s.Pvmount, &s.Temporald, s.Db, app, pod, lay)
 	return operations.NewNewSnapshotOK().WithPayload(body)
 }
 
@@ -189,13 +200,23 @@ func (s *ServerCtx) pull() {
 		log.Printf("res: %+v", p)
 		return
 	}
-	found := make([]int64, 0, 8)
+	found := make(map[int64]struct{})
 	for _, e := range p {
-		f := recursiveInsert(s.Db, &e)
-		found = append(found, f...)
+		/* Enlist live pods in this environment */
+		fs := recursiveInsert(s.Db, &e)
+		for _, f := range fs {
+			found[f] = struct{}{}
+		}
 	}
 	s.Perfing = found
-	log.Print("[Discovery] Found:", s.Perfing)
+	log.Print("[Discovery] Found:", len(s.Perfing))
+}
+
+func mapIsLiveFlag(ps []*models.Pod, alive map[int64]struct{}) {
+	for _, p := range ps {
+		_, prs := alive[p.ID]
+		p.IsLive = prs
+	}
 }
 
 func (s *ServerCtx) PollPodInfo() {
@@ -220,7 +241,7 @@ func (s *ServerCtx) PollPodInfo() {
 func recursiveInsert(db *sql.DB, p *detect.Subscription) []int64 {
 	found := make([]int64, 0, 2)
 	/* BUG XXX It doesn't update existing environ/pod! It is a bug XXX */
-    /* Is it still so? */
+	/* Is it still so? */
 	en := environ.Assign(db, &p.Env)
 	for _, a := range p.Apps {
 		an := app.Assign(db, &a.Name, &a.Seen)

@@ -99,20 +99,21 @@ spec:
     spec:
       containers:
       - name: collect
-        image: /resource_optimization/collect:v5
+        image: /resource_optimization/collect:v6
         ports:
         - containerPort: 8080
         imagePullPolicy: Always
         volumeMounts:
           - name: perftank
-            mountPath: /var/spool/collect
+            mountPath: /persistent
         command:
           - /collect
           - --port=8080
           - --detect=http://detect:8080
           - --extract=http://extract:8080
           - --db=example:example@tcp(mariadb)/collekt?parseTime=True
-          - --persistent=/var/spool/collect
+          - --persistent=/persistent
+          - --volatile=/volatile
       volumes:
         - name: perftank
           persistentVolumeClaim:

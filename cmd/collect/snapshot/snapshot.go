@@ -14,8 +14,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/google/uuid"
 
-	/* XXX Refactor environments -> enviroment */
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/environments"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/pod"
 
@@ -92,7 +91,7 @@ func (s *SnapshotInternal) ToResponse(db *sql.DB) *models.Snapshot {
 	return &r
 }
 
-func getSS(pvmountp *string, link *string, pname *string) (string, string, error) {
+func getSS(pvmountp *string, temporald *string, link *string, pname *string) (string, string, error) {
 	/* try access to the "perf.tar.gz" file for extract */
 	g, eg := http.Get(*link)
 	if eg != nil || g.StatusCode != http.StatusOK {
@@ -106,7 +105,7 @@ func getSS(pvmountp *string, link *string, pname *string) (string, string, error
 	}
 	defer g.Body.Close()
 	log.Print("[Snapshot] Found perf archive for ", *pname)
-	f, ef := ioutil.TempFile("/tmp", "SNPSCHT-"+*pname+"-")
+	f, ef := ioutil.TempFile(*temporald, "SNPSCHT-"+*pname+"-")
 	if ef != nil {
 		log.Print("[Snapshot/error in TempFile]", ef)
 		return "", "", fmt.Errorf("Temporal Snapshot file is failed to be created!: %+v", ef)
@@ -127,7 +126,7 @@ func getSS(pvmountp *string, link *string, pname *string) (string, string, error
 	d := fmt.Sprintf("%s/%s/%x/", *pvmountp, *pname, uuid.NodeID()[3])
 	/* ... and pave the path */
 	os.MkdirAll(d, 0755)
-    fn := d+uuid.String()
+	fn := d + uuid.String()
 
 	er := os.Rename(f.Name(), fn)
 	if er != nil {
@@ -138,14 +137,14 @@ func getSS(pvmountp *string, link *string, pname *string) (string, string, error
 	return uuid.String(), fn, nil
 }
 
-func New(extr *string, m *string, db *sql.DB, a *models.App, p *models.Pod, l *layout.Layout) *models.Snapshot {
+func New(extr *string, mount *string, tempd *string, db *sql.DB, a *models.App, p *models.Pod, l *layout.Layout) *models.Snapshot {
 	k, err := url.Parse(pod.ToLogAddress(db, p.ID))
 	if err != nil {
 		return nil
 	}
 	link := *extr + "/?resource=" + k.Path + "perf-record/perf-" + *a.Name + ".tar.gz"
 	log.Printf("LINK ADDRESS: %s", link)
-	g, loc, err := getSS(m, &link, p.Name)
+	g, loc, err := getSS(mount, tempd, &link, p.Name)
 	if err != nil {
 		log.Printf("[Snapshot] Couldn't get snapshot")
 		return nil
