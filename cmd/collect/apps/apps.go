@@ -3,7 +3,7 @@ package app
 import (
 	"database/sql"
 	"fmt"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/environments"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 	"github.com/go-openapi/strfmt"

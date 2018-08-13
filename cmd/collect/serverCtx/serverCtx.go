@@ -14,7 +14,7 @@ import (
 
 	"database/sql"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/apps"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/environments"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/pod"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/snapshot"
