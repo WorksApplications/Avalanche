@@ -69,6 +69,10 @@ func (s *ServerCtx) DescribeAppHandler(params operations.DescribeAppParams) midd
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	for _, e := range body.Environments {
+        if e == nil {
+            log.Print("[WARN] nil Environment is in body")
+            continue
+        }
 		mapIsLiveFlag(e.Pods, s.Perfing)
 	}
 	return operations.NewDescribeAppOK().WithPayload(body)
