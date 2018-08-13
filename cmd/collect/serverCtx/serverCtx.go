@@ -68,6 +68,9 @@ func (s *ServerCtx) DescribeAppHandler(params operations.DescribeAppParams) midd
 	if body == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
+	for _, e := range body.Environments {
+		mapIsLiveFlag(e.Pods, s.Perfing)
+	}
 	return operations.NewDescribeAppOK().WithPayload(body)
 }
 
@@ -84,6 +87,9 @@ func (s *ServerCtx) GetEnvironmentsHandler(params operations.GetEnvironmentsPara
 	for _, l := range lays {
 		body = append(body, environ.FromLayout(s.Db, l))
 	}
+	for _, e := range body {
+		mapIsLiveFlag(e.Pods, s.Perfing)
+	}
 	return operations.NewGetEnvironmentsOK().WithPayload(body)
 }
 
@@ -91,7 +97,7 @@ func (s *ServerCtx) DescribeEnvironmentHandler(params operations.DescribeEnviron
 	app := app.Describe(s.Db, &params.Appid)
 	env := environ.Get(s.Db, &params.Environment)
 	if app == nil || env == nil {
-		log.Print("Describe Enviroment failed with 404", &params.Appid, &params.Environment, app, env)
+		log.Print("Describe Environment failed with 404", &params.Appid, &params.Environment, app, env)
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	lays := layout.OfBoth(s.Db, env, app)
@@ -99,6 +105,7 @@ func (s *ServerCtx) DescribeEnvironmentHandler(params operations.DescribeEnviron
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	body := environ.FromLayout(s.Db, lays)
+	mapIsLiveFlag(body.Pods, s.Perfing)
 	return operations.NewDescribeEnvironmentOK().WithPayload(body)
 }
 
@@ -117,6 +124,7 @@ func (s *ServerCtx) GetPodsHandler(params operations.GetPodsParams) middleware.R
 	for i, p := range ps {
 		body[i] = p.ToResponse()
 	}
+	mapIsLiveFlag(body, s.Perfing)
 	return operations.NewGetPodsOK().WithPayload(body)
 }
 
@@ -131,6 +139,7 @@ func (s *ServerCtx) DescribePodHandler(params operations.DescribePodParams) midd
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	body := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
+	_, body.IsLive = s.Perfing[body.ID]
 	return operations.NewDescribePodOK().WithPayload(body)
 }
 
@@ -204,10 +213,10 @@ func (s *ServerCtx) pull() {
 }
 
 func mapIsLiveFlag(ps []*models.Pod, alive map[int64]struct{}) {
-    for _, p := range(ps) {
-        _, prs := alive[p.ID]
-        p.IsLive = prs
-    }
+	for _, p := range ps {
+		_, prs := alive[p.ID]
+		p.IsLive = prs
+	}
 }
 
 func (s *ServerCtx) PollPodInfo() {
