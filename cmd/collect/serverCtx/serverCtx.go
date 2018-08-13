@@ -30,6 +30,7 @@ type ServerCtx struct {
 	Pvmount   string
 	Temporald string
 	Perfing   map[int64]struct{}
+    IsMaster  bool
 }
 
 func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Responder {
@@ -71,7 +72,7 @@ func (s *ServerCtx) DescribeAppHandler(params operations.DescribeAppParams) midd
 }
 
 func (s *ServerCtx) GetEnvironmentsHandler(params operations.GetEnvironmentsParams) middleware.Responder {
-	app := app.Describe(s.Db, &params.Appid)
+	app := app.Get(s.Db, &params.Appid)
 	if app == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
@@ -95,7 +96,6 @@ func (s *ServerCtx) DescribeEnvironmentHandler(params operations.DescribeEnviron
 	}
 	lays := layout.OfBoth(s.Db, env, app)
 	if lays == nil {
-		log.Print("non")
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	body := environ.FromLayout(s.Db, lays)
@@ -106,12 +106,10 @@ func (s *ServerCtx) GetPodsHandler(params operations.GetPodsParams) middleware.R
 	app := app.Describe(s.Db, &params.Appid)
 	env := environ.Get(s.Db, &params.Environment)
 	if app == nil || env == nil {
-		log.Print("mya")
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	lays := layout.OfBoth(s.Db, env, app)
 	if lays == nil {
-		log.Print("myu")
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	ps := pod.FromLayout(s.Db, lays)
