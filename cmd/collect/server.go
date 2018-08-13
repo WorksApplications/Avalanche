@@ -49,7 +49,7 @@ func main() {
 	defer server.Shutdown()
 
 	db := establishDBConn(*dbconf)
-	ctx := serverCtx.ServerCtx{db, *detect, *extract, *ssstore, *tempd, make([]int64, 0)}
+	ctx := serverCtx.ServerCtx{db, *detect, *extract, *ssstore, *tempd, make(map[int64]struct{}, 0)}
 
 	if *init {
 		ctx.InitHandle()

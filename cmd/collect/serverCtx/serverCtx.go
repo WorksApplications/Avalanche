@@ -29,7 +29,7 @@ type ServerCtx struct {
 	Extract   string /* extract address */
 	Pvmount   string
 	Temporald string
-	Perfing   []int64
+	Perfing   map[int64]struct{}
 }
 
 func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Responder {
@@ -38,8 +38,9 @@ func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Respon
 
 func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) middleware.Responder {
 	body := make([]*models.Pod, 0)
-	for _, pfing := range s.Perfing {
-		p := pod.Describe(s.Db, pfing)
+    log.Printf("%+v", s.Perfing)
+	for pf, _ := range s.Perfing {
+		p := pod.Describe(s.Db, pf)
 		if p == nil {
 			operations.NewDescribeAppDefault(503).WithPayload(nil)
 		}
@@ -192,13 +193,16 @@ func (s *ServerCtx) pull() {
 		log.Printf("res: %+v", p)
 		return
 	}
-	found := make([]int64, 0, 8)
+	found := make(map[int64]struct{})
 	for _, e := range p {
-		f := recursiveInsert(s.Db, &e)
-		found = append(found, f...)
+		/* Enlist live pods in this environment */
+		fs := recursiveInsert(s.Db, &e)
+        for _, f := range(fs) {
+            found[f] = struct{}{}
+        }
 	}
 	s.Perfing = found
-	log.Print("[Discovery] Found:", s.Perfing)
+	log.Print("[Discovery] Found:", len(s.Perfing))
 }
 
 func (s *ServerCtx) PollPodInfo() {
