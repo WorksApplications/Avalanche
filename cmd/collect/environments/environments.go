@@ -20,6 +20,7 @@ func InitTable(db *sql.DB) {
 			"id MEDIUMINT NOT NULL AUTO_INCREMENT, " +
 			"name CHAR(32) NOT NULL, " +
 			"addr TEXT, " +
+            "kubeapi TEXT, " +
 			"PRIMARY KEY (id) " +
 			")")
 	log.Println("[DB/Env]", res, err)
