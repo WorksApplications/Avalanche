@@ -20,7 +20,7 @@ func InitTable(db *sql.DB) {
 			"id MEDIUMINT NOT NULL AUTO_INCREMENT, " +
 			"name CHAR(32) NOT NULL, " +
 			"addr TEXT, " +
-            "kubeapi TEXT, " +
+			"kubeapi TEXT, " +
 			"PRIMARY KEY (id) " +
 			")")
 	log.Println("[DB/Env]", res, err)
@@ -70,16 +70,10 @@ func fill(db *sql.DB, s *models.Environment, lay *layout.Layout) {
 	s.LiveCount = int64(lsum)
 }
 
-/*
 func ListAll(db *sql.DB) []*models.Environment {
 	where := ""
-	envs := list(db, &where)
-	for _, env := range envs {
-		fill(db, env, nil)
-	}
-	return envs
+	return list(db, &where)
 }
-*/
 
 func Get(db *sql.DB, n *string) *models.Environment {
 	name := fmt.Sprintf("WHERE name = \"%s\"", *n)

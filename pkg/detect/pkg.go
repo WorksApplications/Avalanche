@@ -23,9 +23,10 @@ type App struct {
 }
 
 type Pod struct {
-	Name    string `json:"name"`
-	Link    string `json:"link"`
-	Perfing bool   `json:"perfing"`
+	Name       string     `json:"name"`
+	Link       string     `json:"link"`
+	Profiling  bool       `json:"profiled"`
+	LastUpdate *time.Time `json:"last_update"`
 	//node string
 	//namespace string
 }

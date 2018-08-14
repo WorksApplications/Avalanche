@@ -94,7 +94,7 @@ func followLink(sites []string) ([]string, error) {
 func toPods(ls []string, applink string) []detect.Pod {
 	pods := make([]detect.Pod, len(ls))
 	for i, l := range ls {
-		pods[i] = detect.Pod{strings.TrimRight(l, "/"), applink + l, false}
+		pods[i] = detect.Pod{strings.TrimRight(l, "/"), applink + l, false, nil}
 	}
 	return pods
 }
@@ -177,7 +177,7 @@ func Scan(env string) ([]detect.App, error) {
 			/* BUG this can cause SEGV */
 			defer con.Body.Close()
 			if err == nil && !isNotFound(con) {
-				pod.Perfing = true
+				pod.Profiling = true
 				npds = append(npds, pod)
 			}
 		}
