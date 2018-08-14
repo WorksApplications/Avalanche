@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+    "os"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/restapi"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/restapi/operations"
@@ -44,6 +45,9 @@ func main() {
 	flag.Parse()
 	args := flag.Args()
 	log.Println(args)
+
+    /* Prepare directory for temporal directory to save perf-data (Can be missing) */
+	os.MkdirAll(*tempd, 0755)
 
 	server := restapi.NewServer(api)
 	server.Port = *port
