@@ -10,11 +10,6 @@ import (
 	"time"
 )
 
-type SnapSummary struct {
-	id         int       `json:"id"`
-	created_at time.Time `json:"created_at"`
-}
-
 func InitTable(db *sql.DB) {
 	log.Println("making pod table")
 	res, err := db.Exec(
