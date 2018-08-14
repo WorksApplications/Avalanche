@@ -1,30 +1,31 @@
 const HtmlPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const path = require("path");
+const DefinePlugin = require("webpack").DefinePlugin;
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+// const OptimizeJsPlugin = require("optimize-js-plugin");
 
 const dest = path.resolve(__dirname, "./public");
 const index = path.resolve(__dirname, "./src/index.tsx");
 
 module.exports = env => {
   const isProduction = env && env.production;
+  const collectApiBase = env.COLLECT_API_BASE || process.env.COLLECT_API_BASE;
+  if (!collectApiBase) {
+    console.log(env);
+    throw new Error("COLLECT_API_BASE env var is required.");
+  }
   return {
     mode: isProduction ? "production" : "development",
     output: {
-      filename: "[name].js",
+      filename: "[name].[hash:8].js",
       path: dest
     },
     entry: {
       app: index
     },
     resolve: {
-      extensions: [
-        ".mjs",
-        ".ts",
-        ".tsx",
-        ".js",
-        ".json",
-        ".jsx"
-      ]
+      extensions: [".mjs", ".ts", ".tsx", ".js", ".json", ".jsx"]
     },
     module: {
       rules: [
@@ -60,10 +61,23 @@ module.exports = env => {
     plugins: [
       new HtmlPlugin(),
       new MiniCssExtractPlugin({
-        filename: "[name].css",
-        chunkFilename: "[id].css"
+        filename: "[name].[hash:8].css",
+        chunkFilename: "[id].[hash:8].css"
+      }),
+      new DefinePlugin({
+        COLLECT_API_BASE: JSON.stringify(collectApiBase)
       })
+      // new OptimizeJsPlugin({
+      //   sourceMap: true
+      // })
     ],
-    devtool: isProduction ? "cheap-module-eval-source-map" : "source-map"
+    optimization: {
+      minimizer: [
+        new UglifyJsPlugin({
+          sourceMap: true
+        })
+      ]
+    },
+    devtool: isProduction ? "source-map" : "cheap-module-eval-source-map"
   };
 };

@@ -8,8 +8,9 @@
   "private": true,
   "scripts": {
     "start": "webpack-serve",
-    "build": "webpack --env.production",
-    "test": "tslint -p tsconfig.json | jest"
+    "build": "webpack --env.production --env.COLLECT_API_BASE=\"http://flamescope.internal.worksap.com:31002\"",
+    "test": "tslint -p tsconfig.json | jest",
+    "serve": "serve -s ./public"
   },
   "dependencies": {
     "@types/node": "^10.5.7",
@@ -38,6 +39,7 @@
     "tslint-plugin-prettier": "^1.3.0",
     "tslint-react": "^3.6.0",
     "typescript": "^3.0.0-rc",
+    "uglifyjs-webpack-plugin": "^1.2.7",
     "webpack": "^4.16.2",
     "webpack-cli": "^3.1.0",
     "webpack-serve": "^2.0.2"

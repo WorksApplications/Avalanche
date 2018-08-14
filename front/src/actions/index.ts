@@ -1,4 +1,5 @@
 import { Action, ActionCreator, Dispatch } from "redux";
+import { COLLECT_API_BASE } from "../constants";
 import * as collect from "../generated/collect/api";
 
 export const SELECT_APP = "SELECT_APP";
@@ -10,7 +11,7 @@ export const GET_ENVS_OF_APP_RECEIVE = "GET_ENVS_OF_APP_RECEIVE";
 const collectClient = collect.DefaultApiFactory(
   {},
   undefined,
-  "http://flamescope.internal.worksap.com:31002"
+  COLLECT_API_BASE
 );
 
 export interface IAction {
