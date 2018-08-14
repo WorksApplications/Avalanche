@@ -1,11 +1,11 @@
 import { Component, h } from "preact";
 import { connect } from "preact-redux";
 import { bindActionCreators, Dispatch } from "redux";
-import { getApps } from "../data-flow/actions";
+import { getApps } from "../actions";
 // @ts-ignore
 import styles from "./App.scss";
-import TitleBar from "./layout/TitleBar";
-import Workspace from "./layout/Workspace";
+import TitleBar from "./TitleBar";
+import Workspace from "./Workspace";
 
 const mapDispatchToProps = (dispatch: Dispatch) =>
   bindActionCreators(

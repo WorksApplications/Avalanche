@@ -1,6 +1,6 @@
 import { applyMiddleware, createStore } from "redux";
 import thunk from "redux-thunk";
-import { indexApp } from "./reducers";
+import { indexApp } from "../reducers";
 
 export interface ISnapshotInfo {
   uuid: string;

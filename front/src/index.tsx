@@ -1,10 +1,10 @@
 import { h, render } from "preact";
 import { Provider } from "preact-redux";
-import App from "./components/App";
-import store from "./data-flow/store";
+import App from "./containers/App";
+import index from "./store/index";
 
 render(
-  <Provider store={store}>
+  <Provider store={index}>
     <App />
   </Provider>,
   document.body

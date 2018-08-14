@@ -1,8 +1,8 @@
 import { Component, h } from "preact";
 import { connect } from "preact-redux";
-import { IApplicationState, IPodInfo } from "../../data-flow/store";
-import PodCardList from "../PodCardList";
-import PodFilter from "../PodFilter";
+import PodCardList from "../components/PodCardList";
+import PodFilter from "../components/PodFilter";
+import { IApplicationState, IPodInfo } from "../store";
 // @ts-ignore
 import styles from "./RunningPodsView.scss";
 

@@ -1,9 +1,9 @@
 import { Component, h } from "preact";
 import { connect } from "preact-redux";
 import { bindActionCreators, Dispatch } from "redux";
-import * as actions from "../../data-flow/actions";
-import { IApplicationState } from "../../data-flow/store";
-import AppSelector from "../AppSelector";
+import * as actions from "../actions/index";
+import AppSelector from "../components/AppSelector";
+import { IApplicationState } from "../store";
 // @ts-ignore
 import styles from "./NavigationView.scss";
 

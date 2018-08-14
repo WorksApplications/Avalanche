@@ -1,12 +1,8 @@
 import { Component, h } from "preact";
 import { connect } from "preact-redux";
-import {
-  IApplicationState,
-  IPodInfo,
-  ISnapshotInfo
-} from "../../data-flow/store";
-import SnapshotFilter from "../SnapshotFilter";
-import SnapshotList, { IRowData } from "../SnapshotList";
+import SnapshotFilter from "../components/SnapshotFilter";
+import SnapshotList, { IRowData } from "../components/SnapshotList";
+import { IApplicationState, IPodInfo, ISnapshotInfo } from "../store";
 // @ts-ignore
 import styles from "./SnapshotsView.scss";
 

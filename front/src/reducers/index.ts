@@ -1,11 +1,11 @@
-import { Environment } from "../generated/collect";
 import {
   GET_APPS_RECEIVE,
   GET_ENVS_OF_APP_RECEIVE,
   IAction,
   SELECT_APP
-} from "./actions";
-import { IApplicationState, IEnvironmentInfo, IPodInfo } from "./store";
+} from "../actions";
+import { Environment } from "../generated/collect";
+import { IApplicationState, IEnvironmentInfo, IPodInfo } from "../store";
 
 const INIT: IApplicationState = {
   applicationName: null,
