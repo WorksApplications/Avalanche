@@ -10,7 +10,8 @@ export default (props: IProperty) => {
     optionItem: styles.option,
     optionList: styles.optionView,
     selector: styles.selector,
-    wrap: styles.wrap
+    wrap: styles.wrap,
+    selected: styles.selected
   };
   return <SelectorBase styles={bindingStyles} {...props} />;
 };

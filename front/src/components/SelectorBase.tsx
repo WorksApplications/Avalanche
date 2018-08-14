@@ -8,6 +8,7 @@ export interface IStyles {
   opened?: string;
   closed?: string;
   placeholder?: string;
+  selected?: string;
 }
 
 export interface IProperty {
@@ -50,7 +51,10 @@ class SelectorBase extends Component<IProperty, IState> {
       <div className={styles.optionList}>
         {this.props.options.map(o => (
           <div
-            className={styles.optionItem}
+            className={[
+              styles.optionItem,
+              o.value === this.state.selected ? styles.selected : undefined
+            ].join(" ")}
             key={o.value}
             onMouseDown={this.setSelectingOption.bind(this, o.value)}
           >
@@ -99,6 +103,10 @@ class SelectorBase extends Component<IProperty, IState> {
   };
 
   private setSelectingOption(value: string) {
+    if (this.state.selected === value) {
+      this.setState({ isOpen: false });
+      return;
+    }
     const newState = {
       isOpen: false,
       selected: value
