@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: detect
-        image: /resource_optimization/detect:v4.1
+        image: /resource_optimization/detect:v5
         ports:
         - containerPort: 8080
 ---
@@ -99,7 +99,7 @@ spec:
     spec:
       containers:
       - name: collect
-        image: /resource_optimization/collect:v6
+        image: /resource_optimization/collect:v6.1
         ports:
         - containerPort: 8080
         imagePullPolicy: Always
