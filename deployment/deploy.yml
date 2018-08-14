@@ -15,7 +15,10 @@ spec:
     spec:
       containers:
       - name: detect
-        image: /resource_optimization/detect:v5
+        command:
+          - /detect
+          - --db=example:example@tcp(mariadb)/collekt?parseTime=True
+        image: /resource_optimization/detect:v5.1
         ports:
         - containerPort: 8080
 ---

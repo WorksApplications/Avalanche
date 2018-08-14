@@ -99,6 +99,12 @@ definitions:
         type: string
       flamescope_link:
         type: string
+    example:
+      uuid: "d7eec7c1-daf5-4198-9503-6957aea0bf90"
+      created_at: "2018-01-15T03:00:00.000Z"
+      pod: "collabo"
+      environment: "systema"
+      flamescope_link: "http://flamescope.internal.worksap.com/#/heatmap/collabo-bd6dc859c-f7dfm%2Fa0%2Fd7eec7c1-daf5-4198-9503-6957aea0bf90"
 
   replicas_request:
     type: object

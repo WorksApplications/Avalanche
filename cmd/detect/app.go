@@ -34,6 +34,9 @@ func getAllEnviron(db *sql.DB) []string {
 func main() {
 	log.SetPrefix("detect:\t")
 	dbconf := flag.String("db", "example:example@localhost?parseTime=True", "DB connexion")
+	flag.Parse()
+	args := flag.Args()
+
 	db := establishDBConn(*dbconf)
 	es := getAllEnviron(db)
 

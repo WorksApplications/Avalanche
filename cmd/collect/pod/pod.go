@@ -22,6 +22,7 @@ func InitTable(db *sql.DB) {
 			"address TEXT, " +
 			"live boolean, " +
 			"created DATETIME, " +
+			"lastupdate DATETIME, " +
 			"PRIMARY KEY (id) " +
 			")")
 	log.Println("[DB/Pod]", res, err)
