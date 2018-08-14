@@ -85,9 +85,9 @@ func Get(db *sql.DB, n *string) *models.Environment {
 	}
 }
 
-func add(db *sql.DB, e *string) {
+func Add(db *sql.DB, e *string, k *string) {
 	log.Printf("[DB/Env] Storing %s\n", e)
-	db.Query("INSERT INTO environ(name) values (?)", e)
+	db.Query("INSERT INTO environ(name, kubeapi) values (?, ?)", e, k)
 }
 
 /*
@@ -103,7 +103,7 @@ func Describe(db *sql.DB, n *string) *models.Environment {
 func Assign(db *sql.DB, e *string) *models.Environment {
 	g := Get(db, e)
 	if g == nil {
-		add(db, e)
+		Add(db, e, nil)
 		g = Get(db, e)
 	}
 	return g

@@ -93,8 +93,9 @@ func followLink(sites []string) ([]string, error) {
 
 func toPods(ls []string, applink string) []detect.Pod {
 	pods := make([]detect.Pod, len(ls))
+	t := time.Now()
 	for i, l := range ls {
-		pods[i] = detect.Pod{strings.TrimRight(l, "/"), applink + l, false, nil}
+		pods[i] = detect.Pod{strings.TrimRight(l, "/"), applink + l, false, &t}
 	}
 	return pods
 }
