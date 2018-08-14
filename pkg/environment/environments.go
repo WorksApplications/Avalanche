@@ -20,6 +20,7 @@ func InitTable(db *sql.DB) {
 			"id MEDIUMINT NOT NULL AUTO_INCREMENT, " +
 			"name CHAR(32) NOT NULL, " +
 			"addr TEXT, " +
+			"kubeapi TEXT, " +
 			"PRIMARY KEY (id) " +
 			")")
 	log.Println("[DB/Env]", res, err)
@@ -57,28 +58,22 @@ func fill(db *sql.DB, s *models.Environment, lay *layout.Layout) {
 	for _, l := range lays {
 		lsum = lsum + int(l.Lives)
 		ps := pod.FromLayout(db, l)
-        log.Print(l, ps)
+		log.Print(l, ps)
 		rs := make([]*models.Pod, len(ps))
-        /* XXX assert is_live if it is really alive XXX */
+		/* XXX assert is_live if it is really alive XXX */
 		for i, p := range ps {
 			rs[i] = p.ToResponse()
 		}
 		pods = append(pods, rs...)
 	}
-    s.Pods = pods
+	s.Pods = pods
 	s.LiveCount = int64(lsum)
 }
 
-/*
 func ListAll(db *sql.DB) []*models.Environment {
 	where := ""
-	envs := list(db, &where)
-	for _, env := range envs {
-		fill(db, env, nil)
-	}
-	return envs
+	return list(db, &where)
 }
-*/
 
 func Get(db *sql.DB, n *string) *models.Environment {
 	name := fmt.Sprintf("WHERE name = \"%s\"", *n)
@@ -90,9 +85,9 @@ func Get(db *sql.DB, n *string) *models.Environment {
 	}
 }
 
-func add(db *sql.DB, e *string) {
+func Add(db *sql.DB, e *string, k *string) {
 	log.Printf("[DB/Env] Storing %s\n", e)
-	db.Query("INSERT INTO environ(name) values (?)", e)
+	db.Query("INSERT INTO environ(name, kubeapi) values (?, ?)", e, k)
 }
 
 /*
@@ -108,7 +103,7 @@ func Describe(db *sql.DB, n *string) *models.Environment {
 func Assign(db *sql.DB, e *string) *models.Environment {
 	g := Get(db, e)
 	if g == nil {
-		add(db, e)
+		Add(db, e, nil)
 		g = Get(db, e)
 	}
 	return g

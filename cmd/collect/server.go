@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/restapi"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/restapi/operations"
@@ -35,19 +36,25 @@ func main() {
 	init := flag.Bool("init", false, "Initialize?")
 	dbconf := flag.String("db", "example:example@localhost?parseTime=True", "DB connexion")
 	port := flag.Int("port", 4981, "Port for this server")
+	slave := flag.Bool("slave", false, "Whether it works as slave (no DB update)")
 	detect := flag.String("detect", "http://localhost:8080", "\"detect\" service address")
+	extract := flag.String("extract", "http://localhost:8080", "\"extract\" service address")
+	tempd := flag.String("volatile", "/tmp/debug-collect/collect-volatile", "\"directory for temporal file\"")
 	ssstore := flag.String("persistent", "/tmp/debug-collect", "mount point of persistent volume for snapshot")
 
 	flag.Parse()
 	args := flag.Args()
 	log.Println(args)
 
+	/* Prepare directory for temporal directory to save perf-data (Can be missing) */
+	os.MkdirAll(*tempd, 0755)
+
 	server := restapi.NewServer(api)
 	server.Port = *port
 	defer server.Shutdown()
 
 	db := establishDBConn(*dbconf)
-	ctx := serverCtx.ServerCtx{db, *detect, *ssstore, make([]int64, 0)}
+	ctx := serverCtx.ServerCtx{db, *detect, *extract, *ssstore, *tempd, make(map[int64]struct{}, 0), !*slave}
 
 	if *init {
 		ctx.InitHandle()
@@ -66,6 +73,8 @@ func main() {
 	api.DescribePodHandler = operations.DescribePodHandlerFunc(ctx.DescribePodHandler)
 
 	api.NewSnapshotHandler = operations.NewSnapshotHandlerFunc(ctx.NewSnapshotHandler)
+	api.ListSnapshotsHandler = operations.ListSnapshotsHandlerFunc(ctx.ListSnapshotsHandler)
+
 	api.ListAvailablePodsHandler = operations.ListAvailablePodsHandlerFunc(ctx.ListAvailablePods)
 	api.HealthzHandler = operations.HealthzHandlerFunc(ctx.HealthzHandler)
 

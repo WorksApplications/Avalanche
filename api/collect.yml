@@ -70,7 +70,7 @@ definitions:
       snapshots:
         type: array
         items:
-          $ref: "#/definitions/snapshot_summary"
+          $ref: "#/definitions/snapshot"
       is_live:
         type: boolean
       created_at:
@@ -80,19 +80,6 @@ definitions:
         type: string
       environment:
         type: string
-
-  snapshot_summary:
-    type: object
-    required:
-      - uuid 
-    properties:
-      uuid:
-        type: string
-        minLength: 36
-        maxLength: 36
-      created_at:
-        type: string
-        format: date-time
 
   snapshot:
     type: object
@@ -120,39 +107,6 @@ definitions:
     properties:
       count:
         type: integer
-
-  config:
-    type: object
-    required:
-      - date
-    properties:
-      date:
-        type: string
-        format: date-time
-      environment-config:
-        type: array
-        items:
-          $ref: "#/definitions/environment-config"
-
-  environment-config:
-    type: object
-    required:
-      - name
-    properties:
-      name:
-        type: string
-      tenant:
-        type: string
-      version:
-        type: string
-      landscape:
-        type: string
-      mischo-url:
-        type: string
-      service-url:
-        type: string
-      is_multitenant:
-        type: boolean
 
 paths:
   /healthz:
@@ -317,40 +271,38 @@ paths:
           schema:
             $ref: "#/definitions/snapshot"
       operationId: newSnapshot
-
-  /available-pods:
-    get:
-      responses:
-        200:
-          description: |
-            "this makes a new snapshot"
-          schema:
-            type: array
-            items:
-              $ref: "#/definitions/pod"
-      operationId: listAvailablePods
-
-  /config:
-    get:
-      responses:
-        200:
-          description: |
-            "this shows configuration overview"
-          schema:
-            $ref: "#/definitions/config"
-      operationId: getConfigs
-
-  /config/environment/{environment}:
     get:
       parameters:
+        - name: appid
+          type: string
+          in: path
+          required: true
         - name: environment
+          type: string
+          in: path
+          required: true
+        - name: pod
           type: string
           in: path
           required: true
       responses:
         200:
           description: |
-            "this describes about the pod"
+            "this shows snapshots"
           schema:
-            $ref: "#/definitions/environment-config"
-      operationId: getEnvironmentConfig
+            type: array
+            items:
+              $ref: "#/definitions/snapshot"
+      operationId: listSnapshots
+
+  /available-pods:
+    get:
+      responses:
+        200:
+          description: |
+            "this shows list of currently perf-enabled pods"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/pod"
+      operationId: listAvailablePods

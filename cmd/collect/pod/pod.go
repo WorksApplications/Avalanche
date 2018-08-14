@@ -10,11 +10,6 @@ import (
 	"time"
 )
 
-type SnapSummary struct {
-	id         int       `json:"id"`
-	created_at time.Time `json:"created_at"`
-}
-
 func InitTable(db *sql.DB) {
 	log.Println("making pod table")
 	res, err := db.Exec(
@@ -35,9 +30,9 @@ func InitTable(db *sql.DB) {
 type PodInternal struct {
 	AppId int64
 	EnvId int64
+	Name  string
 
 	id      int64
-	name    string
 	layId   int64
 	created time.Time
 }
@@ -48,7 +43,7 @@ func (p *PodInternal) ToResponse() *models.Pod {
 	}
 	r := models.Pod{
 		ID:        p.id,
-		Name:      &p.name,
+		Name:      &p.Name,
 		CreatedAt: strfmt.DateTime(p.created),
 		IsLive:    false,
 		Snapshots: nil,
@@ -65,7 +60,7 @@ func list(db *sql.DB, where *string, fil bool) []*PodInternal {
 	pods := make([]*PodInternal, 0)
 	for rows.Next() {
 		p := PodInternal{}
-		err = rows.Scan(&p.id, &p.name, &p.AppId, &p.EnvId, &p.layId, &p.created)
+		err = rows.Scan(&p.id, &p.Name, &p.AppId, &p.EnvId, &p.layId, &p.created)
 		if err != nil {
 			log.Print(err)
 			log.Print("[DB/Pod] Scan", err)
@@ -108,22 +103,33 @@ func Describe(db *sql.DB, id int64) *PodInternal {
 	return pods[0]
 }
 
-func add(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) {
+func add(db *sql.DB, p *string, e int64, a int64, l int64, addr *string, lud *time.Time) {
 	log.Printf("[DB/Pod] Storing %s, %d, %d, %d, %s", *p, e, a, l, *addr)
 	/* created means the time when it is seen firstly */
-	now := time.Now()
-	res, err := db.Exec("INSERT INTO pod(name, envid, appid, layid, address, created) values (?, ?, ?, ?, ?, ?)", *p, e, a, l, *addr, now)
+	res, err := db.Exec("INSERT INTO pod(name, envid, appid, layid, address, created, lastupdate) values (?, ?, ?, ?, ?, ?, ?)",
+		*p, e, a, l, *addr, lud, lud)
 	if err != nil {
 		log.Print("[DB/Pod] Error EADD", err)
 	}
 	log.Print("[DB/Pod] OKADD", res)
 }
 
-func Assign(db *sql.DB, p *string, e int64, a int64, l int64, addr *string) *PodInternal {
+func update(db *sql.DB, p *string, e int64, a int64, l int64, addr *string, lud *time.Time) {
+	log.Printf("[DB/Pod] Storing %s, %d, %d, %d, %s", *p, e, a, l, *addr)
+	res, err := db.Exec("UPDATE pod SET (address, last_update) values (?, ?)", *addr, *lud)
+	if err != nil {
+		log.Print("[DB/Pod] Error EADD", err)
+	}
+	log.Print("[DB/Pod] OKADD", res)
+}
+
+func Assign(db *sql.DB, p *string, e int64, a int64, l int64, addr *string, lud *time.Time) *PodInternal {
 	g := Get(db, p, l)
 	if g == nil {
-		add(db, p, e, a, l, addr)
+		add(db, p, e, a, l, addr, lud)
 		g = Get(db, p, l)
+	} else {
+		update(db, p, e, a, l, addr, lud)
 	}
 	return g
 }

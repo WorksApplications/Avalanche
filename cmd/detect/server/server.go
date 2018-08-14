@@ -48,6 +48,9 @@ func subscribe(res http.ResponseWriter, req *http.Request, ch chan<- *util.Scann
 }
 
 func get(res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest, env *string) {
+	/* Prepare anew channel to pull out the result */
+	/* We make a channel instead of using bi-directional shared channel because we have to have a co-relation between
+	   request and the result. */
 	resc := make(chan *detect.Subscription, 16)
 	// Expect it to be closed by remote, so I won't defer close(resc)
 	sreq := util.ScannerRequest{util.DESC, env, resc}
