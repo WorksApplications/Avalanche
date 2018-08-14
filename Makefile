@@ -29,6 +29,9 @@ collect-img: bin/collect
 bin/collect: $(shell find cmd/collect -name *.go) $(PKG) generated_files/stub
 	CGO_ENABLED=0 go build -o bin/collect cmd/collect/server.go
 
+bin/status: $(shell find cmd/status -name *.go) $(PKG) generated_files/stub
+	CGO_ENABLED=0 go build -o bin/status cmd/status/status.go
+
 swagger:
 	swagger generate server -f api/collect.yml -t generated_files -A collect
 

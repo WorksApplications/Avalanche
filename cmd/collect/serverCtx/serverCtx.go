@@ -2,10 +2,10 @@ package serverCtx
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
@@ -14,10 +14,10 @@ import (
 
 	"database/sql"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/apps"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/pod"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/snapshot"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
 	_ "github.com/go-sql-driver/mysql"
@@ -69,6 +69,10 @@ func (s *ServerCtx) DescribeAppHandler(params operations.DescribeAppParams) midd
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	for _, e := range body.Environments {
+		if e == nil {
+			log.Print("[WARN] nil Environment is in body")
+			continue
+		}
 		mapIsLiveFlag(e.Pods, s.Perfing)
 	}
 	return operations.NewDescribeAppOK().WithPayload(body)
@@ -147,15 +151,20 @@ func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) midd
 	app := app.Describe(s.Db, &params.Appid)
 	env := environ.Get(s.Db, &params.Environment)
 	if app == nil || env == nil {
-		return operations.NewDescribeAppDefault(404).WithPayload(nil)
+		emsg := fmt.Sprintf("app %+v or environment %+v is invalid", app, env)
+		return operations.NewDescribeAppDefault(404).WithPayload(&models.Error{Message: &emsg})
 	}
 	lay := layout.OfBoth(s.Db, env, app)
 	if lay == nil {
-		return operations.NewDescribeAppDefault(404).WithPayload(nil)
+		emsg := fmt.Sprintf("ENOLAYOUT app %s is not deployed in environment %s", app.Name, env.Name)
+		return operations.NewDescribeAppDefault(404).WithPayload(&models.Error{Message: &emsg})
 	}
-	os.MkdirAll(s.Temporald, 0755)
 	pod := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
-	body := snapshot.New(&s.Extract, &s.Pvmount, &s.Temporald, s.Db, app, pod, lay)
+	body, err := snapshot.New(&s.Extract, &s.Pvmount, &s.Temporald, s.Db, app, pod, lay)
+	if err != nil {
+		emsg := fmt.Sprintf("Error in creating snapshot: +%v", err)
+		return operations.NewDescribeAppDefault(503).WithPayload(&models.Error{Message: &emsg})
+	}
 	return operations.NewNewSnapshotOK().WithPayload(body)
 }
 
@@ -240,8 +249,8 @@ func (s *ServerCtx) PollPodInfo() {
 
 func recursiveInsert(db *sql.DB, p *detect.Subscription) []int64 {
 	found := make([]int64, 0, 2)
-	/* BUG XXX It doesn't update existing environ/pod! It is a bug XXX */
-	/* Is it still so? */
+	/* Maybe resoleved: XXX It doesn't update existing environ/pod! It is a bug XXX */
+	/* XXX insert detect's lastseen for the update XXX */
 	en := environ.Assign(db, &p.Env)
 	for _, a := range p.Apps {
 		an := app.Assign(db, &a.Name, &a.Seen)
@@ -250,7 +259,7 @@ func recursiveInsert(db *sql.DB, p *detect.Subscription) []int64 {
 		}
 		l := layout.Assign(db, en, an)
 		for _, p := range a.Pods {
-			p := pod.Assign(db, &p.Name, *en.ID, *an.ID, l.Id, &p.Link).ToResponse()
+			p := pod.Assign(db, &p.Name, *en.ID, *an.ID, l.Id, &p.Link, p.LastUpdate).ToResponse()
 			found = append(found, p.ID)
 		}
 	}

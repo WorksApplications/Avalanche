@@ -14,9 +14,9 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/google/uuid"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/pod"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 )
@@ -137,17 +137,17 @@ func getSS(pvmountp *string, temporald *string, link *string, pname *string) (st
 	return uuid.String(), fn, nil
 }
 
-func New(extr *string, mount *string, tempd *string, db *sql.DB, a *models.App, p *models.Pod, l *layout.Layout) *models.Snapshot {
+func New(extr *string, mount *string, tempd *string, db *sql.DB, a *models.App, p *models.Pod, l *layout.Layout) (*models.Snapshot, error) {
 	k, err := url.Parse(pod.ToLogAddress(db, p.ID))
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	link := *extr + "/?resource=" + k.Path + "perf-record/perf-" + *a.Name + ".tar.gz"
 	log.Printf("LINK ADDRESS: %s", link)
 	g, loc, err := getSS(mount, tempd, &link, p.Name)
 	if err != nil {
 		log.Printf("[Snapshot] Couldn't get snapshot")
-		return nil
+		return nil, err
 	}
 	log.Printf("[DB/Snapshot] Storing (%d @ %d: %s)", l.AppId, l.EnvId, g)
 	t := time.Now()
@@ -157,7 +157,7 @@ func New(extr *string, mount *string, tempd *string, db *sql.DB, a *models.App, 
 	log.Printf("[DB/Snapshot] NEW: %+v, err: %s", res, err)
 
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	ss := models.Snapshot{
 		strfmt.DateTime(t),
@@ -166,5 +166,5 @@ func New(extr *string, mount *string, tempd *string, db *sql.DB, a *models.App, 
 		*p.Name,
 		&g,
 	}
-	return &ss
+	return &ss, nil
 }
