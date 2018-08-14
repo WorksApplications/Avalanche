@@ -39,6 +39,9 @@ generated_files/stub: api/collect.yml
 swagger-client-gen:
 	java -jar ./swagger-codegen-cli.jar generate -i ./api/collect.yml -l typescript-fetch -o ./front/src/generated/collect
 
+swagger-mock-gen:
+	java -jar ./swagger-codegen-cli.jar generate -i ./api/collect.yml -l nodejs-server -o ../front/mock/collect
+
 : -img
 
 -img: image//Dockerfile /src/scripting-server.py

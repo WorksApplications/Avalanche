@@ -65,7 +65,8 @@ module.exports = env => {
         chunkFilename: "[id].[hash:8].css"
       }),
       new DefinePlugin({
-        COLLECT_API_BASE: JSON.stringify(collectApiBase)
+        COLLECT_API_BASE: JSON.stringify(collectApiBase),
+        IS_DEBUG: !isProduction
       })
       // new OptimizeJsPlugin({
       //   sourceMap: true

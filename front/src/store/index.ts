@@ -1,5 +1,7 @@
-import { applyMiddleware, createStore } from "redux";
+import { applyMiddleware, createStore, Middleware } from "redux";
+import logger from "redux-logger";
 import thunk from "redux-thunk";
+import { IS_DEBUG } from "../constants";
 import { indexApp } from "../reducers";
 
 export interface ISnapshotInfo {
@@ -30,5 +32,10 @@ export interface IApplicationState {
   readonly environments: { [appName: string]: IEnvironmentInfo };
 }
 
-const store = createStore(indexApp, applyMiddleware(thunk));
+let middlewares: Middleware[] = [thunk];
+if (IS_DEBUG) {
+  middlewares = [...middlewares, logger];
+}
+
+const store = createStore(indexApp, applyMiddleware(...middlewares));
 export default store;
