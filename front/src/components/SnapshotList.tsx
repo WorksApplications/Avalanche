@@ -8,7 +8,7 @@ export interface IRowData {
   name: string;
   environment: string;
   pod: string;
-  createdAt: Date;
+  createdAt: string;
   labels: string[];
   link: string;
   isReady: boolean;
@@ -16,6 +16,7 @@ export interface IRowData {
 
 export interface IProperty {
   rows: IRowData[];
+  emptyMessage?: string;
 }
 
 class SnapshotList extends Component<IProperty, {}> {
@@ -42,7 +43,7 @@ class SnapshotList extends Component<IProperty, {}> {
                 <td>{r.name}</td>
                 <td>{r.pod}</td>
                 <td>{r.environment}</td>
-                <td>{r.createdAt.toDateString()}</td>
+                <td>{r.createdAt}</td>
                 {/*<td>&nbsp;</td>*/}
                 <td>
                   <Link href={r.link}>Framescope</Link>
@@ -53,7 +54,7 @@ class SnapshotList extends Component<IProperty, {}> {
             ))}
             {this.props.rows.length === 0 && (
               <tr className={styles.empty}>
-                <td colSpan={8}>No data</td>
+                <td colSpan={8}>{this.props.emptyMessage}</td>
               </tr>
             )}
           </tbody>

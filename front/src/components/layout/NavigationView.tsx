@@ -1,17 +1,44 @@
 import { Component, h } from "preact";
+import { connect } from "preact-redux";
+import { bindActionCreators, Dispatch } from "redux";
+import * as actions from "../../data-flow/actions";
+import { IApplicationState } from "../../data-flow/store";
 import AppSelector from "../AppSelector";
 // @ts-ignore
 import styles from "./NavigationView.scss";
 
+const mapStateToProps = (state: IApplicationState) => ({
+  applicationName: state.applicationName,
+  applications: state.applications
+});
+
+const mapDispatchToProps = (dispatch: Dispatch) =>
+  bindActionCreators(
+    {
+      selectApp: actions.selectApp,
+      getEnvironmentsOfApp: actions.getEnvironmentsOfApp
+    },
+    dispatch
+  );
+
+// @ts-ignore
+@connect(
+  mapStateToProps,
+  mapDispatchToProps
+)
 class NavigationView extends Component {
   public render() {
-    const tmpData = [{ label: "a", value: "a" }, { label: "b", value: "b" }];
-    // TODO connect, store
+    // @ts-ignore
+    const applications: string[] = this.props.applications;
+    // @ts-ignore
+    const applicationName: string = this.props.applicationName;
+    const showingData = applications.map(x => ({ label: x, value: x }));
     return (
       <div className={styles.wrap}>
         <div>
           <AppSelector
-            options={tmpData}
+            options={showingData}
+            value={applicationName}
             onValueChanged={this.onAppChanged.bind(this)}
             placeholder="Select landscape"
           />
@@ -25,9 +52,12 @@ class NavigationView extends Component {
       </div>
     );
   }
+
   private onAppChanged(app: string) {
-    // TODO execute action
-    alert(app);
+    // @ts-ignore
+    this.props.selectApp(app);
+    // @ts-ignore
+    this.props.getEnvironmentsOfApp(app);
   }
 }
 

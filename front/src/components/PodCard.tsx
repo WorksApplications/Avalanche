@@ -4,7 +4,7 @@ import styles from "./PodCard.scss";
 
 export interface IProperty {
   name: string;
-  createdAt: Date;
+  createdAt: string;
   app: string;
   environment: string;
   snapshots: string[];
@@ -16,9 +16,7 @@ class PodList extends Component<IProperty, {}> {
       <div className={styles.wrap}>
         <div>
           <span className={styles.name}>{this.props.name}</span>
-          <span className={styles.createdAt}>
-            {this.props.createdAt.toDateString()}
-          </span>
+          <span className={styles.createdAt}>{this.props.createdAt}</span>
         </div>
         <div className={styles.info}>
           <div className={styles.infoLeft}>

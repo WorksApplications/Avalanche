@@ -1,6 +1,12 @@
 import { Component, h } from "preact";
+import { connect } from "preact-redux";
+import {
+  IApplicationState,
+  IPodInfo,
+  ISnapshotInfo
+} from "../../data-flow/store";
 import SnapshotFilter from "../SnapshotFilter";
-import SnapshotList from "../SnapshotList";
+import SnapshotList, { IRowData } from "../SnapshotList";
 // @ts-ignore
 import styles from "./SnapshotsView.scss";
 
@@ -9,54 +15,71 @@ interface IState {
   filteringPod?: string;
 }
 
-class SnapshotsView extends Component<{}, IState> {
-  // TODO change this
-  private ssRawTmpData = [
-    {
-      uuid: "550e8400-e29b-41d4-a716-446655440000",
-      name: "alice-excellent_luis",
-      environment: "jillj",
-      pod: "special_luther-special_luther",
-      createdAt: new Date(),
-      labels: [],
-      link: "http://example.com/",
-      isReady: true
-    },
-    {
-      uuid: "550e8400-e29b-41d4-a716-446655440001",
-      name: "bob-excellent_luis",
-      environment: "jillk",
-      pod: "excellent_luis-excellent_luis",
-      createdAt: new Date(),
-      labels: [],
-      link: "http://example.com/",
-      isReady: true
-    }
-  ];
+const mapStateToProps = (state: IApplicationState) => {
+  const pods: IPodInfo[] = Object.values(state.environments).reduce(
+    // flat-map
+    (acc: IPodInfo[], x) => acc.concat(x.pods),
+    []
+  );
+  return {
+    environments: state.environments,
+    pods,
+    snapshots: pods.reduce(
+      // flat-map
+      (acc: ISnapshotInfo[], x) => acc.concat(x.snapshots || []),
+      []
+    )
+  };
+};
 
+// @ts-ignore
+@connect(mapStateToProps)
+class SnapshotsView extends Component<{}, IState> {
   constructor(props: {}) {
     super(props);
-    // TODO connect, store
     this.state = {};
   }
 
   public render() {
-    // TODO change this to logical process
-    const envTmpData = this.ssRawTmpData.map(x => {
-      return { label: x.environment, value: x.environment };
-    });
-    const podTmpData = this.ssRawTmpData.map(x => {
-      return { label: x.pod, value: x.pod };
-    });
+    const environmentNames: string[] = Object.keys(
+      // @ts-ignore
+      this.props.environments || {}
+    );
+    // @ts-ignore
+    const podNames: string[] = this.props.pods.map(x => x.name);
+    // @ts-ignore
+    const snapshots: ISnapshotInfo[] = this.props.snapshots;
 
-    let showingData = this.ssRawTmpData;
-    if (this.state.filteringEnvironment) {
+    const envFilterData = environmentNames.map(x => ({ label: x, value: x }));
+    const podFilterData = podNames.map(x => ({ label: x, value: x }));
+
+    let emptyMessage =
+      snapshots.length > 0 ? "Please select environment" : "No Data";
+    let showingData: IRowData[] = [];
+
+    // TODO when app is re-selected, how filtering should be?
+    if (snapshots.length > 0 && this.state.filteringEnvironment) {
+      showingData = snapshots.map(x => ({
+        uuid: x.uuid,
+        name: "HOGE", // TODO
+        environment: "systema", // TODO
+        pod: "????", // TODO
+        createdAt: x.createdAt ? x.createdAt.toDateString() : "Unknown",
+        labels: [], // TODO
+        link: "#", // TODO
+        isReady: false // TODO
+      }));
       showingData = showingData.filter(
         x => x.environment === this.state.filteringEnvironment
       );
-    }
-    if (this.state.filteringPod) {
-      showingData = showingData.filter(x => x.pod === this.state.filteringPod);
+      if (this.state.filteringPod) {
+        showingData = showingData.filter(
+          x => x.pod === this.state.filteringPod
+        );
+      }
+      if (showingData.length === 0) {
+        emptyMessage = "No Data";
+      }
     }
 
     // TODO no filter option in drop-down list?
@@ -66,20 +89,20 @@ class SnapshotsView extends Component<{}, IState> {
       <div className={styles.wrap}>
         <div className={styles.environmentSelector}>
           <SnapshotFilter
-            options={envTmpData}
+            options={envFilterData}
             onValueChanged={this.onEnvironmentChanged.bind(this)}
             placeholder="Select environment"
           />
         </div>
         <div className={styles.podSelector}>
           <SnapshotFilter
-            options={podTmpData}
+            options={podFilterData}
             onValueChanged={this.onPodChanged.bind(this)}
             placeholder="Select pod name"
           />
         </div>
         <div className={styles.snapshotList}>
-          <SnapshotList rows={showingData} />
+          <SnapshotList rows={showingData} emptyMessage={emptyMessage} />
         </div>
       </div>
     );
