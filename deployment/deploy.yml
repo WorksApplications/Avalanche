@@ -113,7 +113,7 @@ spec:
           - --extract=http://extract:8080
           - --db=example:example@tcp(mariadb)/collekt?parseTime=True
           - --persistent=/persistent
-          - --volatile=/volatile
+          - --volatile=/persistent/volatile
       volumes:
         - name: perftank
           persistentVolumeClaim:
