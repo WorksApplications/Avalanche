@@ -1,16 +1,18 @@
 import {
   GET_APPS_RECEIVE,
   GET_ENVS_OF_APP_RECEIVE,
+  GET_RUNNING_PODS_RECEIVE,
   IAction,
   SELECT_APP
 } from "../actions";
-import { Environment } from "../generated/collect";
+import { Environment, Pod } from "../generated/collect";
 import { IApplicationState, IEnvironmentInfo, IPodInfo } from "../store";
 
 const INIT: IApplicationState = {
   applicationName: null,
   applications: [],
-  environments: {}
+  environments: {},
+  runningPods: []
 };
 
 export function indexApp(
@@ -50,6 +52,27 @@ export function indexApp(
         newEnvironments[e.name] = e;
       }
       return { ...state, environments: newEnvironments };
+    case GET_RUNNING_PODS_RECEIVE:
+      const runningPods: IPodInfo[] = action.payload.pods.map((p: Pod) => ({
+        id: p.id,
+        name: p.name,
+        isLive: p.isLive,
+        createdAt: p.createdAt,
+        app: p.app,
+        environment: p.environment,
+        snapshots: (p.snapshots || []).map(s => ({
+          uuid: s.uuid,
+          name: undefined,
+          pod: s.pod,
+          environment: s.environment,
+          createdAt: s.createdAt,
+          link: s.flamescopeLink
+        }))
+      }));
+      return {
+        ...state,
+        runningPods
+      };
     default:
       return state;
   }

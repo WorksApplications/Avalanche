@@ -8,11 +8,7 @@ import styles from "./RunningPodsView.scss";
 
 const mapStateToProps = (state: IApplicationState) => ({
   applicationName: state.applicationName,
-  pods: Object.values(state.environments).reduce(
-    // flat-map
-    (acc: IPodInfo[], x) => acc.concat(x.pods),
-    []
-  )
+  pods: state.runningPods
 });
 
 // @ts-ignore
@@ -56,4 +52,3 @@ class RunningPodsView extends Component {
 }
 
 export default RunningPodsView;
-// TODO available pods API

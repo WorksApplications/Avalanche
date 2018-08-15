@@ -7,6 +7,8 @@ export const GET_APPS_REQUEST = "GET_APPS_REQUEST";
 export const GET_APPS_RECEIVE = "GET_APPS_RECEIVE";
 export const GET_ENVS_OF_APP_REQUEST = "GET_ENVS_OF_APP_REQUEST";
 export const GET_ENVS_OF_APP_RECEIVE = "GET_ENVS_OF_APP_RECEIVE";
+export const GET_RUNNING_PODS_REQUEST = "GET_RUNNING_PODS_REQUEST";
+export const GET_RUNNING_PODS_RECEIVE = "GET_RUNNING_PODS_RECEIVE";
 
 const collectClient = collect.DefaultApiFactory(
   {},
@@ -19,29 +21,23 @@ export interface IAction {
   payload?: any;
 }
 
-export const selectApp: ActionCreator<Action> = (appName: string) => {
-  return {
-    type: SELECT_APP,
-    payload: {
-      appName
-    }
-  };
-};
+export const selectApp: ActionCreator<Action> = (appName: string) => ({
+  type: SELECT_APP,
+  payload: {
+    appName
+  }
+});
 
-const requestGetApps: ActionCreator<Action> = () => {
-  return {
-    type: GET_APPS_REQUEST
-  };
-};
+const requestGetApps: ActionCreator<Action> = () => ({
+  type: GET_APPS_REQUEST
+});
 
-const receiveGetApps: ActionCreator<Action> = (apps: string[]) => {
-  return {
-    type: GET_APPS_RECEIVE,
-    payload: {
-      apps
-    }
-  };
-};
+const receiveGetApps: ActionCreator<Action> = (apps: string[]) => ({
+  type: GET_APPS_RECEIVE,
+  payload: {
+    apps
+  }
+});
 
 export const getApps = () => (dispatch: Dispatch) => {
   dispatch(requestGetApps());
@@ -51,31 +47,46 @@ export const getApps = () => (dispatch: Dispatch) => {
   // TODO catch
 };
 
-const requestGetEnvsOfApp: ActionCreator<Action> = (app: string) => {
-  return {
-    type: GET_ENVS_OF_APP_REQUEST,
-    payload: {
-      app
-    }
-  };
-};
+const requestGetEnvsOfApp: ActionCreator<Action> = (app: string) => ({
+  type: GET_ENVS_OF_APP_REQUEST,
+  payload: {
+    app
+  }
+});
 
 const receiveGetEnvsOfApp: ActionCreator<Action> = (
   appName: string,
   envs: collect.Environment[]
-) => {
-  return {
-    type: GET_ENVS_OF_APP_RECEIVE,
-    payload: {
-      environments: envs
-    }
-  };
-};
+) => ({
+  type: GET_ENVS_OF_APP_RECEIVE,
+  payload: {
+    environments: envs
+  }
+});
 
 export const getEnvironmentsOfApp = (app: string) => (dispatch: Dispatch) => {
   dispatch(requestGetEnvsOfApp());
   collectClient.getEnvironments(app).then(envs => {
     dispatch(receiveGetEnvsOfApp(app, envs));
+  });
+  // TODO catch
+};
+
+const requestGetRunningPods: ActionCreator<Action> = () => ({
+  type: GET_RUNNING_PODS_REQUEST
+});
+
+const receiveGetRunningPods: ActionCreator<Action> = (pods: collect.Pod[]) => ({
+  type: GET_RUNNING_PODS_RECEIVE,
+  payload: {
+    pods
+  }
+});
+
+export const getRunningPods = () => (dispatch: Dispatch) => {
+  dispatch(requestGetRunningPods());
+  collectClient.listAvailablePods().then(pods => {
+    dispatch(receiveGetRunningPods(pods));
   });
   // TODO catch
 };
