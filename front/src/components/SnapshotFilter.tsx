@@ -11,7 +11,9 @@ export default (props: IProperty) => {
     optionList: styles.optionView,
     placeholder: styles.placeholder,
     selector: styles.selector,
-    wrap: styles.wrap
+    wrap: styles.wrap,
+    selected: styles.selected,
+    unselectOption: styles.unselectOption
   };
   return <SelectorBase styles={bindingStyles} {...props} />;
 };

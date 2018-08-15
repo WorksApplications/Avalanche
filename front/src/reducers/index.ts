@@ -37,7 +37,11 @@ export function indexApp(
           env: p.environment,
           snapshots: (p.snapshots || []).map(s => ({
             uuid: s.uuid,
-            createdAt: s.createdAt
+            name: undefined,
+            pod: s.pod,
+            environment: s.environment,
+            createdAt: s.createdAt,
+            link: s.flamescopeLink
           }))
         })),
         liveCount: e.liveCount

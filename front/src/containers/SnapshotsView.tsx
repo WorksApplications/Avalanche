@@ -57,12 +57,12 @@ class SnapshotsView extends Component<{}, IState> {
     if (snapshots.length > 0 && this.state.filteringEnvironment) {
       showingData = snapshots.map(x => ({
         uuid: x.uuid,
-        name: "HOGE", // TODO
-        environment: "systema", // TODO
-        pod: "????", // TODO
+        name: x.name || "Unknown",
+        environment: x.environment || "Unknown",
+        pod: x.pod || "Unknown",
         createdAt: x.createdAt ? x.createdAt.toDateString() : "Unknown",
         labels: [], // TODO
-        link: "#", // TODO
+        link: x.link || "#",
         isReady: false // TODO
       }));
       showingData = showingData.filter(
@@ -78,7 +78,6 @@ class SnapshotsView extends Component<{}, IState> {
       }
     }
 
-    // TODO no filter option in drop-down list?
     // TODO fix cell width value
 
     return (
@@ -95,6 +94,7 @@ class SnapshotsView extends Component<{}, IState> {
             options={podFilterData}
             onValueChanged={this.onPodChanged.bind(this)}
             placeholder="Select pod name"
+            unselectOptionLabel="Unselect"
           />
         </div>
         <div className={styles.snapshotList}>

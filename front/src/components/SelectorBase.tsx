@@ -9,6 +9,7 @@ export interface IStyles {
   closed?: string;
   placeholder?: string;
   selected?: string;
+  unselectOption?: string;
 }
 
 export interface IProperty {
@@ -18,6 +19,7 @@ export interface IProperty {
   onValueChanged?: (newValue: string | null) => void;
   styles?: IStyles;
   placeholder: string;
+  unselectOptionLabel?: string;
 }
 
 interface IState {
@@ -49,6 +51,15 @@ class SelectorBase extends Component<IProperty, IState> {
     const styles = this.props.styles!;
     const optionsView = this.state.isOpen ? (
       <ul className={styles.optionList}>
+        {this.props.unselectOptionLabel && (
+          <li
+            className={[styles.optionItem, styles.unselectOption].join(" ")}
+            key={"!!!!"}
+            onMouseDown={this.setSelectingOption.bind(this, null)}
+          >
+            {this.props.unselectOptionLabel}
+          </li>
+        )}
         {this.props.options.map(o => (
           <li
             className={[

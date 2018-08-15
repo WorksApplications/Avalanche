@@ -6,7 +6,11 @@ import { indexApp } from "../reducers";
 
 export interface ISnapshotInfo {
   uuid: string;
+  name?: string;
+  pod?: string;
+  environment?: string;
   createdAt?: Date;
+  link?: string;
 }
 
 export interface IPodInfo {
