@@ -11,7 +11,9 @@ export default (props: IProperty) => {
     optionList: styles.optionView,
     selector: styles.selector,
     wrap: styles.wrap,
-    selected: styles.selected
+    selected: styles.selected,
+    placeholder: styles.placeholder
   };
   return <SelectorBase styles={bindingStyles} {...props} />;
 };
+// TODO key event filter

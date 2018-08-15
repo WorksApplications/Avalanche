@@ -48,9 +48,9 @@ class SelectorBase extends Component<IProperty, IState> {
   public render() {
     const styles = this.props.styles!;
     const optionsView = this.state.isOpen ? (
-      <div className={styles.optionList}>
+      <ul className={styles.optionList}>
         {this.props.options.map(o => (
-          <div
+          <li
             className={[
               styles.optionItem,
               o.value === this.state.selected ? styles.selected : undefined
@@ -59,9 +59,9 @@ class SelectorBase extends Component<IProperty, IState> {
             onMouseDown={this.setSelectingOption.bind(this, o.value)}
           >
             {o.label}
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     ) : null;
     const selectorString = this.state.selected || this.props.placeholder;
 

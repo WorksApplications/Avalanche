@@ -43,7 +43,7 @@ swagger-client-gen:
 	java -jar ./swagger-codegen-cli.jar generate -i ./api/collect.yml -l typescript-fetch -o ./front/src/generated/collect
 
 swagger-mock-gen:
-	java -jar ./swagger-codegen-cli.jar generate -i ./api/collect.yml -l nodejs-server -o ../front/mock/collect
+	java -jar ./swagger-codegen-cli.jar generate -i ./api/collect.yml -l nodejs-server -o ./front/mock/collect
 
 : -img
 

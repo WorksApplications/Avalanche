@@ -35,13 +35,16 @@ class NavigationView extends Component {
     const showingData = applications.map(x => ({ label: x, value: x }));
     return (
       <div className={styles.wrap}>
-        <div>
-          <AppSelector
-            options={showingData}
-            value={applicationName}
-            onValueChanged={this.onAppChanged.bind(this)}
-            placeholder="Select landscape"
-          />
+        <div className={styles.appContext}>
+          <div className={styles.label}>Application Context</div>
+          <div className={styles.selector}>
+            <AppSelector
+              options={showingData}
+              value={applicationName}
+              onValueChanged={this.onAppChanged.bind(this)}
+              placeholder="Select landscape"
+            />
+          </div>
         </div>
         <div className={styles.viewList}>
           <div className={[styles.viewItem, styles.selected].join(" ")}>

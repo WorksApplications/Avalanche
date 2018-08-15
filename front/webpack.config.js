@@ -66,7 +66,8 @@ module.exports = env => {
       }),
       new DefinePlugin({
         COLLECT_API_BASE: JSON.stringify(collectApiBase),
-        IS_DEBUG: !isProduction
+        IS_DEBUG: !isProduction,
+        APP_NAME: `"Dynamic Analysis"`
       })
       // new OptimizeJsPlugin({
       //   sourceMap: true

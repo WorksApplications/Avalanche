@@ -43,11 +43,11 @@ class RunningPodsView extends Component {
           <PodFilter />
         </div>
         {applicationName && (
-          <div>
+          <div className={styles.cardList}>
             <PodCardList data={podsOfApp} kind={"App: " + applicationName} />
           </div>
         )}
-        <div>
+        <div className={styles.cardList}>
           <PodCardList data={podInfo} kind="All" />
         </div>
       </div>
@@ -56,3 +56,4 @@ class RunningPodsView extends Component {
 }
 
 export default RunningPodsView;
+// TODO available pods API
