@@ -1,9 +1,9 @@
+import { Action } from "redux";
 import { isType } from "typescript-fsa";
 import {
   getAppsAsyncAction,
   getEnvironmentsOfAppAsyncAction,
   getRunningPodsAsyncAction,
-  IAction,
   selectApp,
   selectEnv
 } from "../actions";
@@ -20,7 +20,7 @@ const INIT: IApplicationState = {
 
 export function indexApp(
   state: IApplicationState = INIT,
-  action: IAction
+  action: Action
 ): IApplicationState {
   if (isType(action, selectApp)) {
     return { ...state, applicationName: action.payload.appName };

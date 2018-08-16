@@ -1,10 +1,7 @@
-import { Action, ActionCreator, Dispatch } from "redux";
+import { Dispatch } from "redux";
 import actionCreatorFactory from "typescript-fsa";
 import { COLLECT_API_BASE } from "../constants";
 import * as collect from "../generated/collect/api";
-
-export const POST_NEW_SNAPSHOT_REQUEST = "POST_NEW_SNAPSHOT_REQUEST";
-export const POST_NEW_SNAPSHOT_RECEIVE = "POST_NEW_SNAPSHOT_RECEIVE";
 
 const actionCreator = actionCreatorFactory();
 
@@ -13,11 +10,6 @@ const collectClient = collect.DefaultApiFactory(
   undefined,
   COLLECT_API_BASE
 );
-
-export interface IAction {
-  type: string;
-  payload?: any;
-}
 
 export const selectApp = actionCreator<{ appName: string }>("SELECT_APP");
 
@@ -99,33 +91,41 @@ export const getRunningPods = () => (dispatch: Dispatch) => {
     });
 };
 
-const requestPostSnapshot: ActionCreator<Action> = () => ({
-  type: POST_NEW_SNAPSHOT_REQUEST
-});
-
-const receivePostSnapshot: ActionCreator<Action> = (
-  snapshot: collect.Snapshot
-) => ({
-  type: POST_NEW_SNAPSHOT_RECEIVE,
-  payload: {
-    newSnapshot: snapshot
-  }
-});
+export const postSnapshotAsyncAction = actionCreator.async<
+  {
+    appId: string;
+    environment: string;
+    podId: string;
+  },
+  { newSnapshot: collect.Snapshot },
+  { message: string }
+>("POST_NEW_SNAPSHOT");
 
 export const postSnapshot = (
   appId: string,
   environment: string,
   podId: string
 ) => (dispatch: Dispatch) => {
-  dispatch(requestPostSnapshot());
+  const params = { appId, environment, podId };
+  dispatch(postSnapshotAsyncAction.started(params));
   collectClient
     .newSnapshot(appId, environment, podId, {
       headers: {
         "Content-Type": "application/json"
       } // This is due to "typescript-fetch"
     })
-    .then(snapshots => {
-      dispatch(receivePostSnapshot(snapshots));
+    .then((snapshot: collect.Snapshot) => {
+      dispatch(
+        postSnapshotAsyncAction.done({
+          params,
+          result: { newSnapshot: snapshot }
+        })
+      );
+    })
+    .catch((reason: Error) => {
+      postSnapshotAsyncAction.failed({
+        params,
+        error: { message: reason.message }
+      });
     });
-  // TODO catch
 };
