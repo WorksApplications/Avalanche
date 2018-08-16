@@ -47,7 +47,6 @@ push-images:
     script:
         - docker info
         - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} ${DOCKERHOST}
-        - 
         - ls -lR
         - apk add make
         - touch bin/collect bin/detect
