@@ -1,7 +1,7 @@
 import { Component, h } from "preact";
 import { connect } from "preact-redux";
 import { bindActionCreators, Dispatch } from "redux";
-import { selectEnv } from "../actions";
+import * as actions from "../actions";
 import SnapshotFilter from "../components/SnapshotFilter";
 import SnapshotList, { IRowData } from "../components/SnapshotList";
 import { IApplicationState, IPodInfo, ISnapshotInfo } from "../store";
@@ -34,7 +34,7 @@ const mapStateToProps = (state: IApplicationState) => {
 const mapDispatchToProps = (dispatch: Dispatch) =>
   bindActionCreators(
     {
-      selectEnv
+      selectEnv: actions.selectEnv
     },
     dispatch
   );
@@ -136,7 +136,8 @@ class SnapshotsView extends Component<{}, IState> {
 
   private onEnvironmentChanged(env: string) {
     // @ts-ignore
-    this.props.selectEnv(env);
+    const selectEnv: typeof actions.selectEnv = this.props.selectEnv;
+    selectEnv({ envName: env }); // unselect
     this.setState({ filteringPod: null });
   }
 

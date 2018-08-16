@@ -3,7 +3,6 @@ import actionCreatorFactory from "typescript-fsa";
 import { COLLECT_API_BASE } from "../constants";
 import * as collect from "../generated/collect/api";
 
-export const SELECT_ENV = "SELECT_ENV";
 export const GET_APPS_REQUEST = "GET_APPS_REQUEST";
 export const GET_APPS_RECEIVE = "GET_APPS_RECEIVE";
 export const GET_ENVS_OF_APP_REQUEST = "GET_ENVS_OF_APP_REQUEST";
@@ -28,12 +27,9 @@ export interface IAction {
 
 export const selectApp = actionCreator<{ appName: string }>("SELECT_APP");
 
-export const selectEnv: ActionCreator<Action> = (envName: string) => ({
-  type: SELECT_ENV,
-  payload: {
-    envName
-  }
-});
+export const selectEnv = actionCreator<{ envName: string | null }>(
+  "SELECT_ENV"
+);
 
 const requestGetApps: ActionCreator<Action> = () => ({
   type: GET_APPS_REQUEST

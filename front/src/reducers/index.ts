@@ -4,8 +4,8 @@ import {
   GET_ENVS_OF_APP_RECEIVE,
   GET_RUNNING_PODS_RECEIVE,
   IAction,
-  SELECT_ENV,
-  selectApp
+  selectApp,
+  selectEnv
 } from "../actions";
 import { Environment, Pod } from "../generated/collect";
 import { IApplicationState, IEnvironmentInfo, IPodInfo } from "../store";
@@ -25,11 +25,12 @@ export function indexApp(
   if (isType(action, selectApp)) {
     return { ...state, applicationName: action.payload.appName };
   }
+  if (isType(action, selectEnv)) {
+    return { ...state, selectedEnvironment: action.payload.envName };
+  }
   switch (action.type) {
     case GET_APPS_RECEIVE:
       return { ...state, applications: action.payload.apps };
-    case SELECT_ENV:
-      return { ...state, selectedEnvironment: action.payload.envName };
     case GET_ENVS_OF_APP_RECEIVE:
       const newEnvironments = { ...state.environments };
       const envs: Environment[] = action.payload.environments;
