@@ -160,6 +160,10 @@ func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) midd
 		return operations.NewDescribeAppDefault(404).WithPayload(&models.Error{Message: &emsg})
 	}
 	pod := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
+	if pod == nil {
+		emsg := fmt.Sprintf("ENOPOD %s couldn't found", params.Pod)
+		return operations.NewDescribeAppDefault(404).WithPayload(&models.Error{Message: &emsg})
+	}
 	body, err := snapshot.New(&s.Extract, &s.Pvmount, &s.Temporald, s.Db, app, pod, lay)
 	if err != nil {
 		emsg := fmt.Sprintf("Error in creating snapshot: +%v", err)
