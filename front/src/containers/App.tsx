@@ -1,7 +1,7 @@
 import { Component, h } from "preact";
 import { connect } from "preact-redux";
 import { bindActionCreators, Dispatch } from "redux";
-import { getApps, getRunningPods } from "../actions";
+import * as actions from "../actions";
 // @ts-ignore
 import styles from "./App.scss";
 import TitleBar from "./TitleBar";
@@ -10,8 +10,8 @@ import Workspace from "./Workspace";
 const mapDispatchToProps = (dispatch: Dispatch) =>
   bindActionCreators(
     {
-      getApps,
-      getRunningPods
+      getApps: actions.getApps,
+      getRunningPods: actions.getRunningPods
     },
     dispatch
   );
@@ -24,7 +24,9 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
 class App extends Component {
   public componentWillMount(): void {
     // @ts-ignore
-    this.props.getApps();
+    const getApps: typeof actions.getApps = this.props.getApps;
+    getApps();
+
     // @ts-ignore
     this.props.getRunningPods();
   }

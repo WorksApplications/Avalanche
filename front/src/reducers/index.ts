@@ -1,8 +1,8 @@
 import { isType } from "typescript-fsa";
 import {
-  GET_APPS_RECEIVE,
   GET_ENVS_OF_APP_RECEIVE,
   GET_RUNNING_PODS_RECEIVE,
+  getAppsAsyncAction,
   IAction,
   selectApp,
   selectEnv
@@ -25,12 +25,13 @@ export function indexApp(
   if (isType(action, selectApp)) {
     return { ...state, applicationName: action.payload.appName };
   }
+  if (isType(action, getAppsAsyncAction.done)) {
+    return { ...state, applications: action.payload.result.apps };
+  }
   if (isType(action, selectEnv)) {
     return { ...state, selectedEnvironment: action.payload.envName };
   }
   switch (action.type) {
-    case GET_APPS_RECEIVE:
-      return { ...state, applications: action.payload.apps };
     case GET_ENVS_OF_APP_RECEIVE:
       const newEnvironments = { ...state.environments };
       const envs: Environment[] = action.payload.environments;
