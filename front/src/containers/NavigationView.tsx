@@ -47,7 +47,7 @@ class NavigationView extends Component {
             />
           </div>
         </div>
-        <div className={styles.viewList}>
+        <div className={[styles.viewList, styles.waitForAppSelect].join(" ")}>
           <div className={[styles.viewItem, styles.selected].join(" ")}>
             Snapshots
           </div>

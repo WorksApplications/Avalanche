@@ -10,6 +10,7 @@ export interface IStyles {
   placeholder?: string;
   selected?: string;
   unselectOption?: string;
+  disabled?: string;
 }
 
 export interface IProperty {
@@ -75,10 +76,16 @@ class SelectorBase extends Component<IProperty, IState> {
     const selectorString = this.props.selectedValue || this.props.placeholder;
 
     return (
-      <div className={styles.wrap} ref={this.getContainer.bind(this)}>
+      <div
+        className={[
+          styles.wrap,
+          this.props.disabled ? styles.disabled : undefined
+        ].join(" ")}
+        ref={this.getContainer.bind(this)}
+      >
         <div
           className={[
-            this.props.styles!.selector,
+            styles!.selector,
             this.state.isOpen ? styles.opened : styles.closed,
             this.props.selectedValue ? "" : styles.placeholder
           ].join(" ")}
@@ -86,7 +93,7 @@ class SelectorBase extends Component<IProperty, IState> {
         >
           {selectorString}
         </div>
-        {optionsView}
+        {!this.props.disabled && optionsView}
       </div>
     );
   }

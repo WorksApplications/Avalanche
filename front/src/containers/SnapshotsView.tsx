@@ -19,6 +19,7 @@ const mapStateToProps = (state: IApplicationState) => {
     []
   );
   return {
+    appName: state.applicationName,
     environments: state.environments,
     filteringEnvironment: state.selectedEnvironment,
     pods,
@@ -50,6 +51,8 @@ class SnapshotsView extends Component<{}, IState> {
   }
 
   public render() {
+    // @ts-ignore
+    const appName = this.props.appName;
     const environmentNames: string[] = Object.keys(
       // @ts-ignore
       this.props.environments || {}
@@ -99,13 +102,19 @@ class SnapshotsView extends Component<{}, IState> {
     // TODO fix cell width value
 
     return (
-      <div className={styles.wrap}>
+      <div
+        className={[
+          styles.wrap,
+          !appName ? styles.waitForAppSelect : undefined
+        ].join(" ")}
+      >
         <div className={styles.environmentSelector}>
           <SnapshotFilter
             options={envFilterData}
             selectedValue={filteringEnvironment}
             onValueChanged={this.onEnvironmentChanged.bind(this)}
             placeholder="Select environment"
+            disabled={!appName}
           />
         </div>
         <div className={styles.podSelector}>
@@ -115,6 +124,7 @@ class SnapshotsView extends Component<{}, IState> {
             onValueChanged={this.onPodChanged.bind(this)}
             placeholder="Select pod name"
             unselectOptionLabel="Unselect"
+            disabled={!filteringEnvironment}
           />
         </div>
         <div className={styles.snapshotList}>

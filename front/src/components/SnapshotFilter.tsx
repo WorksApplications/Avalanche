@@ -13,7 +13,8 @@ export default (props: IProperty) => {
     selector: styles.selector,
     wrap: styles.wrap,
     selected: styles.selected,
-    unselectOption: styles.unselectOption
+    unselectOption: styles.unselectOption,
+    disabled: styles.disabled
   };
   return <SelectorBase styles={bindingStyles} {...props} />;
 };
