@@ -50,5 +50,6 @@ push-images:
         - ls -lR
         - apk add make
         - touch bin/collect bin/detect
+        - touch front/public/*
         - make pushi
 
