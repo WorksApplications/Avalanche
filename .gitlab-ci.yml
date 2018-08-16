@@ -11,7 +11,6 @@ backend-build:
         - swagger generate server -f api/collect.yml -t generated_files -A collect
         - make dep
         - make backend
-        - touch bin/collect bin/detect
         - tar czf cache-go.tar.gz $GOPATH/src/github.com $GOPATH/src/golang.org $GOPATH/src/gopkg.in || true
     cache:
         key: golang
@@ -50,5 +49,6 @@ push-images:
         - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} 
         - ls -lR
         - apk add make
+        - touch bin/collect bin/detect
         - make pushi
 
