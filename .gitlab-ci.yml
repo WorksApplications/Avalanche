@@ -27,6 +27,8 @@ front-build:
     image: node:10.8.0
     script:
         - cd front
+        - mv package.json package.json.templ
+        - sed 's;flamescope.*31002;collect:8080;g' package.json.templ > package.json
         - yarn add --dev webpack webpack-cli
         - npm install
         - PATH=$PATH:$(pwd)/node_modules/.bin yarn build
