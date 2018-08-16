@@ -32,13 +32,8 @@ class RunningPodsView extends Component {
     const applicationName: string = this.props.applicationName;
     // @ts-ignore
     const pods: IPodInfo[] = this.props.pods;
-    const postSnapshot: (
-      appId: string,
-      environment: string,
-      podId: string
-    ) => void =
-      // @ts-ignore
-      this.props.postSnapshot;
+    // @ts-ignore
+    const postSnapshot: typeof actions.postSnapshot = this.props.postSnapshot;
 
     const podInfo = pods.map(p => ({
       id: (p.id || "").toString(),

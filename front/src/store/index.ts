@@ -33,6 +33,7 @@ export interface IEnvironmentInfo {
 export interface IApplicationState {
   readonly applicationName: string | null;
   readonly applications: string[];
+  readonly selectedEnvironment: string | null;
   readonly environments: { [appName: string]: IEnvironmentInfo };
   readonly runningPods: IPodInfo[];
 }

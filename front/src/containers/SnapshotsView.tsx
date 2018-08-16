@@ -1,5 +1,7 @@
 import { Component, h } from "preact";
 import { connect } from "preact-redux";
+import { bindActionCreators, Dispatch } from "redux";
+import * as actions from "../actions";
 import SnapshotFilter from "../components/SnapshotFilter";
 import SnapshotList, { IRowData } from "../components/SnapshotList";
 import { IApplicationState, IPodInfo, ISnapshotInfo } from "../store";
@@ -7,8 +9,7 @@ import { IApplicationState, IPodInfo, ISnapshotInfo } from "../store";
 import styles from "./SnapshotsView.scss";
 
 interface IState {
-  filteringEnvironment?: string;
-  filteringPod?: string;
+  filteringPod?: string | null;
 }
 
 const mapStateToProps = (state: IApplicationState) => {
@@ -18,7 +19,9 @@ const mapStateToProps = (state: IApplicationState) => {
     []
   );
   return {
+    appName: state.applicationName,
     environments: state.environments,
+    filteringEnvironment: state.selectedEnvironment,
     pods,
     snapshots: pods.reduce(
       // flat-map
@@ -28,15 +31,28 @@ const mapStateToProps = (state: IApplicationState) => {
   };
 };
 
+const mapDispatchToProps = (dispatch: Dispatch) =>
+  bindActionCreators(
+    {
+      selectEnv: actions.selectEnv
+    },
+    dispatch
+  );
+
 // @ts-ignore
-@connect(mapStateToProps)
+@connect(
+  mapStateToProps,
+  mapDispatchToProps
+)
 class SnapshotsView extends Component<{}, IState> {
   constructor(props: {}) {
     super(props);
-    this.state = {};
+    this.state = { filteringPod: null };
   }
 
   public render() {
+    // @ts-ignore
+    const appName = this.props.appName;
     const environmentNames: string[] = Object.keys(
       // @ts-ignore
       this.props.environments || {}
@@ -45,6 +61,12 @@ class SnapshotsView extends Component<{}, IState> {
     const podNames: string[] = this.props.pods.map(x => x.name);
     // @ts-ignore
     const snapshots: ISnapshotInfo[] = this.props.snapshots;
+    // @ts-ignore
+    const filteringEnvironment = this.props.filteringEnvironment;
+    if (this.state.filteringPod && !filteringEnvironment) {
+      // FIXME: questionable code
+      this.setState({ filteringPod: null });
+    }
 
     const envFilterData = environmentNames.map(x => ({ label: x, value: x }));
     const podFilterData = podNames.map(x => ({ label: x, value: x }));
@@ -53,8 +75,7 @@ class SnapshotsView extends Component<{}, IState> {
       snapshots.length > 0 ? "Please select environment" : "No Data";
     let showingData: IRowData[] = [];
 
-    // TODO when app is re-selected, how filtering should be?
-    if (snapshots.length > 0 && this.state.filteringEnvironment) {
+    if (snapshots.length > 0 && filteringEnvironment) {
       showingData = snapshots.map(x => ({
         uuid: x.uuid,
         name: x.name || "Unknown",
@@ -66,7 +87,7 @@ class SnapshotsView extends Component<{}, IState> {
         isReady: false // TODO
       }));
       showingData = showingData.filter(
-        x => x.environment === this.state.filteringEnvironment
+        x => x.environment === filteringEnvironment
       );
       if (this.state.filteringPod) {
         showingData = showingData.filter(
@@ -81,20 +102,29 @@ class SnapshotsView extends Component<{}, IState> {
     // TODO fix cell width value
 
     return (
-      <div className={styles.wrap}>
+      <div
+        className={[
+          styles.wrap,
+          !appName ? styles.waitForAppSelect : undefined
+        ].join(" ")}
+      >
         <div className={styles.environmentSelector}>
           <SnapshotFilter
             options={envFilterData}
+            selectedValue={filteringEnvironment}
             onValueChanged={this.onEnvironmentChanged.bind(this)}
             placeholder="Select environment"
+            disabled={!appName}
           />
         </div>
         <div className={styles.podSelector}>
           <SnapshotFilter
             options={podFilterData}
+            selectedValue={this.state.filteringPod}
             onValueChanged={this.onPodChanged.bind(this)}
             placeholder="Select pod name"
             unselectOptionLabel="Unselect"
+            disabled={!filteringEnvironment}
           />
         </div>
         <div className={styles.snapshotList}>
@@ -105,7 +135,10 @@ class SnapshotsView extends Component<{}, IState> {
   }
 
   private onEnvironmentChanged(env: string) {
-    this.setState({ filteringEnvironment: env });
+    // @ts-ignore
+    const selectEnv: typeof actions.selectEnv = this.props.selectEnv;
+    selectEnv({ envName: env }); // unselect
+    this.setState({ filteringPod: null });
   }
 
   private onPodChanged(pod: string) {

@@ -1,7 +1,7 @@
 import { Component, h } from "preact";
 import { connect } from "preact-redux";
 import { bindActionCreators, Dispatch } from "redux";
-import { getEnvironmentsOfApp, selectApp } from "../actions";
+import * as actions from "../actions";
 import AppSelector from "../components/AppSelector";
 import { IApplicationState } from "../store";
 // @ts-ignore
@@ -15,8 +15,9 @@ const mapStateToProps = (state: IApplicationState) => ({
 const mapDispatchToProps = (dispatch: Dispatch) =>
   bindActionCreators(
     {
-      selectApp,
-      getEnvironmentsOfApp
+      selectApp: actions.selectApp,
+      getEnvironmentsOfApp: actions.getEnvironmentsOfApp,
+      selectEnv: actions.selectEnv
     },
     dispatch
   );
@@ -40,13 +41,13 @@ class NavigationView extends Component {
           <div className={styles.selector}>
             <AppSelector
               options={showingData}
-              value={applicationName}
+              selectedValue={applicationName}
               onValueChanged={this.onAppChanged.bind(this)}
               placeholder="Select landscape"
             />
           </div>
         </div>
-        <div className={styles.viewList}>
+        <div className={[styles.viewList, styles.waitForAppSelect].join(" ")}>
           <div className={[styles.viewItem, styles.selected].join(" ")}>
             Snapshots
           </div>
@@ -58,9 +59,15 @@ class NavigationView extends Component {
 
   private onAppChanged(app: string) {
     // @ts-ignore
-    this.props.selectApp(app);
+    const selectApp: typeof actions.selectApp = this.props.selectApp;
+    selectApp({ appName: app });
+    const getEnvironmentsOfApp: typeof actions.getEnvironmentsOfApp =
+      // @ts-ignore
+      this.props.getEnvironmentsOfApp;
+    getEnvironmentsOfApp(app);
     // @ts-ignore
-    this.props.getEnvironmentsOfApp(app);
+    const selectEnv: typeof actions.selectEnv = this.props.selectEnv;
+    selectEnv({ envName: null }); // unselect
   }
 }
 

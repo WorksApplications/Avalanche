@@ -10,12 +10,13 @@ export interface IStyles {
   placeholder?: string;
   selected?: string;
   unselectOption?: string;
+  disabled?: string;
 }
 
 export interface IProperty {
   disabled?: boolean;
   options: Array<{ label: string; value: string }>;
-  value?: string;
+  selectedValue?: string | null;
   onValueChanged?: (newValue: string | null) => void;
   styles?: IStyles;
   placeholder: string;
@@ -24,7 +25,6 @@ export interface IProperty {
 
 interface IState {
   isOpen: boolean;
-  selected: string | null;
 }
 
 // TODO write test
@@ -42,8 +42,7 @@ class SelectorBase extends Component<IProperty, IState> {
   constructor(props: IProperty) {
     super(props);
     this.state = {
-      isOpen: false,
-      selected: props.value || null
+      isOpen: false
     };
   }
 
@@ -64,7 +63,7 @@ class SelectorBase extends Component<IProperty, IState> {
           <li
             className={[
               styles.optionItem,
-              o.value === this.state.selected ? styles.selected : undefined
+              o.value === this.props.selectedValue ? styles.selected : undefined
             ].join(" ")}
             key={o.value}
             onMouseDown={this.setSelectingOption.bind(this, o.value)}
@@ -74,21 +73,27 @@ class SelectorBase extends Component<IProperty, IState> {
         ))}
       </ul>
     ) : null;
-    const selectorString = this.state.selected || this.props.placeholder;
+    const selectorString = this.props.selectedValue || this.props.placeholder;
 
     return (
-      <div className={styles.wrap} ref={this.getContainer.bind(this)}>
+      <div
+        className={[
+          styles.wrap,
+          this.props.disabled ? styles.disabled : undefined
+        ].join(" ")}
+        ref={this.getContainer.bind(this)}
+      >
         <div
           className={[
-            this.props.styles!.selector,
+            styles!.selector,
             this.state.isOpen ? styles.opened : styles.closed,
-            this.state.selected ? "" : styles.placeholder
+            this.props.selectedValue ? "" : styles.placeholder
           ].join(" ")}
           onMouseDown={this.onMouseDown.bind(this)}
         >
           {selectorString}
         </div>
-        {optionsView}
+        {!this.props.disabled && optionsView}
       </div>
     );
   }
@@ -114,7 +119,7 @@ class SelectorBase extends Component<IProperty, IState> {
   };
 
   private setSelectingOption(value: string) {
-    if (this.state.selected === value) {
+    if (this.props.selectedValue === value) {
       this.setState({ isOpen: false });
       return;
     }
