@@ -61,8 +61,10 @@ class NavigationView extends Component {
     // @ts-ignore
     const selectApp: typeof actions.selectApp = this.props.selectApp;
     selectApp({ appName: app });
-    // @ts-ignore
-    this.props.getEnvironmentsOfApp(app);
+    const getEnvironmentsOfApp: typeof actions.getEnvironmentsOfApp =
+      // @ts-ignore
+      this.props.getEnvironmentsOfApp;
+    getEnvironmentsOfApp(app);
     // @ts-ignore
     const selectEnv: typeof actions.selectEnv = this.props.selectEnv;
     selectEnv({ envName: null }); // unselect

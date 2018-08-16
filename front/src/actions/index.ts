@@ -3,8 +3,6 @@ import actionCreatorFactory from "typescript-fsa";
 import { COLLECT_API_BASE } from "../constants";
 import * as collect from "../generated/collect/api";
 
-export const GET_ENVS_OF_APP_REQUEST = "GET_ENVS_OF_APP_REQUEST";
-export const GET_ENVS_OF_APP_RECEIVE = "GET_ENVS_OF_APP_RECEIVE";
 export const GET_RUNNING_PODS_REQUEST = "GET_RUNNING_PODS_REQUEST";
 export const GET_RUNNING_PODS_RECEIVE = "GET_RUNNING_PODS_RECEIVE";
 export const POST_NEW_SNAPSHOT_REQUEST = "POST_NEW_SNAPSHOT_REQUEST";
@@ -53,29 +51,30 @@ export const getApps = () => (dispatch: Dispatch) => {
     });
 };
 
-const requestGetEnvsOfApp: ActionCreator<Action> = (app: string) => ({
-  type: GET_ENVS_OF_APP_REQUEST,
-  payload: {
-    app
-  }
-});
-
-const receiveGetEnvsOfApp: ActionCreator<Action> = (
-  appName: string,
-  envs: collect.Environment[]
-) => ({
-  type: GET_ENVS_OF_APP_RECEIVE,
-  payload: {
-    environments: envs
-  }
-});
+export const getEnvironmentsOfAppAsyncAction = actionCreator.async<
+  { app: string },
+  { envs: collect.Environment[] },
+  { message: string }
+>("GET_ENVS_OF_APP");
 
 export const getEnvironmentsOfApp = (app: string) => (dispatch: Dispatch) => {
-  dispatch(requestGetEnvsOfApp());
-  collectClient.getEnvironments(app).then(envs => {
-    dispatch(receiveGetEnvsOfApp(app, envs));
-  });
-  // TODO catch
+  const params = { app };
+  dispatch(getEnvironmentsOfAppAsyncAction.started(params));
+  collectClient
+    .getEnvironments(app)
+    .then((envs: collect.Environment[]) => {
+      dispatch(
+        getEnvironmentsOfAppAsyncAction.done({ params, result: { envs } })
+      );
+    })
+    .catch((reason: Error) => {
+      dispatch(
+        getEnvironmentsOfAppAsyncAction.failed({
+          params,
+          error: { message: reason.message }
+        })
+      );
+    });
 };
 
 const requestGetRunningPods: ActionCreator<Action> = () => ({
