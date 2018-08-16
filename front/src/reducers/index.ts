@@ -1,10 +1,11 @@
+import { isType } from "typescript-fsa";
 import {
   GET_APPS_RECEIVE,
   GET_ENVS_OF_APP_RECEIVE,
   GET_RUNNING_PODS_RECEIVE,
   IAction,
-  SELECT_APP,
-  SELECT_ENV
+  SELECT_ENV,
+  selectApp
 } from "../actions";
 import { Environment, Pod } from "../generated/collect";
 import { IApplicationState, IEnvironmentInfo, IPodInfo } from "../store";
@@ -21,9 +22,10 @@ export function indexApp(
   state: IApplicationState = INIT,
   action: IAction
 ): IApplicationState {
+  if (isType(action, selectApp)) {
+    return { ...state, applicationName: action.payload.appName };
+  }
   switch (action.type) {
-    case SELECT_APP:
-      return { ...state, applicationName: action.payload.appName };
     case GET_APPS_RECEIVE:
       return { ...state, applications: action.payload.apps };
     case SELECT_ENV:

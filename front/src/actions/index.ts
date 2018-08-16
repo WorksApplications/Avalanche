@@ -1,8 +1,8 @@
 import { Action, ActionCreator, Dispatch } from "redux";
+import actionCreatorFactory from "typescript-fsa";
 import { COLLECT_API_BASE } from "../constants";
 import * as collect from "../generated/collect/api";
 
-export const SELECT_APP = "SELECT_APP";
 export const SELECT_ENV = "SELECT_ENV";
 export const GET_APPS_REQUEST = "GET_APPS_REQUEST";
 export const GET_APPS_RECEIVE = "GET_APPS_RECEIVE";
@@ -12,6 +12,8 @@ export const GET_RUNNING_PODS_REQUEST = "GET_RUNNING_PODS_REQUEST";
 export const GET_RUNNING_PODS_RECEIVE = "GET_RUNNING_PODS_RECEIVE";
 export const POST_NEW_SNAPSHOT_REQUEST = "POST_NEW_SNAPSHOT_REQUEST";
 export const POST_NEW_SNAPSHOT_RECEIVE = "POST_NEW_SNAPSHOT_RECEIVE";
+
+const actionCreator = actionCreatorFactory();
 
 const collectClient = collect.DefaultApiFactory(
   {},
@@ -24,12 +26,7 @@ export interface IAction {
   payload?: any;
 }
 
-export const selectApp: ActionCreator<Action> = (appName: string) => ({
-  type: SELECT_APP,
-  payload: {
-    appName
-  }
-});
+export const selectApp = actionCreator<{ appName: string }>("SELECT_APP");
 
 export const selectEnv: ActionCreator<Action> = (envName: string) => ({
   type: SELECT_ENV,

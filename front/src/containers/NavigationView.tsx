@@ -1,7 +1,7 @@
 import { Component, h } from "preact";
 import { connect } from "preact-redux";
 import { bindActionCreators, Dispatch } from "redux";
-import { getEnvironmentsOfApp, selectApp, selectEnv } from "../actions";
+import * as actions from "../actions";
 import AppSelector from "../components/AppSelector";
 import { IApplicationState } from "../store";
 // @ts-ignore
@@ -15,9 +15,9 @@ const mapStateToProps = (state: IApplicationState) => ({
 const mapDispatchToProps = (dispatch: Dispatch) =>
   bindActionCreators(
     {
-      selectApp,
-      getEnvironmentsOfApp,
-      selectEnv
+      selectApp: actions.selectApp,
+      getEnvironmentsOfApp: actions.getEnvironmentsOfApp,
+      selectEnv: actions.selectEnv
     },
     dispatch
   );
@@ -59,7 +59,8 @@ class NavigationView extends Component {
 
   private onAppChanged(app: string) {
     // @ts-ignore
-    this.props.selectApp(app);
+    const selectApp: typeof actions.selectApp = this.props.selectApp;
+    selectApp({ appName: app });
     // @ts-ignore
     this.props.getEnvironmentsOfApp(app);
     // @ts-ignore
