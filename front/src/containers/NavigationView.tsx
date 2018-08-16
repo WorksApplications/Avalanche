@@ -1,7 +1,7 @@
 import { Component, h } from "preact";
 import { connect } from "preact-redux";
 import { bindActionCreators, Dispatch } from "redux";
-import * as actions from "../actions/index";
+import { getEnvironmentsOfApp, selectApp } from "../actions";
 import AppSelector from "../components/AppSelector";
 import { IApplicationState } from "../store";
 // @ts-ignore
@@ -15,8 +15,8 @@ const mapStateToProps = (state: IApplicationState) => ({
 const mapDispatchToProps = (dispatch: Dispatch) =>
   bindActionCreators(
     {
-      selectApp: actions.selectApp,
-      getEnvironmentsOfApp: actions.getEnvironmentsOfApp
+      selectApp,
+      getEnvironmentsOfApp
     },
     dispatch
   );

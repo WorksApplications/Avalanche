@@ -15,7 +15,11 @@ class PodCardList extends Component<IProperty, {}> {
         <div className={styles.kindWrap}>
           <span className={styles.kind}>{this.props.kind}</span>
         </div>
-        <div>{this.props.data.map(x => <PodCard key={x.id} {...x} />)}</div>
+        <div>
+          {this.props.data.map(x => {
+            return <PodCard key={x.id} {...x} />;
+          })}
+        </div>
       </div>
     );
   }

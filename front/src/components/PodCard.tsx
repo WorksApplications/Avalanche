@@ -8,6 +8,7 @@ export interface IProperty {
   app: string;
   environment: string;
   snapshots: string[];
+  onSaveButtonClick?(): void;
 }
 
 class PodList extends Component<IProperty, {}> {
@@ -15,19 +16,20 @@ class PodList extends Component<IProperty, {}> {
     return (
       <div className={styles.wrap}>
         <div>
+          <div
+            className={styles.saveButton}
+            onMouseDown={this.props.onSaveButtonClick}
+          >
+            <span className={styles.saveTooltip}>Save snapshot</span>Save
+          </div>
           <span className={styles.name}>{this.props.name}</span>
           <span className={styles.createdAt}>{this.props.createdAt}</span>
         </div>
         <div className={styles.info}>
-          <div className={styles.infoLeft}>
-            <div className={styles.appWrap}>
-              <span className={styles.app}>app:{this.props.app}</span>
-            </div>
-            <div className={styles.envWrap}>
-              <span className={styles.env}>env:{this.props.environment}</span>
-            </div>
+          <div className={styles.infoTop}>
+            {this.props.app}&nbsp;&nbsp;{this.props.environment}
           </div>
-          <div className={styles.infoRight}> {/* TODO Snapshots */}</div>
+          {/* TODO show list of Snapshots */}
         </div>
       </div>
     );
@@ -35,4 +37,3 @@ class PodList extends Component<IProperty, {}> {
 }
 
 export default PodList;
-// TODO change pod card layout

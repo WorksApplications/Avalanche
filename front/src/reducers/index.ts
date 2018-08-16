@@ -59,7 +59,7 @@ export function indexApp(
         isLive: p.isLive,
         createdAt: p.createdAt,
         app: p.app,
-        environment: p.environment,
+        env: p.environment,
         snapshots: (p.snapshots || []).map(s => ({
           uuid: s.uuid,
           name: undefined,

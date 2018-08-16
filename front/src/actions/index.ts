@@ -9,6 +9,8 @@ export const GET_ENVS_OF_APP_REQUEST = "GET_ENVS_OF_APP_REQUEST";
 export const GET_ENVS_OF_APP_RECEIVE = "GET_ENVS_OF_APP_RECEIVE";
 export const GET_RUNNING_PODS_REQUEST = "GET_RUNNING_PODS_REQUEST";
 export const GET_RUNNING_PODS_RECEIVE = "GET_RUNNING_PODS_RECEIVE";
+export const POST_NEW_SNAPSHOT_REQUEST = "POST_NEW_SNAPSHOT_REQUEST";
+export const POST_NEW_SNAPSHOT_RECEIVE = "POST_NEW_SNAPSHOT_RECEIVE";
 
 const collectClient = collect.DefaultApiFactory(
   {},
@@ -88,5 +90,36 @@ export const getRunningPods = () => (dispatch: Dispatch) => {
   collectClient.listAvailablePods().then(pods => {
     dispatch(receiveGetRunningPods(pods));
   });
+  // TODO catch
+};
+
+const requestPostSnapshot: ActionCreator<Action> = () => ({
+  type: POST_NEW_SNAPSHOT_REQUEST
+});
+
+const receivePostSnapshot: ActionCreator<Action> = (
+  snapshot: collect.Snapshot
+) => ({
+  type: POST_NEW_SNAPSHOT_RECEIVE,
+  payload: {
+    newSnapshot: snapshot
+  }
+});
+
+export const postSnapshot = (
+  appId: string,
+  environment: string,
+  podId: string
+) => (dispatch: Dispatch) => {
+  dispatch(requestPostSnapshot());
+  collectClient
+    .newSnapshot(appId, environment, podId, {
+      headers: {
+        "Content-Type": "application/json"
+      } // This is due to "typescript-fetch"
+    })
+    .then(snapshots => {
+      dispatch(receivePostSnapshot(snapshots));
+    });
   // TODO catch
 };
