@@ -46,7 +46,8 @@ push-images:
     image: docker:stable
     script:
         - docker info
-        - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} ${
+        - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} ${DOCKERHOST}
+        - 
         - ls -lR
         - apk add make
         - touch bin/collect bin/detect
@@ -59,5 +60,6 @@ push-images:
         - docker push ${
         - docker push ${
     variables:
+        DOCKERHOST: ""
         
 
