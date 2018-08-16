@@ -3,6 +3,7 @@ import { COLLECT_API_BASE } from "../constants";
 import * as collect from "../generated/collect/api";
 
 export const SELECT_APP = "SELECT_APP";
+export const SELECT_ENV = "SELECT_ENV";
 export const GET_APPS_REQUEST = "GET_APPS_REQUEST";
 export const GET_APPS_RECEIVE = "GET_APPS_RECEIVE";
 export const GET_ENVS_OF_APP_REQUEST = "GET_ENVS_OF_APP_REQUEST";
@@ -27,6 +28,13 @@ export const selectApp: ActionCreator<Action> = (appName: string) => ({
   type: SELECT_APP,
   payload: {
     appName
+  }
+});
+
+export const selectEnv: ActionCreator<Action> = (envName: string) => ({
+  type: SELECT_ENV,
+  payload: {
+    envName
   }
 });
 
