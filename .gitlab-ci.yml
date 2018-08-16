@@ -46,10 +46,18 @@ push-images:
     image: docker:stable
     script:
         - docker info
-        - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} 
+        - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} ${
         - ls -lR
         - apk add make
         - touch bin/collect bin/detect
-        - touch front/public/*
-        - make pushi
+        - docker build -f image/static/Dockerfile  --tag ${
+        - docker build -f image/collect/Dockerfile --tag ${
+
+        - docker build -f image/detect/Dockerfile  --tag ${
+        - docker push ${
+        - docker push ${
+        - docker push ${
+        - docker push ${
+    variables:
+        - 
 
