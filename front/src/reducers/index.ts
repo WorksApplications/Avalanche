@@ -1,8 +1,8 @@
 import { isType } from "typescript-fsa";
 import {
-  GET_RUNNING_PODS_RECEIVE,
   getAppsAsyncAction,
   getEnvironmentsOfAppAsyncAction,
+  getRunningPodsAsyncAction,
   IAction,
   selectApp,
   selectEnv
@@ -59,9 +59,9 @@ export function indexApp(
     }
     return { ...state, environments: newEnvironments };
   }
-  switch (action.type) {
-    case GET_RUNNING_PODS_RECEIVE:
-      const runningPods: IPodInfo[] = action.payload.pods.map((p: Pod) => ({
+  if (isType(action, getRunningPodsAsyncAction.done)) {
+    const runningPods: IPodInfo[] = action.payload.result.pods.map(
+      (p: Pod) => ({
         id: p.id,
         name: p.name,
         isLive: p.isLive,
@@ -76,12 +76,12 @@ export function indexApp(
           createdAt: s.createdAt,
           link: s.flamescopeLink
         }))
-      }));
-      return {
-        ...state,
-        runningPods
-      };
-    default:
-      return state;
+      })
+    );
+    return {
+      ...state,
+      runningPods
+    };
   }
+  return state;
 }

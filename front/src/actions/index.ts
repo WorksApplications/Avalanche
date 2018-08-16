@@ -3,8 +3,6 @@ import actionCreatorFactory from "typescript-fsa";
 import { COLLECT_API_BASE } from "../constants";
 import * as collect from "../generated/collect/api";
 
-export const GET_RUNNING_PODS_REQUEST = "GET_RUNNING_PODS_REQUEST";
-export const GET_RUNNING_PODS_RECEIVE = "GET_RUNNING_PODS_RECEIVE";
 export const POST_NEW_SNAPSHOT_REQUEST = "POST_NEW_SNAPSHOT_REQUEST";
 export const POST_NEW_SNAPSHOT_RECEIVE = "POST_NEW_SNAPSHOT_RECEIVE";
 
@@ -77,23 +75,28 @@ export const getEnvironmentsOfApp = (app: string) => (dispatch: Dispatch) => {
     });
 };
 
-const requestGetRunningPods: ActionCreator<Action> = () => ({
-  type: GET_RUNNING_PODS_REQUEST
-});
-
-const receiveGetRunningPods: ActionCreator<Action> = (pods: collect.Pod[]) => ({
-  type: GET_RUNNING_PODS_RECEIVE,
-  payload: {
-    pods
-  }
-});
+export const getRunningPodsAsyncAction = actionCreator.async<
+  {},
+  { pods: collect.Pod[] },
+  { message: string }
+>("GET_RUNNING_PODS");
 
 export const getRunningPods = () => (dispatch: Dispatch) => {
-  dispatch(requestGetRunningPods());
-  collectClient.listAvailablePods().then(pods => {
-    dispatch(receiveGetRunningPods(pods));
-  });
-  // TODO catch
+  const params = {};
+  dispatch(getRunningPodsAsyncAction.started(params));
+  collectClient
+    .listAvailablePods()
+    .then((pods: collect.Pod[]) => {
+      dispatch(getRunningPodsAsyncAction.done({ params, result: { pods } }));
+    })
+    .catch((reason: Error) => {
+      dispatch(
+        getRunningPodsAsyncAction.failed({
+          params,
+          error: { message: reason.message }
+        })
+      );
+    });
 };
 
 const requestPostSnapshot: ActionCreator<Action> = () => ({

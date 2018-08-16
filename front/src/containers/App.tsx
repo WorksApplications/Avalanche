@@ -27,8 +27,10 @@ class App extends Component {
     const getApps: typeof actions.getApps = this.props.getApps;
     getApps();
 
-    // @ts-ignore
-    this.props.getRunningPods();
+    const getRunningPods: typeof actions.getRunningPods =
+      // @ts-ignore
+      this.props.getRunningPods;
+    getRunningPods();
   }
 
   public render() {
