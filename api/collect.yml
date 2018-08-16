@@ -20,6 +20,33 @@ definitions:
       message:
         type: string
 
+  config:
+    type: array
+    items:
+      type: string
+
+  environment-config:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+      tenant:
+        type: string
+      version:
+        type: string
+      landscape:
+        type: string
+      mischo-url:
+        type: string
+      service-url:
+        type: string
+      kube-api:
+        type: string
+      is_multitenant:
+        type: boolean
+
   app:
     type: object
     required:
@@ -312,3 +339,58 @@ paths:
             items:
               $ref: "#/definitions/pod"
       operationId: listAvailablePods
+  /config/environment:
+    get:
+      responses:
+        200:
+          description: |
+            "list the environments to be scanned"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/environment-config"
+      operationId: listEnvironmentConfig
+    post:
+      parameters:
+        - name: config
+          in: body
+          schema: $ref "#/definitions/environment-config"
+      responses:
+        200:
+          description: |
+            "replace the configuration of this environment"
+          schema:
+            $ref: "#/definitions/environment-config"
+      operationId: addEnvironmentConfig
+
+  /config/environment/{environment}:
+    get:
+      parameters:
+        - name: environment
+          type: string
+          in: path
+          required: true
+      responses:
+        200:
+          description: |
+            "describe the environment configuration"
+          schema:
+            $ref: "#/definitions/environment-config"
+      operationId: describeEnvironmentConfig
+    put:
+      parameters:
+        - name: environment
+          type: string
+          in: path
+          required: true
+        - name: config
+          in: body
+          schema: $ref "#/definitions/environment-config"
+      responses:
+        200:
+          description: |
+            "replace the configuration of this environment"
+          schema:
+            $ref: "#/definitions/environment-config"
+      operationId: putEnvironmentConfig
+

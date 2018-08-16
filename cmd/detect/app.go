@@ -37,6 +37,10 @@ func main() {
 	db := establishDBConn(*dbconf)
 	es := getAllEnviron(db)
 
+	flag.Parse()
+	args := flag.Args()
+	log.Println(args)
+
 	x := server.HandlerClosure{make(chan *util.ScannerRequest)}
 	go util.Exchange(x.Ch)
 	for _, e := range es {
