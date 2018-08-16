@@ -7,8 +7,36 @@ import {
   selectApp,
   selectEnv
 } from "../actions";
-import { Pod } from "../generated/collect";
-import { IApplicationState, IEnvironmentInfo, IPodInfo } from "../store";
+import * as collect from "../generated/collect/api";
+import {
+  IApplicationState,
+  IEnvironmentInfo,
+  IPodInfo,
+  ISnapshotInfo
+} from "../store";
+
+function podInfoConvert(pod: collect.Pod): IPodInfo {
+  return {
+    id: pod.id,
+    name: pod.name,
+    isLive: pod.isLive,
+    createdAt: pod.createdAt,
+    app: pod.app,
+    env: pod.environment,
+    snapshots: (pod.snapshots || []).map(s => snapshotInfoConvert(s))
+  };
+}
+
+function snapshotInfoConvert(snapshot: collect.Snapshot): ISnapshotInfo {
+  return {
+    uuid: snapshot.uuid,
+    name: undefined,
+    pod: snapshot.pod,
+    environment: snapshot.environment,
+    createdAt: snapshot.createdAt,
+    link: snapshot.flamescopeLink
+  };
+}
 
 const INIT: IApplicationState = {
   applicationName: null,
@@ -36,22 +64,7 @@ export function indexApp(
     const envInfos: IEnvironmentInfo[] = action.payload.result.envs.map(e => ({
       id: e.id,
       name: e.name,
-      pods: (e.pods || []).map<IPodInfo>(p => ({
-        id: p.id,
-        name: p.name,
-        createdAt: p.createdAt,
-        isLive: p.isLive,
-        app: p.app,
-        env: p.environment,
-        snapshots: (p.snapshots || []).map(s => ({
-          uuid: s.uuid,
-          name: undefined,
-          pod: s.pod,
-          environment: s.environment,
-          createdAt: s.createdAt,
-          link: s.flamescopeLink
-        }))
-      })),
+      pods: (e.pods || []).map<IPodInfo>(p => podInfoConvert(p)),
       liveCount: e.liveCount
     }));
     for (const e of envInfos) {
@@ -60,27 +73,9 @@ export function indexApp(
     return { ...state, environments: newEnvironments };
   }
   if (isType(action, getRunningPodsAsyncAction.done)) {
-    const runningPods: IPodInfo[] = action.payload.result.pods.map(
-      (p: Pod) => ({
-        id: p.id,
-        name: p.name,
-        isLive: p.isLive,
-        createdAt: p.createdAt,
-        app: p.app,
-        env: p.environment,
-        snapshots: (p.snapshots || []).map(s => ({
-          uuid: s.uuid,
-          name: undefined,
-          pod: s.pod,
-          environment: s.environment,
-          createdAt: s.createdAt,
-          link: s.flamescopeLink
-        }))
-      })
-    );
     return {
       ...state,
-      runningPods
+      runningPods: action.payload.result.pods.map(p => podInfoConvert(p))
     };
   }
   return state;
