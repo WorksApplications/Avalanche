@@ -11,6 +11,7 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
   bindActionCreators(
     {
       getApps: actions.getApps,
+      selectApp: actions.selectApp,
       getRunningPods: actions.getRunningPods
     },
     dispatch

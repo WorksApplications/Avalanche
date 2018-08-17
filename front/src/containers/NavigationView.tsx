@@ -1,8 +1,10 @@
 import { Component, h } from "preact";
 import { connect } from "preact-redux";
+import * as qs from "querystring";
 import { bindActionCreators, Dispatch } from "redux";
 import * as actions from "../actions";
 import AppSelector from "../components/AppSelector";
+import { APP_NAME } from "../constants";
 import { IApplicationState } from "../store";
 // @ts-ignore
 import styles from "./NavigationView.scss";
@@ -29,6 +31,18 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
   mapDispatchToProps
 )
 class NavigationView extends Component {
+  public componentWillMount() {
+    // get app & env from query in url
+    const requested = qs.parse(window.location.search.substring(1));
+    if (
+      "app" in requested &&
+      typeof requested.app === "string" &&
+      requested.app
+    ) {
+      this.changeApp(requested.app, true);
+    }
+  }
+
   public render() {
     // @ts-ignore
     const applications: string[] = this.props.applications;
@@ -59,6 +73,10 @@ class NavigationView extends Component {
   }
 
   private onAppChanged(app: string) {
+    this.changeApp(app);
+  }
+
+  private changeApp(app: string, isInizalizing = false) {
     // @ts-ignore
     const selectApp: typeof actions.selectApp = this.props.selectApp;
     selectApp({ appName: app });
@@ -72,6 +90,16 @@ class NavigationView extends Component {
     // @ts-ignore
     const selectPod: typeof actions.selectPod = this.props.selectPod;
     selectPod({ podName: null }); // unselect
+
+    // set app to query in url
+    const requested = qs.parse(window.location.search.substring(1));
+    const newQuery = { ...requested };
+    newQuery.app = app;
+    if (!isInizalizing && "env" in newQuery) {
+      delete newQuery.env;
+    }
+    // current browser does not support 2nd argument :yaomin:
+    history.pushState({}, `${APP_NAME} | ${app}`, "?" + qs.stringify(newQuery));
   }
 }
 

@@ -1,9 +1,11 @@
 import { Component, h } from "preact";
 import { connect } from "preact-redux";
+import * as qs from "querystring";
 import { bindActionCreators, Dispatch } from "redux";
 import * as actions from "../actions";
 import SnapshotFilter from "../components/SnapshotFilter";
 import SnapshotList, { IRowData } from "../components/SnapshotList";
+import { APP_NAME } from "../constants";
 import { IApplicationState, IPodInfo, ISnapshotInfo } from "../store";
 // @ts-ignore
 import styles from "./SnapshotsView.scss";
@@ -43,8 +45,19 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
   mapDispatchToProps
 )
 class SnapshotsView extends Component {
-  constructor(props: {}) {
-    super(props);
+  public componentWillMount() {
+    // get app & env from query in url
+    const requested = qs.parse(window.location.search.substring(1));
+    if (
+      "app" in requested &&
+      typeof requested.app === "string" &&
+      requested.app &&
+      "env" in requested &&
+      typeof requested.env === "string" &&
+      requested.env
+    ) {
+      this.changeEnvironment(requested.env);
+    }
   }
 
   public render() {
@@ -128,12 +141,30 @@ class SnapshotsView extends Component {
   }
 
   private onEnvironmentChanged(env: string) {
+    this.changeEnvironment(env);
+  }
+
+  private changeEnvironment(env: string) {
     // @ts-ignore
     const selectEnv: typeof actions.selectEnv = this.props.selectEnv;
     selectEnv({ envName: env });
     // @ts-ignore
     const selectPod: typeof actions.selectPod = this.props.selectPod;
     selectPod({ podName: null }); // unselect
+
+    // set app to query in url
+    // @ts-ignore
+    const appName = this.props.appName;
+    const requested = qs.parse(window.location.search.substring(1));
+    const newQuery = { ...requested };
+    newQuery.app = appName;
+    newQuery.env = env;
+    // current browser does not support 2nd argument :yaomin:
+    history.pushState(
+      {},
+      `${APP_NAME} | ${appName}-${env}`,
+      "?" + qs.stringify(newQuery)
+    );
   }
 
   private onPodChanged(pod: string) {
