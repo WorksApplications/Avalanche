@@ -17,6 +17,10 @@ export const selectEnv = actionCreator<{ envName: string | null }>(
   "SELECT_ENV"
 );
 
+export const selectPod = actionCreator<{ podName: string | null }>(
+  "SELECT_POD"
+);
+
 export const getAppsAsyncAction = actionCreator.async<
   {},
   { apps: string[] },

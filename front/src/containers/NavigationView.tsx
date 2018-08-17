@@ -17,7 +17,8 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
     {
       selectApp: actions.selectApp,
       getEnvironmentsOfApp: actions.getEnvironmentsOfApp,
-      selectEnv: actions.selectEnv
+      selectEnv: actions.selectEnv,
+      selectPod: actions.selectPod
     },
     dispatch
   );
@@ -68,6 +69,9 @@ class NavigationView extends Component {
     // @ts-ignore
     const selectEnv: typeof actions.selectEnv = this.props.selectEnv;
     selectEnv({ envName: null }); // unselect
+    // @ts-ignore
+    const selectPod: typeof actions.selectPod = this.props.selectPod;
+    selectPod({ podName: null }); // unselect
   }
 }
 

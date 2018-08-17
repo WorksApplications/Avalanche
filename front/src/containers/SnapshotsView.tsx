@@ -8,10 +8,6 @@ import { IApplicationState, IPodInfo, ISnapshotInfo } from "../store";
 // @ts-ignore
 import styles from "./SnapshotsView.scss";
 
-interface IState {
-  filteringPod?: string | null;
-}
-
 const mapStateToProps = (state: IApplicationState) => {
   const pods: IPodInfo[] = Object.values(state.environments).reduce(
     // flat-map
@@ -22,6 +18,7 @@ const mapStateToProps = (state: IApplicationState) => {
     appName: state.applicationName,
     environments: state.environments,
     filteringEnvironment: state.selectedEnvironment,
+    filteringPod: state.selectedPod,
     pods,
     snapshots: pods.reduce(
       // flat-map
@@ -34,7 +31,8 @@ const mapStateToProps = (state: IApplicationState) => {
 const mapDispatchToProps = (dispatch: Dispatch) =>
   bindActionCreators(
     {
-      selectEnv: actions.selectEnv
+      selectEnv: actions.selectEnv,
+      selectPod: actions.selectPod
     },
     dispatch
   );
@@ -44,10 +42,9 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
   mapStateToProps,
   mapDispatchToProps
 )
-class SnapshotsView extends Component<{}, IState> {
+class SnapshotsView extends Component {
   constructor(props: {}) {
     super(props);
-    this.state = { filteringPod: null };
   }
 
   public render() {
@@ -63,10 +60,8 @@ class SnapshotsView extends Component<{}, IState> {
     const snapshots: ISnapshotInfo[] = this.props.snapshots;
     // @ts-ignore
     const filteringEnvironment = this.props.filteringEnvironment;
-    if (this.state.filteringPod && !filteringEnvironment) {
-      // FIXME: questionable code
-      this.setState({ filteringPod: null });
-    }
+    // @ts-ignore
+    const filteringPod = this.props.filteringPod;
 
     const envFilterData = environmentNames.map(x => ({ label: x, value: x }));
     const podFilterData = podNames.map(x => ({ label: x, value: x }));
@@ -89,10 +84,8 @@ class SnapshotsView extends Component<{}, IState> {
       showingData = showingData.filter(
         x => x.environment === filteringEnvironment
       );
-      if (this.state.filteringPod) {
-        showingData = showingData.filter(
-          x => x.pod === this.state.filteringPod
-        );
+      if (filteringPod) {
+        showingData = showingData.filter(x => x.pod === filteringPod);
       }
       if (showingData.length === 0) {
         emptyMessage = "No Data";
@@ -120,7 +113,7 @@ class SnapshotsView extends Component<{}, IState> {
         <div className={styles.podSelector}>
           <SnapshotFilter
             options={podFilterData}
-            selectedValue={this.state.filteringPod}
+            selectedValue={filteringPod}
             onValueChanged={this.onPodChanged.bind(this)}
             placeholder="Select pod name"
             unselectOptionLabel="Unselect"
@@ -137,12 +130,16 @@ class SnapshotsView extends Component<{}, IState> {
   private onEnvironmentChanged(env: string) {
     // @ts-ignore
     const selectEnv: typeof actions.selectEnv = this.props.selectEnv;
-    selectEnv({ envName: env }); // unselect
-    this.setState({ filteringPod: null });
+    selectEnv({ envName: env });
+    // @ts-ignore
+    const selectPod: typeof actions.selectPod = this.props.selectPod;
+    selectPod({ podName: null }); // unselect
   }
 
   private onPodChanged(pod: string) {
-    this.setState({ filteringPod: pod });
+    // @ts-ignore
+    const selectPod: typeof actions.selectPod = this.props.selectPod;
+    selectPod({ podName: pod });
   }
 }
 

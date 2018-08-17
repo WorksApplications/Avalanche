@@ -5,7 +5,8 @@ import {
   getEnvironmentsOfAppAsyncAction,
   getRunningPodsAsyncAction,
   selectApp,
-  selectEnv
+  selectEnv,
+  selectPod
 } from "../actions";
 import * as collect from "../generated/collect/api";
 import {
@@ -43,7 +44,8 @@ const INIT: IApplicationState = {
   applications: [],
   selectedEnvironment: null,
   environments: {},
-  runningPods: []
+  runningPods: [],
+  selectedPod: null
 };
 
 export function indexApp(
@@ -77,6 +79,9 @@ export function indexApp(
       ...state,
       runningPods: action.payload.result.pods.map(p => podInfoConvert(p))
     };
+  }
+  if (isType(action, selectPod)) {
+    return { ...state, selectedPod: action.payload.podName };
   }
   return state;
 }

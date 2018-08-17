@@ -36,6 +36,7 @@ export interface IApplicationState {
   readonly selectedEnvironment: string | null;
   readonly environments: { [appName: string]: IEnvironmentInfo };
   readonly runningPods: IPodInfo[];
+  readonly selectedPod: string | null;
 }
 
 let middlewares: Middleware[] = [thunk];
