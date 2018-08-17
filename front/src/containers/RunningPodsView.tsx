@@ -43,8 +43,8 @@ class RunningPodsView extends Component {
       environment: p.env || "Unknown",
       snapshots: (p.snapshots || []).map(s => s.uuid),
       onSaveButtonClick:
-        p.app && p.env && p.id
-          ? () => postSnapshot(p.app!, p.env!, p.id!.toString())
+        p.app && p.env && p.name
+          ? () => postSnapshot(p.app!, p.env!, p.name!)
           : undefined
     }));
 
