@@ -9,7 +9,8 @@ import styles from "./Toastr.scss";
 const mapStateToProps = (state: IApplicationState) => ({
   isShown: state.isToastrShown,
   message: state.toastrMessage,
-  kind: state.toastrKind
+  kind: state.toastrKind,
+  id: state.toastrId
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) =>
@@ -25,13 +26,16 @@ const Toastr: FunctionalComponent = ({
   isShown,
   message,
   kind = "success",
+  id,
   hideToastr
 }: {
   isShown: boolean;
   message: string;
   kind: "success" | "error";
-  hideToastr: () => void;
+  id: number;
+  hideToastr: ({ id }: { id: number }) => void;
 }) => {
+  const dismissToastr = () => hideToastr({ id });
   return message != null ? (
     <div
       className={[
@@ -45,8 +49,7 @@ const Toastr: FunctionalComponent = ({
       ].join(" ")}
     >
       {message}
-      {/*<span>&#x1F5D9;</span>*/}
-      <span className={styles.dismissButton} onMouseDown={hideToastr}>
+      <span className={styles.dismissButton} onMouseDown={dismissToastr}>
         &#x2716;
       </span>
     </div>
