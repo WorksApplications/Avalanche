@@ -27,6 +27,8 @@ front-build:
     image: node:10.8.0
     script:
         - cd front
+        - mv package.json package.json.templ
+        - sed 's;flamescope.*31002;huedynamics.internal.worksap.com;g' package.json.templ > package.json
         - yarn add --dev webpack webpack-cli
         - npm install
         - PATH=$PATH:$(pwd)/node_modules/.bin yarn build
@@ -46,8 +48,19 @@ push-images:
     image: docker:stable
     script:
         - docker info
-        - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} 
+        - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} ${DOCKERHOST}
         - ls -lR
         - apk add make
-        - make pushi
+        - touch bin/collect bin/detect
+        - docker build -f image/static/Dockerfile  --tag ${
+        - docker build -f image/collect/Dockerfile --tag ${
+
+        - docker build -f image/detect/Dockerfile  --tag ${
+        - docker push ${
+        - docker push ${
+        - docker push ${
+        - docker push ${
+    variables:
+        DOCKERHOST: ""
+        
 

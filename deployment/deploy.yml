@@ -164,6 +164,7 @@ spec:
         image: /resource_optimization/static:alpha
         ports:
         - containerPort: 80
+        imagePullPolicy: Always
 ---
 
 apiVersion: v1
