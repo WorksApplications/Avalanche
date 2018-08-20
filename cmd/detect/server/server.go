@@ -6,14 +6,17 @@ import (
 	"fmt"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/util"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+	"database/sql"
 )
 
 type HandlerClosure struct {
 	Ch chan *util.ScannerRequest
+    Db *sql.DB
 }
 
 func subscribe(res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest) {
@@ -87,15 +90,43 @@ func (s HandlerClosure) SubRunner(res http.ResponseWriter, req *http.Request) {
 		} else {
 			get(res, req, s.Ch, &env)
 		}
-	case "DELETE":
 	}
 }
 
 func (s HandlerClosure) Runner(res http.ResponseWriter, req *http.Request) {
-	log.Printf("R: %s %s", req.Method, req.URL.Path)
+    log.Printf("R: OBSOLETE: %s %s", req.Method, req.URL.Path)
 	switch req.Method {
 	case "GET":
 		get(res, req, s.Ch, nil /* indicates "gimme-all" */)
+	}
+}
+
+func (s HandlerClosure) ConfigEnv(res http.ResponseWriter, req *http.Request) {
+	log.Printf("C: %s %s", req.Method, req.URL.Path)
+	switch req.Method {
+	case "GET":
+        envs := environ.ListConfig(s.Db, nil, nil)
+        reply, e := json.Marshal(envs)
+        if e != nil {
+			res.WriteHeader(http.StatusInternalServerError)
+			return
+        }
+        res.Write(reply)
+	}
+}
+
+func (s HandlerClosure) ConfigEnvSub(res http.ResponseWriter, req *http.Request) {
+	log.Printf("Q: %s %s", req.Method, req.URL.Path)
+	switch req.Method {
+	case "GET":
+		env := strings.TrimPrefix(req.URL.Path, "/config/environments/")
+        envs := environ.ListConfig(s.Db, &env, nil)
+        reply, e := json.Marshal(envs)
+        if e != nil {
+			res.WriteHeader(http.StatusInternalServerError)
+			return
+        }
+        res.Write(reply)
 	case "POST":
 		subscribe(res, req, s.Ch)
 	case "DELETE":

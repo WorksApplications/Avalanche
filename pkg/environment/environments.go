@@ -14,6 +14,17 @@ import (
    |id|name|app_id                     |
    +--+----+---------------------------+
 */
+
+type Environ struct {
+    Id          int64
+    Name        string
+    Addr        *string
+    Kubeapi     *string
+    Multitenant *bool
+    Version     *string
+    Observe     bool
+}
+
 func InitTable(db *sql.DB) {
 	res, err := db.Exec(
 		"CREATE TABLE environ(" +
@@ -21,9 +32,43 @@ func InitTable(db *sql.DB) {
 			"name CHAR(32) NOT NULL, " +
 			"addr TEXT, " +
 			"kubeapi TEXT, " +
+			"multitenant BOOLEAN, " +
+			"version TEXT, " +
+            "observe BOOLEAN, " +
 			"PRIMARY KEY (id) " +
 			")")
 	log.Println("[DB/Env]", res, err)
+}
+
+func ListConfig(db *sql.DB, name *string, obs *bool) []*Environ {
+    namew := ""
+    obsw := ""
+    if (name != nil) {
+        namew = "namew = " + *name
+    }
+    if (obs != nil) {
+        obsw = fmt.Sprintf("observe = %t", obs)
+    }
+    where := ""
+    if (name != nil || obs != nil) {
+        where = "where " + namew + obsw
+    }
+
+	rows, err := db.Query("SELECT id, name, kubeapi, multitenant, version, observe FROM environ " + where)
+	if err != nil {
+		log.Fatal("[DB/Env/Detect] ", err)
+	}
+	defer rows.Close()
+	envs := make([]*Environ, 0)
+	for rows.Next() {
+        var ret Environ
+		err = rows.Scan(&ret.Id, &ret.Name, ret.Kubeapi, ret.Multitenant, ret.Version, &ret.Observe)
+		if err != nil {
+			log.Println("[DB/Env/Detect] Scan ", err)
+		}
+		envs = append(envs, &ret)
+	}
+	return envs
 }
 
 func list(db *sql.DB, where *string) []*models.Environment {
@@ -38,7 +83,7 @@ func list(db *sql.DB, where *string) []*models.Environment {
 		var name string
 		err = rows.Scan(&id, &name)
 		if err != nil {
-			log.Println("[DB/Env] Scan", err)
+			log.Println("[DB/Env] Scan ", err)
 		}
 		envs = append(envs, &models.Environment{&id, 0, &name, nil})
 	}

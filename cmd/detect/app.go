@@ -22,34 +22,28 @@ func establishDBConn(dn string) *sql.DB {
 	return db
 }
 
-func getAllEnviron(db *sql.DB) []string {
-	es := environ.ListAll(db)
-	ret := make([]string, 0, len(es))
-	for _, e := range es {
-		ret = append(ret, *e.Name)
-	}
-	return ret
-}
-
 func main() {
 	log.SetPrefix("detect:\t")
 	dbconf := flag.String("db", "example:example@localhost?parseTime=True", "DB connexion")
 	db := establishDBConn(*dbconf)
-	es := getAllEnviron(db)
+    t := true
+	es := environ.ListConfig(db, nil, &t)
 
 	flag.Parse()
 	args := flag.Args()
 	log.Println(args)
 
-	x := server.HandlerClosure{make(chan *util.ScannerRequest)}
+	x := server.HandlerClosure{make(chan *util.ScannerRequest), db}
 	go util.Exchange(x.Ch)
 	for _, e := range es {
-		sreq := util.ScannerRequest{util.ADD, &e, nil}
+		sreq := util.ScannerRequest{util.ADD, &e.Name, nil}
 		x.Ch <- &sreq
 	}
 
 	//log.Print(apps)
 	http.HandleFunc("/subscription/", x.SubRunner)
 	http.HandleFunc("/subscription", x.Runner)
+	//http.HandleFunc("/config", x.Config)
+	http.HandleFunc("/config/environments", x.ConfigEnv)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

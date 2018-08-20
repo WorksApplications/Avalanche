@@ -76,6 +76,7 @@ func main() {
 	api.ListSnapshotsHandler = operations.ListSnapshotsHandlerFunc(ctx.ListSnapshotsHandler)
 
 	api.ListAvailablePodsHandler = operations.ListAvailablePodsHandlerFunc(ctx.ListAvailablePods)
+
 	api.HealthzHandler = operations.HealthzHandlerFunc(ctx.HealthzHandler)
 
 	if err := server.Serve(); err != nil {

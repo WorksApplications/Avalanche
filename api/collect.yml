@@ -20,11 +20,6 @@ definitions:
       message:
         type: string
 
-  config:
-    type: array
-    items:
-      type: string
-
   environment-config:
     type: object
     required:
@@ -45,6 +40,8 @@ definitions:
       kube-api:
         type: string
       is_multitenant:
+        type: boolean
+      is_enabled:
         type: boolean
 
   app:
@@ -339,6 +336,19 @@ paths:
             items:
               $ref: "#/definitions/pod"
       operationId: listAvailablePods
+
+  /config:
+    get:
+      responses:
+        200:
+          description: |
+            "Show possible configs"
+          schema:
+            type: array
+            items:
+              type: string
+      operationId: getConfig 
+
   /config/environment:
     get:
       responses:
@@ -354,7 +364,8 @@ paths:
       parameters:
         - name: config
           in: body
-          schema: $ref "#/definitions/environment-config"
+          schema:
+            $ref: "#/definitions/environment-config"
       responses:
         200:
           description: |
@@ -385,7 +396,8 @@ paths:
           required: true
         - name: config
           in: body
-          schema: $ref "#/definitions/environment-config"
+          schema:
+            $ref: "#/definitions/environment-config"
       responses:
         200:
           description: |
