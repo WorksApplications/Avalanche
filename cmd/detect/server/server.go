@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/util"
@@ -11,15 +12,14 @@ import (
 	"net/http"
 	"strings"
 	"time"
-	"database/sql"
 )
 
 type HandlerClosure struct {
 	Ch chan *util.ScannerRequest
-    Db *sql.DB
+	Db *sql.DB
 }
 
-func subscribe(res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest) {
+func subscribe(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest) {
 	buf := new(bytes.Buffer)
 	defer req.Body.Close()
 	r, e := buf.ReadFrom(req.Body)
@@ -28,16 +28,20 @@ func subscribe(res http.ResponseWriter, req *http.Request, ch chan<- *util.Scann
 		res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if req.URL.Path != "/subscription" || r == 0 {
-		/* URL is invalid */
-		res.WriteHeader(http.StatusNotFound)
+
+	var env environ.Environ
+	em := json.Unmarshal(buf.Bytes(), &env)
+
+	if em != nil {
+		res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	env := buf.String()
-	sreq := util.ScannerRequest{util.SCAN, &env, nil}
+	sreq := util.ScannerRequest{util.SCAN, &env.Name, nil}
 
 	t := time.NewTimer(20 * time.Second)
+
+	environ.Add(db, &env)
 
 	select {
 	case <-t.C:
@@ -94,7 +98,7 @@ func (s HandlerClosure) SubRunner(res http.ResponseWriter, req *http.Request) {
 }
 
 func (s HandlerClosure) Runner(res http.ResponseWriter, req *http.Request) {
-    log.Printf("R: OBSOLETE: %s %s", req.Method, req.URL.Path)
+	log.Printf("R: OBSOLETE: %s %s", req.Method, req.URL.Path)
 	switch req.Method {
 	case "GET":
 		get(res, req, s.Ch, nil /* indicates "gimme-all" */)
@@ -105,13 +109,13 @@ func (s HandlerClosure) ConfigEnv(res http.ResponseWriter, req *http.Request) {
 	log.Printf("C: %s %s", req.Method, req.URL.Path)
 	switch req.Method {
 	case "GET":
-        envs := environ.ListConfig(s.Db, nil, nil)
-        reply, e := json.Marshal(envs)
-        if e != nil {
+		envs := environ.ListConfig(s.Db, nil, nil)
+		reply, e := json.Marshal(envs)
+		if e != nil {
 			res.WriteHeader(http.StatusInternalServerError)
 			return
-        }
-        res.Write(reply)
+		}
+		res.Write(reply)
 	}
 }
 
@@ -120,15 +124,15 @@ func (s HandlerClosure) ConfigEnvSub(res http.ResponseWriter, req *http.Request)
 	switch req.Method {
 	case "GET":
 		env := strings.TrimPrefix(req.URL.Path, "/config/environments/")
-        envs := environ.ListConfig(s.Db, &env, nil)
-        reply, e := json.Marshal(envs)
-        if e != nil {
+		envs := environ.ListConfig(s.Db, &env, nil)
+		reply, e := json.Marshal(envs)
+		if e != nil {
 			res.WriteHeader(http.StatusInternalServerError)
 			return
-        }
-        res.Write(reply)
+		}
+		res.Write(reply)
 	case "POST":
-		subscribe(res, req, s.Ch)
+		subscribe(s.Db, res, req, s.Ch)
 	case "DELETE":
 	}
 }

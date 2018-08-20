@@ -26,7 +26,7 @@ func main() {
 	log.SetPrefix("detect:\t")
 	dbconf := flag.String("db", "example:example@localhost?parseTime=True", "DB connexion")
 	db := establishDBConn(*dbconf)
-    t := true
+	t := true
 	es := environ.ListConfig(db, nil, &t)
 
 	flag.Parse()

@@ -16,13 +16,13 @@ import (
 */
 
 type Environ struct {
-    Id          int64
-    Name        string
-    Addr        *string
-    Kubeapi     *string
-    Multitenant *bool
-    Version     *string
-    Observe     bool
+	Id          int64   `json:"id"`
+	Name        string  `json:"name"`
+	Addr        *string `json:"address,omitempty"`
+	Kubeapi     *string `json:"kubernetes_api"`
+	Multitenant *bool   `json:"multitenant,omitempty"`
+	Version     *string `json:"version,omitempty"`
+	Observe     bool    `json:"observe"`
 }
 
 func InitTable(db *sql.DB) {
@@ -34,25 +34,25 @@ func InitTable(db *sql.DB) {
 			"kubeapi TEXT, " +
 			"multitenant BOOLEAN, " +
 			"version TEXT, " +
-            "observe BOOLEAN, " +
+			"observe BOOLEAN, " +
 			"PRIMARY KEY (id) " +
 			")")
 	log.Println("[DB/Env]", res, err)
 }
 
 func ListConfig(db *sql.DB, name *string, obs *bool) []*Environ {
-    namew := ""
-    obsw := ""
-    if (name != nil) {
-        namew = "namew = " + *name
-    }
-    if (obs != nil) {
-        obsw = fmt.Sprintf("observe = %t", obs)
-    }
-    where := ""
-    if (name != nil || obs != nil) {
-        where = "where " + namew + obsw
-    }
+	namew := ""
+	obsw := ""
+	if name != nil {
+		namew = "namew = " + *name
+	}
+	if obs != nil {
+		obsw = fmt.Sprintf("observe = %t", obs)
+	}
+	where := ""
+	if name != nil || obs != nil {
+		where = "where " + namew + obsw
+	}
 
 	rows, err := db.Query("SELECT id, name, kubeapi, multitenant, version, observe FROM environ " + where)
 	if err != nil {
@@ -61,7 +61,7 @@ func ListConfig(db *sql.DB, name *string, obs *bool) []*Environ {
 	defer rows.Close()
 	envs := make([]*Environ, 0)
 	for rows.Next() {
-        var ret Environ
+		var ret Environ
 		err = rows.Scan(&ret.Id, &ret.Name, ret.Kubeapi, ret.Multitenant, ret.Version, &ret.Observe)
 		if err != nil {
 			log.Println("[DB/Env/Detect] Scan ", err)
@@ -130,9 +130,19 @@ func Get(db *sql.DB, n *string) *models.Environment {
 	}
 }
 
-func Add(db *sql.DB, e *string, k *string) {
-	log.Printf("[DB/Env] Storing %s\n", e)
-	db.Query("INSERT INTO environ(name, kubeapi) values (?, ?)", e, k)
+func Add(db *sql.DB, e *Environ) {
+	/*
+	   Id          int64
+	   Name        string
+	   Addr        *string
+	   Kubeapi     *string
+	   Multitenant *bool
+	   Version     *string
+	   Observe     bool
+	*/
+	log.Printf("[DB/Env] Storing %#v\n", e)
+	db.Query("INSERT INTO environ(name, kubeapi, multitenant, version, observe) values (?, ?, ?, ?, ?)",
+		e.Name, e.Kubeapi, e.Multitenant, e.Version, e.Observe)
 }
 
 /*
@@ -147,10 +157,12 @@ func Describe(db *sql.DB, n *string) *models.Environment {
 
 func Assign(db *sql.DB, e *string) *models.Environment {
 	g := Get(db, e)
-	if g == nil {
-		Add(db, e, nil)
-		g = Get(db, e)
-	}
+	/*
+		if g == nil {
+			Add(db, e, nil)
+			g = Get(db, e)
+		}
+	*/
 	return g
 }
 
