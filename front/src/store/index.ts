@@ -37,6 +37,10 @@ export interface IApplicationState {
   readonly environments: { [appName: string]: IEnvironmentInfo };
   readonly runningPods: IPodInfo[];
   readonly selectedPod: string | null;
+  readonly isToastrShown: boolean;
+  readonly toastrMessage: string | null;
+  readonly toastrKind: "success" | "error";
+  readonly toastrId: number | null;
 }
 
 let middlewares: Middleware[] = [thunk];

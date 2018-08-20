@@ -42,6 +42,7 @@ export const getApps = () => (dispatch: Dispatch) => {
           error: { message: reason.message }
         })
       );
+      toastr(`Failed to get app names.`, "error")(dispatch);
     });
 };
 
@@ -68,6 +69,9 @@ export const getEnvironmentsOfApp = (app: string) => (dispatch: Dispatch) => {
           error: { message: reason.message }
         })
       );
+      toastr(`Failed to get environment info of "${params.app}".`, "error")(
+        dispatch
+      );
     });
 };
 
@@ -92,6 +96,7 @@ export const getRunningPods = () => (dispatch: Dispatch) => {
           error: { message: reason.message }
         })
       );
+      toastr(`Failed to get running pod info.`, "error")(dispatch);
     });
 };
 
@@ -125,11 +130,37 @@ export const postSnapshot = (
           result: { newSnapshot: snapshot }
         })
       );
+      toastr(`New snapshot for "${params.podId}" is created.`, "success")(
+        dispatch
+      );
     })
     .catch((reason: Error) => {
       postSnapshotAsyncAction.failed({
         params,
         error: { message: reason.message }
       });
+      toastr(`Failed to make a new snapshot for "${params.podId}".`, "error")(
+        dispatch
+      );
     });
+};
+
+export const showToastr = actionCreator<{
+  message: string;
+  kind: "success" | "error";
+  id: number;
+}>("SHOW_TOASTR");
+
+export const hideToastr = actionCreator<{ id: number }>("HIDE_TOASTR");
+
+export const toastr = (
+  message: string,
+  kind: "success" | "error",
+  duration: number = 3000
+) => (dispatch: Dispatch) => {
+  const id = Math.random();
+  dispatch(showToastr({ message, kind, id }));
+  setTimeout(() => {
+    dispatch(hideToastr({ id }));
+  }, duration);
 };

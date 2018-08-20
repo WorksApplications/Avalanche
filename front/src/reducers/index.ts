@@ -4,9 +4,11 @@ import {
   getAppsAsyncAction,
   getEnvironmentsOfAppAsyncAction,
   getRunningPodsAsyncAction,
+  hideToastr,
   selectApp,
   selectEnv,
-  selectPod
+  selectPod,
+  showToastr
 } from "../actions";
 import * as collect from "../generated/collect/api";
 import {
@@ -39,13 +41,18 @@ function snapshotInfoConvert(snapshot: collect.Snapshot): ISnapshotInfo {
   };
 }
 
+// TODO use combineReducer
 const INIT: IApplicationState = {
   applicationName: null,
   applications: [],
   selectedEnvironment: null,
   environments: {},
   runningPods: [],
-  selectedPod: null
+  selectedPod: null,
+  isToastrShown: false,
+  toastrMessage: null,
+  toastrKind: "error",
+  toastrId: null
 };
 
 export function indexApp(
@@ -82,6 +89,24 @@ export function indexApp(
   }
   if (isType(action, selectPod)) {
     return { ...state, selectedPod: action.payload.podName };
+  }
+  if (isType(action, showToastr)) {
+    return {
+      ...state,
+      isToastrShown: true,
+      toastrMessage: action.payload.message,
+      toastrKind: action.payload.kind,
+      toastrId: action.payload.id
+    };
+  }
+  if (isType(action, hideToastr)) {
+    if (action.payload.id === state.toastrId) {
+      return {
+        ...state,
+        isToastrShown: false
+      };
+    }
+    return state;
   }
   return state;
 }

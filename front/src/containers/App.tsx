@@ -2,6 +2,7 @@ import { Component, h } from "preact";
 import { connect } from "preact-redux";
 import { bindActionCreators, Dispatch } from "redux";
 import * as actions from "../actions";
+import Toastr from "../components/Toastr";
 // @ts-ignore
 import styles from "./App.scss";
 import TitleBar from "./TitleBar";
@@ -42,6 +43,9 @@ class App extends Component {
         </div>
         <div className={styles.content}>
           <Workspace />
+        </div>
+        <div className={styles.toastr}>
+          <Toastr />
         </div>
       </div>
     );
