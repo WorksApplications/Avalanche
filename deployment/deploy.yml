@@ -19,6 +19,7 @@ spec:
           - /detect
           - --db=example:example@tcp(mariadb)/collekt?parseTime=True
         image: /resource_optimization/detect:v7
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
 ---
