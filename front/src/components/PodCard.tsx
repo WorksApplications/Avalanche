@@ -8,17 +8,22 @@ export interface IProperty {
   app: string;
   environment: string;
   snapshots: string[];
+
   onSaveButtonClick?(): void;
 }
 
 class PodList extends Component<IProperty, {}> {
   public render() {
+    const onSave = this.props.onSaveButtonClick || (() => undefined);
     return (
       <div className={styles.wrap}>
         <div>
           <div
-            className={styles.saveButton}
-            onMouseDown={this.props.onSaveButtonClick}
+            className={[
+              styles.saveButton,
+              !this.props.onSaveButtonClick ? styles.disabled : undefined
+            ].join(" ")}
+            onMouseDown={onSave}
           >
             <span className={styles.saveTooltip}>Save snapshot</span>Save
           </div>
