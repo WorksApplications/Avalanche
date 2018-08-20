@@ -1,38 +1,31 @@
-import { Component, h } from "preact";
+import { Component, FunctionalComponent, h } from "preact";
 import { connect } from "preact-redux";
 import { bindActionCreators, Dispatch } from "redux";
-import * as actions from "../actions";
-import Toastr from "../components/Toastr";
+import { getApps, getRunningPods, selectApp } from "../actions";
 // @ts-ignore
 import styles from "./App.scss";
 import TitleBar from "./TitleBar";
+import Toastr from "./Toastr";
 import Workspace from "./Workspace";
 
-const mapDispatchToProps = (dispatch: Dispatch) =>
-  bindActionCreators(
-    {
-      getApps: actions.getApps,
-      selectApp: actions.selectApp,
-      getRunningPods: actions.getRunningPods
-    },
-    dispatch
-  );
+interface IDispatchProps {
+  getApps: typeof getApps;
+  selectApp: typeof selectApp;
+  getRunningPods: typeof getRunningPods;
+}
+
+const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
+  bindActionCreators({ getApps, selectApp, getRunningPods }, dispatch);
 
 // @ts-ignore
 @connect(
   undefined,
   mapDispatchToProps
 )
-class App extends Component {
+class App extends Component<IDispatchProps> {
   public componentWillMount(): void {
-    // @ts-ignore
-    const getApps: typeof actions.getApps = this.props.getApps;
-    getApps();
-
-    const getRunningPods: typeof actions.getRunningPods =
-      // @ts-ignore
-      this.props.getRunningPods;
-    getRunningPods();
+    this.props.getApps();
+    this.props.getRunningPods();
   }
 
   public render() {
@@ -52,4 +45,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default (App as any) as FunctionalComponent;

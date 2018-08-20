@@ -1,41 +1,38 @@
-import { Component, h } from "preact";
+import { Component, FunctionalComponent, h } from "preact";
 import { connect } from "preact-redux";
 import { bindActionCreators, Dispatch } from "redux";
-import * as actions from "../actions";
+import { postSnapshot } from "../actions";
 import PodCardList from "../components/PodCardList";
 import PodFilter from "../components/PodFilter";
 import { IApplicationState, IPodInfo } from "../store";
 // @ts-ignore
 import styles from "./RunningPodsView.scss";
 
-const mapStateToProps = (state: IApplicationState) => ({
+interface IStateProps {
+  applicationName: string | null;
+  pods: IPodInfo[];
+}
+
+interface IDispatchProps {
+  postSnapshot: typeof postSnapshot;
+}
+
+const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
   applicationName: state.applicationName,
   pods: state.runningPods
 });
 
-const mapDispatchToProps = (dispatch: Dispatch) =>
-  bindActionCreators(
-    {
-      postSnapshot: actions.postSnapshot
-    },
-    dispatch
-  );
+const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
+  bindActionCreators({ postSnapshot }, dispatch);
 
 // @ts-ignore
 @connect(
   mapStateToProps,
   mapDispatchToProps
 )
-class RunningPodsView extends Component {
+class RunningPodsView extends Component<IStateProps & IDispatchProps> {
   public render() {
-    // @ts-ignore
-    const applicationName: string = this.props.applicationName;
-    // @ts-ignore
-    const pods: IPodInfo[] = this.props.pods;
-    // @ts-ignore
-    const postSnapshot: typeof actions.postSnapshot = this.props.postSnapshot;
-
-    const podInfo = pods.map(p => ({
+    const podInfo = this.props.pods.map(p => ({
       id: (p.id || "").toString(),
       name: p.name,
       createdAt: p.createdAt ? p.createdAt.toDateString() : "Unknown",
@@ -44,12 +41,12 @@ class RunningPodsView extends Component {
       snapshots: (p.snapshots || []).map(s => s.uuid),
       onSaveButtonClick:
         p.app && p.env && p.name
-          ? () => postSnapshot(p.app!, p.env!, p.name!)
+          ? () => this.props.postSnapshot(p.app!, p.env!, p.name!)
           : undefined
     }));
 
-    const podsOfApp = applicationName
-      ? podInfo.filter(x => x.app === applicationName)
+    const podsOfApp = this.props.applicationName
+      ? podInfo.filter(x => x.app === this.props.applicationName)
       : [];
 
     return (
@@ -58,9 +55,12 @@ class RunningPodsView extends Component {
         <div>
           <PodFilter />
         </div>
-        {applicationName && (
+        {this.props.applicationName && (
           <div className={styles.cardList}>
-            <PodCardList data={podsOfApp} kind={"App: " + applicationName} />
+            <PodCardList
+              data={podsOfApp}
+              kind={"App: " + this.props.applicationName}
+            />
           </div>
         )}
         <div className={styles.cardList}>
@@ -71,4 +71,4 @@ class RunningPodsView extends Component {
   }
 }
 
-export default RunningPodsView;
+export default (RunningPodsView as any) as FunctionalComponent;

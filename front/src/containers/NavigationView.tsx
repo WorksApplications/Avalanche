@@ -1,27 +1,39 @@
-import { Component, h } from "preact";
+import { Component, FunctionalComponent, h } from "preact";
 import { connect } from "preact-redux";
 import * as qs from "querystring";
 import { bindActionCreators, Dispatch } from "redux";
-import * as actions from "../actions";
+import {
+  getEnvironmentsOfApp,
+  selectApp,
+  selectEnv,
+  selectPod
+} from "../actions";
 import AppSelector from "../components/AppSelector";
 import { APP_NAME } from "../constants";
 import { IApplicationState } from "../store";
 // @ts-ignore
 import styles from "./NavigationView.scss";
 
-const mapStateToProps = (state: IApplicationState) => ({
+interface IStateProps {
+  applicationName: string | null;
+  applications: string[];
+}
+
+interface IDispatchProps {
+  selectApp: typeof selectApp;
+  getEnvironmentsOfApp: typeof getEnvironmentsOfApp;
+  selectEnv: typeof selectEnv;
+  selectPod: typeof selectPod;
+}
+
+const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
   applicationName: state.applicationName,
   applications: state.applications
 });
 
-const mapDispatchToProps = (dispatch: Dispatch) =>
+const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
   bindActionCreators(
-    {
-      selectApp: actions.selectApp,
-      getEnvironmentsOfApp: actions.getEnvironmentsOfApp,
-      selectEnv: actions.selectEnv,
-      selectPod: actions.selectPod
-    },
+    { selectApp, getEnvironmentsOfApp, selectEnv, selectPod },
     dispatch
   );
 
@@ -30,7 +42,7 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
   mapStateToProps,
   mapDispatchToProps
 )
-class NavigationView extends Component {
+class NavigationView extends Component<IStateProps & IDispatchProps> {
   public componentWillMount() {
     // get app & env from query in url
     const requested = qs.parse(window.location.search.substring(1));
@@ -44,11 +56,10 @@ class NavigationView extends Component {
   }
 
   public render() {
-    // @ts-ignore
-    const applications: string[] = this.props.applications;
-    // @ts-ignore
-    const applicationName: string = this.props.applicationName;
-    const showingData = applications.map(x => ({ label: x, value: x }));
+    const showingData = this.props.applications.map(x => ({
+      label: x,
+      value: x
+    }));
     return (
       <div className={styles.wrap}>
         <div className={styles.appContext}>
@@ -56,7 +67,7 @@ class NavigationView extends Component {
           <div className={styles.selector}>
             <AppSelector
               options={showingData}
-              selectedValue={applicationName}
+              selectedValue={this.props.applicationName}
               onValueChanged={this.onAppChanged.bind(this)}
               placeholder="Select landscape"
             />
@@ -77,19 +88,10 @@ class NavigationView extends Component {
   }
 
   private changeApp(app: string, isInizalizing = false) {
-    // @ts-ignore
-    const selectApp: typeof actions.selectApp = this.props.selectApp;
-    selectApp({ appName: app });
-    const getEnvironmentsOfApp: typeof actions.getEnvironmentsOfApp =
-      // @ts-ignore
-      this.props.getEnvironmentsOfApp;
-    getEnvironmentsOfApp(app);
-    // @ts-ignore
-    const selectEnv: typeof actions.selectEnv = this.props.selectEnv;
-    selectEnv({ envName: null }); // unselect
-    // @ts-ignore
-    const selectPod: typeof actions.selectPod = this.props.selectPod;
-    selectPod({ podName: null }); // unselect
+    this.props.selectApp({ appName: app });
+    this.props.getEnvironmentsOfApp(app);
+    this.props.selectEnv({ envName: null }); // unselect
+    this.props.selectPod({ podName: null }); // unselect
 
     // set app to query in url
     const requested = qs.parse(window.location.search.substring(1));
@@ -103,4 +105,4 @@ class NavigationView extends Component {
   }
 }
 
-export default NavigationView;
+export default (NavigationView as any) as FunctionalComponent;
