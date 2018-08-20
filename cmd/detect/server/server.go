@@ -131,6 +131,7 @@ func (s HandlerClosure) ConfigEnv(res http.ResponseWriter, req *http.Request) {
 	log.Printf("C: %s %s", req.Method, req.URL.Path)
 	switch req.Method {
 	case "GET":
+		/* XXX Feature join unregistered environments that appear in mischo log */
 		envs := environ.ListConfig(s.Db, nil, nil)
 		reply, e := json.Marshal(envs)
 		if e != nil {
