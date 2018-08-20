@@ -145,15 +145,11 @@ func Add(db *sql.DB, e *Environ) {
 		e.Name, e.Kubeapi, e.Multitenant, e.Version, e.Observe)
 }
 
-/*
-func Describe(db *sql.DB, n *string) *models.Environment {
-	g := Get(db, n)
-	if g != nil {
-		fill(db, g, nil)
-	}
-	return g
+func Update(db *sql.DB, e *Environ) {
+	log.Printf("[DB/Env] Update %#v\n", e)
+	db.Query("UPDATE environ set kubeapi = ?, multitenant = ?, version = ?, observe = ? where name = ?",
+		e.Kubeapi, e.Multitenant, e.Version, e.Observe, e.Name)
 }
-*/
 
 func Assign(db *sql.DB, e *string) *models.Environment {
 	g := Get(db, e)
@@ -179,6 +175,7 @@ func FromLayout(db *sql.DB, lay *layout.Layout) *models.Environment {
 	}
 }
 
+/* XXX Why it doesn't fill? */
 func FromId(db *sql.DB, id int64) *models.Environment {
 	wh := fmt.Sprintf("WHERE id = \"%d\"", id)
 	envs := list(db, &wh)

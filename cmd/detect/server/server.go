@@ -9,6 +9,7 @@ import (
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
 	"log"
+	"math/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -19,10 +20,10 @@ type HandlerClosure struct {
 	Db *sql.DB
 }
 
-func subscribe(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest) {
+func update(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest) {
 	buf := new(bytes.Buffer)
 	defer req.Body.Close()
-	r, e := buf.ReadFrom(req.Body)
+	_, e := buf.ReadFrom(req.Body)
 	if e != nil {
 		/* reading response failed */
 		res.WriteHeader(http.StatusInternalServerError)
@@ -37,24 +38,43 @@ func subscribe(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<-
 		return
 	}
 
-	sreq := util.ScannerRequest{util.SCAN, &env.Name, nil}
+	prev := environ.ListConfig(db, &env.Name, nil)
+	if len(prev) == 0 {
+		environ.Add(db, &env)
+		res.WriteHeader(http.StatusOK)
+		sreq := util.ScannerRequest{util.SCAN, &env.Name, nil}
+		subscribe(sreq, res, req, ch)
+	} else if len(prev) > 1 {
+		/* XXX BUG */
+		res.WriteHeader(http.StatusInternalServerError)
+	} else if env.Observe != prev[0].Observe {
+		environ.Update(db, &env)
+		code := util.SCAN
+		if !env.Observe {
+			code = util.DEL
+		}
+		sreq := util.ScannerRequest{code, &env.Name, nil}
+		subscribe(sreq, res, req, ch)
+	} else {
+		environ.Update(db, &env)
+	}
+}
 
+func subscribe(sreq util.ScannerRequest, res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest) error {
 	t := time.NewTimer(20 * time.Second)
-
-	environ.Add(db, &env)
 
 	select {
 	case <-t.C:
 		/* Couldn't write the request within a period(maybe Exchange() is gone). Inform this failure to him */
 		res.WriteHeader(http.StatusRequestTimeout)
+		return fmt.Errorf("Time flies: scan request failed; maybe stuck the scanner?: Magic: %x", rand.Int31())
 	case ch <- &sreq:
 		res.WriteHeader(http.StatusOK)
+		return nil
 	}
-
-	fmt.Fprintf(res, "%s", buf)
 }
 
-func get(res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest, env *string) {
+func get(res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest, env *string) error {
 	/* Prepare anew channel to pull out the result */
 	/* We make a channel instead of using bi-directional shared channel because we have to have a co-relation between
 	   request and the result. */
@@ -68,6 +88,7 @@ func get(res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequ
 	case <-t.C:
 		/* Couldn't write the request within a period(maybe Exchange() is gone). Inform this failure to him */
 		res.WriteHeader(http.StatusRequestTimeout)
+		return fmt.Errorf("Time flies: scan request failed; maybe stuck the scanner?: Magic: %x", rand.Int31())
 	case ch <- &sreq:
 		/* Request is written. Wait for all the answer */
 		subs := make([]*detect.Subscription, 0)
@@ -77,9 +98,10 @@ func get(res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequ
 		reply, e := json.Marshal(&subs)
 		if e != nil {
 			res.WriteHeader(http.StatusInternalServerError)
-			return
+			return fmt.Errorf("Marshaling to Subscription failed...: Magic: %x", rand.Int31())
 		}
 		res.Write(reply)
+		return nil
 	}
 }
 
@@ -132,7 +154,7 @@ func (s HandlerClosure) ConfigEnvSub(res http.ResponseWriter, req *http.Request)
 		}
 		res.Write(reply)
 	case "POST":
-		subscribe(s.Db, res, req, s.Ch)
+		update(s.Db, res, req, s.Ch)
 	case "DELETE":
 	}
 }
