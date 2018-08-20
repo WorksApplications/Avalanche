@@ -25,14 +25,14 @@ func establishDBConn(dn string) *sql.DB {
 func main() {
 	log.SetPrefix("detect:\t")
 	dbconf := flag.String("db", "example:example@localhost?parseTime=True", "DB connexion")
-	t := true
-	es := environ.ListConfig(db, nil, &t)
 
 	flag.Parse()
 	args := flag.Args()
 	log.Println(args)
 
 	db := establishDBConn(*dbconf)
+	t := true
+	es := environ.ListConfig(db, nil, &t)
 	x := server.HandlerClosure{make(chan *util.ScannerRequest), db}
 	go util.Exchange(x.Ch)
 	for _, e := range es {
