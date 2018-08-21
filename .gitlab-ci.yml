@@ -1,4 +1,5 @@
 backend-build:
+    except: develop/front
     stage: build
     image: golang:1.9
     script:
@@ -23,6 +24,7 @@ backend-build:
         expire_in: 1 day
 
 front-build:
+    except: develop/backend
     stage: build
     image: node:10.8.0
     script:
@@ -40,6 +42,8 @@ front-build:
         paths:
             - front/public/
         expire_in: 1 day
+    variables:
+        API_BASE_URL: "http://huedynamics.internal.worksap.com/api"
 
 push-images:
     only:
