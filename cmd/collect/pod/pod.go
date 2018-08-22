@@ -118,7 +118,7 @@ func add(db *sql.DB, p *string, e int64, a int64, l int64, addr *string, lud *ti
 
 func update(db *sql.DB, p *string, e int64, a int64, l int64, addr *string, lud *time.Time) {
 	log.Printf("[DB/Pod] Storing %s, %d, %d, %d, %s", *p, e, a, l, *addr)
-	res, err := db.Exec("UPDATE pod SET address=?, last_update=? WHERE name=? AND layid=?", *addr, *lud, *p, l)
+	res, err := db.Exec("UPDATE pod SET address=?, lastupdate=? WHERE name=? AND layid=?", *addr, *lud, *p, l)
 	if err != nil {
 		log.Print("[DB/Pod] Error UPD ", err)
 		return
