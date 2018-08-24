@@ -1,7 +1,8 @@
 import { applyMiddleware, createStore, Middleware } from "redux";
+/// #if DEBUG
 import logger from "redux-logger";
+/// #endif
 import thunk from "redux-thunk";
-import { IS_DEBUG } from "../constants";
 import rootReducer from "../reducers";
 
 export interface ISnapshotInfo {
@@ -52,9 +53,9 @@ export interface IToastNotificationState {
 }
 
 let middlewares: Middleware[] = [thunk];
-if (IS_DEBUG) {
-  middlewares = [...middlewares, logger];
-}
+/// #if DEBUG
+middlewares = [...middlewares, logger];
+/// #endif
 
 const store = createStore(rootReducer, applyMiddleware(...middlewares));
 export default store;

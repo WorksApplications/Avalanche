@@ -3,7 +3,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const path = require("path");
 const DefinePlugin = require("webpack").DefinePlugin;
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
-// const OptimizeJsPlugin = require("optimize-js-plugin");
+const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 
 const dest = path.resolve(__dirname, "./public");
 const index = path.resolve(__dirname, "./src/index.tsx");
@@ -31,7 +31,17 @@ module.exports = env => {
       rules: [
         {
           test: /\.tsx?$/,
-          loader: "ts-loader"
+          use: [
+            {
+              loader: "ts-loader"
+            },
+            {
+              loader: "ifdef-loader",
+              options: {
+                DEBUG: !isProduction
+              }
+            }
+          ]
         },
         {
           test: /\.scss$/,
@@ -69,15 +79,15 @@ module.exports = env => {
         IS_DEBUG: !isProduction,
         APP_NAME: `"Dynamic Analysis"`
       })
-      // new OptimizeJsPlugin({
-      //   sourceMap: true
-      // })
     ],
     optimization: {
       minimizer: [
         new UglifyJsPlugin({
+          cache: true,
+          parallel: true,
           sourceMap: true
-        })
+        }),
+        new OptimizeCSSAssetsPlugin({})
       ]
     },
     devtool: isProduction ? "source-map" : "cheap-module-eval-source-map"
