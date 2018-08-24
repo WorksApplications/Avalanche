@@ -75,7 +75,7 @@ class NavigationView extends Component<IStateProps & IDispatchProps> {
             />
           </div>
         </div>
-        <div className={[styles.viewList, styles.waitForAppSelect].join(" ")}>
+        <div className={styles.viewList}>
           <Link
             activeClassName={styles.selected}
             className={styles.viewItem}
@@ -84,7 +84,15 @@ class NavigationView extends Component<IStateProps & IDispatchProps> {
             Snapshots
           </Link>
         </div>
-        {/* This will be config & login */}
+        <div className={styles.controlList}>
+          <Link
+            activeClassName={styles.selected}
+            className={styles.viewItem}
+            href={"/config"}
+          >
+            Config
+          </Link>
+        </div>
       </div>
     );
   }

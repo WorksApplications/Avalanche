@@ -1,5 +1,6 @@
 import { Component, h } from "preact";
 import Router, { Route } from "preact-router";
+import ConfigPage from "./ConfigPage";
 import NavigationView from "./NavigationView";
 import SnapshotPage from "./SnapshotPage";
 // @ts-ignore
@@ -15,6 +16,7 @@ class Workspace extends Component {
         <main className={styles.main}>
           <Router>
             <Route component={SnapshotPage} path="/" default={true} />
+            <Route component={ConfigPage} path="/config" />
           </Router>
         </main>
       </div>
