@@ -1,8 +1,9 @@
 import { applyMiddleware, createStore, Middleware } from "redux";
+/// #if DEBUG
 import logger from "redux-logger";
+/// #endif
 import thunk from "redux-thunk";
-import { IS_DEBUG } from "../constants";
-import { indexApp } from "../reducers";
+import rootReducer from "../reducers";
 
 export interface ISnapshotInfo {
   uuid: string;
@@ -31,22 +32,30 @@ export interface IEnvironmentInfo {
 }
 
 export interface IApplicationState {
+  readonly analysisData: IAnalysisDataState;
+  readonly toastNotification: IToastNotificationState;
+}
+
+export interface IAnalysisDataState {
   readonly applicationName: string | null;
   readonly applications: string[];
   readonly selectedEnvironment: string | null;
   readonly environments: { [appName: string]: IEnvironmentInfo };
   readonly runningPods: IPodInfo[];
   readonly selectedPod: string | null;
-  readonly isToastrShown: boolean;
-  readonly toastrMessage: string | null;
-  readonly toastrKind: "success" | "error";
-  readonly toastrId: number | null;
+}
+
+export interface IToastNotificationState {
+  readonly isShown: boolean;
+  readonly message: string | null;
+  readonly kind: "success" | "error";
+  readonly id: number | null;
 }
 
 let middlewares: Middleware[] = [thunk];
-if (IS_DEBUG) {
-  middlewares = [...middlewares, logger];
-}
+/// #if DEBUG
+middlewares = [...middlewares, logger];
+/// #endif
 
-const store = createStore(indexApp, applyMiddleware(...middlewares));
+const store = createStore(rootReducer, applyMiddleware(...middlewares));
 export default store;

@@ -3,17 +3,20 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const path = require("path");
 const DefinePlugin = require("webpack").DefinePlugin;
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
-// const OptimizeJsPlugin = require("optimize-js-plugin");
+const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 
 const dest = path.resolve(__dirname, "./public");
 const index = path.resolve(__dirname, "./src/index.tsx");
 
+const history = require("connect-history-api-fallback");
+const convert = require("koa-connect");
+
 module.exports = env => {
   const isProduction = env && env.production;
-  const collectApiBase = env.COLLECT_API_BASE || process.env.COLLECT_API_BASE;
-  if (!collectApiBase) {
+  const apiBaseUrl = env.API_BASE_URL || process.env.API_BASE_URL;
+  if (!apiBaseUrl) {
     console.log(env);
-    throw new Error("COLLECT_API_BASE env var is required.");
+    throw new Error("API_BASE_URL env var is required.");
   }
   return {
     mode: isProduction ? "production" : "development",
@@ -31,7 +34,17 @@ module.exports = env => {
       rules: [
         {
           test: /\.tsx?$/,
-          loader: "ts-loader"
+          use: [
+            {
+              loader: "ts-loader"
+            },
+            {
+              loader: "ifdef-loader",
+              options: {
+                DEBUG: !isProduction
+              }
+            }
+          ]
         },
         {
           test: /\.scss$/,
@@ -65,21 +78,36 @@ module.exports = env => {
         chunkFilename: "[id].[hash:8].css"
       }),
       new DefinePlugin({
-        COLLECT_API_BASE: JSON.stringify(collectApiBase),
+        COLLECT_API_BASE: JSON.stringify(apiBaseUrl),
         IS_DEBUG: !isProduction,
         APP_NAME: `"Dynamic Analysis"`
       })
-      // new OptimizeJsPlugin({
-      //   sourceMap: true
-      // })
     ],
     optimization: {
       minimizer: [
         new UglifyJsPlugin({
+          cache: true,
+          parallel: true,
           sourceMap: true
+        }),
+        new OptimizeCSSAssetsPlugin({
+          cssProcessorOptions: {
+            map: {
+              inline: false
+            }
+          }
         })
       ]
     },
-    devtool: isProduction ? "source-map" : "cheap-module-eval-source-map"
+    devtool: isProduction ? "source-map" : "cheap-module-eval-source-map",
+    serve: {
+      add: app => {
+        const historyOptions = {
+          index: "/index.html"
+        };
+
+        app.use(convert(history(historyOptions)));
+      }
+    }
   };
 };

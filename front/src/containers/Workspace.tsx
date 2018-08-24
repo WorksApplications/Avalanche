@@ -1,7 +1,8 @@
 import { Component, h } from "preact";
-import MainArea from "./MainArea";
+import Router, { Route } from "preact-router";
+import ConfigPage from "./ConfigPage";
 import NavigationView from "./NavigationView";
-import RunningPodsView from "./RunningPodsView";
+import SnapshotPage from "./SnapshotPage";
 // @ts-ignore
 import styles from "./Workspace.scss";
 
@@ -9,15 +10,15 @@ class Workspace extends Component {
   public render() {
     return (
       <div className={styles.wrap}>
-        <div className={styles.left}>
+        <nav className={styles.nav}>
           <NavigationView />
-        </div>
-        <div className={styles.right}>
-          <RunningPodsView />
-        </div>
-        <div className={styles.middle}>
-          <MainArea />
-        </div>
+        </nav>
+        <main className={styles.main}>
+          <Router>
+            <Route component={SnapshotPage} path="/" default={true} />
+            <Route component={ConfigPage} path="/config" />
+          </Router>
+        </main>
       </div>
     );
   }

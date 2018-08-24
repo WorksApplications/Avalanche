@@ -30,16 +30,18 @@ interface IDispatchProps {
 }
 
 const mapStateToProps: (state: IApplicationState) => IStateProps = state => {
-  const pods: IPodInfo[] = Object.values(state.environments).reduce(
+  const pods: IPodInfo[] = Object.values(
+    state.analysisData.environments
+  ).reduce(
     // flat-map
     (acc: IPodInfo[], x) => acc.concat(x.pods),
     []
   );
   return {
-    appName: state.applicationName,
-    environments: state.environments,
-    filteringEnvironment: state.selectedEnvironment,
-    filteringPod: state.selectedPod,
+    appName: state.analysisData.applicationName,
+    environments: state.analysisData.environments,
+    filteringEnvironment: state.analysisData.selectedEnvironment,
+    filteringPod: state.analysisData.selectedPod,
     pods,
     snapshots: pods.reduce(
       // flat-map

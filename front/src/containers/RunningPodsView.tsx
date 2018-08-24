@@ -18,8 +18,8 @@ interface IDispatchProps {
 }
 
 const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
-  applicationName: state.applicationName,
-  pods: state.runningPods
+  applicationName: state.analysisData.applicationName,
+  pods: state.analysisData.runningPods
 });
 
 const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
