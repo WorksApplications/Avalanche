@@ -14,6 +14,17 @@ import (
    |id|name|app_id                     |
    +--+----+---------------------------+
 */
+
+type Environ struct {
+	Id          int64   `json:"id"`
+	Name        string  `json:"name"`
+	Addr        *string `json:"address,omitempty"`
+	Kubeapi     *string `json:"kubernetes_api"`
+	Multitenant *bool   `json:"multitenant,omitempty"`
+	Version     *string `json:"version,omitempty"`
+	Observe     bool    `json:"observe"`
+}
+
 func InitTable(db *sql.DB) {
 	res, err := db.Exec(
 		"CREATE TABLE environ(" +
@@ -21,9 +32,43 @@ func InitTable(db *sql.DB) {
 			"name CHAR(32) NOT NULL, " +
 			"addr TEXT, " +
 			"kubeapi TEXT, " +
+			"multitenant BOOLEAN, " +
+			"version TEXT, " +
+			"observe BOOLEAN, " +
 			"PRIMARY KEY (id) " +
 			")")
 	log.Println("[DB/Env]", res, err)
+}
+
+func ListConfig(db *sql.DB, name *string, obs *bool) []*Environ {
+	namew := ""
+	obsw := ""
+	if name != nil {
+		namew = "namew = " + *name
+	}
+	if obs != nil {
+		obsw = fmt.Sprintf("observe = %t", *obs)
+	}
+	where := ""
+	if name != nil || obs != nil {
+		where = "where " + namew + obsw
+	}
+
+	rows, err := db.Query("SELECT id, name, kubeapi, multitenant, version, observe FROM environ " + where)
+	if err != nil {
+		log.Fatal("[DB/Env/Detect] ", err)
+	}
+	defer rows.Close()
+	envs := make([]*Environ, 0)
+	for rows.Next() {
+		var ret Environ
+		err = rows.Scan(&ret.Id, &ret.Name, ret.Kubeapi, ret.Multitenant, ret.Version, &ret.Observe)
+		if err != nil {
+			log.Println("[DB/Env/Detect] Scan ", err)
+		}
+		envs = append(envs, &ret)
+	}
+	return envs
 }
 
 func list(db *sql.DB, where *string) []*models.Environment {
@@ -38,7 +83,7 @@ func list(db *sql.DB, where *string) []*models.Environment {
 		var name string
 		err = rows.Scan(&id, &name)
 		if err != nil {
-			log.Println("[DB/Env] Scan", err)
+			log.Println("[DB/Env] Scan ", err)
 		}
 		envs = append(envs, &models.Environment{&id, 0, &name, nil})
 	}
@@ -85,27 +130,35 @@ func Get(db *sql.DB, n *string) *models.Environment {
 	}
 }
 
-func Add(db *sql.DB, e *string, k *string) {
-	log.Printf("[DB/Env] Storing %s\n", e)
-	db.Query("INSERT INTO environ(name, kubeapi) values (?, ?)", e, k)
+func Add(db *sql.DB, e *Environ) {
+	/*
+	   Id          int64
+	   Name        string
+	   Addr        *string
+	   Kubeapi     *string
+	   Multitenant *bool
+	   Version     *string
+	   Observe     bool
+	*/
+	log.Printf("[DB/Env] Storing %#v\n", e)
+	db.Query("INSERT INTO environ(name, kubeapi, multitenant, version, observe) values (?, ?, ?, ?, ?)",
+		e.Name, e.Kubeapi, e.Multitenant, e.Version, e.Observe)
 }
 
-/*
-func Describe(db *sql.DB, n *string) *models.Environment {
-	g := Get(db, n)
-	if g != nil {
-		fill(db, g, nil)
-	}
-	return g
+func Update(db *sql.DB, e *Environ) {
+	log.Printf("[DB/Env] Update %#v\n", e)
+	db.Query("UPDATE environ set kubeapi = ?, multitenant = ?, version = ?, observe = ? where name = ?",
+		e.Kubeapi, e.Multitenant, e.Version, e.Observe, e.Name)
 }
-*/
 
 func Assign(db *sql.DB, e *string) *models.Environment {
 	g := Get(db, e)
-	if g == nil {
-		Add(db, e, nil)
-		g = Get(db, e)
-	}
+	/*
+		if g == nil {
+			Add(db, e, nil)
+			g = Get(db, e)
+		}
+	*/
 	return g
 }
 
@@ -122,6 +175,7 @@ func FromLayout(db *sql.DB, lay *layout.Layout) *models.Environment {
 	}
 }
 
+/* XXX Why it doesn't fill? */
 func FromId(db *sql.DB, id int64) *models.Environment {
 	wh := fmt.Sprintf("WHERE id = \"%d\"", id)
 	envs := list(db, &wh)
