@@ -87,7 +87,13 @@ module.exports = env => {
           parallel: true,
           sourceMap: true
         }),
-        new OptimizeCSSAssetsPlugin({})
+        new OptimizeCSSAssetsPlugin({
+          cssProcessorOptions: {
+            map: {
+              inline: false
+            }
+          }
+        })
       ]
     },
     devtool: isProduction ? "source-map" : "cheap-module-eval-source-map"
