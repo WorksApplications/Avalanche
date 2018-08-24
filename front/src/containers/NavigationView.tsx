@@ -1,5 +1,7 @@
 import { Component, FunctionalComponent, h } from "preact";
 import { connect } from "preact-redux";
+// tslint:disable-next-line:no-submodule-imports
+import { Link } from "preact-router/match";
 import * as qs from "querystring";
 import { bindActionCreators, Dispatch } from "redux";
 import {
@@ -74,9 +76,13 @@ class NavigationView extends Component<IStateProps & IDispatchProps> {
           </div>
         </div>
         <div className={[styles.viewList, styles.waitForAppSelect].join(" ")}>
-          <div className={[styles.viewItem, styles.selected].join(" ")}>
+          <Link
+            activeClassName={styles.selected}
+            className={styles.viewItem}
+            href="/"
+          >
             Snapshots
-          </div>
+          </Link>
         </div>
         {/* This will be config & login */}
       </div>
