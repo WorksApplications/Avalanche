@@ -18,10 +18,10 @@ interface IDispatchProps {
 }
 
 const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
-  isShown: state.isToastrShown,
-  message: state.toastrMessage,
-  kind: state.toastrKind,
-  id: state.toastrId
+  isShown: state.toastNotification.isShown,
+  message: state.toastNotification.message,
+  kind: state.toastNotification.kind,
+  id: state.toastNotification.id
 });
 
 const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
