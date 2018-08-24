@@ -1,5 +1,6 @@
 backend-build:
-    except: develop/front
+    except:
+        - develop/front
     stage: build
     image: golang:1.9
     script:
@@ -24,13 +25,12 @@ backend-build:
         expire_in: 1 day
 
 front-build:
-    except: develop/backend
+    except:
+        - develop/backend
     stage: build
     image: node:10.8.0
     script:
         - cd front
-        - mv package.json package.json.templ
-        - sed 's;flamescope.*31002;huedynamics.internal.worksap.com;g' package.json.templ > package.json
         - yarn add --dev webpack webpack-cli
         - npm install
         - PATH=$PATH:$(pwd)/node_modules/.bin yarn build

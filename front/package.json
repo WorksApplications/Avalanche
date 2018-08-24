@@ -8,7 +8,7 @@
   "private": true,
   "scripts": {
     "start": "webpack-serve",
-    "build": "webpack --env.production --env.COLLECT_API_BASE=\"http://flamescope.internal.worksap.com:31002\"",
+    "build": "webpack --env.production",
     "test": "tslint -p tsconfig.json | jest",
     "serve": "serve -s ./public"
   },

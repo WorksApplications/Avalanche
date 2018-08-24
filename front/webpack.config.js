@@ -10,10 +10,10 @@ const index = path.resolve(__dirname, "./src/index.tsx");
 
 module.exports = env => {
   const isProduction = env && env.production;
-  const collectApiBase = env.COLLECT_API_BASE || process.env.COLLECT_API_BASE;
-  if (!collectApiBase) {
+  const apiBaseUrl = env.API_BASE_URL || process.env.API_BASE_URL;
+  if (!apiBaseUrl) {
     console.log(env);
-    throw new Error("COLLECT_API_BASE env var is required.");
+    throw new Error("API_BASE_URL env var is required.");
   }
   return {
     mode: isProduction ? "production" : "development",
@@ -65,7 +65,7 @@ module.exports = env => {
         chunkFilename: "[id].[hash:8].css"
       }),
       new DefinePlugin({
-        COLLECT_API_BASE: JSON.stringify(collectApiBase),
+        COLLECT_API_BASE: JSON.stringify(apiBaseUrl),
         IS_DEBUG: !isProduction,
         APP_NAME: `"Dynamic Analysis"`
       })
