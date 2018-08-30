@@ -162,7 +162,7 @@ spec:
     spec:
       containers:
       - name: static
-        image: /resource_optimization/static:v1
+        image: /resource_optimization/static:v2
         ports:
         - containerPort: 80
         imagePullPolicy: Always

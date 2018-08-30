@@ -21,6 +21,7 @@ type Environ struct {
 	Addr        *string `json:"address,omitempty"`
 	Kubeapi     *string `json:"kubernetes_api"`
 	Multitenant *bool   `json:"multitenant,omitempty"`
+    /* TODO: validate version range */
 	Version     *string `json:"version,omitempty"`
 	Observe     bool    `json:"observe"`
 }
