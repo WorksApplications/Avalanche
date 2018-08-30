@@ -1,6 +1,6 @@
 import { Component, h } from "preact";
-import MainArea from "./MainArea";
-import RunningPodsView from "./RunningPodsView";
+import MainArea from "../containers/MainArea";
+import RunningPodsView from "../containers/RunningPodsView";
 // @ts-ignore
 import styles from "./SnapshotPage.scss";
 
