@@ -31,9 +31,18 @@ export interface IEnvironmentInfo {
   liveCount?: number;
 }
 
+export interface IEnvironmentConfig {
+  name: string;
+  version: string | null;
+  isObservationEnabled: boolean | null;
+  isMultiTenant: boolean | null;
+  kubeApi: string | null;
+}
+
 export interface IApplicationState {
   readonly analysisData: IAnalysisDataState;
   readonly toastNotification: IToastNotificationState;
+  readonly environmentConfig: IEnvironmentConfigState;
 }
 
 export interface IAnalysisDataState {
@@ -50,6 +59,10 @@ export interface IToastNotificationState {
   readonly message: string | null;
   readonly kind: "success" | "error";
   readonly id: number | null;
+}
+
+export interface IEnvironmentConfigState {
+  readonly environmentConfigs: IEnvironmentConfig[];
 }
 
 let middlewares: Middleware[] = [thunk];

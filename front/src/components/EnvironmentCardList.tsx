@@ -14,7 +14,11 @@ class EnvironmentCardList extends Component<IProperty, {}> {
     return (
       <div className={styles.wrap}>
         {this.props.data.map(x => {
-          return <EnvironmentCard key={x.id} {...x} />;
+          return (
+            <div key={x.id} className={styles.card}>
+              <EnvironmentCard {...x} />
+            </div>
+          );
         })}
       </div>
     );

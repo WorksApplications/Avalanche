@@ -164,3 +164,78 @@ export const toastr = (
     dispatch(hideToastr({ id }));
   }, duration);
 };
+
+export const getEnvironmentConfigsAsyncAction = actionCreator.async<
+  {},
+  { configs: collect.EnvironmentConfig[] },
+  { message: string }
+>("GET_ENVIRONMENT_CONFIGS");
+
+export const getEnvironmentConfigs = () => (dispatch: Dispatch) => {
+  const params = {};
+  dispatch(getEnvironmentConfigsAsyncAction.started(params));
+  collectClient
+    .listEnvironmentConfig()
+    .then((configs: collect.EnvironmentConfig[]) => {
+      dispatch(
+        getEnvironmentConfigsAsyncAction.done({ params, result: { configs } })
+      );
+    })
+    .catch((reason: Error) => {
+      dispatch(
+        getEnvironmentConfigsAsyncAction.failed({
+          params,
+          error: { message: reason.message }
+        })
+      );
+      toastr(`Failed to get environment configs.`, "error")(dispatch);
+    });
+};
+
+export const postEnvironmentConfigAsyncAction = actionCreator.async<
+  {
+    environment: string;
+  },
+  { config: collect.EnvironmentConfig },
+  { message: string }
+>("POST_ENVIRONMENT_CONFIG");
+
+export const postEnvironmentConfig = (
+  environmentName: string,
+  isMultitenant: boolean,
+  kubeApi: string,
+  version: string
+) => (dispatch: Dispatch) => {
+  const newConfig: collect.EnvironmentConfig = {
+    name: environmentName,
+    isMultitenant,
+    kubeApi,
+    version
+  };
+  const params = { environment: environmentName, config: newConfig };
+  dispatch(postEnvironmentConfigAsyncAction.started(params));
+  collectClient
+    .putEnvironmentConfig(environmentName, newConfig, {
+      headers: {
+        "Content-Type": "application/json"
+      } // This is due to "typescript-fetch")
+    })
+    .then((config: collect.EnvironmentConfig) => {
+      dispatch(
+        postEnvironmentConfigAsyncAction.done({
+          params,
+          result: { config }
+        })
+      );
+      toastr(`Config for "${params.environment}" is updated.`, "success")(
+        dispatch
+      );
+    })
+    .catch((reason: Error) => {
+      postEnvironmentConfigAsyncAction.failed({
+        params,
+        error: { message: reason.message }
+      });
+      toastr(`Failed to configure "${params.environment}".`, "error")(dispatch);
+    });
+};

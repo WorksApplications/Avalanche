@@ -1,9 +1,12 @@
-import { Component, h } from "preact";
+import { Component, FunctionalComponent, h } from "preact";
+import { connect } from "preact-redux";
+import { bindActionCreators, Dispatch } from "redux";
+import { getEnvironmentConfigs, postEnvironmentConfig } from "../actions";
 import EnvironmentConfigDialog from "../components/dialogs/EnvironmentConfigDialog";
-import { IProperty as IEnvironmentCardProperty } from "../components/EnvironmentCard";
 import EnvironmentCardList from "../components/EnvironmentCardList";
 import EnvironmentModalDialogFoundation from "../components/EnvironmentModalDialogFoundation";
 import FilterInput from "../components/FilterInput";
+import { IApplicationState, IEnvironmentConfig } from "../store";
 // @ts-ignore
 import styles from "./ConfigPage.scss";
 
@@ -11,89 +14,113 @@ interface IState {
   filteringValue: string;
   showsDialog: boolean;
   dialogTarget: string | null;
-  kind: "mt" | "st" | null;
+  isMultitenant: boolean | null;
   kubeApi: string | null;
   version: "before_17_12" | "after_18_03" | null;
 }
 
-class ConfigPage extends Component<{}, IState> {
+interface IStateProps {
+  environmentConfigs: IEnvironmentConfig[];
+}
+
+interface IDispatchProps {
+  getEnvironmentConfigs: typeof getEnvironmentConfigs;
+  postEnvironmentConfig: typeof postEnvironmentConfig;
+}
+
+const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
+  environmentConfigs: state.environmentConfig.environmentConfigs
+});
+const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
+  bindActionCreators(
+    { getEnvironmentConfigs, postEnvironmentConfig },
+    dispatch
+  );
+
+// @ts-ignore
+@connect(
+  mapStateToProps,
+  mapDispatchToProps
+)
+class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
   constructor() {
     super();
     this.state = {
       filteringValue: "",
       showsDialog: false,
       dialogTarget: null,
-      kind: null,
+      isMultitenant: null,
       kubeApi: null,
       version: null
     };
   }
 
+  public componentWillMount() {
+    this.props.getEnvironmentConfigs();
+  }
+
   public render() {
-    // TODO change it to actual thing
-    let tmpData: Array<IEnvironmentCardProperty & { id: string }> = [
-      {
-        id: "a",
-        name: "a",
-        kind: "unconfigured",
-        onEdit: () => {
-          this.setState({ showsDialog: true, dialogTarget: "a" });
-        }
-      },
-      {
-        id: "b",
-        name: "b",
-        kind: "configured",
-        version: "18.07",
-        nOfMonitored: 12,
-        nOfSnapshot: 123,
-        onEdit: () => {
-          this.setState({ showsDialog: true, dialogTarget: "b" });
-        }
-      },
-      {
-        id: "c",
-        name: "c",
-        kind: "observed",
-        version: "18.09",
-        nOfMonitored: 23,
-        nOfSnapshot: 234,
-        onEdit: () => {
-          this.setState({ showsDialog: true, dialogTarget: "c" });
-        }
+    const setState = this.setState.bind(this);
+    let configs = this.props.environmentConfigs.map(x => {
+      const kind = (x.version === null
+        ? "unconfigured"
+        : x.isObservationEnabled
+          ? "observed"
+          : "configured") as any;
+      let version: "before_17_12" | "after_18_03" | undefined;
+      switch (x.version) {
+        case "before 17.12":
+          version = "before_17_12";
+          break;
+        case "after 18.03":
+          version = "after_18_03";
+          break;
+        default:
+          version = undefined;
       }
-    ];
-    tmpData.push(...tmpData.map(x => ({ ...x })));
-    tmpData.push(...tmpData.map(x => ({ ...x })));
-    tmpData.forEach(x => {
-      x.id = Math.random().toString();
+      return {
+        ...x,
+        id: x.name,
+        version,
+        kind,
+        onEdit() {
+          setState({
+            showsDialog: true,
+            dialogTarget: x.name,
+            isMultitenant: x.isMultiTenant,
+            kubeApi: x.kubeApi,
+            version
+          });
+        }
+      };
     });
 
     if (this.state.filteringValue) {
-      tmpData = tmpData.filter(x => x.name.includes(this.state.filteringValue));
+      // tmpData = tmpData.filter(x => x.name.includes(this.state.filteringValue));
+      configs = configs.filter(x => x.name.includes(this.state.filteringValue));
     }
 
     const onDismiss = () => {
       this.setState({
         showsDialog: false,
         dialogTarget: null,
-        kind: null,
+        isMultitenant: null,
         kubeApi: null,
         version: null
       });
     };
     const onAccept = () => {
-      // TODO post with API
-      console.log(
-        this.state.dialogTarget,
-        this.state.kind,
-        this.state.kubeApi,
-        this.state.version
+      const version = this.state.version!; // TODO convert to proper value
+      this.props.postEnvironmentConfig(
+        this.state.dialogTarget!,
+        this.state.isMultitenant!,
+        this.state.kubeApi!,
+        version
       );
       onDismiss();
     };
-    const onKindChange = (kind: "mt" | "st") => {
-      this.setState({ kind });
+    const onIsMultitenantChange = (isMultiTenant: boolean) => {
+      this.setState({ isMultitenant: isMultiTenant });
     };
     const onKubeApiChange = (kubeApi: string) => {
       this.setState({ kubeApi });
@@ -106,8 +133,8 @@ class ConfigPage extends Component<{}, IState> {
         target={this.state.dialogTarget || ""}
         onDismiss={onDismiss}
         onAccept={onAccept}
-        kind={this.state.kind}
-        onKindChange={onKindChange}
+        isMultitenant={this.state.isMultitenant}
+        onIsMultitenantChange={onIsMultitenantChange}
         kubeApi={this.state.kubeApi}
         onKubeApiChange={onKubeApiChange}
         version={this.state.version}
@@ -124,7 +151,7 @@ class ConfigPage extends Component<{}, IState> {
           />
         </div>
         <div className={styles.cardList}>
-          <EnvironmentCardList data={tmpData} />
+          <EnvironmentCardList data={configs} />
         </div>
         <div
           className={[
@@ -138,9 +165,10 @@ class ConfigPage extends Component<{}, IState> {
     );
   }
 
+  // noinspection JSUnusedLocalSymbols
   private onFilterChange(previous: string, current: string) {
     this.setState({ filteringValue: current });
   }
 }
 
-export default ConfigPage;
+export default (ConfigPage as any) as FunctionalComponent;

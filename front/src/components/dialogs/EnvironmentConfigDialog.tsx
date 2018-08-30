@@ -4,11 +4,11 @@ import dialogStyles from "../EnvironmentModalDialogFoundation.scss";
 
 export interface IProperty {
   target: string;
-  kind: "mt" | "st" | null;
+  isMultitenant: boolean | null;
   kubeApi: string | null;
   version: "before_17_12" | "after_18_03" | null;
 
-  onKindChange(kind: "mt" | "st"): void;
+  onIsMultitenantChange(isMultitenant: boolean): void;
 
   onKubeApiChange(api: string): void;
 
@@ -22,7 +22,7 @@ export interface IProperty {
 class EnvironmentConfigDialog extends Component<IProperty, {}> {
   public render() {
     // TODO url validation
-    const isValidData = this.props.kind !== null && this.props.kubeApi !== null && this.props.version != null;
+    const isValidData = this.props.isMultitenant !== null && this.props.kubeApi !== null && this.props.version != null;
 
     return (
       <div className={dialogStyles.body}>
@@ -36,8 +36,8 @@ class EnvironmentConfigDialog extends Component<IProperty, {}> {
                 id="kind-mt"
                 name="kind"
                 value="mt"
-                checked={this.props.kind === "mt"}
-                onChange={this.onKindChange.bind(this)}
+                checked={this.props.isMultitenant === true}
+                onChange={this.onIsMultitenantChange.bind(this)}
               />
               <label for="kind-mt">MT</label>
               <input
@@ -45,8 +45,8 @@ class EnvironmentConfigDialog extends Component<IProperty, {}> {
                 id="kind-st"
                 name="kind"
                 value="st"
-                checked={this.props.kind === "st"}
-                onChange={this.onKindChange.bind(this)}
+                checked={this.props.isMultitenant === false}
+                onChange={this.onIsMultitenantChange.bind(this)}
               />
               <label for="kind-st">ST</label>
               {/*<div className={dialogStyles.description}>a</div>*/}
@@ -99,10 +99,9 @@ class EnvironmentConfigDialog extends Component<IProperty, {}> {
     );
   }
 
-  private onKindChange(e: Event) {
-    this.props.onKindChange((e.target as HTMLInputElement).value as
-      | "mt"
-      | "st");
+  private onIsMultitenantChange(e: Event) {
+    const value = (e.target as HTMLInputElement).value;
+    this.props.onIsMultitenantChange(value === "mt");
   }
 
   private onKubeApiChange(e: Event) {
