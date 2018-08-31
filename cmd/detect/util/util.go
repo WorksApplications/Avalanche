@@ -47,14 +47,21 @@ func Exchange(ch chan *ScannerRequest) {
 	go dispatch(isc, osc)
 	for {
 		select {
+		/* Catch dispatch() results from osc (outwise subscription channel) */
 		case res := <-osc:
 			m[res.Env] = res
+			/* The timer invokes batch scan. Send all subscription into the channel */
 		case <-t:
 			log.Println("start batch scan")
 			for _, s := range m {
 				log.Printf("%+v", s)
 				isc <- s
 			}
+			/* ScannerRequest handlers; main tactics is that
+			   1: Store requests into the map (called "m");
+			   2: Batch scan is out-of-scope from this;
+			   3: SCAN operation is the exception;
+			*/
 		case req := <-ch:
 			env := req.Env
 			if env == nil && req.Req != DESC {
