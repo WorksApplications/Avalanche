@@ -44,9 +44,9 @@ func main() {
 	http.HandleFunc("/subscription/", x.SubLogs)
 	http.HandleFunc("/subscription", x.Logs)
 
-	http.HandleFunc("/running", x.Running)
+	http.HandleFunc("/tracing", x.Tracing)
 	//http.HandleFunc("/config", x.Config)
-	http.HandleFunc("/config/environments", x.ConfigEnv)
-	http.HandleFunc("/config/environments/", x.ConfigEnvSub)
+	http.HandleFunc("/config/environment", x.ConfigEnv)
+	http.HandleFunc("/config/environment/", x.ConfigEnvSub)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
