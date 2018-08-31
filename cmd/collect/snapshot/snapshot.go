@@ -142,7 +142,7 @@ func New(extr *string, mount *string, tempd *string, db *sql.DB, a *models.App, 
 	if err != nil {
 		return nil, err
 	}
-	link := *extr + "/?resource=" + k.Path + "perf-record/perf-" + *a.Name + ".tar.gz"
+	link := *extr + "/?resource=" + k.Path + "perf-record/" + *a.Name + ".tar.gz"
 	log.Printf("LINK ADDRESS: %s", link)
 	g, loc, err := getSS(mount, tempd, &link, p.Name)
 	if err != nil {
