@@ -25,8 +25,8 @@ type ScannerRequest struct {
 	Ret chan<- *detect.Subscription
 }
 
-func dispatch(ch chan *detect.Subscription) {
-	for s := range ch {
+func dispatch(ich <-chan *detect.Subscription, och chan<- *detect.Subscription) {
+	for s := range ich {
 		log.Printf("[Dispatched worker] Start scan for %s", s.Env)
 		apps, err := parser.Scan(s.Env)
 		if err != nil {
@@ -34,7 +34,7 @@ func dispatch(ch chan *detect.Subscription) {
 		}
 		log.Printf("[Dispatched worker] Scan for %s ended.", s.Env)
 		s.Apps = apps
-		ch <- s
+		och <- s
 	}
 }
 
@@ -42,16 +42,18 @@ func Exchange(ch chan *ScannerRequest) {
 	t := time.Tick(5 * time.Minute)
 	m := make(map[string]*detect.Subscription)
 	empty := make([]detect.App, 0)
-	sc := make(chan *detect.Subscription, 64) // XXX: May have to be extended
-	go dispatch(sc)
+	isc := make(chan *detect.Subscription, 64) // XXX: May have to be extended
+	osc := make(chan *detect.Subscription, 64) // XXX: May have to be extended
+	go dispatch(isc, osc)
 	for {
 		select {
-		case res := <-sc:
+		case res := <-osc:
 			m[res.Env] = res
 		case <-t:
 			log.Println("start batch scan")
 			for _, s := range m {
-				sc <- s
+				log.Printf("%+v", s)
+				isc <- s
 			}
 		case req := <-ch:
 			env := req.Env
@@ -74,7 +76,7 @@ func Exchange(ch chan *ScannerRequest) {
 					// However, you will return empty list which is empty because it is not scanned yet
 					// m[*env] = sub
 				}
-				sc <- sub
+				isc <- sub
 			case DESC:
 				if env == nil {
 					for _, sub := range m {
