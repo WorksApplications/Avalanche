@@ -44,7 +44,7 @@ func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) midd
 		r.App = *app.FromId(s.Db, p.AppId).Name
 		r.Environment = *environ.FromId(s.Db, p.EnvId).Name
 
-		r.IsLive = true
+		r.IsAlive = true
 		body = append(body, r)
 	}
 	if len(body) == 0 {
@@ -68,7 +68,7 @@ func (s *ServerCtx) DescribeAppHandler(params operations.DescribeAppParams) midd
 			log.Print("[WARN] nil Environment is in body")
 			continue
 		}
-		mapIsLiveFlag(e.Pods, s.Perfing)
+		mapIsAliveFlag(e.Pods, s.Perfing)
 	}
 	return operations.NewDescribeAppOK().WithPayload(body)
 }
@@ -87,7 +87,7 @@ func (s *ServerCtx) GetEnvironmentsHandler(params operations.GetEnvironmentsPara
 		body = append(body, environ.FromLayout(s.Db, l))
 	}
 	for _, e := range body {
-		mapIsLiveFlag(e.Pods, s.Perfing)
+		mapIsAliveFlag(e.Pods, s.Perfing)
 	}
 	return operations.NewGetEnvironmentsOK().WithPayload(body)
 }
@@ -104,7 +104,7 @@ func (s *ServerCtx) DescribeEnvironmentHandler(params operations.DescribeEnviron
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	body := environ.FromLayout(s.Db, lays)
-	mapIsLiveFlag(body.Pods, s.Perfing)
+	mapIsAliveFlag(body.Pods, s.Perfing)
 	return operations.NewDescribeEnvironmentOK().WithPayload(body)
 }
 
@@ -123,7 +123,7 @@ func (s *ServerCtx) GetPodsHandler(params operations.GetPodsParams) middleware.R
 	for i, p := range ps {
 		body[i] = p.ToResponse()
 	}
-	mapIsLiveFlag(body, s.Perfing)
+	mapIsAliveFlag(body, s.Perfing)
 	return operations.NewGetPodsOK().WithPayload(body)
 }
 
@@ -138,7 +138,7 @@ func (s *ServerCtx) DescribePodHandler(params operations.DescribePodParams) midd
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	body := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
-	_, body.IsLive = s.Perfing[body.ID]
+	_, body.IsAlive = s.Perfing[body.ID]
 	return operations.NewDescribePodOK().WithPayload(body)
 }
 
