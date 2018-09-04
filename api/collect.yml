@@ -349,7 +349,7 @@ paths:
               type: string
       operationId: getConfig 
 
-  /config/environment:
+  /config/environments:
     get:
       responses:
         200:
@@ -374,7 +374,7 @@ paths:
             $ref: "#/definitions/environment-config"
       operationId: addEnvironmentConfig
 
-  /config/environment/{environment}:
+  /config/environments/{environment}:
     get:
       parameters:
         - name: environment
