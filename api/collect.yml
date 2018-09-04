@@ -33,15 +33,15 @@ definitions:
         type: string
       landscape:
         type: string
-      mischo-url:
+      mischoUrl:
         type: string
-      service-url:
+      serviceUrl:
         type: string
-      kube-api:
+      kubernetesApi:
         type: string
-      is_multitenant:
+      isMultitenant:
         type: boolean
-      is_enabled:
+      isEnabled:
         type: boolean
 
   app:
@@ -78,7 +78,7 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/pod"
-      live_count:
+      liveCount:
           type: integer
 
   pod:
@@ -95,9 +95,9 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/snapshot"
-      is_live:
+      isAlive:
         type: boolean
-      created_at:
+      createdAt:
         type: string
         format: date-time
       app:
@@ -114,23 +114,23 @@ definitions:
         type: string
         minLength: 36
         maxLength: 36
-      created_at:
+      createdAt:
         type: string
         format: date-time
       pod:
         type: string
       environment:
         type: string
-      flamescope_link:
+      flamescopeLink:
         type: string
     example:
       uuid: "d7eec7c1-daf5-4198-9503-6957aea0bf90"
-      created_at: "2018-01-15T03:00:00.000Z"
+      createdAt: "2018-01-15T03:00:00.000Z"
       pod: "collabo"
       environment: "systema"
-      flamescope_link: "http://flamescope.internal.worksap.com/#/heatmap/collabo-bd6dc859c-f7dfm%2Fa0%2Fd7eec7c1-daf5-4198-9503-6957aea0bf90"
+      flamescopeLink: "http://flamescope.internal.worksap.com/#/heatmap/collabo-bd6dc859c-f7dfm%2Fa0%2Fd7eec7c1-daf5-4198-9503-6957aea0bf90"
 
-  replicas_request:
+  replicasRequest:
     type: object
     required:
       - count
@@ -227,7 +227,7 @@ paths:
         - name: replicas
           in: body
           schema:
-            $ref: "#/definitions/replicas_request"
+            $ref: "#/definitions/replicasRequest"
       responses:
         200:
           description: |
@@ -349,7 +349,7 @@ paths:
               type: string
       operationId: getConfig 
 
-  /config/environment:
+  /config/environments:
     get:
       responses:
         200:
@@ -374,7 +374,7 @@ paths:
             $ref: "#/definitions/environment-config"
       operationId: addEnvironmentConfig
 
-  /config/environment/{environment}:
+  /config/environments/{environment}:
     get:
       parameters:
         - name: environment

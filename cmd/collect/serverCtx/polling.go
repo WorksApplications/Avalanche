@@ -52,10 +52,10 @@ func (s *ServerCtx) pull() {
 	log.Print("[Discovery] Found:", len(s.Perfing))
 }
 
-func mapIsLiveFlag(ps []*models.Pod, alive map[int64]struct{}) {
+func mapIsAliveFlag(ps []*models.Pod, alive map[int64]struct{}) {
 	for _, p := range ps {
 		_, prs := alive[p.ID]
-		p.IsLive = prs
+		p.IsAlive = prs
 	}
 }
 

@@ -1,3 +1,4 @@
+/// <reference path="./custom.d.ts" />
 // tslint:disable
 /**
  * collective server for performance inspection
@@ -246,7 +247,7 @@ export interface Pod {
      * @type {boolean}
      * @memberof Pod
      */
-    isLive?: boolean;
+    isAlive?: boolean;
     /**
      * 
      * @type {Date}
@@ -333,7 +334,7 @@ export const DefaultApiFetchParamCreator = function (configuration?: Configurati
          * @throws {RequiredError}
          */
         addEnvironmentConfig(config?: EnvironmentConfig, options: any = {}): FetchArgs {
-            const localVarPath = `/config/environment`;
+            const localVarPath = `/config/environments`;
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
             const localVarHeaderParameter = {} as any;
@@ -465,7 +466,7 @@ export const DefaultApiFetchParamCreator = function (configuration?: Configurati
             if (environment === null || environment === undefined) {
                 throw new RequiredError('environment','Required parameter environment was null or undefined when calling describeEnvironmentConfig.');
             }
-            const localVarPath = `/config/environment/{environment}`
+            const localVarPath = `/config/environments/{environment}`
                 .replace(`{${"environment"}}`, encodeURIComponent(String(environment)));
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
@@ -678,7 +679,7 @@ export const DefaultApiFetchParamCreator = function (configuration?: Configurati
          * @throws {RequiredError}
          */
         listEnvironmentConfig(options: any = {}): FetchArgs {
-            const localVarPath = `/config/environment`;
+            const localVarPath = `/config/environments`;
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
             const localVarHeaderParameter = {} as any;
@@ -786,7 +787,7 @@ export const DefaultApiFetchParamCreator = function (configuration?: Configurati
             if (environment === null || environment === undefined) {
                 throw new RequiredError('environment','Required parameter environment was null or undefined when calling putEnvironmentConfig.');
             }
-            const localVarPath = `/config/environment/{environment}`
+            const localVarPath = `/config/environments/{environment}`
                 .replace(`{${"environment"}}`, encodeURIComponent(String(environment)));
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions = Object.assign({ method: 'PUT' }, options);

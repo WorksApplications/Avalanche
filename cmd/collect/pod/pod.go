@@ -46,7 +46,7 @@ func (p *PodInternal) ToResponse() *models.Pod {
 		ID:        p.id,
 		Name:      &p.Name,
 		CreatedAt: strfmt.DateTime(p.created),
-		IsLive:    false,
+		IsAlive:   false,
 		Snapshots: nil,
 	}
 	return &r

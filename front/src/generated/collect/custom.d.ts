@@ -1,1 +1,1 @@
-declare module "portable-fetch";
+declare module 'portable-fetch';

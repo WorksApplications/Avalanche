@@ -17,7 +17,7 @@ export interface ISnapshotInfo {
 export interface IPodInfo {
   id?: number;
   name: string;
-  isLive?: boolean;
+  isAlive?: boolean;
   createdAt?: Date;
   app?: string;
   env?: string;
