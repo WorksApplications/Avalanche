@@ -36,15 +36,13 @@ func main() {
 	x := server.HandlerClosure{make(chan *util.ScannerRequest), db}
 	go util.Exchange(x.Ch)
 	for _, e := range es {
-		sreq := util.ScannerRequest{util.SCAN, &e.Name, nil}
+		sreq := util.ScannerRequest{util.ADD, &e.Name, nil}
 		x.Ch <- &sreq
 	}
 
 	//log.Print(apps)
-	http.HandleFunc("/subscription/", x.SubLogs)
-	http.HandleFunc("/subscription", x.Logs)
-
-	http.HandleFunc("/running", x.Running)
+	http.HandleFunc("/subscription/", x.SubRunner)
+	http.HandleFunc("/subscription", x.Runner)
 	//http.HandleFunc("/config", x.Config)
 	http.HandleFunc("/config/environments", x.ConfigEnv)
 	http.HandleFunc("/config/environments/", x.ConfigEnvSub)

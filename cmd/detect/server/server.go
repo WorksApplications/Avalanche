@@ -105,7 +105,7 @@ func get(res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequ
 	}
 }
 
-func (s HandlerClosure) SubLogs(res http.ResponseWriter, req *http.Request) {
+func (s HandlerClosure) SubRunner(res http.ResponseWriter, req *http.Request) {
 	/* Has trailing slash or sub-location */
 	log.Printf("S: %s %s", req.Method, req.URL.Path)
 	switch req.Method {
@@ -119,31 +119,11 @@ func (s HandlerClosure) SubLogs(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s HandlerClosure) Logs(res http.ResponseWriter, req *http.Request) {
-	log.Printf("L: OBSOLETE: %s %s", req.Method, req.URL.Path)
+func (s HandlerClosure) Runner(res http.ResponseWriter, req *http.Request) {
+	log.Printf("R: OBSOLETE: %s %s", req.Method, req.URL.Path)
 	switch req.Method {
 	case "GET":
 		get(res, req, s.Ch, nil /* indicates "gimme-all" */)
-	}
-}
-
-func (s HandlerClosure) Running(res http.ResponseWriter, req *http.Request) {
-	log.Printf("R: %s %s", req.Method, req.URL.Path)
-	switch req.Method {
-	case "GET":
-		//get(res, req, s.Ch, nil /* indicates "gimme-all" */)
-		es := environ.ListConfig(s.Db, nil, nil)
-		ks := make([]Pods, 0, len(es))
-		for _, e := range es {
-			kpods := (e.kubernetes_api)
-			ks = append(ks, kpods)
-		}
-		reply, e := json.Marshal(envs)
-		if e != nil {
-			res.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		res.Write(reply)
 	}
 }
 
