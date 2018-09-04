@@ -18,12 +18,14 @@ import (
 type Environ struct {
 	Id          int64   `json:"id"`
 	Name        string  `json:"name"`
-	Addr        *string `json:"address,omitempty"`
-	Kubeapi     *string `json:"kubernetes_api"`
-	Multitenant *bool   `json:"multitenant,omitempty"`
+	Tenant      string  `json:"tenant"`
+	Landscape   string  `json:"Landscape"`
+	Addr        *string `json:"serviceUrl,omitempty"`
+	Kubeapi     *string `json:"KubernetesApi"`
+	Multitenant *bool   `json:"isMultitenant,omitempty"`
 	/* TODO: validate version range */
 	Version *string `json:"version,omitempty"`
-	Observe bool    `json:"observe"`
+	Observe bool    `json:"isEnabled"`
 }
 
 func InitTable(db *sql.DB) {

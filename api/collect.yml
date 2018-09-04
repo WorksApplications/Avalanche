@@ -33,11 +33,11 @@ definitions:
         type: string
       landscape:
         type: string
-      mischo-url:
+      mischoUrl:
         type: string
-      service-url:
+      serviceUrl:
         type: string
-      kube-api:
+      kubernetesApi:
         type: string
       isMultitenant:
         type: boolean

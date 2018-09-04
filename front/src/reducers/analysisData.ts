@@ -20,7 +20,7 @@ function podInfoConvert(pod: collect.Pod): IPodInfo {
   return {
     id: pod.id,
     name: pod.name,
-    isLive: pod.isLive,
+    isAlive: pod.isAlive,
     createdAt: pod.createdAt,
     app: pod.app,
     env: pod.environment,
