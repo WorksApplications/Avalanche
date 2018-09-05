@@ -71,7 +71,7 @@ class NavigationView extends Component<IStateProps & IDispatchProps> {
               options={showingData}
               selectedValue={this.props.applicationName}
               onValueChanged={this.onAppChanged.bind(this)}
-              placeholder="Select landscape"
+              placeholder="Select Application"
             />
           </div>
         </div>
