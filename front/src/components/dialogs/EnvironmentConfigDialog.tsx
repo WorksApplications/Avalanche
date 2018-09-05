@@ -5,12 +5,12 @@ import dialogStyles from "../EnvironmentModalDialogFoundation.scss";
 export interface IProperty {
   target: string;
   isMultitenant: boolean | null;
-  kubeApi: string | null;
+  kubernetesApi: string | null;
   version: "before_17_12" | "after_18_03" | null;
 
   onIsMultitenantChange(isMultitenant: boolean): void;
 
-  onKubeApiChange(api: string): void;
+  onKubernetesApiChange(api: string): void;
 
   onVersionChange(version: "before_17_12" | "after_18_03"): void;
 
@@ -22,7 +22,7 @@ export interface IProperty {
 class EnvironmentConfigDialog extends Component<IProperty, {}> {
   public render() {
     // TODO url validation
-    const isValidData = this.props.isMultitenant !== null && this.props.kubeApi !== null && this.props.version != null;
+    const isValidData = this.props.isMultitenant !== null && this.props.kubernetesApi !== null && this.props.version != null;
 
     return (
       <div className={dialogStyles.body}>
@@ -55,7 +55,7 @@ class EnvironmentConfigDialog extends Component<IProperty, {}> {
           <div className={dialogStyles.group}>
             <label className={dialogStyles.label}>Kubernetes API</label>
             <div className={dialogStyles.input}>
-              <input type="text" name="api" onKeyUp={this.onKubeApiChange.bind(this)} value={this.props.kubeApi || ""}/>
+              <input type="text" name="api" onKeyUp={this.onKubernetesApiChange.bind(this)} value={this.props.kubernetesApi || ""}/>
               <div className={dialogStyles.description}>ex: http://k8s-mischo.internal.worksap.com:52063/</div>
             </div>
           </div>
@@ -104,8 +104,8 @@ class EnvironmentConfigDialog extends Component<IProperty, {}> {
     this.props.onIsMultitenantChange(value === "mt");
   }
 
-  private onKubeApiChange(e: Event) {
-    this.props.onKubeApiChange((e.target as HTMLInputElement).value as string);
+  private onKubernetesApiChange(e: Event) {
+    this.props.onKubernetesApiChange((e.target as HTMLInputElement).value as string);
   }
 
   private onVersionChange(e: Event) {

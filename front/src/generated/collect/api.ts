@@ -189,7 +189,7 @@ export interface EnvironmentConfig {
      * @type {string}
      * @memberof EnvironmentConfig
      */
-    kubeApi?: string;
+    kubernetesApi?: string;
     /**
      * 
      * @type {boolean}
@@ -250,10 +250,10 @@ export interface Pod {
     isAlive?: boolean;
     /**
      * 
-     * @type {Date}
+     * @type {string}
      * @memberof Pod
      */
-    createdAt?: Date;
+    createdAt?: string;
     /**
      * 
      * @type {string}
@@ -296,10 +296,10 @@ export interface Snapshot {
     uuid: string;
     /**
      * 
-     * @type {Date}
+     * @type {string}
      * @memberof Snapshot
      */
-    createdAt?: Date;
+    createdAt?: string;
     /**
      * 
      * @type {string}

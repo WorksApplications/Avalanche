@@ -23,7 +23,7 @@ export function environmentConfig(
           typeof c["is_multitenant"] === "undefined"
             ? null
             : c["is_multitenant"],
-        kubeApi: c["kube-api"] || null
+        kubernetesApi: c["kube-api"] || null
       })
     );
     return { ...state, environmentConfigs };

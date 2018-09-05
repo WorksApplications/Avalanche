@@ -99,7 +99,7 @@ definitions:
         type: boolean
       createdAt:
         type: string
-        format: date-time
+        format: date
       app:
         type: string
       environment:
@@ -116,7 +116,7 @@ definitions:
         maxLength: 36
       createdAt:
         type: string
-        format: date-time
+        format: date
       pod:
         type: string
       environment:
