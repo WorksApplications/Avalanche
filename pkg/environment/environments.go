@@ -68,7 +68,7 @@ func ListConfig(db *sql.DB, name *string, obs *bool) []*Environ {
 		var kapi sql.NullString
 		var vers sql.NullString
 		var multi sql.NullBool
-		err = rows.Scan(&ret.Id, &ret.Name, &kapi, &multi, vers, &ret.Observe)
+		err = rows.Scan(&ret.Id, &ret.Name, &kapi, &multi, &vers, &ret.Observe)
 		ret.Kubeapi = &kapi.String
 		ret.Version = &vers.String
 		ret.Multitenant = &multi.Bool
