@@ -65,13 +65,13 @@ func ListConfig(db *sql.DB, name *string, obs *bool) []*Environ {
 	envs := make([]*Environ, 0)
 	for rows.Next() {
 		var ret Environ
-		var kapi string
-		var vers string
-		var multi bool
+		var kapi sql.NullString
+		var vers sql.NullString
+		var multi sql.NullBool
 		err = rows.Scan(&ret.Id, &ret.Name, &kapi, &multi, vers, &ret.Observe)
-		ret.Kubeapi = &kapi
-		ret.Version = &vers
-		ret.Multitenant = &multi
+		ret.Kubeapi = &kapi.String
+		ret.Version = &vers.String
+		ret.Multitenant = &multi.Bool
 		if err != nil {
 			log.Println("[DB/Env/Detect] Scan ", err)
 		}
