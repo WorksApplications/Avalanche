@@ -7,12 +7,14 @@ default: bin
 
 all: bin
 
-images: collect  detect static-nginx
-bin: bin/detect bin/collect front/public/app.js
-backend: bin/detect bin/collect
+bin: bin/detect bin/collect front/public/app.js bin/enroll
+backend: bin/detect bin/collect bin/enroll
 front: front/public/app.js
 
 collect: collect-img
+
+bin/enroll: $(shell find cmd/enroll -name *.go) $(PKG)
+	CGO_ENABLED=0 go build -o bin/enroll cmd/enroll/app.go
 
 bin/collect: $(shell find cmd/collect -name *.go) $(PKG) generated_files/stub
 	CGO_ENABLED=0 go build -o bin/collect cmd/collect/server.go
@@ -32,10 +34,6 @@ swagger-client-gen:
 
 swagger-mock-gen:
 	java -jar ./swagger-codegen-cli.jar generate -i ./api/collect.yml -l nodejs-server -o ./front/mock/collect
-
-: -img
-
-detect: detect-img
 
 front/public/app.js:
 	cd front && yarn build
