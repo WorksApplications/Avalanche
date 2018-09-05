@@ -3,8 +3,10 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 )
 
@@ -51,12 +53,14 @@ func getAllEnvironment(det string) []string {
 func getRunningPodsFrom(kapi string) []string {
 	g, gete := http.Get(kapi + "/api/v1/pods")
 	if gete != nil {
-		// D S T
+		log.Print("Failed to get kubernetes API response: ", gete)
+		return nil
 	}
 	defer g.Body.Close()
 	b, reade := ioutil.ReadAll(g.Body)
 	if reade != nil {
-		// DSTG
+		log.Print("Failed to read response content from kubernetes API", reade)
+		return nil
 	}
 	type K8sPod struct {
 		name string
@@ -85,13 +89,16 @@ func (s *Ctx) handleFunc(w http.ResponseWriter, r *http.Request) {
 	ps := make([]string, 0)
 	log.Print(ps)
 	for _, e := range es {
+		if e == "" {
+			continue
+		}
 		px := getRunningPodsFrom(e)
 		ps = append(ps, px...)
 	}
 
 	b, err := json.Marshal(ps)
 	if err != nil {
-		// DSTG
+		log.Printf("Marshal failed with %+v, error: %s", ps, err)
 	}
 	w.Write(b)
 }
@@ -99,12 +106,14 @@ func (s *Ctx) handleFunc(w http.ResponseWriter, r *http.Request) {
 func main() {
 	log.SetPrefix("enroll:\t")
 	detect := flag.String("detect", "http://detect:8080", "detect server address")
+	port := flag.Int("port", 8080, "Listen port")
 
 	flag.Parse()
 	log.Println("detect address at:", *detect)
+	listener, _ := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 
 	c := Ctx{*detect}
 
 	http.HandleFunc("/", c.handleFunc)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.Serve(listener, nil))
 }
