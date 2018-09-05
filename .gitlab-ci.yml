@@ -67,6 +67,6 @@ push-images:
     variables:
         DOCKERHOST: ""
         
-        BACKEND_VERSION: "v13"
+        BACKEND_VERSION: "v13.1"
         FRONT_VERSION: "v6"
 
