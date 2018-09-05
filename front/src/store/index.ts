@@ -36,7 +36,7 @@ export interface IEnvironmentConfig {
   version: string | null;
   isObservationEnabled: boolean | null;
   isMultiTenant: boolean | null;
-  kubeApi: string | null;
+  kubernetesApi: string | null;
 }
 
 export interface IApplicationState {

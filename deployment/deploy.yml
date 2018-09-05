@@ -18,7 +18,7 @@ spec:
         command:
           - /detect
           - --db=example:example@tcp(mariadb)/collekt?parseTime=True
-        image: /resource_optimization/detect:v11
+        image: /resource_optimization/detect:v12
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -60,7 +60,7 @@ spec:
     spec:
       containers:
       - name: extract
-        image: /resource_optimization/extract:v11
+        image: /resource_optimization/extract:v12
         ports:
         - containerPort: 5000
 
@@ -103,7 +103,7 @@ spec:
     spec:
       containers:
       - name: collect
-        image: /resource_optimization/collect:v11
+        image: /resource_optimization/collect:v12
         ports:
         - containerPort: 8080
         imagePullPolicy: Always
@@ -162,7 +162,7 @@ spec:
     spec:
       containers:
       - name: static
-        image: /resource_optimization/static:v4
+        image: /resource_optimization/static:v5
         ports:
         - containerPort: 80
         imagePullPolicy: Always

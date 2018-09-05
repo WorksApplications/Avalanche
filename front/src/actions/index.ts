@@ -203,13 +203,13 @@ export const postEnvironmentConfigAsyncAction = actionCreator.async<
 export const postEnvironmentConfig = (
   environmentName: string,
   isMultitenant: boolean,
-  kubeApi: string,
+  kubernetesApi: string,
   version: string
 ) => (dispatch: Dispatch) => {
   const newConfig: collect.EnvironmentConfig = {
     name: environmentName,
     isMultitenant,
-    kubeApi,
+    kubernetesApi,
     version
   };
   const params = { environment: environmentName, config: newConfig };

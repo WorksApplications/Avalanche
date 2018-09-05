@@ -15,7 +15,7 @@ interface IState {
   showsDialog: boolean;
   dialogTarget: string | null;
   isMultitenant: boolean | null;
-  kubeApi: string | null;
+  kubernetesApi: string | null;
   version: "before_17_12" | "after_18_03" | null;
 }
 
@@ -50,7 +50,7 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
       showsDialog: false,
       dialogTarget: null,
       isMultitenant: null,
-      kubeApi: null,
+      kubernetesApi: null,
       version: null
     };
   }
@@ -88,7 +88,7 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
             showsDialog: true,
             dialogTarget: x.name,
             isMultitenant: x.isMultiTenant,
-            kubeApi: x.kubeApi,
+            kubernetesApi: x.kubernetesApi,
             version
           });
         }
@@ -105,7 +105,7 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
         showsDialog: false,
         dialogTarget: null,
         isMultitenant: null,
-        kubeApi: null,
+        kubernetesApi: null,
         version: null
       });
     };
@@ -114,7 +114,7 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
       this.props.postEnvironmentConfig(
         this.state.dialogTarget!,
         this.state.isMultitenant!,
-        this.state.kubeApi!,
+        this.state.kubernetesApi!,
         version
       );
       onDismiss();
@@ -122,8 +122,8 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
     const onIsMultitenantChange = (isMultiTenant: boolean) => {
       this.setState({ isMultitenant: isMultiTenant });
     };
-    const onKubeApiChange = (kubeApi: string) => {
-      this.setState({ kubeApi });
+    const onKubernetesApiChange = (kubernetesApi: string) => {
+      this.setState({ kubernetesApi });
     };
     const onVersionChange = (version: "before_17_12" | "after_18_03") => {
       this.setState({ version });
@@ -135,8 +135,8 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
         onAccept={onAccept}
         isMultitenant={this.state.isMultitenant}
         onIsMultitenantChange={onIsMultitenantChange}
-        kubeApi={this.state.kubeApi}
-        onKubeApiChange={onKubeApiChange}
+        kubernetesApi={this.state.kubernetesApi}
+        onKubernetesApiChange={onKubernetesApiChange}
         version={this.state.version}
         onVersionChange={onVersionChange}
       />

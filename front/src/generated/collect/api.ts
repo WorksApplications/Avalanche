@@ -189,7 +189,7 @@ export interface EnvironmentConfig {
      * @type {string}
      * @memberof EnvironmentConfig
      */
-    kubeApi?: string;
+    kubernetesApi?: string;
     /**
      * 
      * @type {boolean}

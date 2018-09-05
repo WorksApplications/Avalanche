@@ -17,11 +17,12 @@ import {
 } from "../store";
 
 function podInfoConvert(pod: collect.Pod): IPodInfo {
+  const created = new Date(pod.createdAt ? pod.createdAt : 0)
   return {
     id: pod.id,
     name: pod.name,
     isAlive: pod.isAlive,
-    createdAt: pod.createdAt,
+    createdAt: created,
     app: pod.app,
     env: pod.environment,
     snapshots: (pod.snapshots || []).map(s => snapshotInfoConvert(s))
@@ -29,12 +30,13 @@ function podInfoConvert(pod: collect.Pod): IPodInfo {
 }
 
 function snapshotInfoConvert(snapshot: collect.Snapshot): ISnapshotInfo {
+  const created = new Date(snapshot.createdAt ? snapshot.createdAt : 0)
   return {
     uuid: snapshot.uuid,
     name: undefined,
     pod: snapshot.pod,
     environment: snapshot.environment,
-    createdAt: snapshot.createdAt,
+    createdAt: created,
     link: snapshot.flamescopeLink
   };
 }
