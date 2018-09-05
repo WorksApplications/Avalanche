@@ -250,10 +250,10 @@ export interface Pod {
     isAlive?: boolean;
     /**
      * 
-     * @type {string}
+     * @type {Date}
      * @memberof Pod
      */
-    createdAt?: string;
+    createdAt?: Date;
     /**
      * 
      * @type {string}
@@ -296,10 +296,10 @@ export interface Snapshot {
     uuid: string;
     /**
      * 
-     * @type {string}
+     * @type {Date}
      * @memberof Snapshot
      */
-    createdAt?: string;
+    createdAt?: Date;
     /**
      * 
      * @type {string}
