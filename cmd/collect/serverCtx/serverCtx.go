@@ -43,12 +43,12 @@ func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) midd
 		r.App = *app.FromId(s.Db, p.AppId).Name
 		r.Environment = *environ.FromId(s.Db, p.EnvId).Name
 
-        sn := snapshot.FromPod(s.Db, r)
-        ss := make([]*models.Snapshot, len(sn))
-        for i, n := range sn {
-            ss[i] = n.ToResponse(s.Db)
-        }
-        r.Snapshots = ss
+		sn := snapshot.FromPod(s.Db, r)
+		ss := make([]*models.Snapshot, len(sn))
+		for i, n := range sn {
+			ss[i] = n.ToResponse(s.Db)
+		}
+		r.Snapshots = ss
 
 		r.IsAlive = true
 		body = append(body, r)
@@ -129,12 +129,12 @@ func (s *ServerCtx) GetPodsHandler(params operations.GetPodsParams) middleware.R
 	for i, p := range ps {
 		body[i] = p.ToResponse()
 
-        sn := snapshot.FromPod(s.Db, body[i])
-        ss := make([]*models.Snapshot, len(sn))
-        for i, n := range sn {
-            ss[i] = n.ToResponse(s.Db)
-        }
-        body[i].Snapshots = ss
+		sn := snapshot.FromPod(s.Db, body[i])
+		ss := make([]*models.Snapshot, len(sn))
+		for i, n := range sn {
+			ss[i] = n.ToResponse(s.Db)
+		}
+		body[i].Snapshots = ss
 	}
 	mapIsAliveFlag(body, s.Perfing)
 	return operations.NewGetPodsOK().WithPayload(body)
@@ -151,11 +151,11 @@ func (s *ServerCtx) DescribePodHandler(params operations.DescribePodParams) midd
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	body := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
-    sn := snapshot.FromPod(s.Db, body)
-    body.Snapshots = make([]*models.Snapshot, len(sn))
-    for i, n := range sn {
-        body.Snapshots[i] = n.ToResponse(s.Db)
-    }
+	sn := snapshot.FromPod(s.Db, body)
+	body.Snapshots = make([]*models.Snapshot, len(sn))
+	for i, n := range sn {
+		body.Snapshots[i] = n.ToResponse(s.Db)
+	}
 	_, body.IsAlive = s.Perfing[body.ID]
 	return operations.NewDescribePodOK().WithPayload(body)
 }
