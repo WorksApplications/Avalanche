@@ -88,7 +88,7 @@ class SnapshotsView extends Component<IStateProps & IDispatchProps> {
       this.props.snapshots.length > 0 ? "Please select environment" : "No Data";
     let showingData: IRowData[] = [];
 
-    if (this.props.snapshots.length > 0 && this.props.filteringEnvironment) {
+    if (this.props.snapshots.length > 0) {
       showingData = this.props.snapshots.map(x => ({
         uuid: x.uuid,
         name: x.name || "Unknown",
@@ -99,9 +99,11 @@ class SnapshotsView extends Component<IStateProps & IDispatchProps> {
         link: x.link || "#",
         isReady: false // TODO
       }));
-      showingData = showingData.filter(
-        x => x.environment === this.props.filteringEnvironment
-      );
+      if (this.props.filteringEnvironment) {
+          showingData = showingData.filter(
+            x => x.environment === this.props.filteringEnvironment
+          );
+      }
       if (this.props.filteringPod) {
         showingData = showingData.filter(
           x => x.pod === this.props.filteringPod
@@ -136,7 +138,7 @@ class SnapshotsView extends Component<IStateProps & IDispatchProps> {
             selectedValue={this.props.filteringPod}
             onValueChanged={this.onPodChanged.bind(this)}
             placeholder="Select pod name"
-            unselectOptionLabel="Unselect"
+            unselectOptionLabel="Deselect"
             disabled={!this.props.filteringEnvironment}
           />
         </div>
