@@ -74,7 +74,9 @@ func (s *ServerCtx) DescribeAppHandler(params operations.DescribeAppParams) midd
 			log.Print("[WARN] nil Environment is in body")
 			continue
 		}
-		mapIsAliveFlag(e.Pods, s.Perfing)
+		for _, p := range e.Pods {
+			podDescriber(s, p)
+		}
 	}
 	return operations.NewDescribeAppOK().WithPayload(body)
 }
@@ -90,74 +92,82 @@ func (s *ServerCtx) GetEnvironmentsHandler(params operations.GetEnvironmentsPara
 	}
 	body := make([]*models.Environment, 0, len(lays))
 	for _, l := range lays {
-		body = append(body, environ.FromLayout(s.Db, l))
-	}
-	for _, e := range body {
-		mapIsAliveFlag(e.Pods, s.Perfing)
+		k := environ.FromLayout(s.Db, l)
+		for _, p := range k.Pods {
+			podDescriber(s, p)
+		}
+		body = append(body, k)
 	}
 	return operations.NewGetEnvironmentsOK().WithPayload(body)
 }
 
 func (s *ServerCtx) DescribeEnvironmentHandler(params operations.DescribeEnvironmentParams) middleware.Responder {
-	app := app.Describe(s.Db, &params.Appid)
-	env := environ.Get(s.Db, &params.Environment)
-	if app == nil || env == nil {
-		log.Print("Describe Environment failed with 404", &params.Appid, &params.Environment, app, env)
+	lay := layHelper(s.Db, &params.Appid, &params.Environment)
+	if lay == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	lays := layout.OfBoth(s.Db, env, app)
-	if lays == nil {
-		return operations.NewDescribeAppDefault(404).WithPayload(nil)
+	body := environ.FromLayout(s.Db, lay)
+	for _, p := range body.Pods {
+		podDescriber(s, p)
 	}
-	body := environ.FromLayout(s.Db, lays)
-	mapIsAliveFlag(body.Pods, s.Perfing)
 	return operations.NewDescribeEnvironmentOK().WithPayload(body)
 }
 
 func (s *ServerCtx) GetPodsHandler(params operations.GetPodsParams) middleware.Responder {
-	app := app.Describe(s.Db, &params.Appid)
-	env := environ.Get(s.Db, &params.Environment)
-	if app == nil || env == nil {
+	lay := layHelper(s.Db, &params.Appid, &params.Environment)
+	if lay == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
-	lays := layout.OfBoth(s.Db, env, app)
-	if lays == nil {
-		return operations.NewDescribeAppDefault(404).WithPayload(nil)
-	}
-	ps := pod.FromLayout(s.Db, lays)
-	body := make([]*models.Pod, len(ps))
-	for i, p := range ps {
-		body[i] = p.ToResponse()
-
-		sn := snapshot.FromPod(s.Db, body[i])
-		ss := make([]*models.Snapshot, len(sn))
-		for i, n := range sn {
-			ss[i] = n.ToResponse(s.Db)
-		}
-		body[i].Snapshots = ss
-	}
-	mapIsAliveFlag(body, s.Perfing)
+	ps := pod.FromLayout(s.Db, lay)
+	body := podHelper(s, ps)
 	return operations.NewGetPodsOK().WithPayload(body)
 }
 
 func (s *ServerCtx) DescribePodHandler(params operations.DescribePodParams) middleware.Responder {
-	app := app.Describe(s.Db, &params.Appid)
-	env := environ.Get(s.Db, &params.Environment)
-	if app == nil || env == nil {
-		return operations.NewDescribeAppDefault(404).WithPayload(nil)
-	}
-	lay := layout.OfBoth(s.Db, env, app)
+	lay := layHelper(s.Db, &params.Appid, &params.Environment) // validate XXX
 	if lay == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
 	body := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
-	sn := snapshot.FromPod(s.Db, body)
-	body.Snapshots = make([]*models.Snapshot, len(sn))
-	for i, n := range sn {
-		body.Snapshots[i] = n.ToResponse(s.Db)
-	}
-	_, body.IsAlive = s.Perfing[body.ID]
+	podDescriber(s, body)
 	return operations.NewDescribePodOK().WithPayload(body)
+}
+
+func layHelper(db *sql.DB, a *string, e *string) *layout.Layout {
+	app := app.Describe(db, a)
+	env := environ.Get(db, e)
+	if app == nil || env == nil {
+		return nil //operations.NewDescribeAppDefault(404).WithPayload(nil)
+	}
+	lay := layout.OfBoth(db, env, app)
+	if lay == nil {
+		return nil //operations.NewDescribeAppDefault(404).WithPayload(nil)
+	}
+	return lay
+}
+
+func envDescriber(db *sql.DB, lay *layout.Layout) *models.Environment {
+	body := environ.FromLayout(db, lay)
+	return body
+}
+
+func podDescriber(s *ServerCtx, pod *models.Pod) {
+	sn := snapshot.FromPod(s.Db, pod)
+	pod.Snapshots = make([]*models.Snapshot, len(sn))
+	for i, n := range sn {
+		pod.Snapshots[i] = n.ToResponse(s.Db)
+	}
+	_, pod.IsAlive = s.Perfing[pod.ID]
+}
+
+func podHelper(s *ServerCtx, ps []*pod.PodInternal) []*models.Pod {
+	body := make([]*models.Pod, len(ps))
+	for i, p := range ps {
+		body[i] = p.ToResponse()
+		podDescriber(s, body[i])
+	}
+	//mapIsAliveFlag(body, s.Perfing)
+	return body
 }
 
 func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) middleware.Responder {
