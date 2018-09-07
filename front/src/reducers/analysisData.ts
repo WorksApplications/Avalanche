@@ -58,7 +58,7 @@ export function analysisData(
     return { ...state, applicationName: action.payload.appName };
   }
   if (isType(action, getAppsAsyncAction.done)) {
-    return { ...state, applications: action.payload.result.apps };
+    return { ...state, applications: action.payload.result.apps.sort() };
   }
   if (isType(action, selectEnv)) {
     return { ...state, selectedEnvironment: action.payload.envName };
@@ -79,7 +79,21 @@ export function analysisData(
   if (isType(action, getRunningPodsAsyncAction.done)) {
     return {
       ...state,
-      runningPods: action.payload.result.pods.map(p => podInfoConvert(p))
+      runningPods: action.payload.result.pods.map(p => podInfoConvert(p)).sort((a: IPodInfo, b: IPodInfo) => {
+        if (typeof(a) === "undefined") {
+          return 1
+        }
+        else if (typeof(b) === "undefined") {
+          return -1
+        }
+        else if (typeof(a.createdAt) === "undefined") {
+          return 1
+        }
+        else if (typeof(b.createdAt) === "undefined") {
+          return -1
+        }
+        return b.createdAt.getTime() - a.createdAt.getTime()
+    })
     };
   }
   if (isType(action, selectPod)) {
