@@ -79,7 +79,9 @@ class SnapshotsView extends Component<IStateProps & IDispatchProps> {
     const environmentNames: string[] = Object.keys(
       this.props.environments || {}
     );
-    const podNames: string[] = this.props.pods.map(x => x.name);
+    const podNames: string[] = this.props.pods.filter(
+        x => x.snapshots && x.snapshots.length != 0
+    ).map(x => x.name);
 
     const envFilterData = environmentNames.map(x => ({ label: x, value: x }));
     const podFilterData = podNames.map(x => ({ label: x, value: x }));
