@@ -32,19 +32,13 @@ func main() {
 
 	db := establishDBConn(*dbconf)
 	t := true
-
-    /* Get all known environments as the default subscriptions. */
 	es := environ.ListConfig(db, nil, &t)
-
-    /* First we set all environments so need a channel with a buffer with same size of capacity. */
-	x := server.HandlerClosure{make(chan *util.ScannerRequest, len(es)), db}
-
+	x := server.HandlerClosure{make(chan *util.ScannerRequest), db}
+	go util.Exchange(x.Ch)
 	for _, e := range es {
 		sreq := util.ScannerRequest{util.ADD, &e.Name, nil}
 		x.Ch <- &sreq
 	}
-
-	go util.Exchange(x.Ch)
 
 	//log.Print(apps)
 	http.HandleFunc("/subscription/", x.SubRunner)
