@@ -175,7 +175,9 @@ func Scan(env string) ([]detect.App, error) {
 		for _, pod := range pods {
 			requested += 1
 			con, err := http.Get(pod.Link + "perf-record/")
-			/* BUG this can cause SEGV */
+			if err != nil {
+				log.Print("HTTP error", err)
+			}
 			defer con.Body.Close()
 			if err == nil && !isNotFound(con) {
 				pod.Profiling = true
