@@ -51,7 +51,7 @@ class RunningPodsView extends Component<IStateProps & IDispatchProps> {
 
     return (
       <div className={styles.wrap}>
-        <div className={styles.title}>Running Pods</div>
+        <div className={styles.title}>Monitored Pods</div>
         <div>
           <PodFilter />
         </div>
