@@ -43,7 +43,7 @@ front-build:
             - front/public/
         expire_in: 1 day
     variables:
-        API_BASE_URL: "http://huedynamics.internal.worksap.com/api"
+        API_BASE_URL: "http://faster.internal.worksap.com/api"
 
 push-images:
     only:
