@@ -41,6 +41,7 @@ func main() {
 	extract := flag.String("extract", "http://localhost:8080", "\"extract\" service address")
 	tempd := flag.String("volatile", "/tmp/debug-collect/collect-volatile", "\"directory for temporal file\"")
 	ssstore := flag.String("persistent", "/tmp/debug-collect", "mount point of persistent volume for snapshot")
+	flamescope := flag.String("flamescope", "http://flamescope.internal.worksap.com", "flamescope server location")
 
 	flag.Parse()
 	args := flag.Args()
@@ -54,7 +55,7 @@ func main() {
 	defer server.Shutdown()
 
 	db := establishDBConn(*dbconf)
-	ctx := serverCtx.ServerCtx{db, *detect, *extract, *ssstore, *tempd, make(map[int64]struct{}, 0), !*slave}
+	ctx := serverCtx.ServerCtx{db, *detect, *extract, *ssstore, *tempd, make(map[int64]struct{}, 0), !*slave, *flamescope}
 
 	if *init {
 		ctx.InitHandle()
