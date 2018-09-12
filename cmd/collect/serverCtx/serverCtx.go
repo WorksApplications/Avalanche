@@ -26,6 +26,8 @@ type ServerCtx struct {
 	Temporald string
 	Perfing   map[int64]struct{}
 	IsMaster  bool
+
+	Flamescope string
 }
 
 func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Responder {
@@ -46,7 +48,7 @@ func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) midd
 		sn := snapshot.FromPod(s.Db, r)
 		ss := make([]*models.Snapshot, len(sn))
 		for i, n := range sn {
-			ss[i] = n.ToResponse(s.Db)
+			ss[i] = n.ToResponse(s.Db, s.Flamescope)
 		}
 		r.Snapshots = ss
 
@@ -155,7 +157,7 @@ func podDescriber(s *ServerCtx, pod *models.Pod) {
 	sn := snapshot.FromPod(s.Db, pod)
 	pod.Snapshots = make([]*models.Snapshot, len(sn))
 	for i, n := range sn {
-		pod.Snapshots[i] = n.ToResponse(s.Db)
+		pod.Snapshots[i] = n.ToResponse(s.Db, s.Flamescope)
 	}
 	_, pod.IsAlive = s.Perfing[pod.ID]
 }
@@ -209,7 +211,7 @@ func (s *ServerCtx) ListSnapshotsHandler(params operations.ListSnapshotsParams) 
 	sxs := snapshot.FromPod(s.Db, pod)
 	body := make([]*models.Snapshot, len(sxs))
 	for i, ss := range sxs {
-		body[i] = ss.ToResponse(s.Db)
+		body[i] = ss.ToResponse(s.Db, s.Flamescope)
 	}
 
 	return operations.NewListSnapshotsOK().WithPayload(body)

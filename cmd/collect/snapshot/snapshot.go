@@ -72,7 +72,7 @@ func FromPod(db *sql.DB, p *models.Pod) []*SnapshotInternal {
 	return list(db, &wh)
 }
 
-func (s *SnapshotInternal) ToResponse(db *sql.DB) *models.Snapshot {
+func (s *SnapshotInternal) ToResponse(db *sql.DB, flamescope string) *models.Snapshot {
 	if s == nil {
 		return nil
 	}
@@ -83,10 +83,11 @@ func (s *SnapshotInternal) ToResponse(db *sql.DB) *models.Snapshot {
 		e = *environ.FromId(db, s.envid).Name
 	}
 	r := models.Snapshot{
-		UUID:        &s.UUID,
-		CreatedAt:   strfmt.DateTime(s.created),
-		Pod:         p,
-		Environment: e,
+		UUID:           &s.UUID,
+		CreatedAt:      strfmt.DateTime(s.created),
+		Pod:            p,
+		Environment:    e,
+		FlamescopeLink: flamescope + s.link,
 	}
 	return &r
 }
