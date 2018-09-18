@@ -52,7 +52,6 @@ func Exchange(ch chan *ScannerRequest) {
 		case <-t:
 			log.Println("start batch scan")
 			for _, s := range m {
-				log.Printf("%+v", s)
 				isc <- s
 			}
 		case req := <-ch:
