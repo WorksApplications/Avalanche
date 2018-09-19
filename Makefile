@@ -3,11 +3,10 @@ PKG = $(shell find pkg -name *.go)
 
 .PHONY: default clean fmt make_stub dep swagger backend front
 
-default: bin
+default: all
 
-all: bin
+all: front backend
 
-bin: bin/detect bin/collect front/public/app.js bin/enroll
 backend: bin/detect bin/collect bin/enroll
 front: front/public/app.js
 
