@@ -16,7 +16,7 @@ interface IState {
   dialogTarget: string | null;
   isMultitenant: boolean | null;
   kubernetesApi: string | null;
-  version: "before_17_12" | "after_18_03" | null;
+  version: string | null;
 }
 
 interface IStateProps {
@@ -67,21 +67,10 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
         : x.isObservationEnabled
           ? "observed"
           : "configured") as any;
-      let version: "before_17_12" | "after_18_03" | undefined;
-      switch (x.version) {
-        case "before 17.12":
-          version = "before_17_12";
-          break;
-        case "after 18.03":
-          version = "after_18_03";
-          break;
-        default:
-          version = undefined;
-      }
       return {
         ...x,
         id: x.name,
-        version,
+        version: x.version || undefined,
         kind,
         onEdit() {
           setState({
@@ -89,7 +78,7 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
             dialogTarget: x.name,
             isMultitenant: x.isMultiTenant,
             kubernetesApi: x.kubernetesApi,
-            version
+            version: x.version || undefined
           });
         }
       };
@@ -125,7 +114,7 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
     const onKubernetesApiChange = (kubernetesApi: string) => {
       this.setState({ kubernetesApi });
     };
-    const onVersionChange = (version: "before_17_12" | "after_18_03") => {
+    const onVersionChange = (version: string) => {
       this.setState({ version });
     };
     const dialogContent = (
