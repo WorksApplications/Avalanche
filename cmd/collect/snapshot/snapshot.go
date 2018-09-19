@@ -87,7 +87,7 @@ func (s *SnapshotInternal) ToResponse(db *sql.DB, flamescope string) *models.Sna
 		CreatedAt:      strfmt.DateTime(s.created),
 		Pod:            p,
 		Environment:    e,
-		FlamescopeLink: flamescope + s.link,
+		FlamescopeLink: url.PathEscape(flamescope + s.link),
 	}
 	return &r
 }
