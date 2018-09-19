@@ -70,7 +70,7 @@ push-images:
     variables:
         DOCKERHOST: ""
         
-        COLLECT_VERSION: "r1d"
+        COLLECT_VERSION: "r1e"
         DETECT_VERSION: "r1a"
         ENROLL_VERSION: "r1a"
         EXTRACT_VERSION: "r1a"
