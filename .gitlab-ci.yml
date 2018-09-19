@@ -22,6 +22,7 @@ backend-build:
         paths:
             - bin/collect
             - bin/detect
+            - bin/enroll
         expire_in: 1 day
 
 front-build:
