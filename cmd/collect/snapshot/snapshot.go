@@ -31,7 +31,7 @@ func InitTable(db *sql.DB) {
 			"layid int, " +
 			"podid int, " +
 			"created DATETIME, " +
-			"pvloc CHAR(80), " +
+			"pvloc CHAR(128), " +
 			"PRIMARY KEY (id) " +
 			")")
 	log.Println("[DB/Snapshot] Initiate: ", res, err)
