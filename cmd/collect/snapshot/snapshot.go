@@ -127,15 +127,17 @@ func getSS(pvmountp *string, temporald *string, link *string, pname *string) (st
 	d := fmt.Sprintf("%s/%s/%x/", *pvmountp, *pname, uuid.NodeID()[3])
 	/* ... and pave the path */
 	os.MkdirAll(d, 0755)
-	fn := d + uuid.String()
+	filename := uuid.String()
 
-	er := os.Rename(f.Name(), fn)
+	er := os.Rename(f.Name(), d+filename)
 	if er != nil {
 		log.Print("[Snapshot/error] Saving to persistent volume failed:", d, "|||", f.Name(), ":::", er)
 		return "", "", fmt.Errorf("Saving to persistent volume failed:", d, "|||", f.Name(), ":::", er)
 	}
-	log.Print("[Snapshot] data moved to ", fn)
-	return uuid.String(), fn, nil
+	log.Print("[Snapshot] data moved to ", d+filename)
+	/* return relative path from persistent mount point */
+	ret := fmt.Sprintf("%s/%x/%s", *pname, uuid.NodeID()[3], uuid.String())
+	return uuid.String(), ret, nil
 }
 
 func New(extr *string, mount *string, tempd *string, db *sql.DB, a *models.App, p *models.Pod, l *layout.Layout) (*models.Snapshot, error) {
