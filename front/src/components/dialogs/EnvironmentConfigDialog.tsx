@@ -6,13 +6,13 @@ export interface IProperty {
   target: string;
   isMultitenant: boolean | null;
   kubernetesApi: string | null;
-  version: "before_17_12" | "after_18_03" | null;
+  version: string | null;
 
   onIsMultitenantChange(isMultitenant: boolean): void;
 
   onKubernetesApiChange(api: string): void;
 
-  onVersionChange(version: "before_17_12" | "after_18_03"): void;
+  onVersionChange(version: string): void;
 
   onDismiss(): void;
 
@@ -66,8 +66,8 @@ class EnvironmentConfigDialog extends Component<IProperty, {}> {
                 type="radio"
                 id="ver-b1712"
                 name="version"
-                value="before_17_12"
-                checked={this.props.version === "before_17_12"}
+                value="-17.12"
+                checked={this.props.version === "-17.12"}
                 onChange={this.onVersionChange.bind(this)}
               />
               <label for="ver-b1712">Before 17.12</label>
@@ -75,8 +75,8 @@ class EnvironmentConfigDialog extends Component<IProperty, {}> {
                 type="radio"
                 id="ver-a1803"
                 name="version"
-                value="after_18_03"
-                checked={this.props.version === "after_18_03"}
+                value="18.03-"
+                checked={this.props.version === "18.03-"}
                 onChange={this.onVersionChange.bind(this)}
               />
               <label for="ver-a1803">After 18.03</label>
@@ -110,7 +110,7 @@ class EnvironmentConfigDialog extends Component<IProperty, {}> {
 
   private onVersionChange(e: Event) {
     this.props.onVersionChange((e.target as HTMLInputElement)
-      .value as "before_17_12" | "after_18_03");
+      .value as string);
   }
 }
 
