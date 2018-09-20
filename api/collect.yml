@@ -144,7 +144,7 @@ definitions:
     example:
       uuid: "d7eec7c1-daf5-4198-9503-6957aea0bf90"
       createdAt: "2018-01-15T03:00:00.000Z"
-      pod: "collabo"
+      pod: "collabo-bd6dc859c-f7dfm"
       environment: "systema"
       flamescopeLink: "http://flamescope.internal.worksap.com/#/heatmap/collabo-bd6dc859c-f7dfm%2Fa0%2Fd7eec7c1-daf5-4198-9503-6957aea0bf90"
 
