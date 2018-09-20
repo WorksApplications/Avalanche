@@ -35,7 +35,7 @@ func (s *ServerCtx) pull() {
 
 	var p []detect.Subscription
 	err = json.Unmarshal(d, &p)
-	if err != nil || er2 != nil {
+	if err != nil {
 		log.Println("Unmarshal failed!", err, er2)
 		log.Printf("res: %+v", p)
 		return
@@ -50,13 +50,6 @@ func (s *ServerCtx) pull() {
 	}
 	s.Perfing = found
 	log.Print("[Discovery] Found:", len(s.Perfing))
-}
-
-func mapIsAliveFlag(ps []*models.Pod, alive map[int64]struct{}) {
-	for _, p := range ps {
-		_, prs := alive[p.ID]
-		p.IsAlive = prs
-	}
 }
 
 func recursiveInsert(db *sql.DB, p *detect.Subscription) []int64 {
@@ -95,4 +88,36 @@ func (s *ServerCtx) PollPodInfo() {
 			}
 		}
 	}()
+}
+
+func (s *ServerCtx) checkPodAvailability(enroll string) {
+    r, err := http.Get(enroll)
+	if err != nil {
+		log.Println("Poke enroll at ", enroll, " failed!")
+		return
+	}
+	d, err2 := ioutil.ReadAll(r.Body)
+	if err2 != nil {
+		log.Println("Reading enroll at ", enroll, " response failed")
+		return
+	}
+	defer r.Body.Close()
+
+    var response []struct {
+        Name  string
+        Image string
+    }
+
+	err = json.Unmarshal(d, &response)
+	if err != nil {
+		log.Println("Parse error with the response", err)
+		return
+	}
+}
+
+func mapIsAliveFlag(ps []*models.Pod, alive map[int64]struct{}) {
+	for _, p := range ps {
+		_, prs := alive[p.ID]
+		p.IsAlive = prs
+	}
 }

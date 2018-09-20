@@ -38,6 +38,7 @@ func main() {
 	port := flag.Int("port", 4981, "Port for this server")
 	slave := flag.Bool("slave", false, "Whether it works as slave (no DB update)")
 	detect := flag.String("detect", "http://localhost:8080", "\"detect\" service address")
+	enroll := flag.String("enroll", "http://localhost:8080", "\"enroll\" service address")
 	extract := flag.String("extract", "http://localhost:8080", "\"extract\" service address")
 	tempd := flag.String("volatile", "/tmp/debug-collect/collect-volatile", "\"directory for temporal file\"")
 	ssstore := flag.String("persistent", "/tmp/debug-collect", "mount point of persistent volume for snapshot")
@@ -55,7 +56,7 @@ func main() {
 	defer server.Shutdown()
 
 	db := establishDBConn(*dbconf)
-	ctx := serverCtx.ServerCtx{db, *detect, *extract, *ssstore, *tempd, make(map[int64]struct{}, 0), !*slave, *flamescope}
+	ctx := serverCtx.ServerCtx{db, *detect, *enroll, *extract, *ssstore, *tempd, make(map[int64]struct{}, 0), !*slave, *flamescope}
 
 	if *init {
 		ctx.InitHandle()
