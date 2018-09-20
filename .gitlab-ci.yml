@@ -22,6 +22,7 @@ backend-build:
         paths:
             - bin/collect
             - bin/detect
+            - bin/enroll
         expire_in: 1 day
 
 front-build:
@@ -56,10 +57,12 @@ push-images:
         - ls -lR
         - apk add make
         - touch bin/collect bin/detect
-        - docker build -f image/static/Dockerfile  --tag ${
         - docker build -f image/collect/Dockerfile --tag ${
-
         - docker build -f image/detect/Dockerfile  --tag ${
+        - docker build -f image/enroll/Dockerfile  --tag ${
+
+        - docker build -f image/static/Dockerfile  --tag ${
+        - docker push ${
         - docker push ${
         - docker push ${
         - docker push ${
@@ -67,8 +70,9 @@ push-images:
     variables:
         DOCKERHOST: ""
         
-        COLLECT_VERSION: "r1b"
-        EXTRACT_VERSION: "r1a"
+        COLLECT_VERSION: "r1e"
         DETECT_VERSION: "r1a"
+        ENROLL_VERSION: "r1a"
+        EXTRACT_VERSION: "r1a"
         FRONT_VERSION: "r1a"
 
