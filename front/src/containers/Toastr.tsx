@@ -41,16 +41,22 @@ class Toastr extends Component<IStateProps & IDispatchProps> {
   public render() {
     const dismissToastr = () =>
       this.props.hideToastr({ id: this.props.id || 0 });
-    return this.props.message != null ? (
+    return (
       <div
         className={[
           styles.wrap,
-          this.props.isShown ? styles.shown : styles.hidden,
-          this.props.kind === "success"
-            ? styles.success
-            : this.props.kind === "error"
-              ? styles.error
-              : undefined
+          this.props.message == null
+            ? styles.init
+            : this.props.isShown
+              ? styles.shown
+              : styles.hidden,
+          this.props.message == null
+            ? undefined
+            : this.props.kind === "success"
+              ? styles.success
+              : this.props.kind === "error"
+                ? styles.error
+                : undefined
         ].join(" ")}
       >
         {this.props.message}
@@ -58,8 +64,6 @@ class Toastr extends Component<IStateProps & IDispatchProps> {
           &#x2716;
         </span>
       </div>
-    ) : (
-      <div />
     );
   }
 }
