@@ -30,8 +30,10 @@ class PodList extends Component<IProperty, {}> {
             <span className={styles.saveTooltip}>Save snapshot</span>
             Save
           </div>
-          <div className={styles.aliveIndicator}>
-            <AliveIndicator isAlive={this.props.isAlive} />
+          <div className={styles.indicatorWrap}>
+            <div className={styles.aliveIndicator}>
+              <AliveIndicator isAlive={this.props.isAlive} />
+            </div>
           </div>
           <span className={styles.name}>{this.props.name}</span>
           <span className={styles.createdAt}>{this.props.createdAt}</span>
