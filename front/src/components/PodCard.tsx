@@ -1,4 +1,5 @@
 import { Component, h } from "preact";
+import AliveIndicator from "./AliveIndicator";
 // @ts-ignore
 import styles from "./PodCard.scss";
 
@@ -8,6 +9,7 @@ export interface IProperty {
   app: string;
   environment: string;
   snapshots: string[];
+  isAlive: boolean;
 
   onSaveButtonClick?(): void;
 }
@@ -25,14 +27,20 @@ class PodList extends Component<IProperty, {}> {
             ].join(" ")}
             onMouseDown={onSave}
           >
-            <span className={styles.saveTooltip}>Save snapshot</span>Save
+            <span className={styles.saveTooltip}>Save snapshot</span>
+            Save
+          </div>
+          <div className={styles.aliveIndicator}>
+            <AliveIndicator isAlive={this.props.isAlive} />
           </div>
           <span className={styles.name}>{this.props.name}</span>
           <span className={styles.createdAt}>{this.props.createdAt}</span>
         </div>
         <div className={styles.info}>
           <div className={styles.infoTop}>
-            {this.props.app}&nbsp;&nbsp;{this.props.environment}
+            {this.props.app}
+            &nbsp;&nbsp;
+            {this.props.environment}
           </div>
           {/* TODO show list of Snapshots */}
         </div>
