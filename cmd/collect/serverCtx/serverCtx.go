@@ -21,7 +21,7 @@ import (
 type ServerCtx struct {
 	Db        *sql.DB
 	Detect    string /* detect address */
-    Enroll    string
+	Enroll    string
 	Extract   string /* extract address */
 	Pvmount   string
 	Temporald string
@@ -55,7 +55,7 @@ func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) midd
 
 		body = append(body, r)
 	}
-    mapIsAliveFlag(body, s.Perfing)
+	mapIsAliveFlag(body, s.Perfing)
 	if len(body) == 0 {
 		operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}

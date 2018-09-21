@@ -76,6 +76,15 @@ func ListAll(db *sql.DB) []*PodInternal {
 	return pods
 }
 
+func Find(db *sql.DB, n *string) *PodInternal {
+	name := fmt.Sprintf("WHERE name = \"%s\"", *n)
+	pods := list(db, &name, false)
+	if len(pods) == 0 {
+		return nil
+	}
+	return pods[0]
+}
+
 func Get(db *sql.DB, n *string, layid int64) *PodInternal {
 	name := fmt.Sprintf("WHERE name = \"%s\" AND layid = \"%d\"", *n, layid)
 	pods := list(db, &name, false)

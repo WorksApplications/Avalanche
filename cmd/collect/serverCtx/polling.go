@@ -91,7 +91,7 @@ func (s *ServerCtx) PollPodInfo() {
 }
 
 func (s *ServerCtx) checkPodAvailability(enroll string) {
-    r, err := http.Get(enroll)
+	r, err := http.Get(enroll)
 	if err != nil {
 		log.Println("Poke enroll at ", enroll, " failed!")
 		return
@@ -103,16 +103,20 @@ func (s *ServerCtx) checkPodAvailability(enroll string) {
 	}
 	defer r.Body.Close()
 
-    var response []struct {
-        Name  string
-        Image string
-    }
+	var response []struct {
+		Name  string
+		Image string
+	}
 
 	err = json.Unmarshal(d, &response)
 	if err != nil {
 		log.Println("Parse error with the response", err)
 		return
 	}
+
+	/* Find ID from the DB */
+	pod.Find(s.Db, Name)
+	//Perfing   map[int64]struct{}
 }
 
 func mapIsAliveFlag(ps []*models.Pod, alive map[int64]struct{}) {
