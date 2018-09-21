@@ -25,10 +25,11 @@ type ServerCtx struct {
 	Extract   string /* extract address */
 	Pvmount   string
 	Temporald string
-	Perfing   map[int64]struct{}
+	TracedPod map[int64]struct{}
 	IsMaster  bool
 
 	Flamescope string
+	RunningPod map[string]struct{}
 }
 
 func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Responder {
@@ -37,7 +38,7 @@ func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Respon
 
 func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) middleware.Responder {
 	body := make([]*models.Pod, 0)
-	for pf, _ := range s.Perfing {
+	for pf, _ := range s.TracedPod {
 		p := pod.Describe(s.Db, pf)
 		if p == nil {
 			operations.NewDescribeAppDefault(503).WithPayload(nil)
@@ -55,7 +56,7 @@ func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) midd
 
 		body = append(body, r)
 	}
-	mapIsAliveFlag(body, s.Perfing)
+	mapIsAliveFlag(body, s.TracedPod)
 	if len(body) == 0 {
 		operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
@@ -160,7 +161,7 @@ func podDescriber(s *ServerCtx, pod *models.Pod) {
 	for i, n := range sn {
 		pod.Snapshots[i] = n.ToResponse(s.Db, s.Flamescope)
 	}
-	_, pod.IsAlive = s.Perfing[pod.ID]
+	_, pod.IsAlive = s.TracedPod[pod.ID]
 }
 
 func podHelper(s *ServerCtx, ps []*pod.PodInternal) []*models.Pod {

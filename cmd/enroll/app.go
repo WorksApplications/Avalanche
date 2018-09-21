@@ -17,8 +17,9 @@ type Ctx struct {
 }
 
 type Response struct {
-	Name  string
-	Image string
+	Name     string
+	Image    string
+    IsTraced bool
 }
 
 func getAllEnvironment(det string) []string {
@@ -53,13 +54,13 @@ func getAllEnvironment(det string) []string {
 func getRunningPodsFrom(kapi string, filter func(string) bool) []Response {
 	g, gete := http.Get(kapi + "/api/v1/pods")
 	if gete != nil {
-		log.Print("Failed to get kubernetes API response: ", gete)
+		log.Print("Failed to get kubernetes API response: ", gete, "@", kapi)
 		return nil
 	}
 	defer g.Body.Close()
 	b, reade := ioutil.ReadAll(g.Body)
 	if reade != nil {
-		log.Print("Failed to read response content from kubernetes API", reade)
+		log.Print("Failed to read response content from kubernetes API", reade, "@", kapi)
 		return nil
 	}
 	type K8sPod struct {
@@ -89,11 +90,14 @@ func getRunningPodsFrom(kapi string, filter func(string) bool) []Response {
 	ret := make([]Response, 0, len(ps.Items))
 	for _, p := range ps.Items {
 		var r Response
+        /* Iterate over containers */
 		for _, c := range p.Spec.Containers {
 			if c.Name == p.Metadata.Labels.Name {
 				r.Image = c.Image
+                r.IsTraced = false
 			} else if filter(c.Image) {
 				r.Image = c.Image
+                r.IsTraced = true
 			}
 		}
 		r.Name = p.Metadata.Name
