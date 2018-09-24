@@ -120,7 +120,14 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
           />
         </div>
         <div className={styles.cardList}>
-          <EnvironmentCardList data={configs} />
+          <EnvironmentCardList
+            data={configs}
+            noDataMessage={
+              this.state.filteringValue
+                ? "No config with current filter"
+                : "No config"
+            }
+          />
         </div>
 
         {/* dialog to modify */}
@@ -193,7 +200,11 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
 
   private onAddDialogDismiss() {
     this.setState({
-      showsAddDialog: false
+      showsAddDialog: false,
+      dialogTarget: null,
+      isMultitenant: null,
+      kubernetesApi: null,
+      version: null
     });
   }
 
