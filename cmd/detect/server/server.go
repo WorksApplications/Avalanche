@@ -25,7 +25,7 @@ func deserializeEnvironmentUpdate(req *http.Request) (*environ.Environ, error) {
 	defer req.Body.Close()
 	_, err := buf.ReadFrom(req.Body)
 	if err != nil {
-        log.Printf("Read request failed: ", err)
+		log.Printf("Read request failed: ", err)
 		/* reading response failed */
 		return nil, err
 	}
@@ -34,41 +34,79 @@ func deserializeEnvironmentUpdate(req *http.Request) (*environ.Environ, error) {
 	err = json.Unmarshal(buf.Bytes(), &env)
 
 	if err != nil {
-        log.Printf("Parse request failed: ", err)
+		log.Printf("Parse request failed: ", err)
 		return nil, err
 	}
-    
-    return &env, nil
+
+	return &env, nil
 
 }
 
 func update(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest) {
-    env, err := deserializeEnvironmentUpdate(req)
-
-    if err != nil {
+	env, err := deserializeEnvironmentUpdate(req)
+	if err != nil {
 		res.WriteHeader(http.StatusInternalServerError)
-        return
-    }
+		return
+	}
 
+	/*
+	 * Validate the name is identical
+	 */
+	ename := strings.TrimPrefix(req.URL.Path, "/config/environments/")
+	if ename != env.Name {
+		res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	prev := environ.ListConfig(db, &env.Name, nil)
+	if len(prev) > 1 {
+		/* XXX BUG */
+		res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	/* When the resource is not recorded yet, I don't feel good to update here... */
 	if len(prev) == 0 {
 		environ.Add(db, env)
 		res.WriteHeader(http.StatusOK)
 		sreq := util.ScannerRequest{util.SCAN, &env.Name, nil}
 		subscribe(sreq, res, req, ch)
-	} else if len(prev) > 1 {
-		/* XXX BUG */
-		res.WriteHeader(http.StatusInternalServerError)
-	} else if env.Observe != prev[0].Observe {
-		environ.Update(db, env)
+		return
+	}
+
+	/* Commit to DB */
+	environ.Update(db, env)
+
+	/* Handle state change */
+	if env.Observe != prev[0].Observe {
 		code := util.SCAN
 		if !env.Observe {
 			code = util.DEL
 		}
 		sreq := util.ScannerRequest{code, &env.Name, nil}
 		subscribe(sreq, res, req, ch)
+	}
+}
+
+func add(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest) {
+	env, err := deserializeEnvironmentUpdate(req)
+	if err != nil {
+		res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	prev := environ.ListConfig(db, &env.Name, nil)
+	if len(prev) == 0 {
+		/* Commit to DB */
+		environ.Add(db, env)
+		res.WriteHeader(http.StatusOK)
+		/* Send request to scan the target if it is marked to "observe" */
+		if env.Observe {
+			sreq := util.ScannerRequest{util.SCAN, &env.Name, nil}
+			subscribe(sreq, res, req, ch)
+		}
 	} else {
-		environ.Update(db, env)
+		/* XXX: A new environment should not exist a priori. */
+		res.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
@@ -152,7 +190,7 @@ func (s HandlerClosure) ConfigEnv(res http.ResponseWriter, req *http.Request) {
 		}
 		res.Write(reply)
 	case "POST":
-		update(s.Db, res, req, s.Ch)
+		add(s.Db, res, req, s.Ch)
 	}
 }
 
