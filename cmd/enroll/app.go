@@ -16,10 +16,15 @@ type Ctx struct {
 	filter func(string) bool
 }
 
+type MetaResponse struct {
+	List      []Response
+	NameSpace string
+}
+
 type Response struct {
 	Name     string
 	Image    string
-    IsTraced bool
+	IsTraced bool
 }
 
 func getAllEnvironment(det string) []string {
@@ -90,20 +95,16 @@ func getRunningPodsFrom(kapi string, filter func(string) bool) []Response {
 	ret := make([]Response, 0, len(ps.Items))
 	for _, p := range ps.Items {
 		var r Response
-        /* Iterate over containers */
+		/* Iterate over containers to find main one */
 		for _, c := range p.Spec.Containers {
 			if c.Name == p.Metadata.Labels.Name {
 				r.Image = c.Image
-                r.IsTraced = false
-			} else if filter(c.Image) {
-				r.Image = c.Image
-                r.IsTraced = true
+				if filter(c.Image) {
+					r.IsTraced = true
+				}
 			}
 		}
 		r.Name = p.Metadata.Name
-		if r.Image == "" {
-			continue
-		}
 		ret = append(ret, r)
 	}
 	return ret
@@ -113,13 +114,13 @@ func (s *Ctx) handleFunc(w http.ResponseWriter, r *http.Request) {
 	log.Print(r.Proto, r.Method, ": ", r.URL, " | Header: ", r.Header)
 	es := getAllEnvironment(s.detect)
 
-	ps := make([]Response, 0)
+	ps := make([]MetaResponse, 0)
 	for _, e := range es {
 		if e == "" {
 			continue
 		}
 		px := getRunningPodsFrom(e, s.filter)
-		ps = append(ps, px...)
+		ps = append(ps, MetaResponse{px, e})
 	}
 
 	b, err := json.Marshal(ps)
