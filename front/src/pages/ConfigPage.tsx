@@ -120,7 +120,14 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
           />
         </div>
         <div className={styles.cardList}>
-          <EnvironmentCardList data={configs} />
+          <EnvironmentCardList
+            data={configs}
+            noDataMessage={
+              this.state.filteringValue
+                ? "No config with current filter"
+                : "No config"
+            }
+          />
         </div>
 
         {/* dialog to modify */}
