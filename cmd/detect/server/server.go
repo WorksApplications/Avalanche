@@ -30,10 +30,9 @@ func deserializeEnvironmentUpdate(req *http.Request) (*environ.Environ, error) {
 		return nil, err
 	}
 
-	env := environ.Environ{
-		Observe: true,
-		Version: "18.03-",
-	}
+    env := environ.Environ {
+        Observe: true,
+    }
 	err = json.Unmarshal(buf.Bytes(), &env)
 
 	if err != nil {
