@@ -42,8 +42,8 @@ func main() {
 	}
 
 	//log.Print(apps)
-	http.HandleFunc("/subscription/", x.SubRunner)
-	http.HandleFunc("/subscription", x.Runner)
+	http.HandleFunc("/subscriptions/", x.SubRunner)
+	http.HandleFunc("/subscriptions", x.Runner)
 	//http.HandleFunc("/config", x.Config)
 	http.HandleFunc("/config/environments", x.ConfigEnv)
 	http.HandleFunc("/config/environments/", x.ConfigEnvSub)

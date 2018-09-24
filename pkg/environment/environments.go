@@ -47,7 +47,7 @@ func ListConfig(db *sql.DB, name *string, obs *bool) []*Environ {
 	namew := ""
 	obsw := ""
 	if name != nil {
-		namew = "namew = " + *name
+		namew = "name = " + *name
 	}
 	if obs != nil {
 		obsw = fmt.Sprintf("observe = %t", *obs)

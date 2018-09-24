@@ -23,17 +23,19 @@ type HandlerClosure struct {
 func update(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest) {
 	buf := new(bytes.Buffer)
 	defer req.Body.Close()
-	_, e := buf.ReadFrom(req.Body)
-	if e != nil {
+	_, err := buf.ReadFrom(req.Body)
+	if err != nil {
+		log.Printf("Read request failed: ", err)
 		/* reading response failed */
 		res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	var env environ.Environ
-	em := json.Unmarshal(buf.Bytes(), &env)
+	err = json.Unmarshal(buf.Bytes(), &env)
 
-	if em != nil {
+	if err != nil {
+		log.Printf("Parse request failed: ", err)
 		res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -110,7 +112,7 @@ func (s HandlerClosure) SubRunner(res http.ResponseWriter, req *http.Request) {
 	log.Printf("S: %s %s", req.Method, req.URL.Path)
 	switch req.Method {
 	case "GET":
-		env := strings.TrimPrefix(req.URL.Path, "/subscription/")
+		env := strings.TrimPrefix(req.URL.Path, "/subscriptions/")
 		if env == "" {
 			get(res, req, s.Ch, nil)
 		} else {
@@ -139,6 +141,8 @@ func (s HandlerClosure) ConfigEnv(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 		res.Write(reply)
+	case "POST":
+		update(s.Db, res, req, s.Ch)
 	}
 }
 
@@ -154,7 +158,7 @@ func (s HandlerClosure) ConfigEnvSub(res http.ResponseWriter, req *http.Request)
 			return
 		}
 		res.Write(reply)
-	case "POST":
+	case "PUT":
 		update(s.Db, res, req, s.Ch)
 	case "DELETE":
 	}
