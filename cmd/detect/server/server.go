@@ -20,29 +20,39 @@ type HandlerClosure struct {
 	Db *sql.DB
 }
 
-func update(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest) {
+func deserializeEnvironmentUpdate(req *http.Request) (*environ.Environ, error) {
 	buf := new(bytes.Buffer)
 	defer req.Body.Close()
 	_, err := buf.ReadFrom(req.Body)
 	if err != nil {
-		log.Printf("Read request failed: ", err)
+        log.Printf("Read request failed: ", err)
 		/* reading response failed */
-		res.WriteHeader(http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
 	var env environ.Environ
 	err = json.Unmarshal(buf.Bytes(), &env)
 
 	if err != nil {
-		log.Printf("Parse request failed: ", err)
-		res.WriteHeader(http.StatusInternalServerError)
-		return
+        log.Printf("Parse request failed: ", err)
+		return nil, err
 	}
+    
+    return &env, nil
+
+}
+
+func update(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest) {
+    env, err := deserializeEnvironmentUpdate(req)
+
+    if err != nil {
+		res.WriteHeader(http.StatusInternalServerError)
+        return
+    }
 
 	prev := environ.ListConfig(db, &env.Name, nil)
 	if len(prev) == 0 {
-		environ.Add(db, &env)
+		environ.Add(db, env)
 		res.WriteHeader(http.StatusOK)
 		sreq := util.ScannerRequest{util.SCAN, &env.Name, nil}
 		subscribe(sreq, res, req, ch)
@@ -50,7 +60,7 @@ func update(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *u
 		/* XXX BUG */
 		res.WriteHeader(http.StatusInternalServerError)
 	} else if env.Observe != prev[0].Observe {
-		environ.Update(db, &env)
+		environ.Update(db, env)
 		code := util.SCAN
 		if !env.Observe {
 			code = util.DEL
@@ -58,7 +68,7 @@ func update(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *u
 		sreq := util.ScannerRequest{code, &env.Name, nil}
 		subscribe(sreq, res, req, ch)
 	} else {
-		environ.Update(db, &env)
+		environ.Update(db, env)
 	}
 }
 

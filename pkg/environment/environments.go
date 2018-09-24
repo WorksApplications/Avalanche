@@ -14,13 +14,13 @@ import (
    |id|name|app_id                     |
    +--+----+---------------------------+
 */
-
 type Environ struct {
 	Id          int64   `json:"id"`
 	Name        string  `json:"name"`
 	Tenant      string  `json:"tenant"`
 	Landscape   string  `json:"Landscape"`
 	Addr        *string `json:"serviceUrl,omitempty"`
+	MischoAddr  *string `json:"mischoUrl,omitempty"`
 	Kubeapi     *string `json:"kubernetesApi"`
 	Multitenant *bool   `json:"isMultitenant,omitempty"`
 	/* TODO: validate version range */
