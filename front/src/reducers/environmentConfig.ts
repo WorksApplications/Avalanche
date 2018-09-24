@@ -18,12 +18,10 @@ export function environmentConfig(
         name: c.name,
         version: c.version || null,
         isObservationEnabled:
-          typeof c["is_enabled"] === "undefined" ? null : c["is_enabled"],
+          typeof c.isEnabled === "undefined" ? null : c.isEnabled,
         isMultiTenant:
-          typeof c["is_multitenant"] === "undefined"
-            ? null
-            : c["is_multitenant"],
-        kubernetesApi: c["kube-api"] || null
+          typeof c.isMultitenant === "undefined" ? null : c.isMultitenant,
+        kubernetesApi: c.kubernetesApi || null
       })
     );
     return { ...state, environmentConfigs };

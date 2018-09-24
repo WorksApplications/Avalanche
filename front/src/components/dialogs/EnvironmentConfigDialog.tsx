@@ -55,7 +55,7 @@ class EnvironmentConfigDialog extends Component<IProperty, {}> {
           <div className={dialogStyles.group}>
             <label className={dialogStyles.label}>Kubernetes API</label>
             <div className={dialogStyles.input}>
-              <input type="text" name="api" onKeyUp={this.onKubernetesApiChange.bind(this)} value={this.props.kubernetesApi || ""}/>
+              <input type="text" name="api" onChange={this.onKubernetesApiChange.bind(this)} value={this.props.kubernetesApi || ""}/>
               <div className={dialogStyles.description}>ex: http://k8s-mischo.internal.worksap.com:52063/</div>
             </div>
           </div>

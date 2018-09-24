@@ -14,6 +14,7 @@ const convert = require("koa-connect");
 module.exports = env => {
   const isProduction = env && env.production;
   const apiBaseUrl = env.API_BASE_URL || process.env.API_BASE_URL;
+  const appName = "Dynamic Analysis";
   if (!apiBaseUrl) {
     console.log(env);
     throw new Error("API_BASE_URL env var is required.");
@@ -72,7 +73,11 @@ module.exports = env => {
       ]
     },
     plugins: [
-      new HtmlPlugin(),
+      new HtmlPlugin({
+        title: appName,
+        minify: isProduction,
+        template: 'src/index.html'
+      }),
       new MiniCssExtractPlugin({
         filename: "[name].[hash:8].css",
         chunkFilename: "[id].[hash:8].css"
@@ -80,7 +85,7 @@ module.exports = env => {
       new DefinePlugin({
         COLLECT_API_BASE: JSON.stringify(apiBaseUrl),
         IS_DEBUG: !isProduction,
-        APP_NAME: `"Dynamic Analysis"`
+        APP_NAME: `"${appName}"`
       })
     ],
     optimization: {

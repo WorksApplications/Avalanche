@@ -37,9 +37,7 @@ class App extends Component<IDispatchProps> {
         <div className={styles.content}>
           <Workspace />
         </div>
-        <div className={styles.toastr}>
-          <Toastr />
-        </div>
+        <Toastr />
       </div>
     );
   }
