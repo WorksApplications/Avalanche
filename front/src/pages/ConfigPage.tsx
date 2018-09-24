@@ -216,7 +216,7 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
       this.state.kubernetesApi!,
       version
     );
-    this.onAddDialogDismiss();
+    this.onModifyDialogDismiss();
   }
 
   private onAddDialogAccept() {
