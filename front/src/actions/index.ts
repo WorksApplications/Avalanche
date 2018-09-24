@@ -239,3 +239,48 @@ export const postEnvironmentConfig = (
       toastr(`Failed to configure "${params.environment}".`, "error")(dispatch);
     });
 };
+
+export const addEnvironmentConfigAsyncAction = actionCreator.async<
+  {
+    environment: string;
+  },
+  { config: collect.EnvironmentConfig },
+  { message: string }
+>("Add_ENVIRONMENT_CONFIG");
+
+export const addEnvironmentConfig = (
+  environmentName: string,
+  isMultitenant: boolean,
+  kubernetesApi: string,
+  version: string
+) => (dispatch: Dispatch) => {
+  const newConfig: collect.EnvironmentConfig = {
+    name: environmentName,
+    isMultitenant,
+    kubernetesApi,
+    version
+  };
+  const params = { environment: environmentName, config: newConfig };
+  dispatch(addEnvironmentConfigAsyncAction.started(params));
+  collectClient
+    .addEnvironmentConfig(newConfig, {
+      headers: {
+        "Content-Type": "application/json"
+      } // This is due to "typescript-fetch")
+    })
+    .then((config: collect.EnvironmentConfig) => {
+      dispatch(
+        addEnvironmentConfigAsyncAction.done({ params, result: { config } })
+      );
+      toastr(`Config for "${params.environment}" is added.`, "success")(
+        dispatch
+      );
+    })
+    .catch((reason: Error) => {
+      addEnvironmentConfigAsyncAction.failed({
+        params,
+        error: { message: reason.message }
+      });
+      toastr(`Failed to add "${params.environment}".`, "error")(dispatch);
+    });
+};

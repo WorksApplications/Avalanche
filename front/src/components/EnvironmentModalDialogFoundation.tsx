@@ -1,16 +1,12 @@
-import { Component, h } from "preact";
+import { Component, ComponentChildren, h } from "preact";
 // @ts-ignore
 import styles from "./EnvironmentModalDialogFoundation.scss";
 
-interface IProperty {
-  dialogToShow?: JSX.Element;
-}
-
-class EnvironmentModalDialogFoundation extends Component<IProperty, {}> {
-  public render() {
+class EnvironmentModalDialogFoundation extends Component {
+  public render({ children }: { children: ComponentChildren }) {
     return (
       <div className={styles.wrap}>
-        <div className={styles.inner}>{this.props.dialogToShow}</div>
+        <div className={styles.inner}>{children}</div>
       </div>
     );
   }
