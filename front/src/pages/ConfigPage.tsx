@@ -193,7 +193,11 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
 
   private onAddDialogDismiss() {
     this.setState({
-      showsAddDialog: false
+      showsAddDialog: false,
+      dialogTarget: null,
+      isMultitenant: null,
+      kubernetesApi: null,
+      version: null
     });
   }
 
