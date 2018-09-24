@@ -5,6 +5,7 @@ import styles from "./PodCardList.scss";
 
 export interface IProperty {
   data: Array<IPodCardProperty & { id: string }>;
+  noDataMessage?: string;
   kind: string;
 }
 
@@ -15,11 +16,15 @@ class PodCardList extends Component<IProperty, {}> {
         <div className={styles.kindWrap}>
           <span className={styles.kind}>{this.props.kind}</span>
         </div>
-        <div>
-          {this.props.data.map(x => {
-            return <PodCard key={x.id} {...x} />;
-          })}
-        </div>
+        {this.props.data && this.props.data.length > 0 ? (
+          <div>
+            {this.props.data.map(x => {
+              return <PodCard key={x.id} {...x} />;
+            })}
+          </div>
+        ) : (
+          <div className={styles.empty}>{this.props.noDataMessage}</div>
+        )}
       </div>
     );
   }

@@ -61,11 +61,22 @@ class RunningPodsView extends Component<IStateProps & IDispatchProps> {
             <PodCardList
               data={podsOfApp}
               kind={"App: " + this.props.applicationName}
+              noDataMessage={
+                podInfo.length === 0
+                  ? "No pods available"
+                  : podsOfApp.length === 0
+                    ? "No pods available for this app"
+                    : ""
+              }
             />
           </div>
         )}
         <div className={styles.cardList}>
-          <PodCardList data={podInfo} kind="All" />
+          <PodCardList
+            data={podInfo}
+            kind="All"
+            noDataMessage="No pods available."
+          />
         </div>
       </div>
     );
