@@ -232,10 +232,12 @@ export const postEnvironmentConfig = (
       );
     })
     .catch((reason: Error) => {
-      postEnvironmentConfigAsyncAction.failed({
-        params,
-        error: { message: reason.message }
-      });
+      dispatch(
+        postEnvironmentConfigAsyncAction.failed({
+          params,
+          error: { message: reason.message }
+        })
+      );
       toastr(`Failed to configure "${params.environment}".`, "error")(dispatch);
     });
 };
@@ -277,10 +279,12 @@ export const addEnvironmentConfig = (
       );
     })
     .catch((reason: Error) => {
-      addEnvironmentConfigAsyncAction.failed({
-        params,
-        error: { message: reason.message }
-      });
+      dispatch(
+        addEnvironmentConfigAsyncAction.failed({
+          params,
+          error: { message: reason.message }
+        })
+      );
       toastr(`Failed to add "${params.environment}".`, "error")(dispatch);
     });
 };
