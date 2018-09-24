@@ -56,7 +56,18 @@ func main() {
 	defer server.Shutdown()
 
 	db := establishDBConn(*dbconf)
-	ctx := serverCtx.ServerCtx{db, *detect, *enroll, *extract, *ssstore, *tempd, make(map[int64]struct{}, 0), !*slave, *flamescope}
+	ctx := serverCtx.ServerCtx{
+		Db:         db,
+		Detect:     *detect,
+		Enroll:     *enroll,
+		Extract:    *extract,
+		Pvmount:    *ssstore,
+		Temporald:  *tempd,
+		TracedPod:  make(map[int64]struct{}, 0),
+		IsMaster:   !*slave,
+		Flamescope: *flamescope,
+		RunningPod: make(map[string]struct{}, 0),
+	}
 
 	if *init {
 		ctx.InitHandle()

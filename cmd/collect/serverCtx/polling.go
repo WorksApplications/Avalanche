@@ -21,7 +21,7 @@ import (
 
 func (s *ServerCtx) pull() {
 	log.Printf("start to pull pods' information from %s", s.Detect)
-	r, err := http.Get(s.Detect + "/subscription/")
+	r, err := http.Get(s.Detect + "/subscriptions/")
 	if err != nil {
 		log.Println("Poll failed!")
 		return
@@ -48,8 +48,8 @@ func (s *ServerCtx) pull() {
 			found[f] = struct{}{}
 		}
 	}
-	s.Perfing = found
-	log.Print("[Discovery] Found:", len(s.Perfing))
+	s.TracedPod = found
+	log.Print("[Discovery] Found:", len(s.TracedPod))
 }
 
 func recursiveInsert(db *sql.DB, p *detect.Subscription) []int64 {
@@ -114,9 +114,9 @@ func (s *ServerCtx) checkPodAvailability(enroll string) {
 		return
 	}
 
-	/* Find ID from the DB */
-	pod.Find(s.Db, Name)
-	//Perfing   map[int64]struct{}
+	for _, r := range response {
+		s.RunningPod[r.Name] = struct{}{}
+	}
 }
 
 func mapIsAliveFlag(ps []*models.Pod, alive map[int64]struct{}) {
