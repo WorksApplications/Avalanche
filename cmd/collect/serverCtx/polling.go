@@ -20,15 +20,15 @@ import (
 )
 
 func (s *ServerCtx) pull() {
-	log.Printf("start to pull pods' information from %s", s.Detect)
-	r, err := http.Get(s.Detect + "/subscriptions/")
+	log.Printf("start to pull pods' information from %s", s.Detect+"/subscriptions")
+	r, err := http.Get(s.Detect + "/subscriptions")
 	if err != nil {
-		log.Println("Poll failed!")
+		log.Println("Poll failed with ", err)
 		return
 	}
 	d, er2 := ioutil.ReadAll(r.Body)
 	if er2 != nil {
-		log.Println("Poll f-ed up!")
+		log.Println("Poll f-ed up!", er2)
 		return
 	}
 	defer r.Body.Close()
@@ -82,33 +82,42 @@ func (s *ServerCtx) PollPodInfo() {
 			case <-once:
 				close(once)
 				once = nil
+				s.checkPodAvailability()
 				s.pull()
 			case <-t.C:
+				s.checkPodAvailability()
 				s.pull()
 			}
 		}
 	}()
+
 }
 
-func (s *ServerCtx) checkPodAvailability(enroll string) {
-	r, err := http.Get(enroll)
+func (s *ServerCtx) checkPodAvailability() {
+	r, err := http.Get(s.Enroll)
 	if err != nil {
-		log.Println("Poke enroll at ", enroll, " failed!")
+		log.Println("Poke enroll at ", s.Enroll, " failed!")
 		return
 	}
 	d, err2 := ioutil.ReadAll(r.Body)
 	if err2 != nil {
-		log.Println("Reading enroll at ", enroll, " response failed")
+		log.Println("Reading enroll at ", s.Enroll, " response failed")
 		return
 	}
 	defer r.Body.Close()
 
-	var response []struct {
-		Name  string
-		Image string
-
+	type Response struct {
+		Name     string
+		Image    string
 		IsTraced bool
 	}
+
+	type MetaResponse struct {
+		List   []Response
+		Source string
+	}
+
+	var response []MetaResponse
 
 	err = json.Unmarshal(d, &response)
 	if err != nil {
@@ -116,16 +125,19 @@ func (s *ServerCtx) checkPodAvailability(enroll string) {
 		return
 	}
 
-	for _, r := range response {
-		if r.IsTraced {
-			s.RunningPod[r.Name] = struct{}{}
+	for _, v := range response {
+		for _, w := range v.List {
+			if w.IsTraced {
+				s.RunningPod[w.Name] = struct{}{}
+			}
 		}
 	}
+	log.Printf("%+v", s.RunningPod)
 }
 
-func mapIsAliveFlag(ps []*models.Pod, alive map[int64]struct{}) {
+func mapIsAliveFlag(ps []*models.Pod, alive map[string]struct{}) {
 	for _, p := range ps {
-		_, prs := alive[p.ID]
+		_, prs := alive[*p.Name]
 		p.IsAlive = prs
 	}
 }

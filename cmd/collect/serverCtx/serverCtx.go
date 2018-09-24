@@ -56,7 +56,7 @@ func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) midd
 
 		body = append(body, r)
 	}
-	mapIsAliveFlag(body, s.TracedPod)
+	mapIsAliveFlag(body, s.RunningPod)
 	if len(body) == 0 {
 		operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
@@ -161,7 +161,7 @@ func podDescriber(s *ServerCtx, pod *models.Pod) {
 	for i, n := range sn {
 		pod.Snapshots[i] = n.ToResponse(s.Db, s.Flamescope)
 	}
-	_, pod.IsAlive = s.TracedPod[pod.ID]
+	_, pod.IsAlive = s.RunningPod[*pod.Name]
 }
 
 func podHelper(s *ServerCtx, ps []*pod.PodInternal) []*models.Pod {

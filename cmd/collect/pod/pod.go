@@ -113,25 +113,25 @@ func Describe(db *sql.DB, id int64) *PodInternal {
 }
 
 func add(db *sql.DB, p *string, e int64, a int64, l int64, addr *string, lud *time.Time) {
-	log.Printf("[DB/Pod] Storing %s, %d, %d, %d, %s", *p, e, a, l, *addr)
+	//log.Printf("[DB/Pod] Storing %s, %d, %d, %d, %s", *p, e, a, l, *addr)
 	/* created means the time when it is seen firstly */
-	res, err := db.Exec("INSERT INTO pod(name, envid, appid, layid, address, created, lastupdate) values (?, ?, ?, ?, ?, ?, ?)",
+	_, err := db.Exec("INSERT INTO pod(name, envid, appid, layid, address, created, lastupdate) values (?, ?, ?, ?, ?, ?, ?)",
 		*p, e, a, l, *addr, lud, lud)
 	if err != nil {
 		log.Print("[DB/Pod] Error EADD ", err)
 		return
 	}
-	log.Print("[DB/Pod] OKADD", res)
+	//log.Print("[DB/Pod] OKADD", res)
 }
 
 func update(db *sql.DB, p *string, e int64, a int64, l int64, addr *string, lud *time.Time) {
-	log.Printf("[DB/Pod] Storing %s, %d, %d, %d, %s", *p, e, a, l, *addr)
-	res, err := db.Exec("UPDATE pod SET address=?, lastupdate=? WHERE name=? AND layid=?", *addr, *lud, *p, l)
+	//log.Printf("[DB/Pod] Storing %s, %d, %d, %d, %s", *p, e, a, l, *addr)
+	_, err := db.Exec("UPDATE pod SET address=?, lastupdate=? WHERE name=? AND layid=?", *addr, *lud, *p, l)
 	if err != nil {
 		log.Print("[DB/Pod] Error UPD ", err)
 		return
 	}
-	log.Print("[DB/Pod] OKUPD ", res)
+	//log.Print("[DB/Pod] OKUPD ", res)
 }
 
 func Assign(db *sql.DB, p *string, e int64, a int64, l int64, addr *string, lud *time.Time) *PodInternal {

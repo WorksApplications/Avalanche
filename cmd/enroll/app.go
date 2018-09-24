@@ -17,8 +17,8 @@ type Ctx struct {
 }
 
 type MetaResponse struct {
-	List      []Response
-	NameSpace string
+	List   []Response
+	Source string
 }
 
 type Response struct {
