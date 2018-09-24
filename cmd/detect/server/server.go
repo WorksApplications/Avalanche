@@ -89,11 +89,11 @@ func update(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *u
 	}
 }
 
-func add(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest) {
+func add(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest) (*string, error) {
 	env, err := deserializeEnvironmentUpdate(req)
 	if err != nil {
 		res.WriteHeader(http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
 	prev := environ.ListConfig(db, &env.Name, nil)
@@ -109,7 +109,10 @@ func add(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *util
 	} else {
 		/* XXX: A new environment should not exist a priori. */
 		res.WriteHeader(http.StatusInternalServerError)
+		return nil, err
 	}
+
+    return &env.Name, nil
 }
 
 func subscribe(sreq util.ScannerRequest, res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest) error {
@@ -181,24 +184,33 @@ func (s HandlerClosure) Runner(res http.ResponseWriter, req *http.Request) {
 
 func (s HandlerClosure) ConfigEnv(res http.ResponseWriter, req *http.Request) {
 	log.Printf("C: %s %s", req.Method, req.URL.Path)
+    var name *string
+    var err error
 	switch req.Method {
+	case "POST":
+        name, err = add(s.Db, res, req, s.Ch)
+        if err != nil {
+            return
+        }
+        fallthrough
 	case "GET":
 		/* XXX Feature join unregistered environments that appear in mischo log */
-		envs := environ.ListConfig(s.Db, nil, nil)
+		envs := environ.ListConfig(s.Db, name, nil)
 		reply, e := json.Marshal(envs)
 		if e != nil {
 			res.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		res.Write(reply)
-	case "POST":
-		add(s.Db, res, req, s.Ch)
 	}
 }
 
 func (s HandlerClosure) ConfigEnvSub(res http.ResponseWriter, req *http.Request) {
 	log.Printf("Q: %s %s", req.Method, req.URL.Path)
 	switch req.Method {
+	case "PUT":
+		update(s.Db, res, req, s.Ch)
+        fallthrough
 	case "GET":
 		env := strings.TrimPrefix(req.URL.Path, "/config/environments/")
 		envs := environ.ListConfig(s.Db, &env, nil)
@@ -208,8 +220,6 @@ func (s HandlerClosure) ConfigEnvSub(res http.ResponseWriter, req *http.Request)
 			return
 		}
 		res.Write(reply)
-	case "PUT":
-		update(s.Db, res, req, s.Ch)
 	case "DELETE":
 	}
 }
