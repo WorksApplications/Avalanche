@@ -36,6 +36,7 @@ func dispatch(ich <-chan *detect.Subscription, och chan<- *detect.Subscription) 
 		s.Apps = apps
 		och <- s
 	}
+	log.Printf("[Dispatched worker] Exit")
 }
 
 func Exchange(ch chan *ScannerRequest) {
@@ -76,6 +77,7 @@ func Exchange(ch chan *ScannerRequest) {
 					// m[*env] = sub
 				}
 				isc <- sub
+				log.Printf("[Scan manager] sent:", *env)
 			case DESC:
 				if env == nil {
 					for _, sub := range m {
