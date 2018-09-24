@@ -30,9 +30,9 @@ func deserializeEnvironmentUpdate(req *http.Request) (*environ.Environ, error) {
 		return nil, err
 	}
 
-    env := environ.Environ {
-        Observe: true,
-    }
+	env := environ.Environ{
+		Observe: true,
+	}
 	err = json.Unmarshal(buf.Bytes(), &env)
 
 	if err != nil {
@@ -112,7 +112,7 @@ func add(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *util
 		return nil, err
 	}
 
-    return &env.Name, nil
+	return &env.Name, nil
 }
 
 func subscribe(sreq util.ScannerRequest, res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest) error {
@@ -184,15 +184,15 @@ func (s HandlerClosure) Runner(res http.ResponseWriter, req *http.Request) {
 
 func (s HandlerClosure) ConfigEnv(res http.ResponseWriter, req *http.Request) {
 	log.Printf("C: %s %s", req.Method, req.URL.Path)
-    var name *string
-    var err error
+	var name *string
+	var err error
 	switch req.Method {
 	case "POST":
-        name, err = add(s.Db, res, req, s.Ch)
-        if err != nil {
-            return
-        }
-        fallthrough
+		name, err = add(s.Db, res, req, s.Ch)
+		if err != nil {
+			return
+		}
+		fallthrough
 	case "GET":
 		/* XXX Feature join unregistered environments that appear in mischo log */
 		envs := environ.ListConfig(s.Db, name, nil)
@@ -210,7 +210,7 @@ func (s HandlerClosure) ConfigEnvSub(res http.ResponseWriter, req *http.Request)
 	switch req.Method {
 	case "PUT":
 		update(s.Db, res, req, s.Ch)
-        fallthrough
+		fallthrough
 	case "GET":
 		env := strings.TrimPrefix(req.URL.Path, "/config/environments/")
 		envs := environ.ListConfig(s.Db, &env, nil)

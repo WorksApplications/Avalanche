@@ -106,6 +106,8 @@ func (s *ServerCtx) checkPodAvailability(enroll string) {
 	var response []struct {
 		Name  string
 		Image string
+
+		IsTraced bool
 	}
 
 	err = json.Unmarshal(d, &response)
@@ -115,7 +117,9 @@ func (s *ServerCtx) checkPodAvailability(enroll string) {
 	}
 
 	for _, r := range response {
-		s.RunningPod[r.Name] = struct{}{}
+		if r.IsTraced {
+			s.RunningPod[r.Name] = struct{}{}
+		}
 	}
 }
 
