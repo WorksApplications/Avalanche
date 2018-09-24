@@ -1,10 +1,16 @@
 import { Component, FunctionalComponent, h } from "preact";
 import { connect } from "preact-redux";
 import { bindActionCreators, Dispatch } from "redux";
-import { getEnvironmentConfigs, postEnvironmentConfig } from "../actions";
-import EnvironmentConfigDialog from "../components/dialogs/EnvironmentConfigDialog";
+import {
+  addEnvironmentConfig,
+  getEnvironmentConfigs,
+  postEnvironmentConfig
+} from "../actions";
+import EnvironmentConfigAddDialog from "../components/dialogs/EnvironmentConfigAddDialog";
+import EnvironmentConfigModifyDialog from "../components/dialogs/EnvironmentConfigModifyDialog";
 import EnvironmentCardList from "../components/EnvironmentCardList";
 import EnvironmentModalDialogFoundation from "../components/EnvironmentModalDialogFoundation";
+import FabButton from "../components/FabButton";
 import FilterInput from "../components/FilterInput";
 import { IApplicationState, IEnvironmentConfig } from "../store";
 // @ts-ignore
@@ -12,7 +18,8 @@ import styles from "./ConfigPage.scss";
 
 interface IState {
   filteringValue: string;
-  showsDialog: boolean;
+  showsModifyDialog: boolean;
+  showsAddDialog: boolean;
   dialogTarget: string | null;
   isMultitenant: boolean | null;
   kubernetesApi: string | null;
@@ -26,6 +33,7 @@ interface IStateProps {
 interface IDispatchProps {
   getEnvironmentConfigs: typeof getEnvironmentConfigs;
   postEnvironmentConfig: typeof postEnvironmentConfig;
+  addEnvironmentConfig: typeof addEnvironmentConfig;
 }
 
 const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
@@ -33,7 +41,7 @@ const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
 });
 const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
   bindActionCreators(
-    { getEnvironmentConfigs, postEnvironmentConfig },
+    { getEnvironmentConfigs, postEnvironmentConfig, addEnvironmentConfig },
     dispatch
   );
 
@@ -47,7 +55,8 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
     super();
     this.state = {
       filteringValue: "",
-      showsDialog: false,
+      showsModifyDialog: false,
+      showsAddDialog: false,
       dialogTarget: null,
       isMultitenant: null,
       kubernetesApi: null,
@@ -74,7 +83,7 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
         kind,
         onEdit() {
           setState({
-            showsDialog: true,
+            showsModifyDialog: true,
             dialogTarget: x.name,
             isMultitenant: x.isMultiTenant,
             kubernetesApi: x.kubernetesApi,
@@ -85,29 +94,13 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
     });
 
     if (this.state.filteringValue) {
-      // tmpData = tmpData.filter(x => x.name.includes(this.state.filteringValue));
       configs = configs.filter(x => x.name.includes(this.state.filteringValue));
     }
 
-    const onDismiss = () => {
-      this.setState({
-        showsDialog: false,
-        dialogTarget: null,
-        isMultitenant: null,
-        kubernetesApi: null,
-        version: null
-      });
+    const onTargetChange = (target: string) => {
+      this.setState({ dialogTarget: target });
     };
-    const onAccept = () => {
-      const version = this.state.version!; // TODO convert to proper value
-      this.props.postEnvironmentConfig(
-        this.state.dialogTarget!,
-        this.state.isMultitenant!,
-        this.state.kubernetesApi!,
-        version
-      );
-      onDismiss();
-    };
+
     const onIsMultitenantChange = (isMultiTenant: boolean) => {
       this.setState({ isMultitenant: isMultiTenant });
     };
@@ -117,19 +110,6 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
     const onVersionChange = (version: string) => {
       this.setState({ version });
     };
-    const dialogContent = (
-      <EnvironmentConfigDialog
-        target={this.state.dialogTarget || ""}
-        onDismiss={onDismiss}
-        onAccept={onAccept}
-        isMultitenant={this.state.isMultitenant}
-        onIsMultitenantChange={onIsMultitenantChange}
-        kubernetesApi={this.state.kubernetesApi}
-        onKubernetesApiChange={onKubernetesApiChange}
-        version={this.state.version}
-        onVersionChange={onVersionChange}
-      />
-    );
 
     return (
       <div className={styles.wrap}>
@@ -142,21 +122,109 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
         <div className={styles.cardList}>
           <EnvironmentCardList data={configs} />
         </div>
+
+        {/* dialog to modify */}
         <div
           className={[
             styles.modalDialog,
-            this.state.showsDialog ? styles.open : styles.close
+            this.state.showsModifyDialog ? styles.open : styles.close
           ].join(" ")}
         >
-          <EnvironmentModalDialogFoundation dialogToShow={dialogContent} />
+          {this.state.showsModifyDialog ? (
+            <EnvironmentModalDialogFoundation>
+              <EnvironmentConfigModifyDialog
+                target={this.state.dialogTarget || ""}
+                onDismiss={this.onModifyDialogDismiss.bind(this)}
+                onAccept={this.onModifyDialogAccept.bind(this)}
+                isMultitenant={this.state.isMultitenant}
+                onIsMultitenantChange={onIsMultitenantChange}
+                kubernetesApi={this.state.kubernetesApi}
+                onKubernetesApiChange={onKubernetesApiChange}
+                version={this.state.version}
+                onVersionChange={onVersionChange}
+              />
+            </EnvironmentModalDialogFoundation>
+          ) : null}
+        </div>
+
+        <FabButton
+          tooltip="Add environment"
+          onClick={this.addEnvironment.bind(this)}
+        >
+          ＋
+        </FabButton>
+        {/*dialog to add*/}
+        <div
+          className={[
+            styles.modalDialog,
+            this.state.showsAddDialog ? styles.open : styles.close
+          ].join(" ")}
+        >
+          <EnvironmentModalDialogFoundation>
+            {this.state.showsAddDialog ? (
+              <EnvironmentConfigAddDialog
+                onDismiss={this.onAddDialogDismiss.bind(this)}
+                onAccept={this.onAddDialogAccept.bind(this)}
+                target={this.state.dialogTarget}
+                onTargetApiChange={onTargetChange}
+                isMultitenant={this.state.isMultitenant}
+                onIsMultitenantChange={onIsMultitenantChange}
+                kubernetesApi={this.state.kubernetesApi}
+                onKubernetesApiChange={onKubernetesApiChange}
+                version={this.state.version}
+                onVersionChange={onVersionChange}
+              />
+            ) : null}
+          </EnvironmentModalDialogFoundation>
         </div>
       </div>
     );
   }
 
+  private onModifyDialogDismiss() {
+    this.setState({
+      showsModifyDialog: false,
+      dialogTarget: null,
+      isMultitenant: null,
+      kubernetesApi: null,
+      version: null
+    });
+  }
+
+  private onAddDialogDismiss() {
+    this.setState({
+      showsAddDialog: false
+    });
+  }
+
+  private onModifyDialogAccept() {
+    const version = this.state.version!; // TODO convert to proper value
+    this.props.postEnvironmentConfig(
+      this.state.dialogTarget!,
+      this.state.isMultitenant!,
+      this.state.kubernetesApi!,
+      version
+    );
+    this.onAddDialogDismiss();
+  }
+
+  private onAddDialogAccept() {
+    this.props.addEnvironmentConfig(
+      this.state.dialogTarget!,
+      this.state.isMultitenant!,
+      this.state.kubernetesApi!,
+      this.state.version!
+    );
+    this.onAddDialogDismiss();
+  }
+
   // noinspection JSUnusedLocalSymbols
   private onFilterChange(previous: string, current: string) {
     this.setState({ filteringValue: current });
+  }
+
+  private addEnvironment() {
+    this.setState({ showsAddDialog: true });
   }
 }
 
