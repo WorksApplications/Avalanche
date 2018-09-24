@@ -24,7 +24,7 @@ func establishDBConn(dn string) *sql.DB {
 
 func main() {
 	log.SetPrefix("detect:\t")
-	log.SetFlags(log.Lshortfile)
+	log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime)
 	dbconf := flag.String("db", "example:example@localhost?parseTime=True", "DB connexion")
 
 	flag.Parse()
