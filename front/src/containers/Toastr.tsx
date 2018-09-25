@@ -45,11 +45,7 @@ class Toastr extends Component<IStateProps & IDispatchProps> {
       <div
         className={[
           styles.wrap,
-          this.props.message == null
-            ? styles.init
-            : this.props.isShown
-              ? styles.shown
-              : styles.hidden,
+          this.props.isShown ? styles.shown : styles.hidden,
           this.props.message == null
             ? undefined
             : this.props.kind === "success"
@@ -59,7 +55,7 @@ class Toastr extends Component<IStateProps & IDispatchProps> {
                 : undefined
         ].join(" ")}
       >
-        {this.props.message}
+        <span className={styles.message}>{this.props.message}</span>
         <span className={styles.dismissButton} onMouseDown={dismissToastr}>
           &#x2716;
         </span>
