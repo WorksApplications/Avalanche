@@ -3,6 +3,7 @@ import { connect } from "preact-redux";
 import * as qs from "querystring";
 import { bindActionCreators, Dispatch } from "redux";
 import {
+  getApps,
   getEnvironmentsOfApp,
   selectApp,
   selectEnv,
@@ -32,6 +33,7 @@ interface IStateProps {
 }
 
 interface IDispatchProps {
+  getApps: typeof getApps;
   selectApp: typeof selectApp;
   getEnvironmentsOfApp: typeof getEnvironmentsOfApp;
   selectEnv: typeof selectEnv;
@@ -63,7 +65,7 @@ const mapStateToProps: (state: IApplicationState) => IStateProps = state => {
 
 const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
   bindActionCreators(
-    { selectApp, getEnvironmentsOfApp, selectEnv, selectPod },
+    { getApps, selectApp, getEnvironmentsOfApp, selectEnv, selectPod },
     dispatch
   );
 
@@ -73,7 +75,9 @@ const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
   mapDispatchToProps
 )
 class SnapshotsView extends Component<IStateProps & IDispatchProps> {
-  public componentWillMount() {
+  public componentDidMount() {
+    this.props.getApps();
+
     // get app & env from query in url
     const requested = qs.parse(window.location.search.substring(1));
     if (

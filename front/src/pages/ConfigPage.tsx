@@ -64,7 +64,7 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
     };
   }
 
-  public componentWillMount() {
+  public componentDidMount() {
     this.props.getEnvironmentConfigs();
   }
 

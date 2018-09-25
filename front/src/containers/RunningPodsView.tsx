@@ -1,7 +1,7 @@
 import { Component, FunctionalComponent, h } from "preact";
 import { connect } from "preact-redux";
 import { bindActionCreators, Dispatch } from "redux";
-import { postSnapshot } from "../actions";
+import { getRunningPods, postSnapshot } from "../actions";
 import PodCardList from "../components/PodCardList";
 import PodFilter from "../components/PodFilter";
 import { IApplicationState, IPodInfo } from "../store";
@@ -15,6 +15,7 @@ interface IStateProps {
 
 interface IDispatchProps {
   postSnapshot: typeof postSnapshot;
+  getRunningPods: typeof getRunningPods;
 }
 
 const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
@@ -23,7 +24,7 @@ const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
 });
 
 const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
-  bindActionCreators({ postSnapshot }, dispatch);
+  bindActionCreators({ postSnapshot, getRunningPods }, dispatch);
 
 // @ts-ignore
 @connect(
@@ -31,6 +32,10 @@ const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
   mapDispatchToProps
 )
 class RunningPodsView extends Component<IStateProps & IDispatchProps> {
+  public componentDidMount(): void {
+    this.props.getRunningPods();
+  }
+
   public render() {
     const podInfo = this.props.pods.map(p => ({
       id: (p.id || "").toString(),
