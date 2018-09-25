@@ -8,38 +8,7 @@ import {
   selectEnv,
   selectPod
 } from "../actions";
-import * as collect from "../generated/collect/api";
-import {
-  IAnalysisDataState,
-  IEnvironmentInfo,
-  IPodInfo,
-  ISnapshotInfo
-} from "../store";
-
-function podInfoConvert(pod: collect.Pod): IPodInfo {
-  const created = new Date(pod.createdAt ? pod.createdAt : 0)
-  return {
-    id: pod.id,
-    name: pod.name,
-    isAlive: pod.isAlive,
-    createdAt: created,
-    app: pod.app,
-    env: pod.environment,
-    snapshots: (pod.snapshots || []).map(s => snapshotInfoConvert(s))
-  };
-}
-
-function snapshotInfoConvert(snapshot: collect.Snapshot): ISnapshotInfo {
-  const created = new Date(snapshot.createdAt ? snapshot.createdAt : 0)
-  return {
-    uuid: snapshot.uuid,
-    name: undefined,
-    pod: snapshot.pod,
-    environment: snapshot.environment,
-    createdAt: created,
-    link: snapshot.flamescopeLink
-  };
-}
+import { IAnalysisDataState, IPodInfo } from "../store";
 
 const INIT: IAnalysisDataState = {
   applicationName: null,
@@ -65,13 +34,7 @@ export function analysisData(
   }
   if (isType(action, getEnvironmentsOfAppAsyncAction.done)) {
     const newEnvironments = { ...state.environments };
-    const envInfos: IEnvironmentInfo[] = action.payload.result.envs.map(e => ({
-      id: e.id,
-      name: e.name,
-      pods: (e.pods || []).map<IPodInfo>(p => podInfoConvert(p)),
-      liveCount: e.liveCount
-    }));
-    for (const e of envInfos) {
+    for (const e of action.payload.result.envs) {
       newEnvironments[e.name] = e;
     }
     return { ...state, environments: newEnvironments };
@@ -79,21 +42,16 @@ export function analysisData(
   if (isType(action, getRunningPodsAsyncAction.done)) {
     return {
       ...state,
-      runningPods: action.payload.result.pods.map(p => podInfoConvert(p)).sort((a: IPodInfo, b: IPodInfo) => {
-        if (typeof(a) === "undefined") {
-          return 1
+      runningPods: action.payload.result.pods.sort(
+        (a: IPodInfo, b: IPodInfo) => {
+          if (!a || !a.createdAt) {
+            return 1;
+          } else if (!b || !b.createdAt) {
+            return -1;
+          }
+          return b.createdAt.getTime() - a.createdAt.getTime();
         }
-        else if (typeof(b) === "undefined") {
-          return -1
-        }
-        else if (typeof(a.createdAt) === "undefined") {
-          return 1
-        }
-        else if (typeof(b.createdAt) === "undefined") {
-          return -1
-        }
-        return b.createdAt.getTime() - a.createdAt.getTime()
-    })
+      )
     };
   }
   if (isType(action, selectPod)) {

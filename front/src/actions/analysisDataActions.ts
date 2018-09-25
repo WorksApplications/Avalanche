@@ -2,6 +2,7 @@ import { Dispatch } from "redux";
 import actionCreatorFactory from "typescript-fsa";
 import { COLLECT_API_BASE } from "../constants";
 import * as collect from "../generated/collect/api";
+import { IEnvironmentInfo, IPodInfo, ISnapshotInfo } from "../store";
 import { toastr } from "./toastNotificationActions";
 
 const actionCreator = actionCreatorFactory();
@@ -11,6 +12,40 @@ const collectClient = collect.DefaultApiFactory(
   undefined,
   COLLECT_API_BASE
 );
+
+function environmentInfoConvert(env: collect.Environment): IEnvironmentInfo {
+  return {
+    id: env.id,
+    name: env.name,
+    pods: (env.pods || []).map<IPodInfo>(p => podInfoConvert(p)),
+    liveCount: env.liveCount
+  };
+}
+
+function podInfoConvert(pod: collect.Pod): IPodInfo {
+  const created = new Date(pod.createdAt ? pod.createdAt : 0);
+  return {
+    id: pod.id,
+    name: pod.name,
+    isAlive: pod.isAlive,
+    createdAt: created,
+    app: pod.app,
+    env: pod.environment,
+    snapshots: (pod.snapshots || []).map(s => snapshotInfoConvert(s))
+  };
+}
+
+function snapshotInfoConvert(snapshot: collect.Snapshot): ISnapshotInfo {
+  const created = new Date(snapshot.createdAt ? snapshot.createdAt : 0);
+  return {
+    uuid: snapshot.uuid,
+    name: undefined,
+    pod: snapshot.pod,
+    environment: snapshot.environment,
+    createdAt: created,
+    link: snapshot.flamescopeLink
+  };
+}
 
 export const selectApp = actionCreator<{ appName: string }>("SELECT_APP");
 
@@ -49,7 +84,7 @@ export const getApps = () => (dispatch: Dispatch) => {
 
 export const getEnvironmentsOfAppAsyncAction = actionCreator.async<
   { app: string },
-  { envs: collect.Environment[] },
+  { envs: IEnvironmentInfo[] },
   { message: string }
 >("GET_ENVS_OF_APP");
 
@@ -58,7 +93,8 @@ export const getEnvironmentsOfApp = (app: string) => (dispatch: Dispatch) => {
   dispatch(getEnvironmentsOfAppAsyncAction.started(params));
   collectClient
     .getEnvironments(app)
-    .then((envs: collect.Environment[]) => {
+    .then((envResults: collect.Environment[]) => {
+      const envs = envResults.map(env => environmentInfoConvert(env));
       dispatch(
         getEnvironmentsOfAppAsyncAction.done({ params, result: { envs } })
       );
@@ -78,7 +114,7 @@ export const getEnvironmentsOfApp = (app: string) => (dispatch: Dispatch) => {
 
 export const getRunningPodsAsyncAction = actionCreator.async<
   {},
-  { pods: collect.Pod[] },
+  { pods: IPodInfo[] },
   { message: string }
 >("GET_RUNNING_PODS");
 
@@ -87,7 +123,8 @@ export const getRunningPods = () => (dispatch: Dispatch) => {
   dispatch(getRunningPodsAsyncAction.started(params));
   collectClient
     .listAvailablePods()
-    .then((pods: collect.Pod[]) => {
+    .then((podResults: collect.Pod[]) => {
+      const pods = podResults.map(pod => podInfoConvert(pod));
       dispatch(getRunningPodsAsyncAction.done({ params, result: { pods } }));
     })
     .catch((reason: Error) => {
@@ -107,7 +144,7 @@ export const postSnapshotAsyncAction = actionCreator.async<
     environment: string;
     podId: string;
   },
-  { newSnapshot: collect.Snapshot },
+  { newSnapshot: ISnapshotInfo },
   { message: string }
 >("POST_NEW_SNAPSHOT");
 
@@ -125,10 +162,11 @@ export const postSnapshot = (
       } // This is due to "typescript-fetch"
     })
     .then((snapshot: collect.Snapshot) => {
+      const newSnapshot = snapshotInfoConvert(snapshot);
       dispatch(
         postSnapshotAsyncAction.done({
           params,
-          result: { newSnapshot: snapshot }
+          result: { newSnapshot }
         })
       );
       toastr(`New snapshot for "${params.podId}" is created.`, "success")(
