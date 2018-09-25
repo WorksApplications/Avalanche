@@ -24,7 +24,8 @@ export interface IProperty {
 class EnvironmentConfigAddDialog extends Component<IProperty, {}> {
   public render() {
     // TODO url validation
-    const isValidData = this.props.target!==null &&
+    const isValidData =
+      this.props.target !== null &&
       this.props.isMultitenant !== null &&
       this.props.kubernetesApi !== null &&
       this.props.version != null;
@@ -36,8 +37,12 @@ class EnvironmentConfigAddDialog extends Component<IProperty, {}> {
           <div className={dialogStyles.group}>
             <label className={dialogStyles.label}>Name</label>
             <div className={dialogStyles.input}>
-              <input type="text" name="target" onChange={this.onTargetChange.bind(this)}
-                     value={this.props.target || ""}/>
+              <input
+                type="text"
+                name="target"
+                onChange={this.onTargetChange.bind(this)}
+                value={this.props.target || ""}
+              />
             </div>
           </div>
           <div className={dialogStyles.group}>
@@ -67,9 +72,15 @@ class EnvironmentConfigAddDialog extends Component<IProperty, {}> {
           <div className={dialogStyles.group}>
             <label className={dialogStyles.label}>Kubernetes API</label>
             <div className={dialogStyles.input}>
-              <input type="text" name="api" onChange={this.onKubernetesApiChange.bind(this)}
-                     value={this.props.kubernetesApi || ""}/>
-              <div className={dialogStyles.description}>ex: http://k8s-mischo.internal.worksap.com:52063/</div>
+              <input
+                type="text"
+                name="api"
+                onChange={this.onKubernetesApiChange.bind(this)}
+                value={this.props.kubernetesApi || ""}
+              />
+              <div className={dialogStyles.description}>
+                {"ex: http://k8s-mischo.internal.worksap.com:52063/"}
+              </div>
             </div>
           </div>
           <div className={dialogStyles.group}>
@@ -104,7 +115,11 @@ class EnvironmentConfigAddDialog extends Component<IProperty, {}> {
           >
             <span>Cancel</span>
           </button>
-          <button className={dialogStyles.apply} onClick={this.props.onAccept} disabled={!isValidData}>
+          <button
+            className={dialogStyles.apply}
+            onClick={this.props.onAccept}
+            disabled={!isValidData}
+          >
             <span>Apply</span>
           </button>
         </div>
@@ -113,7 +128,8 @@ class EnvironmentConfigAddDialog extends Component<IProperty, {}> {
   }
 
   private onTargetChange(e: Event) {
-    this.props.onTargetApiChange((e.target as HTMLInputElement).value as string);
+    this.props.onTargetApiChange((e.target as HTMLInputElement)
+      .value as string);
   }
 
   private onIsMultitenantChange(e: Event) {
@@ -122,12 +138,12 @@ class EnvironmentConfigAddDialog extends Component<IProperty, {}> {
   }
 
   private onKubernetesApiChange(e: Event) {
-    this.props.onKubernetesApiChange((e.target as HTMLInputElement).value as string);
+    this.props.onKubernetesApiChange((e.target as HTMLInputElement)
+      .value as string);
   }
 
   private onVersionChange(e: Event) {
-    this.props.onVersionChange((e.target as HTMLInputElement)
-      .value as string);
+    this.props.onVersionChange((e.target as HTMLInputElement).value as string);
   }
 }
 

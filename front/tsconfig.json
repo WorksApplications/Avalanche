@@ -23,6 +23,7 @@
     "node_modules",
     "public",
     "*config.js",
+    "mock",
     "src/**/__tests__/**/*.ts",
     "src/**/*.spec.tsx",
     "src/**/*.test.tsx"
