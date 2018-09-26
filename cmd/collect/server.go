@@ -25,6 +25,7 @@ func establishDBConn(dn string) *sql.DB {
 
 func main() {
 	log.SetPrefix("collect:\t")
+	log.SetFlags(log.Lshortfile | log.Ltime | log.Ldate)
 
 	swaggerSpec, err := loads.Embedded(restapi.SwaggerJSON, restapi.FlatSwaggerJSON)
 	if err != nil {

@@ -162,20 +162,21 @@ func get(res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequ
 
 func (s HandlerClosure) SubRunner(res http.ResponseWriter, req *http.Request) {
 	/* Has trailing slash or sub-location */
-	log.Printf("S: %s %s", req.Method, req.URL.Path)
 	switch req.Method {
 	case "GET":
 		env := strings.TrimPrefix(req.URL.Path, "/subscriptions/")
 		if env == "" {
+			log.Printf("S: OBSOLETE: %s %s", req.Method, req.URL.Path)
 			get(res, req, s.Ch, nil)
 		} else {
+			log.Printf("S: %s %s", req.Method, req.URL.Path)
 			get(res, req, s.Ch, &env)
 		}
 	}
 }
 
 func (s HandlerClosure) Runner(res http.ResponseWriter, req *http.Request) {
-	log.Printf("R: OBSOLETE: %s %s", req.Method, req.URL.Path)
+	log.Printf("R: %s %s", req.Method, req.URL.Path)
 	switch req.Method {
 	case "GET":
 		get(res, req, s.Ch, nil /* indicates "gimme-all" */)
