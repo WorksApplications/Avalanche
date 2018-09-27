@@ -12,7 +12,9 @@ export default (props: IProperty) => {
     selector: styles.selector,
     wrap: styles.wrap,
     selected: styles.selected,
-    placeholder: styles.placeholder
+    placeholder: styles.placeholder,
+    searching: styles.searching,
+    preSelected: styles.preSelected
   };
   return <SelectorBase styles={bindingStyles} {...props} />;
 };

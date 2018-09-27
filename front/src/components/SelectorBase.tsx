@@ -11,6 +11,8 @@ export interface IStyles {
   selected?: string;
   unselectOption?: string;
   disabled?: string;
+  searching?: string;
+  preSelected?: string;
 }
 
 export interface IProperty {
@@ -25,6 +27,8 @@ export interface IProperty {
 
 interface IState {
   isOpen: boolean;
+  searchingWord: string;
+  preSelectingIndex: number;
 }
 
 // TODO write test
@@ -42,7 +46,9 @@ class SelectorBase extends Component<IProperty, IState> {
   constructor(props: IProperty) {
     super(props);
     this.state = {
-      isOpen: false
+      isOpen: false,
+      searchingWord: "",
+      preSelectingIndex: -1
     };
   }
 
@@ -59,21 +65,31 @@ class SelectorBase extends Component<IProperty, IState> {
             {this.props.unselectOptionLabel}
           </li>
         )}
-        {this.props.options.map(o => (
-          <li
-            className={[
-              styles.optionItem,
-              o.value === this.props.selectedValue ? styles.selected : undefined
-            ].join(" ")}
-            key={o.value}
-            onMouseDown={this.setSelectingOption.bind(this, o.value)}
-          >
-            {o.label}
-          </li>
-        ))}
+        {this.props.options
+          .filter(o => o.label.startsWith(this.state.searchingWord))
+          .map((o, i) => (
+            <li
+              className={[
+                styles.optionItem,
+                o.value === this.props.selectedValue
+                  ? styles.selected
+                  : undefined,
+                i === this.state.preSelectingIndex
+                  ? styles.preSelected
+                  : undefined
+              ].join(" ")}
+              key={o.value}
+              onMouseDown={this.setSelectingOption.bind(this, o.value)}
+            >
+              {o.label}
+            </li>
+          ))}
       </ul>
     ) : null;
-    const selectorString = this.props.selectedValue || this.props.placeholder;
+    const selectorString =
+      this.state.searchingWord ||
+      this.props.selectedValue ||
+      this.props.placeholder;
 
     return (
       <div
@@ -87,7 +103,11 @@ class SelectorBase extends Component<IProperty, IState> {
           className={[
             styles!.selector,
             this.state.isOpen ? styles.opened : styles.closed,
-            this.props.selectedValue ? "" : styles.placeholder
+            this.state.searchingWord
+              ? styles.searching
+              : this.props.selectedValue
+                ? ""
+                : styles.placeholder
           ].join(" ")}
           onMouseDown={this.onMouseDown.bind(this)}
         >
@@ -100,10 +120,14 @@ class SelectorBase extends Component<IProperty, IState> {
 
   public componentDidMount() {
     document.addEventListener("click", this.onClick, true);
+    document.addEventListener("keypress", this.onKeyPress, true);
+    document.addEventListener("keydown", this.onKeyDown, true);
   }
 
   public componentWillUnmount() {
     document.removeEventListener("click", this.onClick, true);
+    document.removeEventListener("keypress", this.onKeyPress, true);
+    document.removeEventListener("keydown", this.onKeyDown, true);
   }
 
   private getContainer(ref: HTMLElement) {
@@ -114,6 +138,60 @@ class SelectorBase extends Component<IProperty, IState> {
     if (e.target instanceof Node) {
       if (this.container && !this.container.contains(e.target)) {
         this.setState({ isOpen: false });
+        this.setState({ searchingWord: "" });
+      }
+    }
+  };
+
+  private onKeyPress = (e: KeyboardEvent) => {
+    if (this.state.isOpen && e.key !== "Enter") {
+      this.setState((s: IState) => ({
+        searchingWord: s.searchingWord + e.key
+      }));
+    }
+  };
+
+  private onKeyDown = (e: KeyboardEvent) => {
+    if (this.state.isOpen) {
+      switch (e.code) {
+        case "Escape":
+          this.setState({ searchingWord: "" });
+          break;
+        case "Backspace":
+          this.setState((s: IState) => ({
+            searchingWord: s.searchingWord.substring(
+              0,
+              s.searchingWord.length - 1
+            )
+          }));
+          break;
+        case "Enter":
+          this.setSelectingOption(
+            this.props.options.filter(o =>
+              o.label.startsWith(this.state.searchingWord)
+            )[this.state.preSelectingIndex].value
+          );
+          this.setState({ preSelectingIndex: -1, searchingWord: "" });
+          break;
+        case "ArrowDown":
+          this.setState((s: IState) => {
+            const i = s.preSelectingIndex + 1;
+            const optionLength = this.props.options.filter(o =>
+              o.label.startsWith(this.state.searchingWord)
+            ).length;
+            return {
+              preSelectingIndex: i > optionLength - 1 ? optionLength - 1 : i
+            };
+          });
+          break;
+        case "ArrowUp":
+          this.setState((s: IState) => {
+            const i = s.preSelectingIndex - 1;
+            return {
+              preSelectingIndex: i < 0 ? 0 : i
+            };
+          });
+          break;
       }
     }
   };
@@ -125,7 +203,9 @@ class SelectorBase extends Component<IProperty, IState> {
     }
     const newState = {
       isOpen: false,
-      selected: value
+      selected: value,
+      searchingWord: "",
+      preSelectingIndex: -1
     };
     this.setState(newState);
     if (this.props.onValueChanged) {
