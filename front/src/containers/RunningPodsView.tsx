@@ -49,7 +49,7 @@ function sortedPods(pods: IPodInfo[]): IPodInfo[] {
     }
 
     // dictionary order
-    return a > b ? 1 : -1;
+    return a.name > b.name ? 1 : -1;
   });
 }
 

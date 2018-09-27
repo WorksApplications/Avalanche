@@ -44,6 +44,41 @@ function sortedApplications(applications: string[]): string[] {
   return applications.sort();
 }
 
+function sortedSnapshots(snapshots: ISnapshotInfo[]): ISnapshotInfo[] {
+  return snapshots.sort((a, b) => {
+    if (!a) {
+      return 1;
+    }
+    if (!b) {
+      return -1;
+    }
+
+    if (!a.createdAt) {
+      return 1;
+    }
+    if (!b.createdAt) {
+      return -1;
+    }
+
+    // newer pod first
+    const timeDiff = b.createdAt.getTime() - a.createdAt.getTime();
+    if (timeDiff !== 0) {
+      return timeDiff;
+    }
+
+    if (!a.name) {
+      return 1;
+    }
+
+    if (!b.name) {
+      return -1;
+    }
+
+    // dictionary order
+    return a.name > b.name ? 1 : -1;
+  });
+}
+
 const mapStateToProps: (state: IApplicationState) => IStateProps = state => {
   const pods: IPodInfo[] = Object.values(
     state.analysisData.environments
@@ -59,10 +94,12 @@ const mapStateToProps: (state: IApplicationState) => IStateProps = state => {
     filteringEnvironment: state.analysisData.selectedEnvironment,
     filteringPod: state.analysisData.selectedPod,
     pods,
-    snapshots: pods.reduce(
-      // flat-map
-      (acc: ISnapshotInfo[], x) => acc.concat(x.snapshots || []),
-      []
+    snapshots: sortedSnapshots(
+      pods.reduce(
+        // flat-map
+        (acc: ISnapshotInfo[], x) => acc.concat(x.snapshots || []),
+        []
+      )
     )
   };
 };
