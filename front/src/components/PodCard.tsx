@@ -17,6 +17,10 @@ export interface IProperty {
 class PodList extends Component<IProperty, {}> {
   public render() {
     const onSave = this.props.onSaveButtonClick || (() => undefined);
+    const hashPart = this.props.name.startsWith(this.props.app)
+      ? this.props.name.substring(this.props.app.length)
+      : "";
+
     return (
       <div className={styles.wrap}>
         <div>
@@ -35,17 +39,20 @@ class PodList extends Component<IProperty, {}> {
               <AliveIndicator isAlive={this.props.isAlive} />
             </div>
           </div>
-          <span className={styles.name}>{this.props.name}</span>
-          <span className={styles.createdAt}>{this.props.createdAt}</span>
-        </div>
-        <div className={styles.info}>
-          <div className={styles.infoTop}>
-            {this.props.app}
-            &nbsp;&nbsp;
-            {this.props.environment}
+          {hashPart ? (
+            <span className={styles.name}>
+              <span className={styles.appName}>{this.props.app}</span>
+              <span className={styles.hashPart}>{hashPart}</span>
+            </span>
+          ) : (
+            <span className={styles.name}>{this.props.name}</span>
+          )}
+          <div className={styles.info}>
+            <span className={styles.environment}>{this.props.environment}</span>
+            <span className={styles.createdAt}>{this.props.createdAt}</span>
           </div>
-          {/* TODO show list of Snapshots */}
         </div>
+        {/* TODO show list of Snapshots on click */}
       </div>
     );
   }
