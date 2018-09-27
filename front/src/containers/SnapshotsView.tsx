@@ -40,6 +40,10 @@ interface IDispatchProps {
   selectPod: typeof selectPod;
 }
 
+function sortedApplications(applications: string[]): string[] {
+  return applications.sort();
+}
+
 const mapStateToProps: (state: IApplicationState) => IStateProps = state => {
   const pods: IPodInfo[] = Object.values(
     state.analysisData.environments
@@ -50,7 +54,7 @@ const mapStateToProps: (state: IApplicationState) => IStateProps = state => {
   );
   return {
     appName: state.analysisData.applicationName,
-    apps: state.analysisData.applications,
+    apps: sortedApplications(state.analysisData.applications),
     environments: state.analysisData.environments,
     filteringEnvironment: state.analysisData.selectedEnvironment,
     filteringPod: state.analysisData.selectedPod,

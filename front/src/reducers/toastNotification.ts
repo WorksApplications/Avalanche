@@ -25,10 +25,7 @@ export function toastNotification(
   }
   if (isType(action, hideToastr)) {
     if (action.payload.id === state.id) {
-      return {
-        ...state,
-        isShown: false
-      };
+      return { ...state, isShown: false };
     }
     return state;
   }

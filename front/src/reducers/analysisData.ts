@@ -27,7 +27,7 @@ export function analysisData(
     return { ...state, applicationName: action.payload.appName };
   }
   if (isType(action, getAppsAsyncAction.done)) {
-    return { ...state, applications: action.payload.result.apps.sort() };
+    return { ...state, applications: action.payload.result.apps };
   }
   if (isType(action, selectEnv)) {
     return { ...state, selectedEnvironment: action.payload.envName };
