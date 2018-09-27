@@ -18,9 +18,44 @@ interface IDispatchProps {
   getRunningPods: typeof getRunningPods;
 }
 
+function sortedPods(pods: IPodInfo[]): IPodInfo[] {
+  return pods.sort((a, b) => {
+    if (!a) {
+      return 1;
+    }
+    if (!b) {
+      return -1;
+    }
+
+    // living pod first
+    if (a.isAlive && !b.isAlive) {
+      return -1;
+    }
+    if (!a.isAlive && b.isAlive) {
+      return 1;
+    }
+
+    if (!a.createdAt) {
+      return 1;
+    }
+    if (!b.createdAt) {
+      return -1;
+    }
+
+    // newer pod first
+    const timeDiff = b.createdAt.getTime() - a.createdAt.getTime();
+    if (timeDiff !== 0) {
+      return timeDiff;
+    }
+
+    // dictionary order
+    return a > b ? 1 : -1;
+  });
+}
+
 const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
   applicationName: state.analysisData.applicationName,
-  pods: state.analysisData.runningPods
+  pods: sortedPods(state.analysisData.runningPods)
 });
 
 const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>

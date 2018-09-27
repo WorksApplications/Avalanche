@@ -8,7 +8,7 @@ import {
   selectEnv,
   selectPod
 } from "../actions";
-import { IAnalysisDataState, IPodInfo } from "../store";
+import { IAnalysisDataState } from "../store";
 
 const INIT: IAnalysisDataState = {
   applicationName: null,
@@ -40,19 +40,7 @@ export function analysisData(
     return { ...state, environments: newEnvironments };
   }
   if (isType(action, getRunningPodsAsyncAction.done)) {
-    return {
-      ...state,
-      runningPods: action.payload.result.pods.sort(
-        (a: IPodInfo, b: IPodInfo) => {
-          if (!a || !a.createdAt) {
-            return 1;
-          } else if (!b || !b.createdAt) {
-            return -1;
-          }
-          return b.createdAt.getTime() - a.createdAt.getTime();
-        }
-      )
-    };
+    return { ...state, runningPods: action.payload.result.pods };
   }
   if (isType(action, selectPod)) {
     return { ...state, selectedPod: action.payload.podName };
