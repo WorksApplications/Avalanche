@@ -135,6 +135,23 @@ class SnapshotsView extends Component<IStateProps & IDispatchProps> {
       ) {
         this.changeEnvironment(requested.env);
       }
+    } else {
+      // set url from current app and env
+      const newQuery = { ...requested };
+      if (!("app" in newQuery) && this.props.appName) {
+        newQuery.app = this.props.appName;
+
+        if (!("env" in newQuery) && this.props.filteringEnvironment) {
+          newQuery.env = this.props.filteringEnvironment;
+        }
+
+        // current browser does not support 2nd argument :yaomin:
+        history.pushState(
+          {},
+          `${APP_NAME} | ${this.props.appName}`,
+          "?" + qs.stringify(newQuery)
+        );
+      }
     }
   }
 
