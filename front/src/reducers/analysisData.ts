@@ -4,6 +4,7 @@ import {
   getAppsAsyncAction,
   getEnvironmentsOfAppAsyncAction,
   getRunningPodsAsyncAction,
+  postSnapshotAsyncAction,
   selectApp,
   selectEnv,
   selectPod
@@ -45,5 +46,43 @@ export function analysisData(
   if (isType(action, selectPod)) {
     return { ...state, selectedPod: action.payload.podName };
   }
+  if (isType(action, postSnapshotAsyncAction.started)) {
+    return {
+      ...state,
+      runningPods: state.runningPods.map(
+        pod =>
+          pod.name === action.payload.podId ? { ...pod, isSaving: true } : pod
+      )
+    };
+  }
+  if (isType(action, postSnapshotAsyncAction.done)) {
+    return {
+      ...state,
+      runningPods: state.runningPods.map(
+        pod =>
+          pod.name === action.payload.params.podId
+            ? {
+                ...pod,
+                isSaving: false,
+                snapshots: pod.snapshots
+                  ? [...pod.snapshots, action.payload.result.newSnapshot]
+                  : [action.payload.result.newSnapshot]
+              }
+            : pod
+      )
+    };
+  }
+  if (isType(action, postSnapshotAsyncAction.failed)) {
+    return {
+      ...state,
+      runningPods: state.runningPods.map(
+        pod =>
+          pod.name === action.payload.params.podId
+            ? { ...pod, isSaving: false }
+            : pod
+      )
+    };
+  }
+
   return state;
 }

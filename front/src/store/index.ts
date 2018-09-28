@@ -22,6 +22,7 @@ export interface IPodInfo {
   app?: string;
   env?: string;
   snapshots?: ISnapshotInfo[];
+  isSaving?: boolean;
 }
 
 export interface IEnvironmentInfo {

@@ -92,6 +92,7 @@ class RunningPodsView extends Component<IStateProps & IDispatchProps, IState> {
         app: p.app || "Unknown",
         environment: p.env || "Unknown",
         isAlive: p.isAlive || false,
+        isSaving: p.isSaving || false,
         snapshots: (p.snapshots || []).map(s => ({
           uuid: s.uuid,
           createdAt: s.createdAt,

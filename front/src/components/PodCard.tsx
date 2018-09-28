@@ -10,6 +10,7 @@ export interface IProperty {
   environment: string;
   snapshots: Array<{ uuid: string; createdAt?: Date; link?: string }>;
   isAlive: boolean;
+  isSaving?: boolean;
 
   onSaveButtonClick?(): void;
 }
@@ -45,10 +46,15 @@ class PodCard extends Component<IProperty, IState> {
               styles.saveButton,
               !this.props.onSaveButtonClick ? styles.disabled : undefined
             ].join(" ")}
-            onMouseDown={onSave}
           >
-            <span className={styles.saveTooltip}>Save snapshot</span>
-            Save
+            {this.props.isSaving ? (
+              <i className={[styles.spinner, "wap-icon-spinner"].join(" ")} />
+            ) : (
+              <span onMouseDown={onSave}>
+                <span className={styles.saveTooltip}>Save snapshot</span>
+                Save
+              </span>
+            )}
           </div>
           <div className={styles.indicatorWrap}>
             <div className={styles.aliveIndicator}>

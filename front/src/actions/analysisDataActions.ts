@@ -174,10 +174,12 @@ export const postSnapshot = (
       );
     })
     .catch((reason: Error) => {
-      postSnapshotAsyncAction.failed({
-        params,
-        error: { message: reason.message }
-      });
+      dispatch(
+        postSnapshotAsyncAction.failed({
+          params,
+          error: { message: reason.message }
+        })
+      );
       toastr(`Failed to make a new snapshot for "${params.podId}".`, "error")(
         dispatch
       );
