@@ -15,7 +15,7 @@ class PodFilter extends Component<IProperty, IState> {
   public render() {
     return (
       <div className={styles.wrap}>
-        <span className={styles.icon} />
+        <i className={[styles.icon, "wap-icon-filter"].join(" ")} />
         <input
           type="text"
           className={styles.textBox}

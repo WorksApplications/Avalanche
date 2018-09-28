@@ -133,9 +133,8 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
         <FabButton
           tooltip="Add environment"
           onClick={this.addEnvironment.bind(this)}
-        >
-          ＋
-        </FabButton>
+          icon="wap-icon-add"
+        />
 
         {/* dialog to modify */}
         <div
