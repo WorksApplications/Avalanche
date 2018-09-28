@@ -130,6 +130,13 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
           />
         </div>
 
+        <FabButton
+          tooltip="Add environment"
+          onClick={this.addEnvironment.bind(this)}
+        >
+          ＋
+        </FabButton>
+
         {/* dialog to modify */}
         <div
           className={[
@@ -153,13 +160,6 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
             </EnvironmentModalDialogFoundation>
           ) : null}
         </div>
-
-        <FabButton
-          tooltip="Add environment"
-          onClick={this.addEnvironment.bind(this)}
-        >
-          ＋
-        </FabButton>
         {/*dialog to add*/}
         <div
           className={[
