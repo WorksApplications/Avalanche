@@ -4,6 +4,7 @@ const path = require("path");
 const DefinePlugin = require("webpack").DefinePlugin;
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
+const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
 const dest = path.resolve(__dirname, "./public");
 const index = path.resolve(__dirname, "./src/index.tsx");
@@ -34,10 +35,36 @@ module.exports = env => {
     module: {
       rules: [
         {
-          test: /\.tsx?$/,
+          test: /\.[jt]sx?$/,
+          exclude: /node_modules/,
           use: [
+            // {
+            //   loader: "babel-loader",
+            //   options: {
+            //     cacheDirectory: true,
+            //     babelrc: false,
+            //     presets: [
+            //       [
+            //         "@babel/preset-env",
+            //         { targets: { browsers: "last 2 versions" } }
+            //       ],
+            //       "@babel/preset-typescript"
+            //     ],
+            //     plugins: [
+            //       ["@babel/plugin-proposal-decorators", { legacy: true }],
+            //       ["@babel/plugin-proposal-class-properties", { loose: true }],
+            //
+            //       // These should be babel-preset-preact...
+            //       ["@babel/plugin-transform-react-jsx", { pragma: "h" }],
+            //       "@babel/plugin-syntax-jsx"
+            //     ]
+            //   }
+            // },
             {
-              loader: "ts-loader"
+              loader: "ts-loader",
+              options: {
+                transpileOnly: true
+              }
             },
             {
               loader: "ifdef-loader",
@@ -113,7 +140,8 @@ module.exports = env => {
         COLLECT_API_BASE: JSON.stringify(apiBaseUrl),
         IS_DEBUG: !isProduction,
         APP_NAME: `"${appName}"`
-      })
+      }),
+      new ForkTsCheckerWebpackPlugin()
     ],
     optimization: {
       minimizer: [
