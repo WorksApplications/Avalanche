@@ -72,7 +72,7 @@ class PodList extends Component<IProperty, IState> {
           <div className={styles.snapshotsArea}>
             {this.props.snapshots.length > 0 ? (
               <ul className={styles.snapshotList}>
-                {this.props.snapshots.map(s => (
+                {this.props.snapshots.slice(0, 3).map(s => (
                   <li className={styles.snapshot}>
                     <span className={styles.snapshotHash}>
                       <span className={styles.snapshotHashPopover}>
