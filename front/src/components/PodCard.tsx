@@ -8,13 +8,23 @@ export interface IProperty {
   createdAt: string;
   app: string;
   environment: string;
-  snapshots: string[];
+  snapshots: Array<{ uuid: string; createdAt?: Date; link?: string }>;
   isAlive: boolean;
 
   onSaveButtonClick?(): void;
 }
 
-class PodList extends Component<IProperty, {}> {
+export interface IState {
+  isOpen: boolean;
+}
+
+class PodList extends Component<IProperty, IState> {
+  constructor() {
+    super();
+
+    this.state = { isOpen: false };
+  }
+
   public render() {
     const onSave = this.props.onSaveButtonClick || (() => undefined);
     const hashPart = this.props.name.startsWith(this.props.app)
@@ -22,7 +32,13 @@ class PodList extends Component<IProperty, {}> {
       : "";
 
     return (
-      <div className={styles.wrap}>
+      <div
+        className={[
+          styles.wrap,
+          this.state.isOpen ? styles.isOpen : undefined
+        ].join(" ")}
+        onClick={this.onClick.bind(this)}
+      >
         <div>
           <div
             className={[
@@ -52,9 +68,47 @@ class PodList extends Component<IProperty, {}> {
             <span className={styles.createdAt}>{this.props.createdAt}</span>
           </div>
         </div>
-        {/* TODO show list of Snapshots on click */}
+        {this.state.isOpen && (
+          <div className={styles.snapshotsArea}>
+            {this.props.snapshots.length > 0 ? (
+              <ul className={styles.snapshotList}>
+                {this.props.snapshots.map(s => (
+                  <li className={styles.snapshot}>
+                    <span className={styles.snapshotHash}>
+                      <span className={styles.snapshotHashPopover}>
+                        {s.uuid}
+                      </span>
+                      {s.uuid.substr(0, 20)}
+                      ...
+                    </span>
+                    <span className={styles.snapshotDate}>
+                      {s.createdAt && s.createdAt.toDateString()}
+                    </span>
+                    <a
+                      className={styles.snapshotLink}
+                      href={s.link}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      Flamescope
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className={styles.emptySnapshots}>
+                No snapshots for this pod.
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
+  }
+
+  private onClick() {
+    const willOpen = !this.state.isOpen;
+    this.setState({ isOpen: willOpen });
   }
 }
 
