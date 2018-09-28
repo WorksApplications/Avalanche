@@ -164,7 +164,7 @@ class SnapshotsView extends Component<IStateProps & IDispatchProps> {
         name: x.name || "Unknown",
         environment: x.environment || "Unknown",
         pod: x.pod || "Unknown",
-        createdAt: x.createdAt ? x.createdAt.toDateString() : "Unknown",
+        createdAt: x.createdAt ? x.createdAt.toLocaleString() : "Unknown",
         labels: [], // TODO
         link: x.link || "#",
         isReady: false // TODO

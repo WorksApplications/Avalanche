@@ -75,7 +75,7 @@ class RunningPodsView extends Component<IStateProps & IDispatchProps> {
     const podInfo = this.props.pods.map(p => ({
       id: (p.id || "").toString(),
       name: p.name,
-      createdAt: p.createdAt ? p.createdAt.toDateString() : "Unknown",
+      createdAt: p.createdAt ? p.createdAt.toLocaleString() : "Unknown",
       app: p.app || "Unknown",
       environment: p.env || "Unknown",
       isAlive: p.isAlive || false,

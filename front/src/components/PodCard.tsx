@@ -82,7 +82,7 @@ class PodList extends Component<IProperty, IState> {
                       ...
                     </span>
                     <span className={styles.snapshotDate}>
-                      {s.createdAt && s.createdAt.toDateString()}
+                      {s.createdAt && s.createdAt.toLocaleString()}
                     </span>
                     <a
                       className={styles.snapshotLink}
