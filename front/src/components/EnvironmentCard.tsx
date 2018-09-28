@@ -48,13 +48,13 @@ class EnvironmentCard extends Component<IProperty, {}> {
           this.props.kind === "observed") && (
           <a
             className={styles.switchEnabled}
-            onMouseDown={this.props.switchEnabled}
+            onClick={this.props.switchEnabled}
           >
             Observation is{" "}
             {this.props.kind === "observed" ? "Enabled" : "Disabled"}
           </a>
         )}
-        <a className={styles.edit} onMouseDown={this.props.onEdit.bind(this)}>
+        <a className={styles.edit} onClick={this.props.onEdit.bind(this)}>
           Edit
         </a>
       </div>

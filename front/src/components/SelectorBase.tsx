@@ -60,7 +60,7 @@ class SelectorBase extends Component<IProperty, IState> {
           <li
             className={[styles.optionItem, styles.unselectOption].join(" ")}
             key={"!!!!"}
-            onMouseDown={this.setSelectingOption.bind(this, null)}
+            onClick={this.setSelectingOption.bind(this, null)}
           >
             {this.props.unselectOptionLabel}
           </li>
@@ -79,7 +79,7 @@ class SelectorBase extends Component<IProperty, IState> {
                   : undefined
               ].join(" ")}
               key={o.value}
-              onMouseDown={this.setSelectingOption.bind(this, o.value)}
+              onClick={this.setSelectingOption.bind(this, o.value)}
             >
               {o.label}
             </li>
@@ -109,7 +109,7 @@ class SelectorBase extends Component<IProperty, IState> {
                 ? ""
                 : styles.placeholder
           ].join(" ")}
-          onMouseDown={this.onMouseDown.bind(this)}
+          onClick={this.onClickSelector.bind(this)}
         >
           {selectorString}
         </div>
@@ -119,13 +119,13 @@ class SelectorBase extends Component<IProperty, IState> {
   }
 
   public componentDidMount() {
-    document.addEventListener("click", this.onClick, true);
+    document.addEventListener("click", this.onClickOutside, true);
     document.addEventListener("keypress", this.onKeyPress, true);
     document.addEventListener("keydown", this.onKeyDown, true);
   }
 
   public componentWillUnmount() {
-    document.removeEventListener("click", this.onClick, true);
+    document.removeEventListener("click", this.onClickOutside, true);
     document.removeEventListener("keypress", this.onKeyPress, true);
     document.removeEventListener("keydown", this.onKeyDown, true);
   }
@@ -134,7 +134,7 @@ class SelectorBase extends Component<IProperty, IState> {
     this.container = ref;
   }
 
-  private onClick = (e: Event) => {
+  private onClickOutside = (e: Event) => {
     if (e.target instanceof Node) {
       if (this.container && !this.container.contains(e.target)) {
         this.setState({ isOpen: false });
@@ -213,10 +213,7 @@ class SelectorBase extends Component<IProperty, IState> {
     }
   }
 
-  private onMouseDown(event: MouseEvent) {
-    if (event.type === "mousedown" && event.button !== 0) {
-      return;
-    }
+  private onClickSelector(event: MouseEvent) {
     event.stopPropagation();
     event.preventDefault();
 

@@ -56,7 +56,7 @@ class Toastr extends Component<IStateProps & IDispatchProps> {
         ].join(" ")}
       >
         <span className={styles.message}>{this.props.message}</span>
-        <span className={styles.dismissButton} onMouseDown={dismissToastr}>
+        <span className={styles.dismissButton} onClick={dismissToastr}>
           &#x2716;
         </span>
       </div>

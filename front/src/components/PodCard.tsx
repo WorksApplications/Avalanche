@@ -50,7 +50,7 @@ class PodCard extends Component<IProperty, IState> {
             {this.props.isSaving ? (
               <i className={[styles.spinner, "wap-icon-spinner"].join(" ")} />
             ) : (
-              <span onMouseDown={onSave}>
+              <span onClick={onSave}>
                 <span className={styles.saveTooltip}>Save snapshot</span>
                 Save
               </span>
