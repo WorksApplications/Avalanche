@@ -8,11 +8,11 @@ class SnapshotPage extends Component {
   public render() {
     return (
       <div className={styles.wrap}>
-        <div className={styles.pods}>
-          <RunningPodsView />
-        </div>
         <div className={styles.snapshots}>
           <MainArea />
+        </div>
+        <div className={styles.pods}>
+          <RunningPodsView />
         </div>
       </div>
     );
