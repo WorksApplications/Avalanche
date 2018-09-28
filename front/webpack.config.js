@@ -69,6 +69,33 @@ module.exports = env => {
               }
             }
           ]
+        },
+        {
+          test: /\.css$/,
+          use: [
+            isProduction ? MiniCssExtractPlugin.loader : "style-loader",
+            {
+              loader: "css-loader",
+              options: {
+                localIdentName: isProduction
+                  ? "[hash:base64:5]"
+                  : "[name]__[local]--[hash:base64:5]"
+              }
+            }
+          ]
+        },
+        {
+          // WAP fonts
+          test: /\.(woff(2)?|ttf|eot|svg)(\?[a-z1-9]+)?$/,
+          use: [
+            {
+              loader: "file-loader",
+              options: {
+                name: "[name].[hash:base64:5].[ext]",
+                outputPath: "fonts/"
+              }
+            }
+          ]
         }
       ]
     },
@@ -76,7 +103,7 @@ module.exports = env => {
       new HtmlPlugin({
         title: appName,
         minify: isProduction,
-        template: 'src/index.html'
+        template: "src/index.html"
       }),
       new MiniCssExtractPlugin({
         filename: "[name].[hash:8].css",
