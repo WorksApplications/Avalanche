@@ -18,7 +18,7 @@ export interface IState {
   isOpen: boolean;
 }
 
-class PodList extends Component<IProperty, IState> {
+class PodCard extends Component<IProperty, IState> {
   constructor() {
     super();
 
@@ -112,4 +112,4 @@ class PodList extends Component<IProperty, IState> {
   }
 }
 
-export default PodList;
+export default PodCard;
