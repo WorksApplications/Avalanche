@@ -38,24 +38,23 @@ class PodCard extends Component<IProperty, IState> {
           styles.wrap,
           this.state.isOpen ? styles.isOpen : undefined
         ].join(" ")}
-        onClick={this.onClick.bind(this)}
       >
-        <div>
-          <div
-            className={[
-              styles.saveButton,
-              !this.props.onSaveButtonClick ? styles.disabled : undefined
-            ].join(" ")}
-          >
-            {this.props.isSaving ? (
-              <i className={[styles.spinner, "wap-icon-spinner"].join(" ")} />
-            ) : (
-              <span onClick={onSave}>
-                <span className={styles.saveTooltip}>Save snapshot</span>
-                Save
-              </span>
-            )}
-          </div>
+        <div
+          className={[
+            styles.saveButton,
+            !this.props.onSaveButtonClick ? styles.disabled : undefined
+          ].join(" ")}
+        >
+          {this.props.isSaving ? (
+            <i className={[styles.spinner, "wap-icon-spinner"].join(" ")} />
+          ) : (
+            <span>
+              <span className={styles.saveTooltip}>Save snapshot</span>
+              <span onClick={onSave}>Save</span>
+            </span>
+          )}
+        </div>
+        <div onClick={this.onClick.bind(this)}>
           <div className={styles.indicatorWrap}>
             <div className={styles.aliveIndicator}>
               <AliveIndicator isAlive={this.props.isAlive} />
@@ -73,41 +72,41 @@ class PodCard extends Component<IProperty, IState> {
             <span className={styles.environment}>{this.props.environment}</span>
             <span className={styles.createdAt}>{this.props.createdAt}</span>
           </div>
-        </div>
-        {this.state.isOpen && (
-          <div className={styles.snapshotsArea}>
-            {this.props.snapshots.length > 0 ? (
-              <ul className={styles.snapshotList}>
-                {this.props.snapshots.slice(0, 3).map(s => (
-                  <li className={styles.snapshot}>
-                    <span className={styles.snapshotHash}>
-                      <span className={styles.snapshotHashPopover}>
-                        {s.uuid}
+          {this.state.isOpen && (
+            <div className={styles.snapshotsArea}>
+              {this.props.snapshots.length > 0 ? (
+                <ul className={styles.snapshotList}>
+                  {this.props.snapshots.slice(0, 3).map(s => (
+                    <li className={styles.snapshot}>
+                      <span className={styles.snapshotHash}>
+                        <span className={styles.snapshotHashPopover}>
+                          {s.uuid}
+                        </span>
+                        {s.uuid.substr(0, 20)}
+                        ...
                       </span>
-                      {s.uuid.substr(0, 20)}
-                      ...
-                    </span>
-                    <span className={styles.snapshotDate}>
-                      {s.createdAt && s.createdAt.toLocaleString()}
-                    </span>
-                    <a
-                      className={styles.snapshotLink}
-                      href={s.link}
-                      target="_blank"
-                      rel="noopener"
-                    >
-                      Flamescope
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className={styles.emptySnapshots}>
-                No snapshots for this pod.
-              </div>
-            )}
-          </div>
-        )}
+                      <span className={styles.snapshotDate}>
+                        {s.createdAt && s.createdAt.toLocaleString()}
+                      </span>
+                      <a
+                        className={styles.snapshotLink}
+                        href={s.link}
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        Flamescope
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className={styles.emptySnapshots}>
+                  No snapshots for this pod.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     );
   }
