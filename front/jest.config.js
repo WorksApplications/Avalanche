@@ -1,9 +1,9 @@
 module.exports = {
   collectCoverageFrom: ["src/**/*.{js,jsx,ts,tsx}"],
   transform: {
-    "^.+\\.tsx?$": "ts-jest"
+    "^.+\\.(j|m|t)sx?$": "babel-jest"
   },
-  setupTestFrameworkScriptFile: "<rootDir>/setupEnzyme.ts",
+  setupTestFrameworkScriptFile: "<rootDir>/setupEnzyme.js",
   testMatch: [
     "<rootDir>/src/**/__tests__/**/*.(t|j)s?(x)",
     "<rootDir>/src/**/?(*.)(spec|test).(t|j)s?(x)"
