@@ -35,35 +35,13 @@ module.exports = env => {
     module: {
       rules: [
         {
-          test: /\.[jt]sx?$/,
+          test: /\.[jmt]sx?$/,
           exclude: /node_modules/,
           use: [
-            // {
-            //   loader: "babel-loader",
-            //   options: {
-            //     cacheDirectory: true,
-            //     babelrc: false,
-            //     presets: [
-            //       [
-            //         "@babel/preset-env",
-            //         { targets: { browsers: "last 2 versions" } }
-            //       ],
-            //       "@babel/preset-typescript"
-            //     ],
-            //     plugins: [
-            //       ["@babel/plugin-proposal-decorators", { legacy: true }],
-            //       ["@babel/plugin-proposal-class-properties", { loose: true }],
-            //
-            //       // These should be babel-preset-preact...
-            //       ["@babel/plugin-transform-react-jsx", { pragma: "h" }],
-            //       "@babel/plugin-syntax-jsx"
-            //     ]
-            //   }
-            // },
             {
-              loader: "ts-loader",
+              loader: "babel-loader",
               options: {
-                transpileOnly: true
+                cacheDirectory: true
               }
             },
             {
