@@ -10,7 +10,9 @@
     "start": "webpack-dev-server",
     "build": "webpack --env.production",
     "test": "tslint -p tsconfig.json | jest",
-    "serve": "serve -s ./public"
+    "serve": "serve -s ./public",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "dependencies": {
     "portable-fetch": "^3.0.0",
@@ -33,6 +35,10 @@
     "@babel/preset-env": "^7.1.0",
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.1.0",
+    "@storybook/addon-actions": "^4.0.0-alpha.23",
+    "@storybook/addon-links": "^4.0.0-alpha.23",
+    "@storybook/addons": "^4.0.0-alpha.23",
+    "@storybook/react": "^4.0.0-alpha.23",
     "@types/enzyme": "^3.1.14",
     "@types/enzyme-adapter-react-16": "^1.0.3",
     "@types/jest": "^23.3.1",
@@ -43,6 +49,9 @@
     "@types/react-router": "^4.0.31",
     "@types/react-router-dom": "^4.3.1",
     "@types/redux-logger": "^3.0.6",
+    "@types/storybook__addon-actions": "^3.4.1",
+    "@types/storybook__addon-links": "^3.3.2",
+    "@types/storybook__react": "^3.0.9",
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^23.6.0",
     "babel-loader": "^8.0.4",
