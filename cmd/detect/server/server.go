@@ -190,7 +190,7 @@ func (s HandlerClosure) Runner(res http.ResponseWriter, req *http.Request) {
 	switch req.Method {
 	case "GET":
 		err := get(res, req, s.Ch, nil /* indicates "gimme-all" */)
-		if err {
+		if err != nil {
 			log.Print(err)
 		}
 	}
