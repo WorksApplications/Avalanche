@@ -1,4 +1,4 @@
-import { FunctionalComponent, h } from "preact";
+import * as React from "react";
 // @ts-ignore
 import styles from "./AliveIndicator.scss";
 
@@ -6,7 +6,7 @@ interface IProperty {
   isAlive: boolean;
 }
 
-const AliveIndicator: FunctionalComponent<IProperty> = ({ ...props }) => (
+const AliveIndicator: React.StatelessComponent<IProperty> = ({ ...props }) => (
   <div className={styles.wrap}>
     <div
       className={[

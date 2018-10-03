@@ -1,4 +1,4 @@
-import { Component, h } from "preact";
+import * as React from "react";
 import Link from "./Link";
 // @ts-ignore
 import styles from "./SnapshotList.scss";
@@ -19,7 +19,7 @@ export interface IProperty {
   emptyMessage?: string;
 }
 
-class SnapshotList extends Component<IProperty, {}> {
+class SnapshotList extends React.Component<IProperty, {}> {
   public render() {
     return (
       <div className={styles.wrap}>

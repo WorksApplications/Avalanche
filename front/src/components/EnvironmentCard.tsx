@@ -1,4 +1,4 @@
-import { Component, h } from "preact";
+import * as React from "react";
 // @ts-ignore
 import styles from "./EnvironmentCard.scss";
 
@@ -14,7 +14,7 @@ export interface IProperty {
   onEdit(): void;
 }
 
-class EnvironmentCard extends Component<IProperty, {}> {
+class EnvironmentCard extends React.Component<IProperty, {}> {
   public render() {
     let kind: string | null = null;
     switch (this.props.kind) {

@@ -1,4 +1,4 @@
-import { h } from "preact";
+import * as React from "react";
 import SelectorBase, { IProperty, IStyles } from "./SelectorBase";
 // @ts-ignore
 import styles from "./SnapshotFilter.scss";

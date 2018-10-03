@@ -1,4 +1,4 @@
-import { Component, h } from "preact";
+import * as React from "react";
 import AliveIndicator from "./AliveIndicator";
 // @ts-ignore
 import styles from "./PodCard.scss";
@@ -19,9 +19,9 @@ export interface IState {
   isOpen: boolean;
 }
 
-class PodCard extends Component<IProperty, IState> {
-  constructor() {
-    super();
+class PodCard extends React.Component<IProperty, IState> {
+  constructor(props: IProperty) {
+    super(props);
 
     this.state = { isOpen: false };
   }

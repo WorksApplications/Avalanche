@@ -1,4 +1,4 @@
-import { Component, h } from "preact";
+import * as React from "react";
 
 export interface IStyles {
   optionList?: string;
@@ -32,7 +32,7 @@ interface IState {
 }
 
 // TODO write test
-class SelectorBase extends Component<IProperty, IState> {
+class SelectorBase extends React.Component<IProperty, IState> {
   public static defaultProps: Partial<IProperty> = {
     disabled: false,
     styles: {

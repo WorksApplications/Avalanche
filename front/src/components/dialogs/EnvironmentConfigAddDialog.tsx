@@ -1,4 +1,4 @@
-import { Component, h } from "preact";
+import * as React from "react";
 // @ts-ignore
 import dialogStyles from "../EnvironmentModalDialogFoundation.scss";
 
@@ -21,7 +21,7 @@ export interface IProperty {
   onAccept(): void;
 }
 
-class EnvironmentConfigAddDialog extends Component<IProperty, {}> {
+class EnvironmentConfigAddDialog extends React.Component<IProperty, {}> {
   public render() {
     // TODO url validation
     const isValidData =
@@ -56,7 +56,7 @@ class EnvironmentConfigAddDialog extends Component<IProperty, {}> {
                 checked={this.props.isMultitenant === true}
                 onChange={this.onIsMultitenantChange.bind(this)}
               />
-              <label for="kind-mt">MT</label>
+              <label htmlFor="kind-mt">MT</label>
               <input
                 type="radio"
                 id="kind-st"
@@ -65,7 +65,7 @@ class EnvironmentConfigAddDialog extends Component<IProperty, {}> {
                 checked={this.props.isMultitenant === false}
                 onChange={this.onIsMultitenantChange.bind(this)}
               />
-              <label for="kind-st">ST</label>
+              <label htmlFor="kind-st">ST</label>
               {/*<div className={dialogStyles.description}>a</div>*/}
             </div>
           </div>
@@ -94,7 +94,7 @@ class EnvironmentConfigAddDialog extends Component<IProperty, {}> {
                 checked={this.props.version === "-17.12"}
                 onChange={this.onVersionChange.bind(this)}
               />
-              <label for="ver-b1712">Before 17.12</label>
+              <label htmlFor="ver-b1712">Before 17.12</label>
               <input
                 type="radio"
                 id="ver-a1803"
@@ -103,7 +103,7 @@ class EnvironmentConfigAddDialog extends Component<IProperty, {}> {
                 checked={this.props.version === "18.03-"}
                 onChange={this.onVersionChange.bind(this)}
               />
-              <label for="ver-a1803">After 18.03</label>
+              <label htmlFor="ver-a1803">After 18.03</label>
               {/*<div className={dialogStyles.description}>a</div>*/}
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { Component, h } from "preact";
+import * as React from "react";
 // @ts-ignore
 import styles from "./FilterInput.scss";
 
@@ -11,7 +11,15 @@ interface IState {
   value: string;
 }
 
-class FilterInput extends Component<IProperty, IState> {
+class FilterInput extends React.Component<IProperty, IState> {
+  constructor(props: IProperty) {
+    super(props);
+
+    this.state = {
+      value: ""
+    };
+  }
+
   public render() {
     return (
       <div className={styles.wrap}>
@@ -22,6 +30,7 @@ class FilterInput extends Component<IProperty, IState> {
           value={this.state.value}
           onKeyUp={this.change.bind(this)}
           placeholder={this.props.placeholder}
+          onChange={this.change.bind(this)}
         />
       </div>
     );

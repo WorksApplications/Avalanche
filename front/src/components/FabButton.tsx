@@ -1,4 +1,4 @@
-import { FunctionalComponent, h } from "preact";
+import * as React from "react";
 // @ts-ignore
 import styles from "./FabButton.scss";
 
@@ -8,7 +8,7 @@ interface IProperty {
   onClick(): void;
 }
 
-const FabButton: FunctionalComponent<IProperty> = ({ ...props }) => (
+const FabButton: React.StatelessComponent<IProperty> = ({ ...props }) => (
   <div className={styles.wrap} onClick={props.onClick}>
     <div className={styles.innerWrap}>
       <span className={styles.tooltip}>{props.tooltip}</span>

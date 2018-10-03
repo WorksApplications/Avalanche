@@ -1,5 +1,5 @@
-import { Component, FunctionalComponent, h } from "preact";
-import { connect } from "preact-redux";
+import * as React from "react";
+import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
 import { getRunningPods, postSnapshot } from "../actions";
 import PodCardList from "../components/PodCardList";
@@ -21,6 +21,8 @@ interface IDispatchProps {
   postSnapshot: typeof postSnapshot;
   getRunningPods: typeof getRunningPods;
 }
+
+type IProps = IStateProps & IDispatchProps;
 
 function sortedPods(pods: IPodInfo[]): IPodInfo[] {
   return pods.sort((a, b) => {
@@ -70,9 +72,9 @@ const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
   mapStateToProps,
   mapDispatchToProps
 )
-class RunningPodsView extends Component<IStateProps & IDispatchProps, IState> {
-  constructor() {
-    super();
+class RunningPodsView extends React.Component<IProps, IState> {
+  constructor(props: IProps) {
+    super(props);
     this.state = {
       filteringValue: ""
     };
@@ -155,4 +157,4 @@ class RunningPodsView extends Component<IStateProps & IDispatchProps, IState> {
   }
 }
 
-export default (RunningPodsView as any) as FunctionalComponent;
+export default (RunningPodsView as any) as React.ComponentClass;

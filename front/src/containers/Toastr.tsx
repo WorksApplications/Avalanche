@@ -1,5 +1,5 @@
-import { Component, FunctionalComponent, h } from "preact";
-import { connect } from "preact-redux";
+import * as React from "react";
+import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
 import { hideToastr } from "../actions";
 import { IApplicationState } from "../store";
@@ -37,7 +37,7 @@ const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
   mapStateToProps,
   mapDispatchToProps
 )
-class Toastr extends Component<IStateProps & IDispatchProps> {
+class Toastr extends React.Component<IStateProps & IDispatchProps> {
   public render() {
     const dismissToastr = () =>
       this.props.hideToastr({ id: this.props.id || 0 });
@@ -64,4 +64,4 @@ class Toastr extends Component<IStateProps & IDispatchProps> {
   }
 }
 
-export default (Toastr as any) as FunctionalComponent;
+export default (Toastr as any) as React.ComponentClass;

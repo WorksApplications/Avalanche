@@ -1,30 +1,31 @@
-import { Component, h } from "preact";
+import * as React from "react";
 // tslint:disable-next-line:no-submodule-imports
-import { Link } from "preact-router/match";
+import { NavLink } from "react-router-dom";
 // @ts-ignore
 import styles from "./NavigationView.scss";
 
-class NavigationView extends Component {
+class NavigationView extends React.Component {
   public render() {
     return (
       <div className={styles.wrap}>
         <div className={styles.viewList}>
-          <Link
+          <NavLink
+            exact={true}
             activeClassName={styles.selected}
             className={styles.viewItem}
-            href="/"
+            to="/"
           >
             Snapshots
-          </Link>
+          </NavLink>
         </div>
         <div className={styles.controlList}>
-          <Link
+          <NavLink
             activeClassName={styles.selected}
             className={styles.viewItem}
-            href={"/config"}
+            to={"/config"}
           >
             Config
-          </Link>
+          </NavLink>
         </div>
       </div>
     );

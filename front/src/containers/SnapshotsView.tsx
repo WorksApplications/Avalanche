@@ -1,6 +1,6 @@
-import { Component, FunctionalComponent, h } from "preact";
-import { connect } from "preact-redux";
 import * as qs from "querystring";
+import * as React from "react";
+import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
 import {
   getApps,
@@ -115,7 +115,7 @@ const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
   mapStateToProps,
   mapDispatchToProps
 )
-class SnapshotsView extends Component<IStateProps & IDispatchProps> {
+class SnapshotsView extends React.Component<IStateProps & IDispatchProps> {
   public componentDidMount() {
     this.props.getApps();
 
@@ -291,4 +291,4 @@ class SnapshotsView extends Component<IStateProps & IDispatchProps> {
   }
 }
 
-export default (SnapshotsView as any) as FunctionalComponent;
+export default (SnapshotsView as any) as React.ComponentClass;

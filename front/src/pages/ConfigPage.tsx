@@ -1,5 +1,5 @@
-import { Component, FunctionalComponent, h } from "preact";
-import { connect } from "preact-redux";
+import * as React from "react";
+import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
 import {
   addEnvironmentConfig,
@@ -36,6 +36,8 @@ interface IDispatchProps {
   addEnvironmentConfig: typeof addEnvironmentConfig;
 }
 
+type IProps = IStateProps & IDispatchProps;
+
 const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
   environmentConfigs: state.environmentConfig.environmentConfigs
 });
@@ -50,9 +52,9 @@ const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
   mapStateToProps,
   mapDispatchToProps
 )
-class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
-  constructor() {
-    super();
+class ConfigPage extends React.Component<IProps, IState> {
+  constructor(props: IProps) {
+    super(props);
     this.state = {
       filteringValue: "",
       showsModifyDialog: false,
@@ -238,4 +240,4 @@ class ConfigPage extends Component<IStateProps & IDispatchProps, IState> {
   }
 }
 
-export default (ConfigPage as any) as FunctionalComponent;
+export default (ConfigPage as any) as React.ComponentClass;

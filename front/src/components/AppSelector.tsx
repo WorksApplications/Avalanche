@@ -1,4 +1,4 @@
-import { h } from "preact";
+import * as React from "react";
 // @ts-ignore
 import styles from "./AppSelector.scss";
 import SelectorBase, { IProperty, IStyles } from "./SelectorBase";

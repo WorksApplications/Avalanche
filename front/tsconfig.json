@@ -6,7 +6,6 @@
     "sourceMap": true,
     "allowJs": true,
     "jsx": "react",
-    "jsxFactory": "h",
     "moduleResolution": "node",
     "rootDirs": ["src"],
     "forceConsistentCasingInFileNames": true,
