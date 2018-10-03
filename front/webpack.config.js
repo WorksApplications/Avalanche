@@ -9,9 +9,6 @@ const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const dest = path.resolve(__dirname, "./public");
 const index = path.resolve(__dirname, "./src/index.tsx");
 
-const history = require("connect-history-api-fallback");
-const convert = require("koa-connect");
-
 module.exports = env => {
   const isProduction = env && env.production;
   const apiBaseUrl = env.API_BASE_URL || process.env.API_BASE_URL;
@@ -137,15 +134,10 @@ module.exports = env => {
         })
       ]
     },
-    devtool: isProduction ? "source-map" : "cheap-module-eval-source-map",
-    serve: {
-      add: app => {
-        const historyOptions = {
-          index: "/index.html"
-        };
-
-        app.use(convert(history(historyOptions)));
-      }
-    }
+    devServer: {
+      contentBase: dest,
+      historyApiFallback: true
+    },
+    devtool: isProduction ? "source-map" : "cheap-module-eval-source-map"
   };
 };
