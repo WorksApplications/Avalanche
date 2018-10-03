@@ -1,5 +1,5 @@
-import { Component, FunctionalComponent, h } from "preact";
-import { connect } from "preact-redux";
+import * as React from "react";
+import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
 import { hideToastr } from "../actions";
 import { IApplicationState } from "../store";
@@ -37,7 +37,7 @@ const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
   mapStateToProps,
   mapDispatchToProps
 )
-class Toastr extends Component<IStateProps & IDispatchProps> {
+class Toastr extends React.Component<IStateProps & IDispatchProps> {
   public render() {
     const dismissToastr = () =>
       this.props.hideToastr({ id: this.props.id || 0 });
@@ -45,11 +45,7 @@ class Toastr extends Component<IStateProps & IDispatchProps> {
       <div
         className={[
           styles.wrap,
-          this.props.message == null
-            ? styles.init
-            : this.props.isShown
-              ? styles.shown
-              : styles.hidden,
+          this.props.isShown ? styles.shown : styles.hidden,
           this.props.message == null
             ? undefined
             : this.props.kind === "success"
@@ -59,8 +55,8 @@ class Toastr extends Component<IStateProps & IDispatchProps> {
                 : undefined
         ].join(" ")}
       >
-        {this.props.message}
-        <span className={styles.dismissButton} onMouseDown={dismissToastr}>
+        <span className={styles.message}>{this.props.message}</span>
+        <span className={styles.dismissButton} onClick={dismissToastr}>
           &#x2716;
         </span>
       </div>
@@ -68,4 +64,4 @@ class Toastr extends Component<IStateProps & IDispatchProps> {
   }
 }
 
-export default (Toastr as any) as FunctionalComponent;
+export default (Toastr as any) as React.ComponentClass;

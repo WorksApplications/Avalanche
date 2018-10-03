@@ -4,12 +4,10 @@ const path = require("path");
 const DefinePlugin = require("webpack").DefinePlugin;
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
+const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
 const dest = path.resolve(__dirname, "./public");
 const index = path.resolve(__dirname, "./src/index.tsx");
-
-const history = require("connect-history-api-fallback");
-const convert = require("koa-connect");
 
 module.exports = env => {
   const isProduction = env && env.production;
@@ -34,10 +32,14 @@ module.exports = env => {
     module: {
       rules: [
         {
-          test: /\.tsx?$/,
+          test: /\.[jmt]sx?$/,
+          exclude: /node_modules/,
           use: [
             {
-              loader: "ts-loader"
+              loader: "babel-loader",
+              options: {
+                cacheDirectory: true
+              }
             },
             {
               loader: "ifdef-loader",
@@ -69,6 +71,33 @@ module.exports = env => {
               }
             }
           ]
+        },
+        {
+          test: /\.css$/,
+          use: [
+            isProduction ? MiniCssExtractPlugin.loader : "style-loader",
+            {
+              loader: "css-loader",
+              options: {
+                localIdentName: isProduction
+                  ? "[hash:base64:5]"
+                  : "[name]__[local]--[hash:base64:5]"
+              }
+            }
+          ]
+        },
+        {
+          // WAP fonts
+          test: /\.(woff(2)?|ttf|eot|svg)(\?[a-z1-9]+)?$/,
+          use: [
+            {
+              loader: "file-loader",
+              options: {
+                name: "[name].[hash:base64:5].[ext]",
+                outputPath: "fonts/"
+              }
+            }
+          ]
         }
       ]
     },
@@ -76,7 +105,7 @@ module.exports = env => {
       new HtmlPlugin({
         title: appName,
         minify: isProduction,
-        template: 'src/index.html'
+        template: "src/index.html"
       }),
       new MiniCssExtractPlugin({
         filename: "[name].[hash:8].css",
@@ -86,7 +115,8 @@ module.exports = env => {
         COLLECT_API_BASE: JSON.stringify(apiBaseUrl),
         IS_DEBUG: !isProduction,
         APP_NAME: `"${appName}"`
-      })
+      }),
+      new ForkTsCheckerWebpackPlugin()
     ],
     optimization: {
       minimizer: [
@@ -104,15 +134,10 @@ module.exports = env => {
         })
       ]
     },
-    devtool: isProduction ? "source-map" : "cheap-module-eval-source-map",
-    serve: {
-      add: app => {
-        const historyOptions = {
-          index: "/index.html"
-        };
-
-        app.use(convert(history(historyOptions)));
-      }
-    }
+    devServer: {
+      contentBase: dest,
+      historyApiFallback: true
+    },
+    devtool: isProduction ? "source-map" : "cheap-module-eval-source-map"
   };
 };

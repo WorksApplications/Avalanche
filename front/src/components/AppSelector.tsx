@@ -1,4 +1,4 @@
-import { h } from "preact";
+import * as React from "react";
 // @ts-ignore
 import styles from "./AppSelector.scss";
 import SelectorBase, { IProperty, IStyles } from "./SelectorBase";
@@ -12,7 +12,9 @@ export default (props: IProperty) => {
     selector: styles.selector,
     wrap: styles.wrap,
     selected: styles.selected,
-    placeholder: styles.placeholder
+    placeholder: styles.placeholder,
+    searching: styles.searching,
+    preSelected: styles.preSelected
   };
   return <SelectorBase styles={bindingStyles} {...props} />;
 };

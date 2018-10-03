@@ -1,4 +1,4 @@
-import { Component, h } from "preact";
+import * as React from "react";
 import PodCard, { IProperty as IPodCardProperty } from "./PodCard";
 // @ts-ignore
 import styles from "./PodCardList.scss";
@@ -9,7 +9,7 @@ export interface IProperty {
   kind: string;
 }
 
-class PodCardList extends Component<IProperty, {}> {
+class PodCardList extends React.Component<IProperty, {}> {
   public render() {
     return (
       <div className={styles.wrap}>

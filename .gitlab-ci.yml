@@ -34,7 +34,7 @@ front-build:
         - cd front
         - yarn add --dev webpack webpack-cli
         - npm install
-        - PATH=$PATH:$(pwd)/node_modules/.bin yarn build
+        - PATH=$PATH:$(pwd)/node_modules/.bin yarn build --env.API_BASE_URL=${API_BASE_URL}
     cache:
         key: react
         paths:

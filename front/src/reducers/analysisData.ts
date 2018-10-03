@@ -4,42 +4,12 @@ import {
   getAppsAsyncAction,
   getEnvironmentsOfAppAsyncAction,
   getRunningPodsAsyncAction,
+  postSnapshotAsyncAction,
   selectApp,
   selectEnv,
   selectPod
 } from "../actions";
-import * as collect from "../generated/collect/api";
-import {
-  IAnalysisDataState,
-  IEnvironmentInfo,
-  IPodInfo,
-  ISnapshotInfo
-} from "../store";
-
-function podInfoConvert(pod: collect.Pod): IPodInfo {
-  const created = new Date(pod.createdAt ? pod.createdAt : 0)
-  return {
-    id: pod.id,
-    name: pod.name,
-    isAlive: pod.isAlive,
-    createdAt: created,
-    app: pod.app,
-    env: pod.environment,
-    snapshots: (pod.snapshots || []).map(s => snapshotInfoConvert(s))
-  };
-}
-
-function snapshotInfoConvert(snapshot: collect.Snapshot): ISnapshotInfo {
-  const created = new Date(snapshot.createdAt ? snapshot.createdAt : 0)
-  return {
-    uuid: snapshot.uuid,
-    name: undefined,
-    pod: snapshot.pod,
-    environment: snapshot.environment,
-    createdAt: created,
-    link: snapshot.flamescopeLink
-  };
-}
+import { IAnalysisDataState } from "../store";
 
 const INIT: IAnalysisDataState = {
   applicationName: null,
@@ -58,46 +28,61 @@ export function analysisData(
     return { ...state, applicationName: action.payload.appName };
   }
   if (isType(action, getAppsAsyncAction.done)) {
-    return { ...state, applications: action.payload.result.apps.sort() };
+    return { ...state, applications: action.payload.result.apps };
   }
   if (isType(action, selectEnv)) {
     return { ...state, selectedEnvironment: action.payload.envName };
   }
   if (isType(action, getEnvironmentsOfAppAsyncAction.done)) {
     const newEnvironments = { ...state.environments };
-    const envInfos: IEnvironmentInfo[] = action.payload.result.envs.map(e => ({
-      id: e.id,
-      name: e.name,
-      pods: (e.pods || []).map<IPodInfo>(p => podInfoConvert(p)),
-      liveCount: e.liveCount
-    }));
-    for (const e of envInfos) {
+    for (const e of action.payload.result.envs) {
       newEnvironments[e.name] = e;
     }
     return { ...state, environments: newEnvironments };
   }
   if (isType(action, getRunningPodsAsyncAction.done)) {
-    return {
-      ...state,
-      runningPods: action.payload.result.pods.map(p => podInfoConvert(p)).sort((a: IPodInfo, b: IPodInfo) => {
-        if (typeof(a) === "undefined") {
-          return 1
-        }
-        else if (typeof(b) === "undefined") {
-          return -1
-        }
-        else if (typeof(a.createdAt) === "undefined") {
-          return 1
-        }
-        else if (typeof(b.createdAt) === "undefined") {
-          return -1
-        }
-        return b.createdAt.getTime() - a.createdAt.getTime()
-    })
-    };
+    return { ...state, runningPods: action.payload.result.pods };
   }
   if (isType(action, selectPod)) {
     return { ...state, selectedPod: action.payload.podName };
   }
+  if (isType(action, postSnapshotAsyncAction.started)) {
+    return {
+      ...state,
+      runningPods: state.runningPods.map(
+        pod =>
+          pod.name === action.payload.podId ? { ...pod, isSaving: true } : pod
+      )
+    };
+  }
+  if (isType(action, postSnapshotAsyncAction.done)) {
+    return {
+      ...state,
+      runningPods: state.runningPods.map(
+        pod =>
+          pod.name === action.payload.params.podId
+            ? {
+                ...pod,
+                isSaving: false,
+                snapshots: pod.snapshots
+                  ? [...pod.snapshots, action.payload.result.newSnapshot]
+                  : [action.payload.result.newSnapshot]
+              }
+            : pod
+      )
+    };
+  }
+  if (isType(action, postSnapshotAsyncAction.failed)) {
+    return {
+      ...state,
+      runningPods: state.runningPods.map(
+        pod =>
+          pod.name === action.payload.params.podId
+            ? { ...pod, isSaving: false }
+            : pod
+      )
+    };
+  }
+
   return state;
 }

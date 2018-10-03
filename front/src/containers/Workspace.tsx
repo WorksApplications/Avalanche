@@ -1,12 +1,12 @@
-import { Component, h } from "preact";
-import Router, { Route } from "preact-router";
+import * as React from "react";
+import { Route, Switch } from "react-router-dom";
 import ConfigPage from "../pages/ConfigPage";
 import SnapshotPage from "../pages/SnapshotPage";
 import NavigationView from "./NavigationView";
 // @ts-ignore
 import styles from "./Workspace.scss";
 
-class Workspace extends Component {
+class Workspace extends React.Component {
   public render() {
     return (
       <div className={styles.wrap}>
@@ -14,10 +14,15 @@ class Workspace extends Component {
           <NavigationView />
         </nav>
         <main className={styles.main}>
-          <Router>
-            <Route component={SnapshotPage} path="/" default={true} />
+          <Switch>
+            <Route
+              exact={true}
+              component={SnapshotPage}
+              path="/"
+              default={true}
+            />
             <Route component={ConfigPage} path="/config" />
-          </Router>
+          </Switch>
         </main>
       </div>
     );

@@ -1,12 +1,12 @@
-import { Component, ComponentChildren, h } from "preact";
+import * as React from "react";
 // @ts-ignore
 import styles from "./EnvironmentModalDialogFoundation.scss";
 
-class EnvironmentModalDialogFoundation extends Component {
-  public render({ children }: { children: ComponentChildren }) {
+class EnvironmentModalDialogFoundation extends React.Component {
+  public render() {
     return (
       <div className={styles.wrap}>
-        <div className={styles.inner}>{children}</div>
+        <div className={styles.inner}>{this.props.children}</div>
       </div>
     );
   }

@@ -22,6 +22,7 @@ export interface IPodInfo {
   app?: string;
   env?: string;
   snapshots?: ISnapshotInfo[];
+  isSaving?: boolean;
 }
 
 export interface IEnvironmentInfo {
@@ -71,4 +72,14 @@ middlewares = [...middlewares, logger];
 /// #endif
 
 const store = createStore(rootReducer, applyMiddleware(...middlewares));
+
+/// #if DEBUG
+declare var module: any;
+if (module.hot) {
+  module.hot.accept("../reducers", () =>
+    store.replaceReducer(require("../reducers").default)
+  );
+}
+/// #endif
+
 export default store;

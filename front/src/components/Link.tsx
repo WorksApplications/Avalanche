@@ -1,4 +1,4 @@
-import { FunctionalComponent, h } from "preact";
+import * as React from "react";
 // @ts-ignore
 import styles from "./Link.scss";
 
@@ -6,7 +6,7 @@ interface IProperty {
   href: string;
 }
 
-const Link: FunctionalComponent<IProperty> = ({ children, ...props }) => (
+const Link: React.StatelessComponent<IProperty> = ({ children, ...props }) => (
   <span className={styles.wrap}>
     <a
       className={styles.anchor}

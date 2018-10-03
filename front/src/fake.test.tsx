@@ -1,9 +1,9 @@
-import { h } from "preact";
-// tslint:disable:no-implicit-dependencies
-import { shallow } from "preact-render-spy";
+// tslint:disable-next-line:no-implicit-dependencies
+import { shallow } from "enzyme";
+import * as React from "react";
 
 it("should a", () => {
-  const Node = ({ name }) => <div>{name}</div>;
+  const Node = ({ name }: { name: string }) => <div>{name}</div>;
   const context = shallow(<Node name="example" />);
-  expect(context.find("div")).toBeTruthy();
+  expect(context.find("div").exists()).toBeTruthy();
 });

@@ -1,4 +1,4 @@
-import { Component, h } from "preact";
+import * as React from "react";
 import EnvironmentCard, {
   IProperty as IEnvironmentCardProperty
 } from "./EnvironmentCard";
@@ -10,7 +10,7 @@ export interface IProperty {
   noDataMessage?: string;
 }
 
-class EnvironmentCardList extends Component<IProperty, {}> {
+class EnvironmentCardList extends React.Component<IProperty, {}> {
   public render() {
     const isNotEmpty = this.props.data && this.props.data.length > 0;
     return (

@@ -6,7 +6,6 @@
     "sourceMap": true,
     "allowJs": true,
     "jsx": "react",
-    "jsxFactory": "h",
     "moduleResolution": "node",
     "rootDirs": ["src"],
     "forceConsistentCasingInFileNames": true,
@@ -17,12 +16,14 @@
     "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": true,
     "baseUrl": ".",
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "skipLibCheck": true
   },
   "exclude": [
     "node_modules",
     "public",
     "*config.js",
+    "mock",
     "src/**/__tests__/**/*.ts",
     "src/**/*.spec.tsx",
     "src/**/*.test.tsx"

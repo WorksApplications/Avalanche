@@ -1,4 +1,4 @@
-import { h } from "preact";
+import * as React from "react";
 import SelectorBase, { IProperty, IStyles } from "./SelectorBase";
 // @ts-ignore
 import styles from "./SnapshotFilter.scss";
@@ -14,7 +14,9 @@ export default (props: IProperty) => {
     wrap: styles.wrap,
     selected: styles.selected,
     unselectOption: styles.unselectOption,
-    disabled: styles.disabled
+    disabled: styles.disabled,
+    searching: styles.searching,
+    preSelected: styles.preSelected
   };
   return <SelectorBase styles={bindingStyles} {...props} />;
 };

@@ -1,11 +1,12 @@
 module.exports = {
   collectCoverageFrom: ["src/**/*.{js,jsx,ts,tsx}"],
-  "transform": {
-    "^.+\\.tsx?$": "ts-jest"
+  transform: {
+    "^.+\\.(j|m|t)sx?$": "babel-jest"
   },
+  setupTestFrameworkScriptFile: "<rootDir>/setupEnzyme.js",
   testMatch: [
-    "<rootDir>/src/**/__tests__/**/*.ts?(x)",
-    "<rootDir>/src/**/?(*.)(spec|test).ts?(x)"
+    "<rootDir>/src/**/__tests__/**/*.(t|j)s?(x)",
+    "<rootDir>/src/**/?(*.)(spec|test).(t|j)s?(x)"
   ],
   moduleFileExtensions: [
     "mjs",
@@ -19,5 +20,6 @@ module.exports = {
     "jsx",
     "json",
     "node"
-  ]
+  ],
+  unmockedModulePathPatterns: ["react", "enzyme", "jest-enzyme"]
 };
