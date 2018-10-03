@@ -143,12 +143,22 @@ func get(res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequ
 	case <-t.C:
 		/* Couldn't write the request within a period(maybe Exchange() is gone). Inform this failure to him */
 		res.WriteHeader(http.StatusRequestTimeout)
-		return fmt.Errorf("Time flies: scan request failed; maybe stuck the scanner?: Magic: %x", rand.Int31())
+		log.Println("Scanner Request can't be sent")
+		return fmt.Errorf("Time flies: scan request failed; maybe stuck the scanner?")
 	case ch <- &sreq:
 		/* Request is written. Wait for all the answer */
 		subs := make([]*detect.Subscription, 0)
-		for sub := range resc {
-			subs = append(subs, sub)
+		for {
+			select {
+			case sub, ok := <-resc:
+				subs = append(subs, sub)
+				if !ok {
+					break
+				}
+			case <-t.C:
+				log.Println("Scanner can't reply")
+				return fmt.Errorf("Scanner is frozen")
+			}
 		}
 		reply, e := json.Marshal(&subs)
 		if e != nil {
@@ -167,7 +177,7 @@ func (s HandlerClosure) SubRunner(res http.ResponseWriter, req *http.Request) {
 		env := strings.TrimPrefix(req.URL.Path, "/subscriptions/")
 		if env == "" {
 			log.Printf("S: OBSOLETE: %s %s", req.Method, req.URL.Path)
-			get(res, req, s.Ch, nil)
+			s.Runner(res, req)
 		} else {
 			log.Printf("S: %s %s", req.Method, req.URL.Path)
 			get(res, req, s.Ch, &env)
@@ -179,7 +189,10 @@ func (s HandlerClosure) Runner(res http.ResponseWriter, req *http.Request) {
 	log.Printf("R: %s %s", req.Method, req.URL.Path)
 	switch req.Method {
 	case "GET":
-		get(res, req, s.Ch, nil /* indicates "gimme-all" */)
+		err = get(res, req, s.Ch, nil /* indicates "gimme-all" */)
+		if err {
+			log.Print(err)
+		}
 	}
 }
 
