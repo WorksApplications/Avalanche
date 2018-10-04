@@ -191,7 +191,7 @@ func (s HandlerClosure) Runner(res http.ResponseWriter, req *http.Request) {
 	case "GET":
 		err := get(res, req, s.Ch, nil /* indicates "gimme-all" */)
 		if err != nil {
-			log.Print(err)
+			panic(err)
 		}
 	}
 }
