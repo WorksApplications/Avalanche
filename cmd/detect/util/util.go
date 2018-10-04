@@ -79,11 +79,15 @@ func Exchange(ch chan *ScannerRequest) {
 				isc <- sub
 				log.Printf("[Scan manager] sent:", *env)
 			case DESC:
+                log.Printf("DESC1")
 				if env == nil {
+                    log.Printf("DESC2")
 					for _, sub := range m {
+                    log.Printf("DESC3")
 						req.Ret <- sub
 					}
 				} else {
+                    log.Printf("DESC5")
 					sub, prs := m[*env]
 					if !prs {
 						log.Printf("Not found %s", *env)
@@ -91,6 +95,7 @@ func Exchange(ch chan *ScannerRequest) {
 						req.Ret <- sub
 					}
 				}
+                log.Printf("DESC4")
 				close(req.Ret)
 			}
 		}

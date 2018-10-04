@@ -148,17 +148,8 @@ func get(res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequ
 	case ch <- &sreq:
 		/* Request is written. Wait for all the answer */
 		subs := make([]*detect.Subscription, 0)
-		for {
-			select {
-			case sub, ok := <-resc:
-				subs = append(subs, sub)
-				if !ok {
-					break
-				}
-			case <-t.C:
-				log.Println("Scanner can't reply")
-				return fmt.Errorf("Scanner is frozen")
-			}
+        for sub := range resc {
+			subs = append(subs, sub)
 		}
 		reply, e := json.Marshal(&subs)
 		if e != nil {

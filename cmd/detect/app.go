@@ -2,10 +2,9 @@ package main
 
 import (
 	"database/sql"
+	"net/http"
 	"flag"
 	"log"
-	"net/http"
-	"runtime/debug"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -31,8 +30,6 @@ func main() {
 	flag.Parse()
 	args := flag.Args()
 	log.Println(args)
-
-	debug.SetTraceback("system")
 
 	db := establishDBConn(*dbconf)
 	t := true
