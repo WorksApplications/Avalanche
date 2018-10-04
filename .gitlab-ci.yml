@@ -2,7 +2,7 @@ backend-build:
     except:
         - develop/front
     stage: build
-    image: golang:1.9
+    image: golang:1.11
     script:
         - tar xf cache-go.tar.gz -C / || true
         - mkdir -p /go/src/git.paas.workslan/resource_optimization
