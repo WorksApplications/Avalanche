@@ -90,7 +90,7 @@ class RunningPodsView extends React.Component<IProps, IState> {
       .map(p => ({
         id: (p.id || "").toString(),
         name: p.name,
-        createdAt: p.createdAt ? p.createdAt.toLocaleString() : "Unknown",
+        createdAt: p.createdAt,
         app: p.app || "Unknown",
         environment: p.env || "Unknown",
         isAlive: p.isAlive || false,

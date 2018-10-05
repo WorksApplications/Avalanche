@@ -5,7 +5,7 @@ import styles from "./PodCard.scss";
 
 export interface IProperty {
   name: string;
-  createdAt: string;
+  createdAt?: Date;
   app: string;
   environment: string;
   snapshots: Array<{ uuid: string; createdAt?: Date; link?: string }>;
@@ -70,7 +70,11 @@ class PodCard extends React.Component<IProperty, IState> {
           )}
           <div className={styles.info}>
             <span className={styles.environment}>{this.props.environment}</span>
-            <span className={styles.createdAt}>{this.props.createdAt}</span>
+            <span className={styles.createdAt}>
+              {this.props.createdAt
+                ? this.props.createdAt.toLocaleString()
+                : "Unknown"}
+            </span>
           </div>
           {this.state.isOpen && (
             <div className={styles.snapshotsArea}>
@@ -86,7 +90,7 @@ class PodCard extends React.Component<IProperty, IState> {
                         ...
                       </span>
                       <span className={styles.snapshotDate}>
-                        {s.createdAt && s.createdAt.toLocaleString()}
+                        {s.createdAt ? s.createdAt.toLocaleString() : "Unknown"}
                       </span>
                       <a
                         className={styles.snapshotLink}

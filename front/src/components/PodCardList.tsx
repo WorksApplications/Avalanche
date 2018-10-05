@@ -17,11 +17,15 @@ class PodCardList extends React.Component<IProperty, {}> {
           <span className={styles.kind}>{this.props.kind}</span>
         </div>
         {this.props.data && this.props.data.length > 0 ? (
-          <div>
+          <ul className={styles.cardList}>
             {this.props.data.map(x => {
-              return <PodCard key={x.id} {...x} />;
+              return (
+                <li className={styles.card} key={x.id}>
+                  <PodCard {...x} />
+                </li>
+              );
             })}
-          </div>
+          </ul>
         ) : (
           <div className={styles.empty}>{this.props.noDataMessage}</div>
         )}
