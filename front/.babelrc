@@ -10,7 +10,11 @@
   ],
   "env": {
     "production": {
-      "plugins": ["react-remove-properties", { "properties": ["data-test"] }]
+      "presets": ["react-optimize"],
+      "plugins": [
+        ["react-remove-properties", { "properties": ["data-test"] }],
+        "babel-plugin-closure-elimination"
+      ]
     }
   }
 }
