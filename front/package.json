@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "start": "webpack-dev-server",
+    "start": "webpack-dev-server --hot",
     "build": "webpack --env.production",
     "test": "tslint -p tsconfig.json | jest",
     "serve": "serve -s ./public",
@@ -18,6 +18,7 @@
     "portable-fetch": "^3.0.0",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
+    "react-hot-loader": "^4.3.11",
     "react-redux": "^5.0.7",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",

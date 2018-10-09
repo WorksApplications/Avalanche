@@ -1,4 +1,5 @@
 import * as React from "react";
+import { hot } from "react-hot-loader";
 // @ts-ignore
 import styles from "./App.scss";
 import TitleBar from "./TitleBar";
@@ -21,4 +22,4 @@ class App extends React.Component {
   }
 }
 
-export default App;
+export default hot(module)(App);
