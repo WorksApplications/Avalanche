@@ -1,7 +1,9 @@
 module.exports = {
   collectCoverageFrom: ["src/**/*.{js,jsx,ts,tsx}"],
   transform: {
-    "^.+\\.(j|m|t)sx?$": "babel-jest"
+    ".+\\.(j|m|t)sx?$": "babel-jest",
+    ".+\\.(css|styl|less|sass|scss)$":
+      "<rootDir>/node_modules/jest-css-modules-transform"
   },
   setupTestFrameworkScriptFile: "<rootDir>/setupEnzyme.js",
   testMatch: [
