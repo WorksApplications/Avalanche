@@ -5,8 +5,6 @@ import styles from "./EnvironmentCard.scss";
 export interface IProperty {
   name: string;
   version?: string;
-  nOfMonitored?: number;
-  nOfSnapshot?: number;
   kind: "unconfigured" | "configured" | "observed";
 
   switchEnabled?(): void;
@@ -29,20 +27,10 @@ class EnvironmentCard extends React.Component<IProperty, {}> {
         break;
     }
     return (
-      <div className={[styles.wrap, kind].join(" ")}>
+      <div className={[styles.wrap, kind].join(" ")} data-test="root">
         <div className={styles.name}>{this.props.name}</div>
         {this.props.version && (
           <div className={styles.version}>version {this.props.version}</div>
-        )}
-        {this.props.nOfMonitored && (
-          <div className={styles.nOfMonitored}>
-            {this.props.nOfMonitored} monitored pods
-          </div>
-        )}
-        {this.props.nOfSnapshot && (
-          <div className={styles.nOfSnapshot}>
-            {this.props.nOfSnapshot} snapshots
-          </div>
         )}
         {(this.props.kind === "configured" ||
           this.props.kind === "observed") && (
@@ -54,7 +42,12 @@ class EnvironmentCard extends React.Component<IProperty, {}> {
             {this.props.kind === "observed" ? "Enabled" : "Disabled"}
           </a>
         )}
-        <a className={styles.edit} onClick={this.props.onEdit.bind(this)}>
+        <a
+          className={styles.edit}
+          onClick={this.props.onEdit.bind(this)}
+          role="button"
+          data-test="edit-button"
+        >
           Edit
         </a>
       </div>
