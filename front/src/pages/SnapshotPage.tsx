@@ -1,15 +1,20 @@
+import { History } from "history";
 import * as React from "react";
-import MainArea from "../containers/MainArea";
 import RunningPodsView from "../containers/RunningPodsView";
+import SnapshotsView from "../containers/SnapshotsView";
 // @ts-ignore
 import styles from "./SnapshotPage.scss";
 
-class SnapshotPage extends React.Component {
+interface IDerivedProperties {
+  history: History;
+}
+
+class SnapshotPage extends React.Component<IDerivedProperties> {
   public render() {
     return (
       <div className={styles.wrap}>
         <div className={styles.snapshots}>
-          <MainArea />
+          <SnapshotsView history={this.props.history} />
         </div>
         <div className={styles.pods}>
           <RunningPodsView />
@@ -19,4 +24,4 @@ class SnapshotPage extends React.Component {
   }
 }
 
-export default SnapshotPage;
+export default SnapshotPage as React.ComponentClass;
