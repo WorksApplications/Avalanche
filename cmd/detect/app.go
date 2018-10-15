@@ -2,9 +2,9 @@ package main
 
 import (
 	"database/sql"
-	"net/http"
 	"flag"
 	"log"
+	"net/http"
 
 	_ "github.com/go-sql-driver/mysql"
 

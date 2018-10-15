@@ -148,13 +148,13 @@ func get(res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequ
 	case ch <- &sreq:
 		/* Request is written. Wait for all the answer */
 		subs := make([]*detect.Subscription, 0)
-        for sub := range resc {
+		for sub := range resc {
 			subs = append(subs, sub)
 		}
 		reply, e := json.Marshal(&subs)
 		if e != nil {
 			res.WriteHeader(http.StatusInternalServerError)
-			return fmt.Errorf("Marshaling to Subscription failed...: Magic: %x", rand.Int31())
+			return fmt.Errorf("Marshaling to Subscription failed: %+v", subs)
 		}
 		res.Write(reply)
 		return nil

@@ -12,8 +12,9 @@ type ScanInfo struct {
 }
 
 type Subscription struct {
-	Env  string `json:"environment"`
-	Apps []App  `json:"apps"`
+	Env     string `json:"environment"`
+	Apps    []App  `json:"apps"`
+	OnGoing bool   `json:"-"`
 }
 
 type App struct {

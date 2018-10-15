@@ -25,16 +25,20 @@ type ScannerRequest struct {
 	Ret chan<- *detect.Subscription
 }
 
-func dispatch(ich <-chan *detect.Subscription, och chan<- *detect.Subscription) {
-	for s := range ich {
-		log.Printf("[Dispatched worker] Start scan for %s", s.Env)
-		apps, err := parser.Scan(s.Env)
-		if err != nil {
-			log.Printf("Error in the scan for %s", err)
-		}
-		log.Printf("[Dispatched worker] Scan for %s ended.", s.Env)
-		s.Apps = apps
-		och <- s
+func dispatch(ic <-chan *detect.Subscription, oc chan<- *detect.Subscription) {
+	log.Printf("[Dispatched worker] Enter")
+	for s := range ic {
+		go func() {
+			log.Printf("[Dispatched worker] Start scan for %s", s.Env)
+			apps, err := parser.Scan(s.Env)
+			if err != nil {
+				log.Printf("Error in the scan for %s", err)
+			}
+			log.Printf("[Dispatched worker] Scan for %s ended.", s.Env)
+			s.Apps = apps
+			s.OnGoing = false
+			oc <- s
+		}()
 	}
 	log.Printf("[Dispatched worker] Exit")
 }
@@ -53,7 +57,16 @@ func Exchange(ch chan *ScannerRequest) {
 		case <-t:
 			log.Println("start batch scan")
 			for _, s := range m {
-				isc <- s
+				if s.OnGoing {
+					/* Do not spawn on-going call again */
+					continue
+				}
+				select {
+				case isc <- s:
+					s.OnGoing = true
+				default:
+					log.Println("request buffer is full")
+				}
 			}
 		case req := <-ch:
 			env := req.Env
@@ -62,7 +75,7 @@ func Exchange(ch chan *ScannerRequest) {
 			}
 			switch req.Req {
 			case ADD:
-				sub := detect.Subscription{*env, empty}
+				sub := detect.Subscription{*env, empty, false}
 				m[*env] = &sub
 				log.Printf("%s will be scanned", *env)
 			case DEL:
@@ -71,7 +84,7 @@ func Exchange(ch chan *ScannerRequest) {
 			case SCAN:
 				sub, prs := m[*env]
 				if !prs {
-					sub = &detect.Subscription{*env, empty}
+					sub = &detect.Subscription{*env, empty, true}
 					// If this line is enabled, you don't have to receive result from dispatch.
 					// However, you will return empty list which is empty because it is not scanned yet
 					// m[*env] = sub
@@ -79,15 +92,15 @@ func Exchange(ch chan *ScannerRequest) {
 				isc <- sub
 				log.Printf("[Scan manager] sent:", *env)
 			case DESC:
-                log.Printf("DESC1")
+				log.Printf("DESC1")
 				if env == nil {
-                    log.Printf("DESC2")
+					log.Printf("DESC2")
 					for _, sub := range m {
-                    log.Printf("DESC3")
+						log.Printf("DESC3")
 						req.Ret <- sub
 					}
 				} else {
-                    log.Printf("DESC5")
+					log.Printf("DESC5")
 					sub, prs := m[*env]
 					if !prs {
 						log.Printf("Not found %s", *env)
@@ -95,7 +108,7 @@ func Exchange(ch chan *ScannerRequest) {
 						req.Ret <- sub
 					}
 				}
-                log.Printf("DESC4")
+				log.Printf("DESC4")
 				close(req.Ret)
 			}
 		}
