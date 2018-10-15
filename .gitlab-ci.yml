@@ -71,7 +71,7 @@ push-images:
         DOCKERHOST: ""
         
         COLLECT_VERSION: "r1g"
-        DETECT_VERSION: "r1c"
+        DETECT_VERSION: "r1d"
         ENROLL_VERSION: "r1b"
         EXTRACT_VERSION: "r1a"
         FRONT_VERSION: "r1c"
