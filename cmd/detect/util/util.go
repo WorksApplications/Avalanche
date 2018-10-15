@@ -28,7 +28,7 @@ type ScannerRequest struct {
 func dispatch(ic <-chan *detect.Subscription, oc chan<- *detect.Subscription) {
 	log.Printf("[Dispatched worker] Enter")
 	for s := range ic {
-		go func() {
+		go func(s *detect.Subscription) {
 			log.Printf("[Dispatched worker] Start scan for %s", s.Env)
 			apps, err := parser.Scan(s.Env)
 			if err != nil {
@@ -38,7 +38,7 @@ func dispatch(ic <-chan *detect.Subscription, oc chan<- *detect.Subscription) {
 			s.Apps = apps
 			s.OnGoing = false
 			oc <- s
-		}()
+		}(s)
 	}
 	log.Printf("[Dispatched worker] Exit")
 }
