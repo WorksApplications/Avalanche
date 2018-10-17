@@ -1,7 +1,5 @@
 import * as React from "react";
-import EnvironmentCard, {
-  IProperty as IEnvironmentCardProperty
-} from "./EnvironmentCard";
+import EnvironmentCard, { IEnvironmentCardProperty } from "./EnvironmentCard";
 // @ts-ignore
 import styles from "./EnvironmentCardList.scss";
 

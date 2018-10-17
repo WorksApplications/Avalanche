@@ -4,7 +4,7 @@ import * as React from "react";
 import { action } from "@storybook/addon-actions";
 import { boolean, withKnobs } from "@storybook/addon-knobs/react";
 import { storiesOf } from "@storybook/react";
-import "../containers/App.scss";
+import "../../App.scss";
 import "../wapicon/style.css";
 import PodCard from "./PodCard";
 

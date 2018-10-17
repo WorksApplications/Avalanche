@@ -2,7 +2,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
 import { getRunningPods, postSnapshot } from "../actions";
-import PodCardList from "../components/PodCardList";
+import PodCardList, { IPodCardListData } from "../components/PodCardList";
 import PodFilter from "../components/PodFilter";
 import { IApplicationState, IPodInfo } from "../store";
 // @ts-ignore
@@ -85,7 +85,7 @@ class RunningPodsView extends React.Component<IProps, IState> {
   }
 
   public render() {
-    const podInfo = this.props.pods
+    const podInfo: IPodCardListData = this.props.pods
       .filter(p => p.name.startsWith(this.state.filteringValue))
       .map(p => ({
         id: (p.id || "").toString(),

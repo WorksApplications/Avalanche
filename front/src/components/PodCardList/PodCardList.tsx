@@ -1,10 +1,12 @@
 import * as React from "react";
-import PodCard, { IProperty as IPodCardProperty } from "./PodCard";
+import PodCard, { IPodCardProperty } from "../PodCard/index";
 // @ts-ignore
 import styles from "./PodCardList.scss";
 
+export type ICardListData = Array<IPodCardProperty & { id: string }>;
+
 export interface IProperty {
-  data: Array<IPodCardProperty & { id: string }>;
+  data: ICardListData;
   noDataMessage?: string;
   kind: string;
 }

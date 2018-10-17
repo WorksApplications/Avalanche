@@ -1,5 +1,5 @@
 import * as React from "react";
-import AliveIndicator from "./AliveIndicator";
+import AliveIndicator from "../AliveIndicator";
 // @ts-ignore
 import styles from "./PodCard.scss";
 
@@ -15,7 +15,7 @@ export interface IProperty {
   onSaveButtonClick?(): void;
 }
 
-export interface IState {
+interface IState {
   isOpen: boolean;
 }
 
