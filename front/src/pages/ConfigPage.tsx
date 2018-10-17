@@ -145,7 +145,7 @@ class ConfigPage extends React.Component<IProps, IState> {
             this.state.showsModifyDialog ? styles.open : styles.close
           ].join(" ")}
         >
-          {this.state.showsModifyDialog ? (
+          {this.state.showsModifyDialog && (
             <EnvironmentModalDialogFoundation>
               <EnvironmentConfigModifyDialog
                 target={this.state.dialogTarget || ""}
@@ -159,7 +159,7 @@ class ConfigPage extends React.Component<IProps, IState> {
                 onVersionChange={onVersionChange}
               />
             </EnvironmentModalDialogFoundation>
-          ) : null}
+          )}
         </div>
         {/*dialog to add*/}
         <div
@@ -169,7 +169,7 @@ class ConfigPage extends React.Component<IProps, IState> {
           ].join(" ")}
         >
           <EnvironmentModalDialogFoundation>
-            {this.state.showsAddDialog ? (
+            {this.state.showsAddDialog && (
               <EnvironmentConfigAddDialog
                 onDismiss={this.onAddDialogDismiss.bind(this)}
                 onAccept={this.onAddDialogAccept.bind(this)}
@@ -182,7 +182,7 @@ class ConfigPage extends React.Component<IProps, IState> {
                 version={this.state.version}
                 onVersionChange={onVersionChange}
               />
-            ) : null}
+            )}
           </EnvironmentModalDialogFoundation>
         </div>
       </div>

@@ -20,13 +20,11 @@ class PodCardList extends React.Component<IProperty, {}> {
         </div>
         {this.props.data && this.props.data.length > 0 ? (
           <ul className={styles.cardList} data-test="card-list">
-            {this.props.data.map(x => {
-              return (
-                <li className={styles.card} key={x.id}>
-                  <PodCard {...x} />
-                </li>
-              );
-            })}
+            {this.props.data.map(x => (
+              <li className={styles.card} key={x.id}>
+                <PodCard {...x} />
+              </li>
+            ))}
           </ul>
         ) : (
           <div className={styles.empty} data-test="empty-message">

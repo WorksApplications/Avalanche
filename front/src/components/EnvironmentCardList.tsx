@@ -20,13 +20,11 @@ class EnvironmentCardList extends React.Component<IProperty, {}> {
       >
         {isNotEmpty ? (
           <div className={styles.cards}>
-            {this.props.data.map(x => {
-              return (
-                <div key={x.id} className={styles.card}>
-                  <EnvironmentCard {...x} />
-                </div>
-              );
-            })}
+            {this.props.data.map(x => (
+              <div key={x.id} className={styles.card}>
+                <EnvironmentCard {...x} />
+              </div>
+            ))}
           </div>
         ) : (
           <div className={styles.empty}>

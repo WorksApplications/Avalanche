@@ -54,7 +54,7 @@ class SelectorBase extends React.Component<IProperty, IState> {
 
   public render() {
     const styles = this.props.styles!;
-    const optionsView = this.state.isOpen ? (
+    const optionsView = this.state.isOpen && (
       <ul className={styles.optionList}>
         {this.props.unselectOptionLabel && (
           <li
@@ -85,7 +85,7 @@ class SelectorBase extends React.Component<IProperty, IState> {
             </li>
           ))}
       </ul>
-    ) : null;
+    );
     const selectorString =
       this.state.searchingWord ||
       this.props.selectedValue ||
