@@ -125,7 +125,7 @@ func (s *ServerCtx) checkPodAvailability() {
 		return
 	}
 
-    rps := make(map[string]struct{}, 0)
+	rps := make(map[string]struct{}, 0)
 	for _, v := range response {
 		for _, w := range v.List {
 			if w.IsTraced {
