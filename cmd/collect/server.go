@@ -68,6 +68,7 @@ func main() {
 		IsMaster:   !*slave,
 		Flamescope: *flamescope,
 		RunningPod: make(map[string]struct{}, 0),
+		Ready:      false,
 	}
 
 	if *init {

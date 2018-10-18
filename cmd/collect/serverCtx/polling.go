@@ -19,26 +19,26 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func (s *ServerCtx) pull() {
+func (s *ServerCtx) pull() error {
 	log.Printf("start to pull pods' information from %s", s.Detect+"/subscriptions")
 	r, err := http.Get(s.Detect + "/subscriptions")
 	if err != nil {
 		log.Println("Poll failed with ", err)
-		return
+		return err
 	}
-	d, er2 := ioutil.ReadAll(r.Body)
-	if er2 != nil {
-		log.Println("Poll f-ed up!", er2)
-		return
+	d, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println("Poll f-ed up!", err)
+		return err
 	}
 	defer r.Body.Close()
 
 	var p []detect.Subscription
 	err = json.Unmarshal(d, &p)
 	if err != nil {
-		log.Println("Unmarshal failed!", err, er2)
+		log.Println("Unmarshal failed!", err)
 		log.Printf("res: %+v", p)
-		return
+		return err
 	}
 	found := make(map[int64]struct{})
 	for _, e := range p {
@@ -50,6 +50,7 @@ func (s *ServerCtx) pull() {
 	}
 	s.TracedPod = found
 	log.Print("[Discovery] Found:", len(s.TracedPod))
+	return nil
 }
 
 func recursiveInsert(db *sql.DB, p *detect.Subscription) []int64 {
@@ -76,33 +77,39 @@ func (s *ServerCtx) PollPodInfo() {
 	t := time.NewTicker(1 * time.Minute)
 	once := make(chan int, 1)
 	once <- 1
-	go func() {
+	go func(flag *bool) {
 		for {
 			select {
 			case <-once:
 				close(once)
 				once = nil
-				s.checkPodAvailability()
-				s.pull()
+				checkerr := s.checkPodAvailability()
+				pullerr := s.pull()
+				if checkerr == nil && pullerr == nil {
+					*flag = true
+				} else {
+					log.Print("Failed to setup", checkerr, pullerr)
+					panic("Initialization failed")
+				}
 			case <-t.C:
 				s.checkPodAvailability()
 				s.pull()
 			}
 		}
-	}()
+	}(&s.Ready)
 
 }
 
-func (s *ServerCtx) checkPodAvailability() {
+func (s *ServerCtx) checkPodAvailability() error {
 	r, err := http.Get(s.Enroll)
 	if err != nil {
 		log.Println("Poke enroll at ", s.Enroll, " failed!")
-		return
+		return err
 	}
-	d, err2 := ioutil.ReadAll(r.Body)
-	if err2 != nil {
+	d, err := ioutil.ReadAll(r.Body)
+	if err != nil {
 		log.Println("Reading enroll at ", s.Enroll, " response failed")
-		return
+		return err
 	}
 	defer r.Body.Close()
 
@@ -121,8 +128,8 @@ func (s *ServerCtx) checkPodAvailability() {
 
 	err = json.Unmarshal(d, &response)
 	if err != nil {
-		log.Println("Parse error with the response", err)
-		return
+		log.Println("Parse error with the response", err, string(d))
+		return err
 	}
 
 	rps := make(map[string]struct{}, 0)
@@ -135,6 +142,7 @@ func (s *ServerCtx) checkPodAvailability() {
 	}
 	s.RunningPod = rps
 	log.Printf("%+v", s.RunningPod)
+	return nil
 }
 
 func mapIsAliveFlag(ps []*models.Pod, alive map[string]struct{}) {

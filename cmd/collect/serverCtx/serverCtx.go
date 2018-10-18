@@ -27,6 +27,7 @@ type ServerCtx struct {
 	Temporald string
 	TracedPod map[int64]struct{}
 	IsMaster  bool
+	Ready     bool
 
 	Flamescope string
 	RunningPod map[string]struct{}
