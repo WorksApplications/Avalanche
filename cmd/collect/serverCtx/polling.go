@@ -125,6 +125,8 @@ func (s *ServerCtx) checkPodAvailability() {
 		return
 	}
 
+	s.RunningPod = nil
+
 	for _, v := range response {
 		for _, w := range v.List {
 			if w.IsTraced {
