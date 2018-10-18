@@ -125,15 +125,15 @@ func (s *ServerCtx) checkPodAvailability() {
 		return
 	}
 
-	s.RunningPod = nil
-
+	var rps map[string]struct{}
 	for _, v := range response {
 		for _, w := range v.List {
 			if w.IsTraced {
-				s.RunningPod[w.Name] = struct{}{}
+				rps[w.Name] = struct{}{}
 			}
 		}
 	}
+	s.RunningPod = rps
 	log.Printf("%+v", s.RunningPod)
 }
 
