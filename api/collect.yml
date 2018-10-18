@@ -343,6 +343,18 @@ paths:
               $ref: "#/definitions/snapshot"
       operationId: listSnapshots
 
+  /snapshots:
+    get:
+      responses:
+        200:
+          description: |
+            "returns list of snapshots across applications"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/snapshot"
+      operationId: listSnapshots
+
   /available-pods:
     get:
       responses:
