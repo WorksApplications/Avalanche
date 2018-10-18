@@ -37,7 +37,7 @@ func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Respon
 	if s.Ready {
 		return operations.NewHealthzOK().WithPayload("Vaer sa godt")
 	} else {
-		return operations.NewHealthzDefault(503).WithPayload("nil")
+		return operations.NewHealthzDefault(503).WithPayload(nil)
 	}
 }
 
