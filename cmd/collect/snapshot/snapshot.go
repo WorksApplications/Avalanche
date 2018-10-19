@@ -137,7 +137,7 @@ func getSS(pvmountp *string, temporald *string, link *string, pname *string) (st
 	er := os.Rename(f.Name(), d+filename)
 	if er != nil {
 		log.Print("[Snapshot/error] Saving to persistent volume failed:", d, "|||", f.Name(), ":::", er)
-		return "", "", fmt.Errorf("Saving to persistent volume failed:", d, "|||", f.Name(), ":::", er)
+		return "", "", fmt.Errorf("Saving to persistent volume failed: %s,\n\t name: %s\n\t rename: %s", d, f.Name(), er)
 	}
 	log.Print("[Snapshot] data moved to ", d+filename)
 	/* return relative path from persistent mount point */

@@ -83,7 +83,7 @@ func OfBoth(db *sql.DB, env *models.Environment, app *models.App) *Layout {
 	where := fmt.Sprintf("WHERE envid = \"%d\" AND appid = \"%d\"", *env.ID, *app.ID)
 	l := of(db, &where)
 	if len(l) > 1 {
-		log.Printf("[DB/Layout] @@@@INCONSISTENT@@@@: couple of env: %d, app: %d has %s pairs!", *env.ID, *app.ID, len(l))
+		log.Printf("[DB/Layout] @@@@INCONSISTENT@@@@: couple of env: %d, app: %d has %d pairs!", *env.ID, *app.ID, len(l))
 	}
 	if len(l) == 0 {
 		return nil

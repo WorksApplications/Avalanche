@@ -101,6 +101,10 @@ func (s *ServerCtx) PollPodInfo() {
 }
 
 func (s *ServerCtx) checkPodAvailability() error {
+	if s.Enroll == "" {
+		/* disable this feature */
+		return nil
+	}
 	r, err := http.Get(s.Enroll)
 	if err != nil {
 		log.Println("Poke enroll at ", s.Enroll, " failed!")

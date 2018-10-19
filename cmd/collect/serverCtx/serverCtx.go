@@ -188,7 +188,7 @@ func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) midd
 	}
 	lay := layout.OfBoth(s.Db, env, app)
 	if lay == nil {
-		emsg := fmt.Sprintf("ENOLAYOUT app %s is not deployed in environment %s", app.Name, env.Name)
+		emsg := fmt.Sprintf("ENOLAYOUT app %s is not deployed in environment %s", *app.Name, *env.Name)
 		return operations.NewDescribeAppDefault(404).WithPayload(&models.Error{Message: &emsg})
 	}
 	pod := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
