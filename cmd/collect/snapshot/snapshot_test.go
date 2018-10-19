@@ -17,12 +17,12 @@ func TestGetLatest(t *testing.T) {
 	//InitTable(db)
 
 	snapshots := sqlmock.NewRows([]string{"uuid", "created", "appid", "podid", "envid", "layid", "pvloc"})
-    snapshots.AddRow(2, "fa27ec29-71f5-46c1-9644-49be4e5b66ee", 1, 1, 1, epoch1, "")
-    snapshots.AddRow(2, "3c00c091-f42e-4b8c-a1f8-b618c652723a", 1, 1, 1, epoch2, "")
+	snapshots.AddRow(2, "fa27ec29-71f5-46c1-9644-49be4e5b66ee", 1, 1, 1, epoch1, "")
+	snapshots.AddRow(2, "3c00c091-f42e-4b8c-a1f8-b618c652723a", 1, 1, 1, epoch2, "")
 
 	mock.ExpectQuery("SELECT (.+) FROM snapshot order by created limit 10").WillReturnRows(snapshots)
 
-    GetLatest(db, 10)
+	GetLatest(db, 10)
 }
 
 func TestToResponse(t *testing.T) {
