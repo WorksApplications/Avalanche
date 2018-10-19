@@ -204,7 +204,7 @@ func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) midd
 	return operations.NewNewSnapshotOK().WithPayload(body)
 }
 
-func (s *ServerCtx) ListSnapshotsHandler(params operations.ListSnapshotsParams) middleware.Responder {
+func (s *ServerCtx) ShowSnapshotsOfPodHandler(params operations.ShowSnapshotsOfPodParams) middleware.Responder {
 	app := app.Describe(s.Db, &params.Appid)
 	env := environ.Get(s.Db, &params.Environment)
 	if app == nil || env == nil {
@@ -221,7 +221,33 @@ func (s *ServerCtx) ListSnapshotsHandler(params operations.ListSnapshotsParams) 
 		body[i] = ss.ToResponse(s.Db, s.Flamescope)
 	}
 
-	return operations.NewListSnapshotsOK().WithPayload(body)
+	return operations.NewShowSnapshotsOfPodOK().WithPayload(body)
+}
+
+func (s *ServerCtx) ListSnapshotsHandler(params operations.ListSnapshotsParams) middleware.Responder {
+	var ss []*models.Snapshot
+	var max int64
+	if params.Max == nil {
+		max = 10
+	} else {
+		max = *params.Max
+	}
+
+	switch *params.OrderBy {
+	case "":
+		fallthrough
+	case "date":
+		si := snapshot.GetLatest(s.Db, max)
+		ss = make([]*models.Snapshot, len(si))
+		for i, n := range si {
+			ss[i] = n.ToResponse(s.Db, s.Flamescope)
+		}
+	default:
+		mes := "No other ordering keyword supported than \"date\""
+		return operations.NewListSnapshotsDefault(400).WithPayload(&models.Error{Message: &mes})
+	}
+
+	return operations.NewListSnapshotsOK().WithPayload(ss)
 }
 
 func (s *ServerCtx) InitHandle() {

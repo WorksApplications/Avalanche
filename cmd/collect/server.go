@@ -88,6 +88,7 @@ func main() {
 	api.DescribePodHandler = operations.DescribePodHandlerFunc(ctx.DescribePodHandler)
 
 	api.NewSnapshotHandler = operations.NewSnapshotHandlerFunc(ctx.NewSnapshotHandler)
+	api.ShowSnapshotsOfPodHandler = operations.ShowSnapshotsOfPodHandlerFunc(ctx.ShowSnapshotsOfPodHandler)
 	api.ListSnapshotsHandler = operations.ListSnapshotsHandlerFunc(ctx.ListSnapshotsHandler)
 
 	api.ListAvailablePodsHandler = operations.ListAvailablePodsHandlerFunc(ctx.ListAvailablePods)

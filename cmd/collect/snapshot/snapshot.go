@@ -72,6 +72,11 @@ func FromPod(db *sql.DB, p *models.Pod) []*SnapshotInternal {
 	return list(db, &wh)
 }
 
+func GetLatest(db *sql.DB, max int64) []*SnapshotInternal {
+	wh := fmt.Sprintf("order by created limit \"%d\"", max)
+	return list(db, &wh)
+}
+
 func (s *SnapshotInternal) ToResponse(db *sql.DB, flamescope string) *models.Snapshot {
 	if s == nil {
 		return nil

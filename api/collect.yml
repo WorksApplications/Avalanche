@@ -345,10 +345,20 @@ paths:
             type: array
             items:
               $ref: "#/definitions/snapshot"
-      operationId: listSnapshots
+      operationId: showSnapshotsOfPod
 
   /snapshots:
     get:
+      parameters:
+        - in: query
+          name: order-by
+          type: string
+          default: "date"
+        - in: query
+          name: max
+          type: integer
+          default: 10
+          maximum: 1000
       responses:
         200:
           description: |
@@ -357,6 +367,10 @@ paths:
             type: array
             items:
               $ref: "#/definitions/snapshot"
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/error"
       operationId: listSnapshots
 
   /available-pods:
