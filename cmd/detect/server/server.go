@@ -25,7 +25,7 @@ func deserializeEnvironmentUpdate(req *http.Request) (*environ.Environ, error) {
 	defer req.Body.Close()
 	_, err := buf.ReadFrom(req.Body)
 	if err != nil {
-		log.Printf("Read request failed: ", err)
+		log.Print("Read request failed: ", err)
 		/* reading response failed */
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func deserializeEnvironmentUpdate(req *http.Request) (*environ.Environ, error) {
 	err = json.Unmarshal(buf.Bytes(), &env)
 
 	if err != nil {
-		log.Printf("Parse request failed: ", err)
+		log.Print("Parse request failed: ", err)
 		return nil, err
 	}
 

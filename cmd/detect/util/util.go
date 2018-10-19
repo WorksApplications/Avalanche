@@ -71,7 +71,7 @@ func Exchange(ch chan *ScannerRequest) {
 		case req := <-ch:
 			env := req.Env
 			if env == nil && req.Req != DESC {
-				log.Printf("WARN: nil exception was almost there! req.Req=%s", req.Req)
+				log.Printf("WARN: nil exception was almost there! req.Req=%+v", req.Req)
 			}
 			switch req.Req {
 			case ADD:
@@ -90,7 +90,7 @@ func Exchange(ch chan *ScannerRequest) {
 					// m[*env] = sub
 				}
 				isc <- sub
-				log.Printf("[Scan manager] sent:", *env)
+				log.Print("[Scan manager] sent:", *env)
 			case DESC:
 				if env == nil {
 					for _, sub := range m {

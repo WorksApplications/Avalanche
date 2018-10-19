@@ -5,13 +5,16 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"reflect"
 	//"github.com/google/uuid"
-	"database/sql"
 	"encoding/json"
 	"testing"
 	"time"
 )
 
-func singletonMockDB(epoch time.Time) *sql.DB {
+func TestGetLatest(t *testing.T) {
+}
+
+func TestToResponse(t *testing.T) {
+	epoch := time.Date(2018, 1, 15, 3, 0, 0, 0, time.UTC)
 	db, mock, _ := sqlmock.New()
 	//InitTable(db)
 
@@ -20,19 +23,6 @@ func singletonMockDB(epoch time.Time) *sql.DB {
 
 	mock.ExpectQuery("SELECT (.+) FROM pod WHERE id = \"1\"").WillReturnRows(pod)
 	mock.ExpectQuery("SELECT (.+) FROM environ WHERE id = \"2\"").WillReturnRows(environ)
-
-	return db
-}
-
-func TestGetLatest(t *testing.T) {
-	epoch := time.Date(2018, 1, 15, 3, 0, 0, 0, time.UTC)
-	db := singletonMockDB(epoch)
-	GetLatest(db, 10)
-}
-
-func TestToResponse(t *testing.T) {
-	epoch := time.Date(2018, 1, 15, 3, 0, 0, 0, time.UTC)
-	db := singletonMockDB(epoch)
 
 	id := "d7eec7c1-daf5-4198-9503-6957aea0bf90"
 	internal := SnapshotInternal{
