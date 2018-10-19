@@ -27,13 +27,18 @@ type ServerCtx struct {
 	Temporald string
 	TracedPod map[int64]struct{}
 	IsMaster  bool
+	Ready     bool
 
 	Flamescope string
 	RunningPod map[string]struct{}
 }
 
 func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Responder {
-	return operations.NewHealthzOK().WithPayload("Vaer sa godt")
+	if s.Ready {
+		return operations.NewHealthzOK().WithPayload("Vaer sa godt")
+	} else {
+		return operations.NewHealthzDefault(503).WithPayload(nil)
+	}
 }
 
 func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) middleware.Responder {
