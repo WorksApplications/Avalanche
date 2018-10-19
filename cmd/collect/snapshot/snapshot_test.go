@@ -11,6 +11,18 @@ import (
 )
 
 func TestGetLatest(t *testing.T) {
+	epoch1 := time.Date(2018, 1, 15, 3, 0, 0, 0, time.UTC)
+	epoch2 := time.Date(2018, 3, 25, 5, 0, 0, 0, time.UTC)
+	db, mock, _ := sqlmock.New()
+	//InitTable(db)
+
+	snapshots := sqlmock.NewRows([]string{"uuid", "created", "appid", "podid", "envid", "layid", "pvloc"})
+    snapshots.AddRow(2, "fa27ec29-71f5-46c1-9644-49be4e5b66ee", 1, 1, 1, epoch1, "")
+    snapshots.AddRow(2, "3c00c091-f42e-4b8c-a1f8-b618c652723a", 1, 1, 1, epoch2, "")
+
+	mock.ExpectQuery("SELECT (.+) FROM snapshot order by created limit 10").WillReturnRows(snapshots)
+
+    GetLatest(db, 10)
 }
 
 func TestToResponse(t *testing.T) {
