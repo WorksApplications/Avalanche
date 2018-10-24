@@ -1,9 +1,8 @@
 import { Dispatch } from "redux";
-import actionCreatorFactory from "typescript-fsa";
+import actionCreatorFactory, { Meta } from "typescript-fsa";
 import { COLLECT_API_BASE } from "../constants";
 import * as collect from "../generated/collect/api";
 import { IEnvironmentConfig } from "../store";
-import { toastr } from "./toastNotificationActions";
 
 const actionCreator = actionCreatorFactory();
 
@@ -33,27 +32,32 @@ export const getEnvironmentConfigsAsyncAction = actionCreator.async<
   { message: string }
 >("GET_ENVIRONMENT_CONFIGS");
 
-export const getEnvironmentConfigs = () => (dispatch: Dispatch) => {
+export const getEnvironmentConfigs = (meta?: Meta) => (
+  dispatch: Dispatch
+): Promise<{ configs: IEnvironmentConfig[] }> => {
   const params = {};
-  dispatch(getEnvironmentConfigsAsyncAction.started(params));
-  collectClient
+  dispatch(getEnvironmentConfigsAsyncAction.started(params, meta));
+  return collectClient
     .listEnvironmentConfig()
     .then((configResults: collect.EnvironmentConfig[]) => {
       const configs = configResults.map(config =>
         environmentConfigConvert(config)
       );
-      dispatch(
-        getEnvironmentConfigsAsyncAction.done({ params, result: { configs } })
-      );
+      const result = { configs };
+      dispatch(getEnvironmentConfigsAsyncAction.done({ params, result }, meta));
+      return result;
     })
     .catch((reason: Error) => {
       dispatch(
-        getEnvironmentConfigsAsyncAction.failed({
-          params,
-          error: { message: reason.message }
-        })
+        getEnvironmentConfigsAsyncAction.failed(
+          {
+            params,
+            error: { message: reason.message }
+          },
+          meta
+        )
       );
-      toastr(`Failed to get environment configs.`, "error")(dispatch);
+      throw reason;
     });
 };
 
@@ -66,44 +70,50 @@ export const postEnvironmentConfigAsyncAction = actionCreator.async<
 >("POST_ENVIRONMENT_CONFIG");
 
 export const postEnvironmentConfig = (
-  environmentName: string,
-  isMultitenant: boolean,
-  kubernetesApi: string,
-  version: string
-) => (dispatch: Dispatch) => {
+  params: {
+    environmentName: string;
+    isMultitenant: boolean;
+    kubernetesApi: string;
+    version: string;
+  },
+  meta?: Meta
+) => (dispatch: Dispatch): Promise<{ config: IEnvironmentConfig }> => {
   const newConfig: collect.EnvironmentConfig = {
-    name: environmentName,
-    isMultitenant,
-    kubernetesApi,
-    version
+    name: params.environmentName,
+    isMultitenant: params.isMultitenant,
+    kubernetesApi: params.kubernetesApi,
+    version: params.version
   };
-  const params = { environment: environmentName, config: newConfig };
-  dispatch(postEnvironmentConfigAsyncAction.started(params));
-  collectClient
-    .putEnvironmentConfig(environmentName, newConfig, {
+  const newParams = { environment: params.environmentName, config: newConfig };
+  dispatch(postEnvironmentConfigAsyncAction.started(newParams, meta));
+  return collectClient
+    .putEnvironmentConfig(params.environmentName, newConfig, {
       headers: {
         "Content-Type": "application/json"
       } // This is due to "typescript-fetch")
     })
     .then((configResult: collect.EnvironmentConfig) => {
+      const config = environmentConfigConvert(configResult);
+      const result = { config };
       dispatch(
-        postEnvironmentConfigAsyncAction.done({
-          params,
-          result: { config: environmentConfigConvert(configResult) }
-        })
+        postEnvironmentConfigAsyncAction.done(
+          { params: newParams, result },
+          meta
+        )
       );
-      toastr(`Config for "${params.environment}" is updated.`, "success")(
-        dispatch
-      );
+      return result;
     })
     .catch((reason: Error) => {
       dispatch(
-        postEnvironmentConfigAsyncAction.failed({
-          params,
-          error: { message: reason.message }
-        })
+        postEnvironmentConfigAsyncAction.failed(
+          {
+            params: newParams,
+            error: { message: reason.message }
+          },
+          meta
+        )
       );
-      toastr(`Failed to configure "${params.environment}".`, "error")(dispatch);
+      throw reason;
     });
 };
 
@@ -111,45 +121,47 @@ export const addEnvironmentConfigAsyncAction = actionCreator.async<
   {
     environment: string;
   },
-  { config: collect.EnvironmentConfig },
+  { config: IEnvironmentConfig },
   { message: string }
 >("Add_ENVIRONMENT_CONFIG");
 
 export const addEnvironmentConfig = (
-  environmentName: string,
-  isMultitenant: boolean,
-  kubernetesApi: string,
-  version: string
-) => (dispatch: Dispatch) => {
+  params: {
+    environmentName: string;
+    isMultitenant: boolean;
+    kubernetesApi: string;
+    version: string;
+  },
+  meta?: Meta
+) => (dispatch: Dispatch): Promise<{ config: IEnvironmentConfig }> => {
   const newConfig: collect.EnvironmentConfig = {
-    name: environmentName,
-    isMultitenant,
-    kubernetesApi,
-    version
+    name: params.environmentName,
+    isMultitenant: params.isMultitenant,
+    kubernetesApi: params.kubernetesApi,
+    version: params.version
   };
-  const params = { environment: environmentName, config: newConfig };
-  dispatch(addEnvironmentConfigAsyncAction.started(params));
-  collectClient
+  const newParams = { environment: params.environmentName, config: newConfig };
+  dispatch(addEnvironmentConfigAsyncAction.started(newParams, meta));
+  return collectClient
     .addEnvironmentConfig(newConfig, {
       headers: {
         "Content-Type": "application/json"
       } // This is due to "typescript-fetch")
     })
     .then((config: collect.EnvironmentConfig) => {
+      const result = { config: environmentConfigConvert(config) };
       dispatch(
-        addEnvironmentConfigAsyncAction.done({ params, result: { config } })
+        addEnvironmentConfigAsyncAction.done({ params: newParams, result })
       );
-      toastr(`Config for "${params.environment}" is added.`, "success")(
-        dispatch
-      );
+      return result;
     })
     .catch((reason: Error) => {
       dispatch(
         addEnvironmentConfigAsyncAction.failed({
-          params,
+          params: newParams,
           error: { message: reason.message }
         })
       );
-      toastr(`Failed to add "${params.environment}".`, "error")(dispatch);
+      throw reason;
     });
 };

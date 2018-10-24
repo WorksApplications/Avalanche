@@ -1,9 +1,8 @@
 import { Dispatch } from "redux";
-import actionCreatorFactory from "typescript-fsa";
+import actionCreatorFactory, { Meta } from "typescript-fsa";
 import { COLLECT_API_BASE } from "../constants";
 import * as collect from "../generated/collect/api";
 import { IEnvironmentInfo, IPodInfo, ISnapshotInfo } from "../store";
-import { toastr } from "./toastNotificationActions";
 
 const actionCreator = actionCreatorFactory();
 
@@ -63,22 +62,29 @@ export const getAppsAsyncAction = actionCreator.async<
   { message: string }
 >("GET_APPS");
 
-export const getApps = () => (dispatch: Dispatch) => {
+export const getApps = (meta?: Meta) => (
+  dispatch: Dispatch
+): Promise<{ apps: string[] }> => {
   const params = {};
-  dispatch(getAppsAsyncAction.started(params));
-  collectClient
+  dispatch(getAppsAsyncAction.started(params, meta));
+  return collectClient
     .getApps()
     .then((apps: string[]) => {
-      dispatch(getAppsAsyncAction.done({ params, result: { apps } }));
+      const result = { apps };
+      dispatch(getAppsAsyncAction.done({ params, result }, meta));
+      return result;
     })
     .catch((reason: Error) => {
       dispatch(
-        getAppsAsyncAction.failed({
-          params,
-          error: { message: reason.message }
-        })
+        getAppsAsyncAction.failed(
+          {
+            params,
+            error: { message: reason.message }
+          },
+          meta
+        )
       );
-      toastr(`Failed to get app names.`, "error")(dispatch);
+      throw reason;
     });
 };
 
@@ -88,27 +94,29 @@ export const getEnvironmentsOfAppAsyncAction = actionCreator.async<
   { message: string }
 >("GET_ENVS_OF_APP");
 
-export const getEnvironmentsOfApp = (app: string) => (dispatch: Dispatch) => {
-  const params = { app };
-  dispatch(getEnvironmentsOfAppAsyncAction.started(params));
-  collectClient
-    .getEnvironments(app)
+export const getEnvironmentsOfApp = (params: { app: string }, meta?: Meta) => (
+  dispatch: Dispatch
+): Promise<{ envs: IEnvironmentInfo[] }> => {
+  dispatch(getEnvironmentsOfAppAsyncAction.started(params, meta));
+  return collectClient
+    .getEnvironments(params.app)
     .then((envResults: collect.Environment[]) => {
       const envs = envResults.map(env => environmentInfoConvert(env));
-      dispatch(
-        getEnvironmentsOfAppAsyncAction.done({ params, result: { envs } })
-      );
+      const result = { envs };
+      dispatch(getEnvironmentsOfAppAsyncAction.done({ params, result }, meta));
+      return result;
     })
     .catch((reason: Error) => {
       dispatch(
-        getEnvironmentsOfAppAsyncAction.failed({
-          params,
-          error: { message: reason.message }
-        })
+        getEnvironmentsOfAppAsyncAction.failed(
+          {
+            params,
+            error: { message: reason.message }
+          },
+          meta
+        )
       );
-      toastr(`Failed to get environment info of "${params.app}".`, "error")(
-        dispatch
-      );
+      throw reason;
     });
 };
 
@@ -118,23 +126,30 @@ export const getRunningPodsAsyncAction = actionCreator.async<
   { message: string }
 >("GET_RUNNING_PODS");
 
-export const getRunningPods = () => (dispatch: Dispatch) => {
+export const getRunningPods = (meta?: Meta) => (
+  dispatch: Dispatch
+): Promise<{ pods: IPodInfo[] }> => {
   const params = {};
-  dispatch(getRunningPodsAsyncAction.started(params));
-  collectClient
+  dispatch(getRunningPodsAsyncAction.started(params, meta));
+  return collectClient
     .listAvailablePods()
     .then((podResults: collect.Pod[]) => {
       const pods = podResults.map(pod => podInfoConvert(pod));
-      dispatch(getRunningPodsAsyncAction.done({ params, result: { pods } }));
+      const result = { pods };
+      dispatch(getRunningPodsAsyncAction.done({ params, result }, meta));
+      return result;
     })
     .catch((reason: Error) => {
       dispatch(
-        getRunningPodsAsyncAction.failed({
-          params,
-          error: { message: reason.message }
-        })
+        getRunningPodsAsyncAction.failed(
+          {
+            params,
+            error: { message: reason.message }
+          },
+          meta
+        )
       );
-      toastr(`Failed to get running pod info.`, "error")(dispatch);
+      throw reason;
     });
 };
 
@@ -149,39 +164,36 @@ export const postSnapshotAsyncAction = actionCreator.async<
 >("POST_NEW_SNAPSHOT");
 
 export const postSnapshot = (
-  appId: string,
-  environment: string,
-  podId: string
-) => (dispatch: Dispatch) => {
-  const params = { appId, environment, podId };
-  dispatch(postSnapshotAsyncAction.started(params));
-  collectClient
-    .newSnapshot(appId, environment, podId, {
+  params: {
+    appId: string;
+    environment: string;
+    podId: string;
+  },
+  meta?: Meta
+) => (dispatch: Dispatch): Promise<{ newSnapshot: ISnapshotInfo }> => {
+  dispatch(postSnapshotAsyncAction.started(params, meta));
+  return collectClient
+    .newSnapshot(params.appId, params.environment, params.podId, {
       headers: {
         "Content-Type": "application/json"
       } // This is due to "typescript-fetch"
     })
     .then((snapshot: collect.Snapshot) => {
       const newSnapshot = snapshotInfoConvert(snapshot);
-      dispatch(
-        postSnapshotAsyncAction.done({
-          params,
-          result: { newSnapshot }
-        })
-      );
-      toastr(`New snapshot for "${params.podId}" is created.`, "success")(
-        dispatch
-      );
+      const result = { newSnapshot };
+      dispatch(postSnapshotAsyncAction.done({ params, result }, meta));
+      return result;
     })
     .catch((reason: Error) => {
       dispatch(
-        postSnapshotAsyncAction.failed({
-          params,
-          error: { message: reason.message }
-        })
+        postSnapshotAsyncAction.failed(
+          {
+            params,
+            error: { message: reason.message }
+          },
+          meta
+        )
       );
-      toastr(`Failed to make a new snapshot for "${params.podId}".`, "error")(
-        dispatch
-      );
+      throw reason;
     });
 };

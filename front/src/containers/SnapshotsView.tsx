@@ -8,11 +8,13 @@ import {
   getEnvironmentsOfApp,
   selectApp,
   selectEnv,
-  selectPod
+  selectPod,
+  toastr
 } from "../actions";
 import AppSelector from "../components/AppSelector";
 import SnapshotFilter from "../components/SnapshotFilter";
 import SnapshotList, { IRowData } from "../components/SnapshotList";
+import { DispatchPropList } from "../helpers";
 import {
   IApplicationState,
   IEnvironmentInfo,
@@ -32,19 +34,22 @@ interface IStateProps {
   snapshots: ISnapshotInfo[];
 }
 
-interface IDispatchProps {
-  getApps: typeof getApps;
-  selectApp: typeof selectApp;
-  getEnvironmentsOfApp: typeof getEnvironmentsOfApp;
-  selectEnv: typeof selectEnv;
-  selectPod: typeof selectPod;
-}
+const actions = {
+  getApps,
+  selectApp,
+  getEnvironmentsOfApp,
+  selectEnv,
+  selectPod,
+  toastr
+};
 
 interface IComponentProperties {
   history: History;
 }
 
-type IProps = IComponentProperties & IStateProps & IDispatchProps;
+type IProps = IComponentProperties &
+  IStateProps &
+  DispatchPropList<typeof actions>;
 
 function sortedApplications(applications: string[]): string[] {
   return applications.sort();
@@ -110,11 +115,8 @@ const mapStateToProps: (state: IApplicationState) => IStateProps = state => {
   };
 };
 
-const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
-  bindActionCreators(
-    { getApps, selectApp, getEnvironmentsOfApp, selectEnv, selectPod },
-    dispatch
-  );
+const mapDispatchToProps = (dispatch: Dispatch) =>
+  bindActionCreators(actions, dispatch);
 
 // @ts-ignore
 @connect(
@@ -123,7 +125,9 @@ const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
 )
 class SnapshotsView extends React.Component<IProps> {
   public componentDidMount() {
-    this.props.getApps();
+    this.props.getApps().catch(() => {
+      this.props.toastr(`Failed to get app names.`, "error");
+    });
 
     // get app & env from query in url
     const requested = qs.parse(this.props.history.location.search.substring(1));
@@ -281,7 +285,9 @@ class SnapshotsView extends React.Component<IProps> {
 
   private changeApp(app: string) {
     this.props.selectApp({ appName: app });
-    this.props.getEnvironmentsOfApp(app);
+    this.props.getEnvironmentsOfApp({ app }).catch(() => {
+      this.props.toastr(`Failed to get environment info of ${app}`, "error");
+    });
     this.props.selectEnv({ envName: null }); // unselect
     this.props.selectPod({ podName: null }); // unselect
   }
@@ -300,6 +306,4 @@ class SnapshotsView extends React.Component<IProps> {
   }
 }
 
-export default (SnapshotsView as any) as React.ComponentClass<
-  IComponentProperties
->;
+export default SnapshotsView as React.ComponentClass<IComponentProperties>;

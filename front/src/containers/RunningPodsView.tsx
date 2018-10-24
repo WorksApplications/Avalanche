@@ -1,9 +1,10 @@
 import * as React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
-import { getRunningPods, postSnapshot } from "../actions";
+import { getRunningPods, postSnapshot, toastr } from "../actions";
 import PodCardList, { IPodCardListData } from "../components/PodCardList";
 import PodFilter from "../components/PodFilter";
+import { DispatchPropList } from "../helpers";
 import { IApplicationState, IPodInfo } from "../store";
 // @ts-ignore
 import styles from "./RunningPodsView.scss";
@@ -17,12 +18,13 @@ interface IStateProps {
   pods: IPodInfo[];
 }
 
-interface IDispatchProps {
-  postSnapshot: typeof postSnapshot;
-  getRunningPods: typeof getRunningPods;
-}
+const actions = {
+  postSnapshot,
+  getRunningPods,
+  toastr
+};
 
-type IProps = IStateProps & IDispatchProps;
+type IProps = IStateProps & DispatchPropList<typeof actions>;
 
 function sortedPods(pods: IPodInfo[]): IPodInfo[] {
   return pods.sort((a, b) => {
@@ -64,8 +66,8 @@ const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
   pods: sortedPods(state.analysisData.runningPods)
 });
 
-const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
-  bindActionCreators({ postSnapshot, getRunningPods }, dispatch);
+const mapDispatchToProps = (dispatch: Dispatch) =>
+  bindActionCreators(actions, dispatch);
 
 // @ts-ignore
 @connect(
@@ -81,7 +83,9 @@ class RunningPodsView extends React.Component<IProps, IState> {
   }
 
   public componentDidMount(): void {
-    this.props.getRunningPods();
+    this.props.getRunningPods().catch(() => {
+      this.props.toastr(`Failed to get running pod info.`, "error");
+    });
   }
 
   public render() {
@@ -102,7 +106,26 @@ class RunningPodsView extends React.Component<IProps, IState> {
         })),
         onSaveButtonClick:
           p.app && p.env && p.name
-            ? () => this.props.postSnapshot(p.app!, p.env!, p.name!)
+            ? () => {
+                this.props
+                  .postSnapshot({
+                    appId: p.app!,
+                    environment: p.env!,
+                    podId: p.name!
+                  })
+                  .then(({ newSnapshot }) => {
+                    this.props.toastr(
+                      `New snapshot for "${newSnapshot.name} is created.`,
+                      "success"
+                    );
+                  })
+                  .catch(() => {
+                    this.props.toastr(
+                      `Failed to make a new snapshot for "${p.name!}.`,
+                      "error"
+                    );
+                  });
+              }
             : undefined
       }));
 

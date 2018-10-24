@@ -4,7 +4,8 @@ import { bindActionCreators, Dispatch } from "redux";
 import {
   addEnvironmentConfig,
   getEnvironmentConfigs,
-  postEnvironmentConfig
+  postEnvironmentConfig,
+  toastr
 } from "../actions";
 import EnvironmentConfigAddDialog from "../components/dialogs/EnvironmentConfigAddDialog";
 import EnvironmentConfigModifyDialog from "../components/dialogs/EnvironmentConfigModifyDialog";
@@ -12,6 +13,7 @@ import EnvironmentCardList from "../components/EnvironmentCardList";
 import EnvironmentModalDialogFoundation from "../components/EnvironmentModalDialogFoundation";
 import FabButton from "../components/FabButton";
 import FilterInput from "../components/FilterInput";
+import { DispatchPropList } from "../helpers";
 import { IApplicationState, IEnvironmentConfig } from "../store";
 // @ts-ignore
 import styles from "./ConfigPage.scss";
@@ -30,22 +32,20 @@ interface IStateProps {
   environmentConfigs: IEnvironmentConfig[];
 }
 
-interface IDispatchProps {
-  getEnvironmentConfigs: typeof getEnvironmentConfigs;
-  postEnvironmentConfig: typeof postEnvironmentConfig;
-  addEnvironmentConfig: typeof addEnvironmentConfig;
-}
+const actions = {
+  getEnvironmentConfigs,
+  postEnvironmentConfig,
+  addEnvironmentConfig,
+  toastr
+};
 
-type IProps = IStateProps & IDispatchProps;
+type IProps = IStateProps & DispatchPropList<typeof actions>;
 
 const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
   environmentConfigs: state.environmentConfig.environmentConfigs
 });
-const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
-  bindActionCreators(
-    { getEnvironmentConfigs, postEnvironmentConfig, addEnvironmentConfig },
-    dispatch
-  );
+const mapDispatchToProps = (dispatch: Dispatch) =>
+  bindActionCreators(actions, dispatch);
 
 // @ts-ignore
 @connect(
@@ -67,7 +67,9 @@ class ConfigPage extends React.Component<IProps, IState> {
   }
 
   public componentDidMount() {
-    this.props.getEnvironmentConfigs();
+    this.props.getEnvironmentConfigs().catch(() => {
+      this.props.toastr(`Failed to get environment configs.`, "error");
+    });
   }
 
   public render() {
@@ -210,23 +212,39 @@ class ConfigPage extends React.Component<IProps, IState> {
   }
 
   private onModifyDialogAccept() {
-    const version = this.state.version!; // TODO convert to proper value
-    this.props.postEnvironmentConfig(
-      this.state.dialogTarget!,
-      this.state.isMultitenant!,
-      this.state.kubernetesApi!,
-      version
-    );
+    const version = this.state.version!;
+    const environmentName = this.state.dialogTarget!;
+    this.props
+      .postEnvironmentConfig({
+        environmentName,
+        isMultitenant: this.state.isMultitenant!,
+        kubernetesApi: this.state.kubernetesApi!,
+        version
+      })
+      .then(({ config }) => {
+        this.props.toastr(`Config for "${config.name}" is updated.`, "success");
+      })
+      .catch(() => {
+        this.props.toastr(`Failed to configure "${environmentName}".`, "error");
+      });
     this.onModifyDialogDismiss();
   }
 
   private onAddDialogAccept() {
-    this.props.addEnvironmentConfig(
-      this.state.dialogTarget!,
-      this.state.isMultitenant!,
-      this.state.kubernetesApi!,
-      this.state.version!
-    );
+    const environmentName = this.state.dialogTarget!;
+    this.props
+      .addEnvironmentConfig({
+        environmentName,
+        isMultitenant: this.state.isMultitenant!,
+        kubernetesApi: this.state.kubernetesApi!,
+        version: this.state.version!
+      })
+      .then(({ config }) => {
+        this.props.toastr(`Config for "${config.name}" is added.`, "success");
+      })
+      .catch(() => {
+        this.props.toastr(`Failed to add "${environmentName}".`, "error");
+      });
     this.onAddDialogDismiss();
   }
 

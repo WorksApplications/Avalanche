@@ -31,7 +31,6 @@ interface IState {
   preSelectingIndex: number;
 }
 
-// TODO write test
 class SelectorBase extends React.Component<IProperty, IState> {
   public static defaultProps: Partial<IProperty> = {
     disabled: false,
