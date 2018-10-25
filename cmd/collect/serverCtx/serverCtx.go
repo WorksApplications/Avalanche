@@ -21,22 +21,29 @@ import (
 type ServerCtx struct {
 	Db        *sql.DB
 	Detect    string /* detect address */
+	Enroll    string
 	Extract   string /* extract address */
 	Pvmount   string
 	Temporald string
-	Perfing   map[int64]struct{}
+	TracedPod map[int64]struct{}
 	IsMaster  bool
+	Ready     bool
 
 	Flamescope string
+	RunningPod map[string]struct{}
 }
 
 func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Responder {
-	return operations.NewHealthzOK().WithPayload("Vaer sa godt")
+	if s.Ready {
+		return operations.NewHealthzOK().WithPayload("Vaer sa godt")
+	} else {
+		return operations.NewHealthzDefault(503).WithPayload(nil)
+	}
 }
 
 func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) middleware.Responder {
 	body := make([]*models.Pod, 0)
-	for pf, _ := range s.Perfing {
+	for pf, _ := range s.TracedPod {
 		p := pod.Describe(s.Db, pf)
 		if p == nil {
 			operations.NewDescribeAppDefault(503).WithPayload(nil)
@@ -52,9 +59,9 @@ func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) midd
 		}
 		r.Snapshots = ss
 
-		r.IsAlive = true
 		body = append(body, r)
 	}
+	mapIsAliveFlag(body, s.RunningPod)
 	if len(body) == 0 {
 		operations.NewDescribeAppDefault(404).WithPayload(nil)
 	}
@@ -159,7 +166,7 @@ func podDescriber(s *ServerCtx, pod *models.Pod) {
 	for i, n := range sn {
 		pod.Snapshots[i] = n.ToResponse(s.Db, s.Flamescope)
 	}
-	_, pod.IsAlive = s.Perfing[pod.ID]
+	_, pod.IsAlive = s.RunningPod[*pod.Name]
 }
 
 func podHelper(s *ServerCtx, ps []*pod.PodInternal) []*models.Pod {
@@ -181,12 +188,12 @@ func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) midd
 	}
 	lay := layout.OfBoth(s.Db, env, app)
 	if lay == nil {
-		emsg := fmt.Sprintf("ENOLAYOUT app %s is not deployed in environment %s", app.Name, env.Name)
+		emsg := fmt.Sprintf("ENOLAYOUT app %s is not deployed in environment %s", *app.Name, *env.Name)
 		return operations.NewDescribeAppDefault(404).WithPayload(&models.Error{Message: &emsg})
 	}
 	pod := pod.Get(s.Db, &params.Pod, lay.Id).ToResponse()
 	if pod == nil {
-		emsg := fmt.Sprintf("ENOPOD %s couldn't found", params.Pod, "on", lay.Id)
+		emsg := fmt.Sprintf("ENOPOD %s couldn't found on %d", params.Pod, lay.Id)
 		return operations.NewDescribeAppDefault(404).WithPayload(&models.Error{Message: &emsg})
 	}
 	body, err := snapshot.New(&s.Extract, &s.Pvmount, &s.Temporald, s.Db, app, pod, lay)
@@ -197,7 +204,7 @@ func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) midd
 	return operations.NewNewSnapshotOK().WithPayload(body)
 }
 
-func (s *ServerCtx) ListSnapshotsHandler(params operations.ListSnapshotsParams) middleware.Responder {
+func (s *ServerCtx) ShowSnapshotsOfPodHandler(params operations.ShowSnapshotsOfPodParams) middleware.Responder {
 	app := app.Describe(s.Db, &params.Appid)
 	env := environ.Get(s.Db, &params.Environment)
 	if app == nil || env == nil {
@@ -214,7 +221,33 @@ func (s *ServerCtx) ListSnapshotsHandler(params operations.ListSnapshotsParams) 
 		body[i] = ss.ToResponse(s.Db, s.Flamescope)
 	}
 
-	return operations.NewListSnapshotsOK().WithPayload(body)
+	return operations.NewShowSnapshotsOfPodOK().WithPayload(body)
+}
+
+func (s *ServerCtx) ListSnapshotsHandler(params operations.ListSnapshotsParams) middleware.Responder {
+	var ss []*models.Snapshot
+	var max int64
+	if params.Max == nil {
+		max = 10
+	} else {
+		max = *params.Max
+	}
+
+	switch *params.OrderBy {
+	case "":
+		fallthrough
+	case "date":
+		si := snapshot.GetLatest(s.Db, max)
+		ss = make([]*models.Snapshot, len(si))
+		for i, n := range si {
+			ss[i] = n.ToResponse(s.Db, s.Flamescope)
+		}
+	default:
+		mes := "No other ordering keyword supported than \"date\""
+		return operations.NewListSnapshotsDefault(400).WithPayload(&models.Error{Message: &mes})
+	}
+
+	return operations.NewListSnapshotsOK().WithPayload(ss)
 }
 
 func (s *ServerCtx) InitHandle() {

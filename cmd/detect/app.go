@@ -24,7 +24,7 @@ func establishDBConn(dn string) *sql.DB {
 
 func main() {
 	log.SetPrefix("detect:\t")
-	log.SetFlags(log.Lshortfile)
+	log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime)
 	dbconf := flag.String("db", "example:example@localhost?parseTime=True", "DB connexion")
 
 	flag.Parse()
@@ -42,8 +42,8 @@ func main() {
 	}
 
 	//log.Print(apps)
-	http.HandleFunc("/subscription/", x.SubRunner)
-	http.HandleFunc("/subscription", x.Runner)
+	http.HandleFunc("/subscriptions/", x.SubRunner)
+	http.HandleFunc("/subscriptions", x.Runner)
 	//http.HandleFunc("/config", x.Config)
 	http.HandleFunc("/config/environments", x.ConfigEnv)
 	http.HandleFunc("/config/environments/", x.ConfigEnvSub)

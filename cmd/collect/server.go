@@ -25,6 +25,7 @@ func establishDBConn(dn string) *sql.DB {
 
 func main() {
 	log.SetPrefix("collect:\t")
+	log.SetFlags(log.Lshortfile | log.Ltime | log.Ldate)
 
 	swaggerSpec, err := loads.Embedded(restapi.SwaggerJSON, restapi.FlatSwaggerJSON)
 	if err != nil {
@@ -38,6 +39,7 @@ func main() {
 	port := flag.Int("port", 4981, "Port for this server")
 	slave := flag.Bool("slave", false, "Whether it works as slave (no DB update)")
 	detect := flag.String("detect", "http://localhost:8080", "\"detect\" service address")
+	enroll := flag.String("enroll", "http://localhost:8080", "\"enroll\" service address")
 	extract := flag.String("extract", "http://localhost:8080", "\"extract\" service address")
 	tempd := flag.String("volatile", "/tmp/debug-collect/collect-volatile", "\"directory for temporal file\"")
 	ssstore := flag.String("persistent", "/tmp/debug-collect", "mount point of persistent volume for snapshot")
@@ -55,7 +57,19 @@ func main() {
 	defer server.Shutdown()
 
 	db := establishDBConn(*dbconf)
-	ctx := serverCtx.ServerCtx{db, *detect, *extract, *ssstore, *tempd, make(map[int64]struct{}, 0), !*slave, *flamescope}
+	ctx := serverCtx.ServerCtx{
+		Db:         db,
+		Detect:     *detect,
+		Enroll:     *enroll,
+		Extract:    *extract,
+		Pvmount:    *ssstore,
+		Temporald:  *tempd,
+		TracedPod:  make(map[int64]struct{}, 0),
+		IsMaster:   !*slave,
+		Flamescope: *flamescope,
+		RunningPod: make(map[string]struct{}, 0),
+		Ready:      false,
+	}
 
 	if *init {
 		ctx.InitHandle()
@@ -74,6 +88,7 @@ func main() {
 	api.DescribePodHandler = operations.DescribePodHandlerFunc(ctx.DescribePodHandler)
 
 	api.NewSnapshotHandler = operations.NewSnapshotHandlerFunc(ctx.NewSnapshotHandler)
+	api.ShowSnapshotsOfPodHandler = operations.ShowSnapshotsOfPodHandlerFunc(ctx.ShowSnapshotsOfPodHandler)
 	api.ListSnapshotsHandler = operations.ListSnapshotsHandlerFunc(ctx.ListSnapshotsHandler)
 
 	api.ListAvailablePodsHandler = operations.ListAvailablePodsHandlerFunc(ctx.ListAvailablePods)

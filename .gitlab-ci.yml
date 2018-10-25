@@ -2,7 +2,7 @@ backend-build:
     except:
         - develop/front
     stage: build
-    image: golang:1.9
+    image: golang:1.11
     script:
         - tar xf cache-go.tar.gz -C / || true
         - mkdir -p /go/src/git.paas.workslan/resource_optimization
@@ -70,9 +70,9 @@ push-images:
     variables:
         DOCKERHOST: ""
         
-        COLLECT_VERSION: "r1e"
-        DETECT_VERSION: "r1a"
-        ENROLL_VERSION: "r1a"
+        COLLECT_VERSION: "r1j"
+        DETECT_VERSION: "r1d"
+        ENROLL_VERSION: "r1b"
         EXTRACT_VERSION: "r1a"
-        FRONT_VERSION: "r1a"
+        FRONT_VERSION: "r1c"
 

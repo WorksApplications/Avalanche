@@ -25,17 +25,22 @@ type ScannerRequest struct {
 	Ret chan<- *detect.Subscription
 }
 
-func dispatch(ich <-chan *detect.Subscription, och chan<- *detect.Subscription) {
-	for s := range ich {
-		log.Printf("[Dispatched worker] Start scan for %s", s.Env)
-		apps, err := parser.Scan(s.Env)
-		if err != nil {
-			log.Printf("Error in the scan for %s", err)
-		}
-		log.Printf("[Dispatched worker] Scan for %s ended.", s.Env)
-		s.Apps = apps
-		och <- s
+func dispatch(ic <-chan *detect.Subscription, oc chan<- *detect.Subscription) {
+	log.Printf("[Dispatched worker] Enter")
+	for s := range ic {
+		go func(s *detect.Subscription) {
+			log.Printf("[Dispatched worker] Start scan for %s", s.Env)
+			apps, err := parser.Scan(s.Env)
+			if err != nil {
+				log.Printf("Error in the scan for %s", err)
+			}
+			log.Printf("[Dispatched worker] Scan for %s ended.", s.Env)
+			s.Apps = apps
+			s.OnGoing = false
+			oc <- s
+		}(s)
 	}
+	log.Printf("[Dispatched worker] Exit")
 }
 
 func Exchange(ch chan *ScannerRequest) {
@@ -52,16 +57,25 @@ func Exchange(ch chan *ScannerRequest) {
 		case <-t:
 			log.Println("start batch scan")
 			for _, s := range m {
-				isc <- s
+				if s.OnGoing {
+					/* Do not spawn on-going call again */
+					continue
+				}
+				select {
+				case isc <- s:
+					s.OnGoing = true
+				default:
+					log.Println("request buffer is full")
+				}
 			}
 		case req := <-ch:
 			env := req.Env
 			if env == nil && req.Req != DESC {
-				log.Printf("WARN: nil exception was almost there! req.Req=%s", req.Req)
+				log.Printf("WARN: nil exception was almost there! req.Req=%+v", req.Req)
 			}
 			switch req.Req {
 			case ADD:
-				sub := detect.Subscription{*env, empty}
+				sub := detect.Subscription{*env, empty, false}
 				m[*env] = &sub
 				log.Printf("%s will be scanned", *env)
 			case DEL:
@@ -70,12 +84,13 @@ func Exchange(ch chan *ScannerRequest) {
 			case SCAN:
 				sub, prs := m[*env]
 				if !prs {
-					sub = &detect.Subscription{*env, empty}
+					sub = &detect.Subscription{*env, empty, true}
 					// If this line is enabled, you don't have to receive result from dispatch.
 					// However, you will return empty list which is empty because it is not scanned yet
 					// m[*env] = sub
 				}
 				isc <- sub
+				log.Print("[Scan manager] sent:", *env)
 			case DESC:
 				if env == nil {
 					for _, sub := range m {

@@ -72,6 +72,11 @@ func FromPod(db *sql.DB, p *models.Pod) []*SnapshotInternal {
 	return list(db, &wh)
 }
 
+func GetLatest(db *sql.DB, max int64) []*SnapshotInternal {
+	wh := fmt.Sprintf("order by created limit %d", max)
+	return list(db, &wh)
+}
+
 func (s *SnapshotInternal) ToResponse(db *sql.DB, flamescope string) *models.Snapshot {
 	if s == nil {
 		return nil
@@ -132,7 +137,7 @@ func getSS(pvmountp *string, temporald *string, link *string, pname *string) (st
 	er := os.Rename(f.Name(), d+filename)
 	if er != nil {
 		log.Print("[Snapshot/error] Saving to persistent volume failed:", d, "|||", f.Name(), ":::", er)
-		return "", "", fmt.Errorf("Saving to persistent volume failed:", d, "|||", f.Name(), ":::", er)
+		return "", "", fmt.Errorf("Saving to persistent volume failed: %s,\n\t name: %s\n\t rename: %s", d, f.Name(), er)
 	}
 	log.Print("[Snapshot] data moved to ", d+filename)
 	/* return relative path from persistent mount point */

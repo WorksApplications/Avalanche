@@ -19,26 +19,26 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func (s *ServerCtx) pull() {
-	log.Printf("start to pull pods' information from %s", s.Detect)
-	r, err := http.Get(s.Detect + "/subscription/")
+func (s *ServerCtx) pull() error {
+	log.Printf("start to pull pods' information from %s", s.Detect+"/subscriptions")
+	r, err := http.Get(s.Detect + "/subscriptions")
 	if err != nil {
-		log.Println("Poll failed!")
-		return
+		log.Println("Poll failed with ", err)
+		return err
 	}
-	d, er2 := ioutil.ReadAll(r.Body)
-	if er2 != nil {
-		log.Println("Poll f-ed up!")
-		return
+	d, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println("Poll f-ed up!", err)
+		return err
 	}
 	defer r.Body.Close()
 
 	var p []detect.Subscription
 	err = json.Unmarshal(d, &p)
-	if err != nil || er2 != nil {
-		log.Println("Unmarshal failed!", err, er2)
+	if err != nil {
+		log.Println("Unmarshal failed!", err)
 		log.Printf("res: %+v", p)
-		return
+		return err
 	}
 	found := make(map[int64]struct{})
 	for _, e := range p {
@@ -48,15 +48,9 @@ func (s *ServerCtx) pull() {
 			found[f] = struct{}{}
 		}
 	}
-	s.Perfing = found
-	log.Print("[Discovery] Found:", len(s.Perfing))
-}
-
-func mapIsAliveFlag(ps []*models.Pod, alive map[int64]struct{}) {
-	for _, p := range ps {
-		_, prs := alive[p.ID]
-		p.IsAlive = prs
-	}
+	s.TracedPod = found
+	log.Print("[Discovery] Found:", len(s.TracedPod))
+	return nil
 }
 
 func recursiveInsert(db *sql.DB, p *detect.Subscription) []int64 {
@@ -83,16 +77,81 @@ func (s *ServerCtx) PollPodInfo() {
 	t := time.NewTicker(1 * time.Minute)
 	once := make(chan int, 1)
 	once <- 1
-	go func() {
+	go func(flag *bool) {
 		for {
 			select {
 			case <-once:
 				close(once)
 				once = nil
-				s.pull()
+				checkerr := s.checkPodAvailability()
+				pullerr := s.pull()
+				if checkerr == nil && pullerr == nil {
+					*flag = true
+				} else {
+					log.Print("Failed to setup", checkerr, pullerr)
+					panic("Initialization failed")
+				}
 			case <-t.C:
+				s.checkPodAvailability()
 				s.pull()
 			}
 		}
-	}()
+	}(&s.Ready)
+
+}
+
+func (s *ServerCtx) checkPodAvailability() error {
+	if s.Enroll == "" {
+		/* disable this feature */
+		return nil
+	}
+	r, err := http.Get(s.Enroll)
+	if err != nil {
+		log.Println("Poke enroll at ", s.Enroll, " failed!")
+		return err
+	}
+	d, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println("Reading enroll at ", s.Enroll, " response failed")
+		return err
+	}
+	defer r.Body.Close()
+
+	type Response struct {
+		Name     string
+		Image    string
+		IsTraced bool
+	}
+
+	type MetaResponse struct {
+		List   []Response
+		Source string
+	}
+
+	var response []MetaResponse
+
+	err = json.Unmarshal(d, &response)
+	if err != nil {
+		log.Println("Parse error with the response", err, string(d))
+		return err
+	}
+
+	rps := make(map[string]struct{}, 0)
+	for _, v := range response {
+		for _, w := range v.List {
+			if w.IsTraced {
+				rps[w.Name] = struct{}{}
+			}
+		}
+	}
+	s.RunningPod = rps
+	log.Printf("%+v", s.RunningPod)
+	return nil
+}
+
+func mapIsAliveFlag(ps []*models.Pod, alive map[string]struct{}) {
+	for _, p := range ps {
+		_, prs := alive[*p.Name]
+		p.IsAlive = prs
+	}
 }

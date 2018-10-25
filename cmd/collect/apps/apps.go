@@ -75,7 +75,7 @@ func fill(db *sql.DB, s *models.App) {
 }
 
 func add(db *sql.DB, n *string, d *time.Time) error {
-	log.Printf("[DB/App] Storing (%s, %s)", n, d)
+	log.Printf("[DB/App] Storing (%s, %s)", *n, d)
 	_, err := db.Exec("INSERT INTO app(name, lastseen) values (?, ?)", n, d)
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func add(db *sql.DB, n *string, d *time.Time) error {
 
 func update(db *sql.DB, id int64, d *time.Time) error {
 	_, err := db.Exec("UPDATE app SET lastseen = ? WHERE id = ?", d, id)
-	log.Printf("[DB/App] Update: %d with lastseen = %s)", id, d)
+	//log.Printf("[DB/App] Update: %d with lastseen = %s)", id, d)
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func Assign(db *sql.DB, n *string, d *time.Time) *models.App {
 	} else {
 		err := update(db, *g.ID, d)
 		if err != nil {
-			log.Printf("[DB/App] Error to update %s", *n, err)
+			log.Printf("[DB/App] Error to update %s, %s", *n, err)
 			return nil
 		}
 		g.Lastseen = strfmt.DateTime(*d)

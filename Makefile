@@ -1,7 +1,7 @@
 PKG = $(shell find pkg -name *.go)
 
 
-.PHONY: default clean fmt make_stub dep swagger backend front
+.PHONY: default clean fmt make_stub dep swagger backend front test
 
 default: all
 
@@ -50,5 +50,8 @@ fmt:
 	go fmt ./cmd/...
 	go fmt ./pkg/...
 
+test:
+	go test ./cmd/...
+
 dep:
-	go get -v -d ./...
+	go get -t -v -d ./...

@@ -14,13 +14,13 @@ import (
    |id|name|app_id                     |
    +--+----+---------------------------+
 */
-
 type Environ struct {
 	Id          int64   `json:"id"`
 	Name        string  `json:"name"`
 	Tenant      string  `json:"tenant"`
 	Landscape   string  `json:"Landscape"`
 	Addr        *string `json:"serviceUrl,omitempty"`
+	MischoAddr  *string `json:"mischoUrl,omitempty"`
 	Kubeapi     *string `json:"kubernetesApi"`
 	Multitenant *bool   `json:"isMultitenant,omitempty"`
 	/* TODO: validate version range */
@@ -47,10 +47,10 @@ func ListConfig(db *sql.DB, name *string, obs *bool) []*Environ {
 	namew := ""
 	obsw := ""
 	if name != nil {
-		namew = "namew = " + *name
+		namew = fmt.Sprintf("name=\"%s\"", *name)
 	}
 	if obs != nil {
-		obsw = fmt.Sprintf("observe = %t", *obs)
+		obsw = fmt.Sprintf("observe=%t", *obs)
 	}
 	where := ""
 	if name != nil || obs != nil {
