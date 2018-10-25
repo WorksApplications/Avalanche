@@ -13,7 +13,7 @@ import EnvironmentCardList from "../components/EnvironmentCardList";
 import EnvironmentModalDialogFoundation from "../components/EnvironmentModalDialogFoundation";
 import FabButton from "../components/FabButton";
 import FilterInput from "../components/FilterInput";
-import { OperationToProps, thunkToActionBulk } from "../helpers";
+import { OperationsToProps, thunkToActionBulk } from "../helpers";
 import { IApplicationState, IEnvironmentConfig } from "../store";
 import styles from "./ConfigPage.scss";
 
@@ -41,7 +41,7 @@ const operations = {
   addEnvironmentConfigThunk
 };
 
-type IDispatchProps = typeof actions & OperationToProps<typeof operations>;
+type IDispatchProps = typeof actions & OperationsToProps<typeof operations>;
 
 type IProps = IStateProps & IDispatchProps;
 

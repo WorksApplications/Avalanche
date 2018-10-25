@@ -4,7 +4,7 @@ import { bindActionCreators, Dispatch } from "redux";
 import { getRunningPodsThunk, postSnapshotThunk, toastr } from "../actions";
 import PodCardList, { IPodCardListData } from "../components/PodCardList";
 import PodFilter from "../components/PodFilter";
-import { OperationToProps, thunkToActionBulk } from "../helpers";
+import { OperationsToProps, thunkToActionBulk } from "../helpers";
 import { IApplicationState, IPodInfo } from "../store";
 import styles from "./RunningPodsView.scss";
 
@@ -26,7 +26,7 @@ const operations = {
   getRunningPodsThunk
 };
 
-type IDispatchProps = typeof actions & OperationToProps<typeof operations>;
+type IDispatchProps = typeof actions & OperationsToProps<typeof operations>;
 
 type IProps = IStateProps & IDispatchProps;
 

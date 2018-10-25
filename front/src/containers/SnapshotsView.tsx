@@ -14,7 +14,7 @@ import {
 import AppSelector from "../components/AppSelector";
 import SnapshotFilter from "../components/SnapshotFilter";
 import SnapshotList, { IRowData } from "../components/SnapshotList";
-import { OperationToProps, thunkToActionBulk } from "../helpers";
+import { OperationsToProps, thunkToActionBulk } from "../helpers";
 import {
   IApplicationState,
   IEnvironmentInfo,
@@ -49,7 +49,7 @@ interface IComponentProperties {
   history: History;
 }
 
-type IDispatchProps = typeof actions & OperationToProps<typeof operations>;
+type IDispatchProps = typeof actions & OperationsToProps<typeof operations>;
 
 type IProps = IComponentProperties & IStateProps & IDispatchProps;
 
