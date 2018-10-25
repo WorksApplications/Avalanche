@@ -6,7 +6,6 @@ import PodCardList, { IPodCardListData } from "../components/PodCardList";
 import PodFilter from "../components/PodFilter";
 import { OperationToProps, thunkToActionBulk } from "../helpers";
 import { IApplicationState, IPodInfo } from "../store";
-// @ts-ignore
 import styles from "./RunningPodsView.scss";
 
 interface IState {
@@ -77,11 +76,6 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
     dispatch
   );
 
-// @ts-ignore
-@connect(
-  mapStateToProps,
-  mapDispatchToProps
-)
 class RunningPodsView extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
@@ -188,4 +182,7 @@ class RunningPodsView extends React.Component<IProps, IState> {
   }
 }
 
-export default (RunningPodsView as any) as React.ComponentClass;
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(RunningPodsView) as React.ComponentClass;

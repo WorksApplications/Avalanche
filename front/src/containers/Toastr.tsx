@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
 import { hideToastr } from "../actions";
 import { IApplicationState } from "../store";
-// @ts-ignore
 import styles from "./Toastr.scss";
 
 interface IStateProps {
@@ -32,11 +31,6 @@ const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
     dispatch
   );
 
-// @ts-ignore
-@connect(
-  mapStateToProps,
-  mapDispatchToProps
-)
 class Toastr extends React.Component<IStateProps & IDispatchProps> {
   public render() {
     const dismissToastr = () =>
@@ -64,4 +58,7 @@ class Toastr extends React.Component<IStateProps & IDispatchProps> {
   }
 }
 
-export default (Toastr as any) as React.ComponentClass;
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Toastr) as React.ComponentClass;

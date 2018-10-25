@@ -21,7 +21,6 @@ import {
   IPodInfo,
   ISnapshotInfo
 } from "../store";
-// @ts-ignore
 import styles from "./SnapshotsView.scss";
 
 interface IStateProps {
@@ -124,11 +123,6 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
     dispatch
   );
 
-// @ts-ignore
-@connect(
-  mapStateToProps,
-  mapDispatchToProps
-)
 class SnapshotsView extends React.Component<IProps> {
   public componentDidMount() {
     this.props.getAppsThunk().catch(() => {
@@ -312,4 +306,7 @@ class SnapshotsView extends React.Component<IProps> {
   }
 }
 
-export default SnapshotsView as React.ComponentClass<IComponentProperties>;
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SnapshotsView) as React.ComponentClass<IComponentProperties>;

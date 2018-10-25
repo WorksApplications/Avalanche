@@ -2,7 +2,6 @@ import { History } from "history";
 import * as React from "react";
 import RunningPodsView from "../containers/RunningPodsView";
 import SnapshotsView from "../containers/SnapshotsView";
-// @ts-ignore
 import styles from "./SnapshotPage.scss";
 
 interface IDerivedProperties {

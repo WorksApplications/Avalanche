@@ -1,6 +1,5 @@
 import * as React from "react";
 import { hot } from "react-hot-loader";
-// @ts-ignore
 import styles from "./App.scss";
 import TitleBar from "./containers/TitleBar";
 import Toastr from "./containers/Toastr";

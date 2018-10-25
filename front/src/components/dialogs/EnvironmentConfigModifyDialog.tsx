@@ -1,5 +1,4 @@
 import * as React from "react";
-// @ts-ignore
 import dialogStyles from "../EnvironmentModalDialogFoundation.scss";
 
 export interface IProperty {

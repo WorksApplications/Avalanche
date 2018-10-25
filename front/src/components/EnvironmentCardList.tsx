@@ -1,6 +1,5 @@
 import * as React from "react";
 import EnvironmentCard, { IEnvironmentCardProperty } from "./EnvironmentCard";
-// @ts-ignore
 import styles from "./EnvironmentCardList.scss";
 
 export interface IProperty {

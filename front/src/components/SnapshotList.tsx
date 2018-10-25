@@ -1,6 +1,5 @@
 import * as React from "react";
 import Link from "./Link";
-// @ts-ignore
 import styles from "./SnapshotList.scss";
 
 export interface IRowData {

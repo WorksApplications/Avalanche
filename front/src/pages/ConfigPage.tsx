@@ -15,7 +15,6 @@ import FabButton from "../components/FabButton";
 import FilterInput from "../components/FilterInput";
 import { OperationToProps, thunkToActionBulk } from "../helpers";
 import { IApplicationState, IEnvironmentConfig } from "../store";
-// @ts-ignore
 import styles from "./ConfigPage.scss";
 
 interface IState {
@@ -55,11 +54,6 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
     dispatch
   );
 
-// @ts-ignore
-@connect(
-  mapStateToProps,
-  mapDispatchToProps
-)
 class ConfigPage extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
@@ -266,4 +260,7 @@ class ConfigPage extends React.Component<IProps, IState> {
   }
 }
 
-export default (ConfigPage as any) as React.ComponentClass;
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ConfigPage) as React.ComponentClass;
