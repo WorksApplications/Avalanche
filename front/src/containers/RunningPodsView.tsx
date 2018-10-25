@@ -1,11 +1,11 @@
 import * as React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
-import { getRunningPods, postSnapshot } from "../actions";
-import PodCardList from "../components/PodCardList";
+import { getRunningPodsThunk, postSnapshotThunk, toastr } from "../actions";
+import PodCardList, { IPodCardListData } from "../components/PodCardList";
 import PodFilter from "../components/PodFilter";
+import { OperationsToProps, thunkToActionBulk } from "../helpers";
 import { IApplicationState, IPodInfo } from "../store";
-// @ts-ignore
 import styles from "./RunningPodsView.scss";
 
 interface IState {
@@ -17,10 +17,16 @@ interface IStateProps {
   pods: IPodInfo[];
 }
 
-interface IDispatchProps {
-  postSnapshot: typeof postSnapshot;
-  getRunningPods: typeof getRunningPods;
-}
+const actions = {
+  toastr
+};
+
+const operations = {
+  postSnapshotThunk,
+  getRunningPodsThunk
+};
+
+type IDispatchProps = typeof actions & OperationsToProps<typeof operations>;
 
 type IProps = IStateProps & IDispatchProps;
 
@@ -64,14 +70,12 @@ const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
   pods: sortedPods(state.analysisData.runningPods)
 });
 
-const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
-  bindActionCreators({ postSnapshot, getRunningPods }, dispatch);
+const mapDispatchToProps = (dispatch: Dispatch) =>
+  bindActionCreators(
+    { ...actions, ...thunkToActionBulk(operations) },
+    dispatch
+  );
 
-// @ts-ignore
-@connect(
-  mapStateToProps,
-  mapDispatchToProps
-)
 class RunningPodsView extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
@@ -81,11 +85,13 @@ class RunningPodsView extends React.Component<IProps, IState> {
   }
 
   public componentDidMount(): void {
-    this.props.getRunningPods();
+    this.props.getRunningPodsThunk().catch(() => {
+      this.props.toastr(`Failed to get running pod info.`, "error");
+    });
   }
 
   public render() {
-    const podInfo = this.props.pods
+    const podInfo: IPodCardListData = this.props.pods
       .filter(p => p.name.startsWith(this.state.filteringValue))
       .map(p => ({
         id: (p.id || "").toString(),
@@ -102,7 +108,26 @@ class RunningPodsView extends React.Component<IProps, IState> {
         })),
         onSaveButtonClick:
           p.app && p.env && p.name
-            ? () => this.props.postSnapshot(p.app!, p.env!, p.name!)
+            ? () => {
+                this.props
+                  .postSnapshotThunk({
+                    appId: p.app!,
+                    environment: p.env!,
+                    podId: p.name!
+                  })
+                  .then(({ newSnapshot }) => {
+                    this.props.toastr(
+                      `New snapshot for "${newSnapshot.name} is created.`,
+                      "success"
+                    );
+                  })
+                  .catch(() => {
+                    this.props.toastr(
+                      `Failed to make a new snapshot for "${p.name!}.`,
+                      "error"
+                    );
+                  });
+              }
             : undefined
       }));
 
@@ -157,4 +182,7 @@ class RunningPodsView extends React.Component<IProps, IState> {
   }
 }
 
-export default (RunningPodsView as any) as React.ComponentClass;
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(RunningPodsView) as React.ComponentClass;

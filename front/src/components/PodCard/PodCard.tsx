@@ -1,6 +1,5 @@
 import * as React from "react";
-import AliveIndicator from "./AliveIndicator";
-// @ts-ignore
+import AliveIndicator from "../AliveIndicator";
 import styles from "./PodCard.scss";
 
 export interface IProperty {
@@ -15,7 +14,7 @@ export interface IProperty {
   onSaveButtonClick?(): void;
 }
 
-export interface IState {
+interface IState {
   isOpen: boolean;
 }
 
@@ -87,35 +86,43 @@ class PodCard extends React.Component<IProperty, IState> {
             <div className={styles.snapshotsArea} data-test="snapshot-area">
               {this.props.snapshots.length > 0 ? (
                 <ul className={styles.snapshotList}>
-                  {this.props.snapshots.slice(0, 3).map(s => (
-                    <li
-                      key={s.uuid}
-                      className={styles.snapshot}
-                      data-test="snapshot"
-                    >
-                      <span className={styles.snapshotHash}>
-                        <span className={styles.snapshotHashPopover}>
-                          {s.uuid}
+                  {this.props.snapshots
+                    .sort(
+                      (a, b) =>
+                        b!.createdAt!.getTime() - a!.createdAt!.getTime()
+                    )
+                    .slice(0, 3)
+                    .map(s => (
+                      <li
+                        key={s.uuid}
+                        className={styles.snapshot}
+                        data-test="snapshot"
+                      >
+                        <span className={styles.snapshotHash}>
+                          <span className={styles.snapshotHashPopover}>
+                            {s.uuid}
+                          </span>
+                          {s.uuid.substr(0, 20)}
+                          ...
                         </span>
-                        {s.uuid.substr(0, 20)}
-                        ...
-                      </span>
-                      <span
-                        className={styles.snapshotDate}
-                        data-test="snapshot-date"
-                      >
-                        {s.createdAt ? s.createdAt.toLocaleString() : "Unknown"}
-                      </span>
-                      <a
-                        className={styles.snapshotLink}
-                        href={s.link}
-                        target="_blank"
-                        rel="noopener"
-                      >
-                        Flamescope
-                      </a>
-                    </li>
-                  ))}
+                        <span
+                          className={styles.snapshotDate}
+                          data-test="snapshot-date"
+                        >
+                          {s.createdAt
+                            ? s.createdAt.toLocaleString()
+                            : "Unknown"}
+                        </span>
+                        <a
+                          className={styles.snapshotLink}
+                          href={s.link}
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          Flamescope
+                        </a>
+                      </li>
+                    ))}
                 </ul>
               ) : (
                 <div

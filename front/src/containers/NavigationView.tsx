@@ -1,7 +1,6 @@
 import * as React from "react";
 // tslint:disable-next-line:no-submodule-imports
 import { NavLink } from "react-router-dom";
-// @ts-ignore
 import styles from "./NavigationView.scss";
 
 class NavigationView extends React.Component {

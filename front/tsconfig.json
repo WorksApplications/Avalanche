@@ -17,7 +17,8 @@
     "noUnusedLocals": true,
     "baseUrl": ".",
     "experimentalDecorators": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "isolatedModules": true
   },
   "exclude": [
     "node_modules",

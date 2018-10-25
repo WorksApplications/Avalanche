@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "start": "webpack-dev-server",
+    "start": "webpack-dev-server --hot",
     "build": "webpack --env.production",
     "test": "tslint -p tsconfig.json | jest",
     "serve": "serve -s ./public",
@@ -15,16 +15,19 @@
     "build-storybook": "build-storybook"
   },
   "dependencies": {
+    "history": "^4.7.2",
     "portable-fetch": "^3.0.0",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
+    "react-hot-loader": "^4.3.11",
     "react-redux": "^5.0.7",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
     "redux": "^4.0.0",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.3.0",
-    "typescript-fsa": "^3.0.0-beta-2"
+    "typescript-fsa": "^3.0.0-beta-2",
+    "typescript-fsa-redux-thunk": "^2.0.0-beta.11"
   },
   "devDependencies": {
     "@babel/core": "^7.1.0",
@@ -42,6 +45,7 @@
     "@storybook/react": "^4.0.0-alpha.23",
     "@types/enzyme": "^3.1.14",
     "@types/enzyme-adapter-react-16": "^1.0.3",
+    "@types/history": "^4.7.1",
     "@types/jest": "^23.3.1",
     "@types/node": "^10.9.1",
     "@types/react": "^16.4.14",

@@ -168,5 +168,57 @@ describe("<PodCard />", () => {
         ).valueOf()
       ).toBe(Math.floor((baseDateValue + 6000) / 1000) * 1000); // since millisecond is missing
     });
+
+    it("renders ordered list (the newest should be displayed on the top)", () => {
+      const contextNormal = shallow(
+        <PodCard
+          {...basicCardProps}
+          snapshots={basicCardProps.snapshots.slice(0, 3)}
+        />
+      );
+      contextNormal.find(sel`info-root`).simulate("click");
+      expect(
+        new Date(
+          contextNormal
+            .find(sel`snapshot`)
+            .first()
+            .find(sel`snapshot-date`)
+            .text()
+        ).valueOf()
+      ).toBeGreaterThan(
+        new Date(
+          contextNormal
+            .find(sel`snapshot`)
+            .last()
+            .find(sel`snapshot-date`)
+            .text()
+        ).valueOf()
+      );
+
+      const contextReversed = shallow(
+        <PodCard
+          {...basicCardProps}
+          snapshots={basicCardProps.snapshots.slice(0, 3).reverse()}
+        />
+      );
+      contextReversed.find(sel`info-root`).simulate("click");
+      expect(
+        new Date(
+          contextReversed
+            .find(sel`snapshot`)
+            .first()
+            .find(sel`snapshot-date`)
+            .text()
+        ).valueOf()
+      ).toBeGreaterThan(
+        new Date(
+          contextReversed
+            .find(sel`snapshot`)
+            .last()
+            .find(sel`snapshot-date`)
+            .text()
+        ).valueOf()
+      );
+    });
   });
 });

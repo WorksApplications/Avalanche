@@ -1,15 +1,16 @@
 import { Action } from "redux";
 import { isType } from "typescript-fsa";
 import {
-  getAppsAsyncAction,
-  getEnvironmentsOfAppAsyncAction,
-  getRunningPodsAsyncAction,
-  postSnapshotAsyncAction,
+  getAppsThunk,
+  getEnvironmentsOfAppThunk,
+  getLatestSnapshotsThunk,
+  getRunningPodsThunk,
+  postSnapshotThunk,
   selectApp,
   selectEnv,
   selectPod
 } from "../actions";
-import { IAnalysisDataState } from "../store";
+import { IAnalysisDataState, IPodInfo, ISnapshotInfo } from "../store";
 
 const INIT: IAnalysisDataState = {
   applicationName: null,
@@ -17,7 +18,9 @@ const INIT: IAnalysisDataState = {
   selectedEnvironment: null,
   environments: {},
   runningPods: [],
-  selectedPod: null
+  selectedPod: null,
+  pods: [],
+  snapshots: []
 };
 
 export function analysisData(
@@ -27,26 +30,43 @@ export function analysisData(
   if (isType(action, selectApp)) {
     return { ...state, applicationName: action.payload.appName };
   }
-  if (isType(action, getAppsAsyncAction.done)) {
+  if (isType(action, getAppsThunk.async.done)) {
     return { ...state, applications: action.payload.result.apps };
   }
   if (isType(action, selectEnv)) {
     return { ...state, selectedEnvironment: action.payload.envName };
   }
-  if (isType(action, getEnvironmentsOfAppAsyncAction.done)) {
-    const newEnvironments = { ...state.environments };
+  if (isType(action, getEnvironmentsOfAppThunk.async.done)) {
+    const environments = { ...state.environments };
     for (const e of action.payload.result.envs) {
-      newEnvironments[e.name] = e;
+      environments[e.name] = e;
     }
-    return { ...state, environments: newEnvironments };
+    const pods = action.payload.result.envs.reduce(
+      // flat-map
+      (acc: IPodInfo[], x) => acc.concat(x.pods),
+      []
+    );
+    const snapshots = pods.reduce(
+      // flat-map
+      (acc: ISnapshotInfo[], x) =>
+        x.snapshots ? acc.concat(x.snapshots) : acc,
+      []
+    );
+
+    return {
+      ...state,
+      environments,
+      pods,
+      snapshots
+    };
   }
-  if (isType(action, getRunningPodsAsyncAction.done)) {
+  if (isType(action, getRunningPodsThunk.async.done)) {
     return { ...state, runningPods: action.payload.result.pods };
   }
   if (isType(action, selectPod)) {
     return { ...state, selectedPod: action.payload.podName };
   }
-  if (isType(action, postSnapshotAsyncAction.started)) {
+  if (isType(action, postSnapshotThunk.async.started)) {
     return {
       ...state,
       runningPods: state.runningPods.map(
@@ -55,7 +75,7 @@ export function analysisData(
       )
     };
   }
-  if (isType(action, postSnapshotAsyncAction.done)) {
+  if (isType(action, postSnapshotThunk.async.done)) {
     return {
       ...state,
       runningPods: state.runningPods.map(
@@ -72,7 +92,7 @@ export function analysisData(
       )
     };
   }
-  if (isType(action, postSnapshotAsyncAction.failed)) {
+  if (isType(action, postSnapshotThunk.async.failed)) {
     return {
       ...state,
       runningPods: state.runningPods.map(
@@ -81,6 +101,12 @@ export function analysisData(
             ? { ...pod, isSaving: false }
             : pod
       )
+    };
+  }
+  if (isType(action, getLatestSnapshotsThunk.async.done)) {
+    return {
+      ...state,
+      snapshots: action.payload.result.snapshots
     };
   }
 

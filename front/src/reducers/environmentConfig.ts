@@ -1,6 +1,6 @@
 import { Action } from "redux";
 import { isType } from "typescript-fsa";
-import { getEnvironmentConfigsAsyncAction } from "../actions";
+import { getEnvironmentConfigsThunk } from "../actions";
 import { IEnvironmentConfigState } from "../store";
 
 const INIT: IEnvironmentConfigState = {
@@ -11,7 +11,7 @@ export function environmentConfig(
   state: IEnvironmentConfigState = INIT,
   action: Action
 ): IEnvironmentConfigState {
-  if (isType(action, getEnvironmentConfigsAsyncAction.done)) {
+  if (isType(action, getEnvironmentConfigsThunk.async.done)) {
     return { ...state, environmentConfigs: action.payload.result.configs };
   }
   return state;

@@ -1,9 +1,9 @@
 import * as React from "react";
-// @ts-ignore
+import { hot } from "react-hot-loader";
 import styles from "./App.scss";
-import TitleBar from "./TitleBar";
-import Toastr from "./Toastr";
-import Workspace from "./Workspace";
+import TitleBar from "./containers/TitleBar";
+import Toastr from "./containers/Toastr";
+import Workspace from "./containers/Workspace";
 
 class App extends React.Component {
   public render() {
@@ -21,4 +21,4 @@ class App extends React.Component {
   }
 }
 
-export default App;
+export default hot(module)(App);

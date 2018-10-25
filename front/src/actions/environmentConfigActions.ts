@@ -1,11 +1,11 @@
-import { Dispatch } from "redux";
 import actionCreatorFactory from "typescript-fsa";
+import { asyncFactory } from "typescript-fsa-redux-thunk";
 import { COLLECT_API_BASE } from "../constants";
 import * as collect from "../generated/collect/api";
 import { IEnvironmentConfig } from "../store";
-import { toastr } from "./toastNotificationActions";
 
 const actionCreator = actionCreatorFactory();
+const asyncActionCreator = asyncFactory(actionCreator);
 
 const collectClient = collect.DefaultApiFactory(
   {},
@@ -27,129 +27,79 @@ function environmentConfigConvert(
   };
 }
 
-export const getEnvironmentConfigsAsyncAction = actionCreator.async<
+export const getEnvironmentConfigsThunk = asyncActionCreator<
   {},
-  { configs: IEnvironmentConfig[] },
-  { message: string }
->("GET_ENVIRONMENT_CONFIGS");
-
-export const getEnvironmentConfigs = () => (dispatch: Dispatch) => {
-  const params = {};
-  dispatch(getEnvironmentConfigsAsyncAction.started(params));
+  { configs: IEnvironmentConfig[] }
+>("GET_ENVIRONMENT_CONFIGS", () =>
   collectClient
     .listEnvironmentConfig()
     .then((configResults: collect.EnvironmentConfig[]) => {
       const configs = configResults.map(config =>
         environmentConfigConvert(config)
       );
-      dispatch(
-        getEnvironmentConfigsAsyncAction.done({ params, result: { configs } })
-      );
+      return { configs };
     })
-    .catch((reason: Error) => {
-      dispatch(
-        getEnvironmentConfigsAsyncAction.failed({
-          params,
-          error: { message: reason.message }
-        })
-      );
-      toastr(`Failed to get environment configs.`, "error")(dispatch);
-    });
-};
+);
 
-export const postEnvironmentConfigAsyncAction = actionCreator.async<
+export const postEnvironmentConfigThunk = asyncActionCreator<
   {
-    environment: string;
+    environmentName: string;
+    isMultitenant: boolean;
+    kubernetesApi: string;
+    version: string;
   },
-  { config: IEnvironmentConfig },
-  { message: string }
->("POST_ENVIRONMENT_CONFIG");
+  { config: IEnvironmentConfig }
+>(
+  "POST_ENVIRONMENT_CONFIG",
+  ({ environmentName, isMultitenant, kubernetesApi, version }) =>
+    collectClient
+      .putEnvironmentConfig(
+        environmentName,
+        {
+          name: environmentName,
+          isMultitenant,
+          kubernetesApi,
+          version
+        },
+        {
+          headers: {
+            "Content-Type": "application/json"
+          } // This is due to "typescript-fetch")
+        }
+      )
+      .then((configResult: collect.EnvironmentConfig) => {
+        const config = environmentConfigConvert(configResult);
+        return { config };
+      })
+);
 
-export const postEnvironmentConfig = (
-  environmentName: string,
-  isMultitenant: boolean,
-  kubernetesApi: string,
-  version: string
-) => (dispatch: Dispatch) => {
-  const newConfig: collect.EnvironmentConfig = {
-    name: environmentName,
-    isMultitenant,
-    kubernetesApi,
-    version
-  };
-  const params = { environment: environmentName, config: newConfig };
-  dispatch(postEnvironmentConfigAsyncAction.started(params));
-  collectClient
-    .putEnvironmentConfig(environmentName, newConfig, {
-      headers: {
-        "Content-Type": "application/json"
-      } // This is due to "typescript-fetch")
-    })
-    .then((configResult: collect.EnvironmentConfig) => {
-      dispatch(
-        postEnvironmentConfigAsyncAction.done({
-          params,
-          result: { config: environmentConfigConvert(configResult) }
-        })
-      );
-      toastr(`Config for "${params.environment}" is updated.`, "success")(
-        dispatch
-      );
-    })
-    .catch((reason: Error) => {
-      dispatch(
-        postEnvironmentConfigAsyncAction.failed({
-          params,
-          error: { message: reason.message }
-        })
-      );
-      toastr(`Failed to configure "${params.environment}".`, "error")(dispatch);
-    });
-};
-
-export const addEnvironmentConfigAsyncAction = actionCreator.async<
+export const addEnvironmentConfigThunk = asyncActionCreator<
   {
-    environment: string;
+    environmentName: string;
+    isMultitenant: boolean;
+    kubernetesApi: string;
+    version: string;
   },
-  { config: collect.EnvironmentConfig },
-  { message: string }
->("Add_ENVIRONMENT_CONFIG");
-
-export const addEnvironmentConfig = (
-  environmentName: string,
-  isMultitenant: boolean,
-  kubernetesApi: string,
-  version: string
-) => (dispatch: Dispatch) => {
-  const newConfig: collect.EnvironmentConfig = {
-    name: environmentName,
-    isMultitenant,
-    kubernetesApi,
-    version
-  };
-  const params = { environment: environmentName, config: newConfig };
-  dispatch(addEnvironmentConfigAsyncAction.started(params));
-  collectClient
-    .addEnvironmentConfig(newConfig, {
-      headers: {
-        "Content-Type": "application/json"
-      } // This is due to "typescript-fetch")
-    })
-    .then((config: collect.EnvironmentConfig) => {
-      dispatch(
-        addEnvironmentConfigAsyncAction.done({ params, result: { config } })
-      );
-      toastr(`Config for "${params.environment}" is added.`, "success")(
-        dispatch
-      );
-    })
-    .catch((reason: Error) => {
-      dispatch(
-        addEnvironmentConfigAsyncAction.failed({
-          params,
-          error: { message: reason.message }
-        })
-      );
-      toastr(`Failed to add "${params.environment}".`, "error")(dispatch);
-    });
-};
+  { config: IEnvironmentConfig }
+>(
+  "Add_ENVIRONMENT_CONFIG",
+  ({ environmentName, isMultitenant, kubernetesApi, version }) =>
+    collectClient
+      .addEnvironmentConfig(
+        {
+          name: environmentName,
+          isMultitenant,
+          kubernetesApi,
+          version
+        },
+        {
+          headers: {
+            "Content-Type": "application/json"
+          } // This is due to "typescript-fetch")
+        }
+      )
+      .then((newConfig: collect.EnvironmentConfig) => {
+        const config = environmentConfigConvert(newConfig);
+        return { config };
+      })
+);

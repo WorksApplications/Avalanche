@@ -1,6 +1,5 @@
 import * as React from "react";
 import Link from "./Link";
-// @ts-ignore
 import styles from "./SnapshotList.scss";
 
 export interface IRowData {
@@ -38,7 +37,7 @@ class SnapshotList extends React.Component<IProperty, {}> {
           </thead>
           <tbody>
             {this.props.rows.map(r => (
-              <tr id={r.uuid}>
+              <tr key={r.uuid}>
                 <td>{r.uuid}</td>
                 <td>{r.name}</td>
                 <td>{r.pod}</td>

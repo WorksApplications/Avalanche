@@ -3,7 +3,6 @@ import { Route, Switch } from "react-router-dom";
 import ConfigPage from "../pages/ConfigPage";
 import SnapshotPage from "../pages/SnapshotPage";
 import NavigationView from "./NavigationView";
-// @ts-ignore
 import styles from "./Workspace.scss";
 
 class Workspace extends React.Component {
