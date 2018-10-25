@@ -73,7 +73,7 @@ func FromPod(db *sql.DB, p *models.Pod) []*SnapshotInternal {
 }
 
 func GetLatest(db *sql.DB, max int64) []*SnapshotInternal {
-	wh := fmt.Sprintf("order by created limit %d", max)
+	wh := fmt.Sprintf("order by created desc limit %d", max)
 	return list(db, &wh)
 }
 

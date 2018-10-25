@@ -20,9 +20,12 @@ func TestGetLatest(t *testing.T) {
 	snapshots.AddRow(2, "fa27ec29-71f5-46c1-9644-49be4e5b66ee", 1, 1, 1, epoch1, "")
 	snapshots.AddRow(2, "3c00c091-f42e-4b8c-a1f8-b618c652723a", 1, 1, 1, epoch2, "")
 
-	mock.ExpectQuery("SELECT (.+) FROM snapshot order by created limit 10").WillReturnRows(snapshots)
+	mock.ExpectQuery("SELECT (.+) FROM snapshot order by created desc limit 10").WillReturnRows(snapshots)
 
-	GetLatest(db, 10)
+	snapshotsResult := GetLatest(db, 10)
+	if snapshotsResult[0].created.Before(snapshotsResult[1].created) {
+		t.Fatal("Return oldest one first")
+	}
 }
 
 func TestToResponse(t *testing.T) {
