@@ -6,6 +6,7 @@ import { bindActionCreators, Dispatch } from "redux";
 import {
   getAppsThunk,
   getEnvironmentsOfAppThunk,
+  getLatestSnapshotsThunk,
   selectApp,
   selectEnv,
   selectPod,
@@ -42,7 +43,8 @@ const actions = {
 
 const operations = {
   getAppsThunk,
-  getEnvironmentsOfAppThunk
+  getEnvironmentsOfAppThunk,
+  getLatestSnapshotsThunk
 };
 
 interface IComponentProperties {
@@ -93,27 +95,14 @@ function sortedSnapshots(snapshots: ISnapshotInfo[]): ISnapshotInfo[] {
 }
 
 const mapStateToProps: (state: IApplicationState) => IStateProps = state => {
-  const pods: IPodInfo[] = Object.values(
-    state.analysisData.environments
-  ).reduce(
-    // flat-map
-    (acc: IPodInfo[], x) => acc.concat(x.pods),
-    []
-  );
   return {
     appName: state.analysisData.applicationName,
     apps: sortedApplications(state.analysisData.applications),
     environments: state.analysisData.environments,
     filteringEnvironment: state.analysisData.selectedEnvironment,
     filteringPod: state.analysisData.selectedPod,
-    pods,
-    snapshots: sortedSnapshots(
-      pods.reduce(
-        // flat-map
-        (acc: ISnapshotInfo[], x) => acc.concat(x.snapshots || []),
-        []
-      )
-    )
+    pods: state.analysisData.pods,
+    snapshots: sortedSnapshots(state.analysisData.snapshots)
   };
 };
 
@@ -157,6 +146,13 @@ class SnapshotsView extends React.Component<IProps> {
 
         this.props.history.push({
           search: `?${qs.stringify(newQuery)}`
+        });
+      }
+
+      // if "app" is not selected, shows latest snapshots
+      if (!this.props.appName) {
+        this.props.getLatestSnapshotsThunk({ count: 10 }).catch(() => {
+          this.props.toastr(`Failed to get latest snapshots.`, "error");
         });
       }
     }
@@ -258,6 +254,7 @@ class SnapshotsView extends React.Component<IProps> {
               selectedValue={this.props.filteringEnvironment}
               onValueChanged={this.onEnvironmentChanged.bind(this)}
               placeholder="Select environment"
+              unselectOptionLabel="Deselect"
               disabled={!this.props.appName}
             />
           </div>

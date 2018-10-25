@@ -105,3 +105,13 @@ export const postSnapshotThunk = asyncActionCreator<
       return { newSnapshot };
     })
 );
+
+export const getLatestSnapshotsThunk = asyncActionCreator<
+  { count: number },
+  { snapshots: ISnapshotInfo[] }
+>("GET_LATEST_SNAPSHOTS", ({ count }) =>
+  collectClient.listSnapshots("date", count).then(snapshotResults => {
+    const snapshots = snapshotResults.map(s => snapshotInfoConvert(s));
+    return { snapshots };
+  })
+);

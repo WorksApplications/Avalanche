@@ -53,6 +53,8 @@ export interface IAnalysisDataState {
   readonly environments: { [appName: string]: IEnvironmentInfo };
   readonly runningPods: IPodInfo[];
   readonly selectedPod: string | null;
+  readonly pods: IPodInfo[];
+  readonly snapshots: ISnapshotInfo[];
 }
 
 export interface IToastNotificationState {
