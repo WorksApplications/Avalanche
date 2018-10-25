@@ -697,33 +697,25 @@ export const DefaultApiFetchParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @param {string} appid 
-         * @param {string} environment 
-         * @param {string} pod 
+         * @param {string} [orderBy] 
+         * @param {number} [max] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listSnapshots(appid: string, environment: string, pod: string, options: any = {}): FetchArgs {
-            // verify required parameter 'appid' is not null or undefined
-            if (appid === null || appid === undefined) {
-                throw new RequiredError('appid','Required parameter appid was null or undefined when calling listSnapshots.');
-            }
-            // verify required parameter 'environment' is not null or undefined
-            if (environment === null || environment === undefined) {
-                throw new RequiredError('environment','Required parameter environment was null or undefined when calling listSnapshots.');
-            }
-            // verify required parameter 'pod' is not null or undefined
-            if (pod === null || pod === undefined) {
-                throw new RequiredError('pod','Required parameter pod was null or undefined when calling listSnapshots.');
-            }
-            const localVarPath = `/apps/{appid}/environments/{environment}/pods/{pod}/snapshots`
-                .replace(`{${"appid"}}`, encodeURIComponent(String(appid)))
-                .replace(`{${"environment"}}`, encodeURIComponent(String(environment)))
-                .replace(`{${"pod"}}`, encodeURIComponent(String(pod)));
+        listSnapshots(orderBy?: string, max?: number, options: any = {}): FetchArgs {
+            const localVarPath = `/snapshots`;
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            if (orderBy !== undefined) {
+                localVarQueryParameter['order-by'] = orderBy;
+            }
+
+            if (max !== undefined) {
+                localVarQueryParameter['max'] = max;
+            }
 
             localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
             // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
@@ -802,6 +794,46 @@ export const DefaultApiFetchParamCreator = function (configuration?: Configurati
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
             const needsSerialization = (<any>"EnvironmentConfig" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
             localVarRequestOptions.body =  needsSerialization ? JSON.stringify(config || {}) : (config || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {string} appid 
+         * @param {string} environment 
+         * @param {string} pod 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        showSnapshotsOfPod(appid: string, environment: string, pod: string, options: any = {}): FetchArgs {
+            // verify required parameter 'appid' is not null or undefined
+            if (appid === null || appid === undefined) {
+                throw new RequiredError('appid','Required parameter appid was null or undefined when calling showSnapshotsOfPod.');
+            }
+            // verify required parameter 'environment' is not null or undefined
+            if (environment === null || environment === undefined) {
+                throw new RequiredError('environment','Required parameter environment was null or undefined when calling showSnapshotsOfPod.');
+            }
+            // verify required parameter 'pod' is not null or undefined
+            if (pod === null || pod === undefined) {
+                throw new RequiredError('pod','Required parameter pod was null or undefined when calling showSnapshotsOfPod.');
+            }
+            const localVarPath = `/apps/{appid}/environments/{environment}/pods/{pod}/snapshots`
+                .replace(`{${"appid"}}`, encodeURIComponent(String(appid)))
+                .replace(`{${"environment"}}`, encodeURIComponent(String(environment)))
+                .replace(`{${"pod"}}`, encodeURIComponent(String(pod)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
 
             return {
                 url: url.format(localVarUrlObj),
@@ -1054,14 +1086,13 @@ export const DefaultApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @param {string} appid 
-         * @param {string} environment 
-         * @param {string} pod 
+         * @param {string} [orderBy] 
+         * @param {number} [max] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listSnapshots(appid: string, environment: string, pod: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<Snapshot>> {
-            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).listSnapshots(appid, environment, pod, options);
+        listSnapshots(orderBy?: string, max?: number, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<Snapshot>> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).listSnapshots(orderBy, max, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -1101,6 +1132,26 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          */
         putEnvironmentConfig(environment: string, config?: EnvironmentConfig, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<EnvironmentConfig> {
             const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).putEnvironmentConfig(environment, config, options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {string} appid 
+         * @param {string} environment 
+         * @param {string} pod 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        showSnapshotsOfPod(appid: string, environment: string, pod: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<Snapshot>> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).showSnapshotsOfPod(appid, environment, pod, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -1240,14 +1291,13 @@ export const DefaultApiFactory = function (configuration?: Configuration, fetch?
         },
         /**
          * 
-         * @param {string} appid 
-         * @param {string} environment 
-         * @param {string} pod 
+         * @param {string} [orderBy] 
+         * @param {number} [max] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listSnapshots(appid: string, environment: string, pod: string, options?: any) {
-            return DefaultApiFp(configuration).listSnapshots(appid, environment, pod, options)(fetch, basePath);
+        listSnapshots(orderBy?: string, max?: number, options?: any) {
+            return DefaultApiFp(configuration).listSnapshots(orderBy, max, options)(fetch, basePath);
         },
         /**
          * 
@@ -1269,6 +1319,17 @@ export const DefaultApiFactory = function (configuration?: Configuration, fetch?
          */
         putEnvironmentConfig(environment: string, config?: EnvironmentConfig, options?: any) {
             return DefaultApiFp(configuration).putEnvironmentConfig(environment, config, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {string} appid 
+         * @param {string} environment 
+         * @param {string} pod 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        showSnapshotsOfPod(appid: string, environment: string, pod: string, options?: any) {
+            return DefaultApiFp(configuration).showSnapshotsOfPod(appid, environment, pod, options)(fetch, basePath);
         },
     };
 };
@@ -1426,15 +1487,14 @@ export class DefaultApi extends BaseAPI {
 
     /**
      * 
-     * @param {} appid 
-     * @param {} environment 
-     * @param {} pod 
+     * @param {} [orderBy] 
+     * @param {} [max] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DefaultApi
      */
-    public listSnapshots(appid: string, environment: string, pod: string, options?: any) {
-        return DefaultApiFp(this.configuration).listSnapshots(appid, environment, pod, options)(this.fetch, this.basePath);
+    public listSnapshots(orderBy?: string, max?: number, options?: any) {
+        return DefaultApiFp(this.configuration).listSnapshots(orderBy, max, options)(this.fetch, this.basePath);
     }
 
     /**
@@ -1460,6 +1520,19 @@ export class DefaultApi extends BaseAPI {
      */
     public putEnvironmentConfig(environment: string, config?: EnvironmentConfig, options?: any) {
         return DefaultApiFp(this.configuration).putEnvironmentConfig(environment, config, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @param {} appid 
+     * @param {} environment 
+     * @param {} pod 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public showSnapshotsOfPod(appid: string, environment: string, pod: string, options?: any) {
+        return DefaultApiFp(this.configuration).showSnapshotsOfPod(appid, environment, pod, options)(this.fetch, this.basePath);
     }
 
 }
