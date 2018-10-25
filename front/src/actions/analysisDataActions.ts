@@ -1,10 +1,11 @@
-import { Dispatch } from "redux";
-import actionCreatorFactory, { Meta } from "typescript-fsa";
+import actionCreatorFactory from "typescript-fsa";
+import { asyncFactory } from "typescript-fsa-redux-thunk";
 import { COLLECT_API_BASE } from "../constants";
 import * as collect from "../generated/collect/api";
 import { IEnvironmentInfo, IPodInfo, ISnapshotInfo } from "../store";
 
 const actionCreator = actionCreatorFactory();
+const asyncActionCreator = asyncFactory(actionCreator);
 
 const collectClient = collect.DefaultApiFactory(
   {},
@@ -56,144 +57,51 @@ export const selectPod = actionCreator<{ podName: string | null }>(
   "SELECT_POD"
 );
 
-export const getAppsAsyncAction = actionCreator.async<
-  {},
-  { apps: string[] },
-  { message: string }
->("GET_APPS");
-
-export const getApps = (meta?: Meta) => (
-  dispatch: Dispatch
-): Promise<{ apps: string[] }> => {
-  const params = {};
-  dispatch(getAppsAsyncAction.started(params, meta));
-  return collectClient
-    .getApps()
-    .then((apps: string[]) => {
-      const result = { apps };
-      dispatch(getAppsAsyncAction.done({ params, result }, meta));
-      return result;
+export const getAppsThunk = asyncActionCreator<{}, { apps: string[] }>(
+  "GET_APPS",
+  () =>
+    collectClient.getApps().then((apps: string[]) => {
+      return { apps };
     })
-    .catch((reason: Error) => {
-      dispatch(
-        getAppsAsyncAction.failed(
-          {
-            params,
-            error: { message: reason.message }
-          },
-          meta
-        )
-      );
-      throw reason;
-    });
-};
+);
 
-export const getEnvironmentsOfAppAsyncAction = actionCreator.async<
+export const getEnvironmentsOfAppThunk = asyncActionCreator<
   { app: string },
-  { envs: IEnvironmentInfo[] },
-  { message: string }
->("GET_ENVS_OF_APP");
-
-export const getEnvironmentsOfApp = (params: { app: string }, meta?: Meta) => (
-  dispatch: Dispatch
-): Promise<{ envs: IEnvironmentInfo[] }> => {
-  dispatch(getEnvironmentsOfAppAsyncAction.started(params, meta));
-  return collectClient
-    .getEnvironments(params.app)
+  { envs: IEnvironmentInfo[] }
+>("GET_ENVS_OF_APP", ({ app }) =>
+  collectClient
+    .getEnvironments(app)
     .then((envResults: collect.Environment[]) => {
       const envs = envResults.map(env => environmentInfoConvert(env));
-      const result = { envs };
-      dispatch(getEnvironmentsOfAppAsyncAction.done({ params, result }, meta));
-      return result;
+      return { envs };
     })
-    .catch((reason: Error) => {
-      dispatch(
-        getEnvironmentsOfAppAsyncAction.failed(
-          {
-            params,
-            error: { message: reason.message }
-          },
-          meta
-        )
-      );
-      throw reason;
-    });
-};
+);
 
-export const getRunningPodsAsyncAction = actionCreator.async<
-  {},
-  { pods: IPodInfo[] },
-  { message: string }
->("GET_RUNNING_PODS");
-
-export const getRunningPods = (meta?: Meta) => (
-  dispatch: Dispatch
-): Promise<{ pods: IPodInfo[] }> => {
-  const params = {};
-  dispatch(getRunningPodsAsyncAction.started(params, meta));
-  return collectClient
-    .listAvailablePods()
-    .then((podResults: collect.Pod[]) => {
+export const getRunningPodsThunk = asyncActionCreator<{}, { pods: IPodInfo[] }>(
+  "GET_RUNNING_PODS",
+  () =>
+    collectClient.listAvailablePods().then((podResults: collect.Pod[]) => {
       const pods = podResults.map(pod => podInfoConvert(pod));
-      const result = { pods };
-      dispatch(getRunningPodsAsyncAction.done({ params, result }, meta));
-      return result;
+      return { pods };
     })
-    .catch((reason: Error) => {
-      dispatch(
-        getRunningPodsAsyncAction.failed(
-          {
-            params,
-            error: { message: reason.message }
-          },
-          meta
-        )
-      );
-      throw reason;
-    });
-};
+);
 
-export const postSnapshotAsyncAction = actionCreator.async<
+export const postSnapshotThunk = asyncActionCreator<
   {
     appId: string;
     environment: string;
     podId: string;
   },
-  { newSnapshot: ISnapshotInfo },
-  { message: string }
->("POST_NEW_SNAPSHOT");
-
-export const postSnapshot = (
-  params: {
-    appId: string;
-    environment: string;
-    podId: string;
-  },
-  meta?: Meta
-) => (dispatch: Dispatch): Promise<{ newSnapshot: ISnapshotInfo }> => {
-  dispatch(postSnapshotAsyncAction.started(params, meta));
-  return collectClient
-    .newSnapshot(params.appId, params.environment, params.podId, {
+  { newSnapshot: ISnapshotInfo }
+>("POST_NEW_SNAPSHOT", ({ appId, environment, podId }) =>
+  collectClient
+    .newSnapshot(appId, environment, podId, {
       headers: {
         "Content-Type": "application/json"
       } // This is due to "typescript-fetch"
     })
     .then((snapshot: collect.Snapshot) => {
       const newSnapshot = snapshotInfoConvert(snapshot);
-      const result = { newSnapshot };
-      dispatch(postSnapshotAsyncAction.done({ params, result }, meta));
-      return result;
+      return { newSnapshot };
     })
-    .catch((reason: Error) => {
-      dispatch(
-        postSnapshotAsyncAction.failed(
-          {
-            params,
-            error: { message: reason.message }
-          },
-          meta
-        )
-      );
-      throw reason;
-    });
-};
+);

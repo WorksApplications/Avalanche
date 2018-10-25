@@ -1,7 +1,6 @@
-import { Dispatch } from "redux";
-import { Meta } from "typescript-fsa";
+import { ThunkActionCreator, thunkToAction } from "typescript-fsa-redux-thunk";
 
-// export type DispatchPropWithInference<T> = T extends (() => (
+// export type OperationToProp<T> = T extends (() => (
 //   dispatch: Dispatch
 // ) => infer R)
 //   ? () => R
@@ -11,17 +10,36 @@ import { Meta } from "typescript-fsa";
 //       ? () => R
 //       : T extends ((arg1: infer A1) => infer R) ? (arg1: A1) => R : undefined;
 
-export type DispatchPropWithInference<T> = T extends (() => (
-  dispatch: Dispatch
-) => infer R)
-  ? () => R
-  : T extends ((
-      payload: infer P,
-      meta?: Meta
-    ) => (dispatch: Dispatch) => infer R)
-    ? (payload: P, meta?: Meta) => R
-    : T; // not thunk below
+// export type OperationToProp<T> = T extends (() => (dispatch: Dispatch) => infer R)
+//   ? () => R
+//   : T extends ((
+//       payload: infer P,
+//       meta?: Meta
+//     ) => (dispatch: Dispatch) => infer R)
+//     ? (payload: P, meta?: Meta) => R
+//     : T; // not thunk below
+//
+// export type OperationToProps<T> = { [P in keyof T]: OperationToProp<T[P]> };
 
-export type DispatchPropList<T> = {
-  [P in keyof T]: DispatchPropWithInference<T[P]>
-};
+export type OperationToProp<T> = T extends {
+  action: ThunkActionCreator<
+    infer Params,
+    Promise<infer Succ>,
+    infer State,
+    infer Extra
+  >;
+} // ? ThunkActionCreator<Params, Promise<Succ>, State, Extra> // ? (params?: Params) => ThunkAction<Promise<Succ>, State, Extra, AnyAction>
+  ? (params?: Params) => Promise<Succ>
+  : never;
+
+export type OperationToProps<T> = { [P in keyof T]: OperationToProp<T[P]> };
+
+export function thunkToActionBulk(thunks: {
+  [key: string]: { action: ThunkActionCreator<any, any, any, any> };
+}): { [key: string]: any } {
+  const result = {};
+  for (const [key, thunk] of Object.entries(thunks)) {
+    result[key] = thunkToAction(thunk.action);
+  }
+  return result;
+}

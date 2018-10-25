@@ -2,9 +2,9 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
 import {
-  addEnvironmentConfig,
-  getEnvironmentConfigs,
-  postEnvironmentConfig,
+  addEnvironmentConfigThunk,
+  getEnvironmentConfigsThunk,
+  postEnvironmentConfigThunk,
   toastr
 } from "../actions";
 import EnvironmentConfigAddDialog from "../components/dialogs/EnvironmentConfigAddDialog";
@@ -13,7 +13,7 @@ import EnvironmentCardList from "../components/EnvironmentCardList";
 import EnvironmentModalDialogFoundation from "../components/EnvironmentModalDialogFoundation";
 import FabButton from "../components/FabButton";
 import FilterInput from "../components/FilterInput";
-import { DispatchPropList } from "../helpers";
+import { OperationToProps, thunkToActionBulk } from "../helpers";
 import { IApplicationState, IEnvironmentConfig } from "../store";
 // @ts-ignore
 import styles from "./ConfigPage.scss";
@@ -33,19 +33,27 @@ interface IStateProps {
 }
 
 const actions = {
-  getEnvironmentConfigs,
-  postEnvironmentConfig,
-  addEnvironmentConfig,
   toastr
 };
 
-type IProps = IStateProps & DispatchPropList<typeof actions>;
+const operations = {
+  getEnvironmentConfigsThunk,
+  postEnvironmentConfigThunk,
+  addEnvironmentConfigThunk
+};
+
+type IDispatchProps = typeof actions & OperationToProps<typeof operations>;
+
+type IProps = IStateProps & IDispatchProps;
 
 const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
   environmentConfigs: state.environmentConfig.environmentConfigs
 });
 const mapDispatchToProps = (dispatch: Dispatch) =>
-  bindActionCreators(actions, dispatch);
+  bindActionCreators(
+    { ...actions, ...thunkToActionBulk(operations) },
+    dispatch
+  );
 
 // @ts-ignore
 @connect(
@@ -67,7 +75,7 @@ class ConfigPage extends React.Component<IProps, IState> {
   }
 
   public componentDidMount() {
-    this.props.getEnvironmentConfigs().catch(() => {
+    this.props.getEnvironmentConfigsThunk().catch(() => {
       this.props.toastr(`Failed to get environment configs.`, "error");
     });
   }
@@ -215,7 +223,7 @@ class ConfigPage extends React.Component<IProps, IState> {
     const version = this.state.version!;
     const environmentName = this.state.dialogTarget!;
     this.props
-      .postEnvironmentConfig({
+      .postEnvironmentConfigThunk({
         environmentName,
         isMultitenant: this.state.isMultitenant!,
         kubernetesApi: this.state.kubernetesApi!,
@@ -233,7 +241,7 @@ class ConfigPage extends React.Component<IProps, IState> {
   private onAddDialogAccept() {
     const environmentName = this.state.dialogTarget!;
     this.props
-      .addEnvironmentConfig({
+      .addEnvironmentConfigThunk({
         environmentName,
         isMultitenant: this.state.isMultitenant!,
         kubernetesApi: this.state.kubernetesApi!,

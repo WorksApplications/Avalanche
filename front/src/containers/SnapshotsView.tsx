@@ -4,8 +4,8 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
 import {
-  getApps,
-  getEnvironmentsOfApp,
+  getAppsThunk,
+  getEnvironmentsOfAppThunk,
   selectApp,
   selectEnv,
   selectPod,
@@ -14,7 +14,7 @@ import {
 import AppSelector from "../components/AppSelector";
 import SnapshotFilter from "../components/SnapshotFilter";
 import SnapshotList, { IRowData } from "../components/SnapshotList";
-import { DispatchPropList } from "../helpers";
+import { OperationToProps, thunkToActionBulk } from "../helpers";
 import {
   IApplicationState,
   IEnvironmentInfo,
@@ -35,21 +35,24 @@ interface IStateProps {
 }
 
 const actions = {
-  getApps,
   selectApp,
-  getEnvironmentsOfApp,
   selectEnv,
   selectPod,
   toastr
+};
+
+const operations = {
+  getAppsThunk,
+  getEnvironmentsOfAppThunk
 };
 
 interface IComponentProperties {
   history: History;
 }
 
-type IProps = IComponentProperties &
-  IStateProps &
-  DispatchPropList<typeof actions>;
+type IDispatchProps = typeof actions & OperationToProps<typeof operations>;
+
+type IProps = IComponentProperties & IStateProps & IDispatchProps;
 
 function sortedApplications(applications: string[]): string[] {
   return applications.sort();
@@ -116,7 +119,10 @@ const mapStateToProps: (state: IApplicationState) => IStateProps = state => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch) =>
-  bindActionCreators(actions, dispatch);
+  bindActionCreators(
+    { ...actions, ...thunkToActionBulk(operations) },
+    dispatch
+  );
 
 // @ts-ignore
 @connect(
@@ -125,7 +131,7 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
 )
 class SnapshotsView extends React.Component<IProps> {
   public componentDidMount() {
-    this.props.getApps().catch(() => {
+    this.props.getAppsThunk().catch(() => {
       this.props.toastr(`Failed to get app names.`, "error");
     });
 
@@ -285,7 +291,7 @@ class SnapshotsView extends React.Component<IProps> {
 
   private changeApp(app: string) {
     this.props.selectApp({ appName: app });
-    this.props.getEnvironmentsOfApp({ app }).catch(() => {
+    this.props.getEnvironmentsOfAppThunk({ app }).catch(() => {
       this.props.toastr(`Failed to get environment info of ${app}`, "error");
     });
     this.props.selectEnv({ envName: null }); // unselect

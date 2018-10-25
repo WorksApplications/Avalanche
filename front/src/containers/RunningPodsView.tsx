@@ -1,10 +1,10 @@
 import * as React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
-import { getRunningPods, postSnapshot, toastr } from "../actions";
+import { getRunningPodsThunk, postSnapshotThunk, toastr } from "../actions";
 import PodCardList, { IPodCardListData } from "../components/PodCardList";
 import PodFilter from "../components/PodFilter";
-import { DispatchPropList } from "../helpers";
+import { OperationToProps, thunkToActionBulk } from "../helpers";
 import { IApplicationState, IPodInfo } from "../store";
 // @ts-ignore
 import styles from "./RunningPodsView.scss";
@@ -19,12 +19,17 @@ interface IStateProps {
 }
 
 const actions = {
-  postSnapshot,
-  getRunningPods,
   toastr
 };
 
-type IProps = IStateProps & DispatchPropList<typeof actions>;
+const operations = {
+  postSnapshotThunk,
+  getRunningPodsThunk
+};
+
+type IDispatchProps = typeof actions & OperationToProps<typeof operations>;
+
+type IProps = IStateProps & IDispatchProps;
 
 function sortedPods(pods: IPodInfo[]): IPodInfo[] {
   return pods.sort((a, b) => {
@@ -67,7 +72,10 @@ const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) =>
-  bindActionCreators(actions, dispatch);
+  bindActionCreators(
+    { ...actions, ...thunkToActionBulk(operations) },
+    dispatch
+  );
 
 // @ts-ignore
 @connect(
@@ -83,7 +91,7 @@ class RunningPodsView extends React.Component<IProps, IState> {
   }
 
   public componentDidMount(): void {
-    this.props.getRunningPods().catch(() => {
+    this.props.getRunningPodsThunk().catch(() => {
       this.props.toastr(`Failed to get running pod info.`, "error");
     });
   }
@@ -108,7 +116,7 @@ class RunningPodsView extends React.Component<IProps, IState> {
           p.app && p.env && p.name
             ? () => {
                 this.props
-                  .postSnapshot({
+                  .postSnapshotThunk({
                     appId: p.app!,
                     environment: p.env!,
                     podId: p.name!

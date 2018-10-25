@@ -1,10 +1,10 @@
 import { Action } from "redux";
 import { isType } from "typescript-fsa";
 import {
-  getAppsAsyncAction,
-  getEnvironmentsOfAppAsyncAction,
-  getRunningPodsAsyncAction,
-  postSnapshotAsyncAction,
+  getAppsThunk,
+  getEnvironmentsOfAppThunk,
+  getRunningPodsThunk,
+  postSnapshotThunk,
   selectApp,
   selectEnv,
   selectPod
@@ -27,26 +27,26 @@ export function analysisData(
   if (isType(action, selectApp)) {
     return { ...state, applicationName: action.payload.appName };
   }
-  if (isType(action, getAppsAsyncAction.done)) {
+  if (isType(action, getAppsThunk.async.done)) {
     return { ...state, applications: action.payload.result.apps };
   }
   if (isType(action, selectEnv)) {
     return { ...state, selectedEnvironment: action.payload.envName };
   }
-  if (isType(action, getEnvironmentsOfAppAsyncAction.done)) {
+  if (isType(action, getEnvironmentsOfAppThunk.async.done)) {
     const newEnvironments = { ...state.environments };
     for (const e of action.payload.result.envs) {
       newEnvironments[e.name] = e;
     }
     return { ...state, environments: newEnvironments };
   }
-  if (isType(action, getRunningPodsAsyncAction.done)) {
+  if (isType(action, getRunningPodsThunk.async.done)) {
     return { ...state, runningPods: action.payload.result.pods };
   }
   if (isType(action, selectPod)) {
     return { ...state, selectedPod: action.payload.podName };
   }
-  if (isType(action, postSnapshotAsyncAction.started)) {
+  if (isType(action, postSnapshotThunk.async.started)) {
     return {
       ...state,
       runningPods: state.runningPods.map(
@@ -55,7 +55,7 @@ export function analysisData(
       )
     };
   }
-  if (isType(action, postSnapshotAsyncAction.done)) {
+  if (isType(action, postSnapshotThunk.async.done)) {
     return {
       ...state,
       runningPods: state.runningPods.map(
@@ -72,7 +72,7 @@ export function analysisData(
       )
     };
   }
-  if (isType(action, postSnapshotAsyncAction.failed)) {
+  if (isType(action, postSnapshotThunk.async.failed)) {
     return {
       ...state,
       runningPods: state.runningPods.map(
