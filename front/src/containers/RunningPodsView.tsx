@@ -76,7 +76,7 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
     dispatch
   );
 
-class RunningPodsView extends React.Component<IProps, IState> {
+export class RunningPodsView extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {

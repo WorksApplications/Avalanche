@@ -112,7 +112,7 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
     dispatch
   );
 
-class SnapshotsView extends React.Component<IProps> {
+export class SnapshotsView extends React.Component<IProps> {
   public componentDidMount() {
     this.props.getAppsThunk().catch(() => {
       this.props.toastr(`Failed to get app names.`, "error");

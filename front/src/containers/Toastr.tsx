@@ -31,7 +31,7 @@ const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
     dispatch
   );
 
-class Toastr extends React.Component<IStateProps & IDispatchProps> {
+export class Toastr extends React.Component<IStateProps & IDispatchProps> {
   public render() {
     const dismissToastr = () =>
       this.props.hideToastr({ id: this.props.id || 0 });

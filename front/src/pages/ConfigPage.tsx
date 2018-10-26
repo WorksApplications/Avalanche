@@ -54,7 +54,7 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
     dispatch
   );
 
-class ConfigPage extends React.Component<IProps, IState> {
+export class ConfigPage extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
