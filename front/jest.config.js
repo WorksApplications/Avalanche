@@ -5,7 +5,6 @@ module.exports = {
     ".+\\.(css|styl|less|sass|scss)$":
       "<rootDir>/node_modules/jest-css-modules-transform"
   },
-  setupTestFrameworkScriptFile: "<rootDir>/setupEnzyme.js",
   testMatch: [
     "<rootDir>/src/**/__tests__/**/*.(t|j)s?(x)",
     "<rootDir>/src/**/?(*.)(spec|test).(t|j)s?(x)"
@@ -23,5 +22,5 @@ module.exports = {
     "json",
     "node"
   ],
-  unmockedModulePathPatterns: ["react", "enzyme", "jest-enzyme"]
+  unmockedModulePathPatterns: ["react"]
 };

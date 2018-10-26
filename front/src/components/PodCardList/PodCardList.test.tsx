@@ -1,14 +1,9 @@
-// tslint:disable-next-line:no-implicit-dependencies
-import { shallow } from "enzyme";
+// tslint:disable:no-submodule-imports no-implicit-dependencies
+import "jest-dom/extend-expect";
 import * as React from "react";
+import { render } from "react-testing-library";
+import "react-testing-library/cleanup-after-each";
 import PodCardList, { IProperty as PodCardListProperty } from "./PodCardList";
-
-const sel = (strings: TemplateStringsArray) => {
-  if (strings.length === 1) {
-    return `[data-test="${strings[0]}"]`;
-  }
-  throw new Error("Invalid argument");
-};
 
 const baseDateValue = Date.now();
 
@@ -57,19 +52,21 @@ const basicListProps: PodCardListProperty = {
 
 describe("<PodCardList />", () => {
   it("renders itself", () => {
-    const context = shallow(<PodCardList {...basicListProps} />);
-    expect(context.find(sel`root`).exists()).toBe(true);
+    const { getByTestId } = render(<PodCardList {...basicListProps} />);
+    expect(getByTestId("root")).not.toBeNull();
   });
 
   it("renders list if there are card data", () => {
-    const context = shallow(<PodCardList {...basicListProps} />);
-    expect(context.find(sel`card-list`).exists()).toBe(true);
-    expect(context.find(sel`empty-message`).exists()).toBe(false);
+    const { queryByTestId } = render(<PodCardList {...basicListProps} />);
+    expect(queryByTestId("card-list")).not.toBeNull();
+    expect(queryByTestId("empty-message")).toBeNull();
   });
 
   it("renders empty message if there are no card data", () => {
-    const context = shallow(<PodCardList {...basicListProps} data={[]} />);
-    expect(context.find(sel`card-list`).exists()).toBe(false);
-    expect(context.find(sel`empty-message`).exists()).toBe(true);
+    const { queryByTestId } = render(
+      <PodCardList {...basicListProps} data={[]} />
+    );
+    expect(queryByTestId("card-list")).toBeNull();
+    expect(queryByTestId("empty-message")).not.toBeNull();
   });
 });

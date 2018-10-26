@@ -13,7 +13,7 @@
     "production": {
       "presets": ["react-optimize"],
       "plugins": [
-        ["react-remove-properties", { "properties": ["data-test"] }],
+        ["react-remove-properties", { "properties": ["data-testid"] }],
         "babel-plugin-closure-elimination"
       ]
     }
