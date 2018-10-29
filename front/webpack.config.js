@@ -5,6 +5,8 @@ const DefinePlugin = require("webpack").DefinePlugin;
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
+const ResourceHintWebpackPlugin = require("resource-hints-webpack-plugin");
+const PreloadWebpackPlugin = require("preload-webpack-plugin");
 
 const dest = path.resolve(__dirname, "./public");
 const index = path.resolve(__dirname, "./src/index.tsx");
@@ -102,14 +104,14 @@ module.exports = env => {
       ]
     },
     plugins: [
+      // new require("webpack-bundle-analyzer").BundleAnalyzerPlugin()
       new HtmlPlugin({
         title: appName,
         minify: isProduction,
         template: "src/index.html"
       }),
       new MiniCssExtractPlugin({
-        filename: "[name].[hash:8].css",
-        chunkFilename: "[id].[hash:8].css"
+        filename: "[name].[hash:8].css"
       }),
       new DefinePlugin({
         COLLECT_API_BASE: JSON.stringify(apiBaseUrl),
@@ -119,15 +121,23 @@ module.exports = env => {
           ? JSON.stringify("production")
           : process.env.NODE_ENV
       }),
-      new ForkTsCheckerWebpackPlugin()
-      // new require("webpack-bundle-analyzer").BundleAnalyzerPlugin()
+      new ForkTsCheckerWebpackPlugin(),
+      new ResourceHintWebpackPlugin(),
+      new PreloadWebpackPlugin({
+        rel: "prefetch"
+      })
     ],
     optimization: {
       minimizer: [
         new UglifyJsPlugin({
           cache: true,
           parallel: true,
-          sourceMap: true
+          sourceMap: true,
+          uglifyOptions: {
+            output: {
+              comments: false
+            }
+          }
         }),
         new OptimizeCSSAssetsPlugin({
           cssProcessorOptions: {
