@@ -114,9 +114,13 @@ module.exports = env => {
       new DefinePlugin({
         COLLECT_API_BASE: JSON.stringify(apiBaseUrl),
         IS_DEBUG: !isProduction,
-        APP_NAME: `"${appName}"`
+        APP_NAME: `"${appName}"`,
+        "process.env.NODE_ENV": isProduction
+          ? JSON.stringify("production")
+          : process.env.NODE_ENV
       }),
       new ForkTsCheckerWebpackPlugin()
+      // new require("webpack-bundle-analyzer").BundleAnalyzerPlugin()
     ],
     optimization: {
       minimizer: [
