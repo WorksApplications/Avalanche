@@ -5,7 +5,6 @@ const DefinePlugin = require("webpack").DefinePlugin;
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
-const ResourceHintWebpackPlugin = require("resource-hints-webpack-plugin");
 const PreloadWebpackPlugin = require("preload-webpack-plugin");
 
 const dest = path.resolve(__dirname, "./public");
@@ -110,6 +109,14 @@ module.exports = env => {
         minify: isProduction,
         template: "src/index.html"
       }),
+      new PreloadWebpackPlugin({
+        rel: "preload",
+        include: "allAssets",
+        fileWhitelist: [
+          /app(\.[0-9a-f]+)?\.(js|css)$/,
+          /-page(\.[0-9a-f]+)?\.(js|css)$/
+        ] // in the future, other chunks will be added with lower priority...
+      }),
       new MiniCssExtractPlugin({
         filename: "[name].[hash:8].css"
       }),
@@ -121,11 +128,7 @@ module.exports = env => {
           ? JSON.stringify("production")
           : process.env.NODE_ENV
       }),
-      new ForkTsCheckerWebpackPlugin(),
-      new ResourceHintWebpackPlugin(),
-      new PreloadWebpackPlugin({
-        rel: "prefetch"
-      })
+      new ForkTsCheckerWebpackPlugin()
     ],
     optimization: {
       minimizer: [
