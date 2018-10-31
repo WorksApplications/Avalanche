@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as ReactModal from "react-modal";
 import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
 import {
@@ -7,13 +8,13 @@ import {
   postEnvironmentConfigThunk,
   toastr
 } from "../actions";
-import EnvironmentConfigAddDialog from "../components/dialogs/EnvironmentConfigAddDialog";
-import EnvironmentConfigModifyDialog from "../components/dialogs/EnvironmentConfigModifyDialog";
 import EnvironmentCardList from "../components/EnvironmentCardList";
-import EnvironmentModalDialogFoundation from "../components/EnvironmentModalDialogFoundation";
+import EnvironmentConfigAddModal from "../components/EnvironmentConfigAddModal";
+import EnvironmentConfigModifyModal from "../components/EnvironmentConfigModifyModal";
 import FabButton from "../components/FabButton";
 import FilterInput from "../components/FilterInput";
 import { OperationsToProps, thunkToActionBulk } from "../helpers";
+import modalStyles from "../Modal.scss";
 import { IApplicationState, IEnvironmentConfig } from "../store";
 import styles from "./ConfigPage.scss";
 
@@ -141,54 +142,41 @@ export class ConfigPage extends React.Component<IProps, IState> {
           onClick={this.addEnvironment.bind(this)}
           icon="wap-icon-add"
         />
-
-        {/* dialog to modify */}
-        <div
-          className={[
-            styles.modalDialog,
-            this.state.showsModifyDialog ? styles.open : styles.close
-          ].join(" ")}
+        <ReactModal
+          isOpen={this.state.showsModifyDialog}
+          overlayClassName={modalStyles.overlay}
+          className={modalStyles.inner}
         >
-          {this.state.showsModifyDialog && (
-            <EnvironmentModalDialogFoundation>
-              <EnvironmentConfigModifyDialog
-                target={this.state.dialogTarget || ""}
-                onDismiss={this.onModifyDialogDismiss.bind(this)}
-                onAccept={this.onModifyDialogAccept.bind(this)}
-                isMultitenant={this.state.isMultitenant}
-                onIsMultitenantChange={onIsMultitenantChange}
-                kubernetesApi={this.state.kubernetesApi}
-                onKubernetesApiChange={onKubernetesApiChange}
-                version={this.state.version}
-                onVersionChange={onVersionChange}
-              />
-            </EnvironmentModalDialogFoundation>
-          )}
-        </div>
-        {/*dialog to add*/}
-        <div
-          className={[
-            styles.modalDialog,
-            this.state.showsAddDialog ? styles.open : styles.close
-          ].join(" ")}
+          <EnvironmentConfigModifyModal
+            target={this.state.dialogTarget || ""}
+            onDismiss={this.onModifyDialogDismiss.bind(this)}
+            onAccept={this.onModifyDialogAccept.bind(this)}
+            isMultitenant={this.state.isMultitenant}
+            onIsMultitenantChange={onIsMultitenantChange}
+            kubernetesApi={this.state.kubernetesApi}
+            onKubernetesApiChange={onKubernetesApiChange}
+            version={this.state.version}
+            onVersionChange={onVersionChange}
+          />
+        </ReactModal>
+        <ReactModal
+          isOpen={this.state.showsAddDialog}
+          overlayClassName={modalStyles.overlay}
+          className={modalStyles.inner}
         >
-          <EnvironmentModalDialogFoundation>
-            {this.state.showsAddDialog && (
-              <EnvironmentConfigAddDialog
-                onDismiss={this.onAddDialogDismiss.bind(this)}
-                onAccept={this.onAddDialogAccept.bind(this)}
-                target={this.state.dialogTarget}
-                onTargetApiChange={onTargetChange}
-                isMultitenant={this.state.isMultitenant}
-                onIsMultitenantChange={onIsMultitenantChange}
-                kubernetesApi={this.state.kubernetesApi}
-                onKubernetesApiChange={onKubernetesApiChange}
-                version={this.state.version}
-                onVersionChange={onVersionChange}
-              />
-            )}
-          </EnvironmentModalDialogFoundation>
-        </div>
+          <EnvironmentConfigAddModal
+            onDismiss={this.onAddDialogDismiss.bind(this)}
+            onAccept={this.onAddDialogAccept.bind(this)}
+            target={this.state.dialogTarget}
+            onTargetApiChange={onTargetChange}
+            isMultitenant={this.state.isMultitenant}
+            onIsMultitenantChange={onIsMultitenantChange}
+            kubernetesApi={this.state.kubernetesApi}
+            onKubernetesApiChange={onKubernetesApiChange}
+            version={this.state.version}
+            onVersionChange={onVersionChange}
+          />
+        </ReactModal>
       </div>
     );
   }

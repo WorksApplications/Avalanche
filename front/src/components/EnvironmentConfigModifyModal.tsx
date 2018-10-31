@@ -1,5 +1,5 @@
 import * as React from "react";
-import dialogStyles from "../EnvironmentModalDialogFoundation.scss";
+import styles from "../Modal.scss";
 
 export interface IProperty {
   target: string;
@@ -18,7 +18,7 @@ export interface IProperty {
   onAccept(): void;
 }
 
-class EnvironmentConfigModifyDialog extends React.Component<IProperty, {}> {
+class EnvironmentConfigModifyModal extends React.Component<IProperty, {}> {
   public render() {
     // TODO url validation
     const isValidData =
@@ -27,14 +27,14 @@ class EnvironmentConfigModifyDialog extends React.Component<IProperty, {}> {
       this.props.version != null;
 
     return (
-      <div className={dialogStyles.body}>
-        <div className={dialogStyles.header}>
+      <div className={styles.body}>
+        <div className={styles.header}>
           Configure environment: {this.props.target}
         </div>
-        <div className={dialogStyles.content}>
-          <div className={dialogStyles.group}>
-            <label className={dialogStyles.label}>Tenant Kind</label>
-            <div className={dialogStyles.input}>
+        <div className={styles.content}>
+          <div className={styles.group}>
+            <label className={styles.label}>Tenant Kind</label>
+            <div className={styles.input}>
               <input
                 type="radio"
                 id="kind-mt"
@@ -56,23 +56,23 @@ class EnvironmentConfigModifyDialog extends React.Component<IProperty, {}> {
               {/*<div className={dialogStyles.description}>a</div>*/}
             </div>
           </div>
-          <div className={dialogStyles.group}>
-            <label className={dialogStyles.label}>Kubernetes API</label>
-            <div className={dialogStyles.input}>
+          <div className={styles.group}>
+            <label className={styles.label}>Kubernetes API</label>
+            <div className={styles.input}>
               <input
                 type="text"
                 name="api"
                 onChange={this.onKubernetesApiChange.bind(this)}
                 value={this.props.kubernetesApi || ""}
               />
-              <div className={dialogStyles.description}>
+              <div className={styles.description}>
                 {"ex: http://k8s-mischo.internal.worksap.com:52063/"}
               </div>
             </div>
           </div>
-          <div className={dialogStyles.group}>
-            <label className={dialogStyles.label}>HUE Version</label>
-            <div className={dialogStyles.input}>
+          <div className={styles.group}>
+            <label className={styles.label}>HUE Version</label>
+            <div className={styles.input}>
               <input
                 type="radio"
                 id="ver-b1712"
@@ -95,15 +95,12 @@ class EnvironmentConfigModifyDialog extends React.Component<IProperty, {}> {
             </div>
           </div>
         </div>
-        <div className={dialogStyles.navigation}>
-          <button
-            className={dialogStyles.cancel}
-            onClick={this.props.onDismiss}
-          >
+        <div className={styles.navigation}>
+          <button className={styles.cancel} onClick={this.props.onDismiss}>
             <span>Cancel</span>
           </button>
           <button
-            className={dialogStyles.apply}
+            className={styles.apply}
             onClick={this.props.onAccept}
             disabled={!isValidData}
           >
@@ -129,4 +126,4 @@ class EnvironmentConfigModifyDialog extends React.Component<IProperty, {}> {
   }
 }
 
-export default EnvironmentConfigModifyDialog;
+export default EnvironmentConfigModifyModal;
