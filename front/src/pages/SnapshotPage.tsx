@@ -1,19 +1,14 @@
-import { History } from "history";
 import * as React from "react";
 import RunningPodsView from "../containers/RunningPodsView";
 import SnapshotsView from "../containers/SnapshotsView";
 import styles from "./SnapshotPage.scss";
 
-interface IDerivedProperties {
-  history: History;
-}
-
-class SnapshotPage extends React.Component<IDerivedProperties> {
+class SnapshotPage extends React.Component {
   public render() {
     return (
       <div className={styles.wrap}>
         <div className={styles.snapshots}>
-          <SnapshotsView history={this.props.history} />
+          <SnapshotsView />
         </div>
         <div className={styles.pods}>
           <RunningPodsView />

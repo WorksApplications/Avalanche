@@ -1,3 +1,9 @@
+import {
+  connectRouter,
+  routerMiddleware,
+  RouterState
+} from "connected-react-router";
+import { createBrowserHistory } from "history";
 import { applyMiddleware, createStore, Middleware } from "redux";
 /// #if DEBUG
 import logger from "redux-logger";
@@ -44,6 +50,7 @@ export interface IApplicationState {
   readonly analysisData: IAnalysisDataState;
   readonly toastNotification: IToastNotificationState;
   readonly environmentConfig: IEnvironmentConfigState;
+  readonly router: RouterState;
 }
 
 export interface IAnalysisDataState {
@@ -68,12 +75,17 @@ export interface IEnvironmentConfigState {
   readonly environmentConfigs: IEnvironmentConfig[];
 }
 
-let middlewares: Middleware[] = [thunk];
+export const history = createBrowserHistory();
+
+let middlewares: Middleware[] = [routerMiddleware(history), thunk];
 /// #if DEBUG
 middlewares = [...middlewares, logger];
 /// #endif
 
-const store = createStore(rootReducer, applyMiddleware(...middlewares));
+const store = createStore(
+  connectRouter(history)(rootReducer),
+  applyMiddleware(...middlewares)
+);
 
 /// #if DEBUG
 declare var module: any;
