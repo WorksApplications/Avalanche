@@ -65,10 +65,12 @@ export interface IAnalysisDataState {
 }
 
 export interface IToastNotificationState {
-  readonly isShown: boolean;
-  readonly message: string | null;
-  readonly kind: "success" | "error";
-  readonly id: number | null;
+  readonly notifications: Array<{
+    readonly isShown: boolean;
+    readonly message: string;
+    readonly kind: "success" | "error";
+    readonly id: number;
+  }>;
 }
 
 export interface IEnvironmentConfigState {

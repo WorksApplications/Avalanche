@@ -6,10 +6,12 @@ import { IApplicationState } from "../store";
 import styles from "./Toastr.scss";
 
 interface IStateProps {
-  isShown: boolean;
-  message: string | null;
-  kind: "success" | "error";
-  id: number | null;
+  notifications: Array<{
+    isShown: boolean;
+    message: string;
+    kind: "success" | "error";
+    id: number;
+  }>;
 }
 
 interface IDispatchProps {
@@ -17,10 +19,7 @@ interface IDispatchProps {
 }
 
 const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
-  isShown: state.toastNotification.isShown,
-  message: state.toastNotification.message,
-  kind: state.toastNotification.kind,
-  id: state.toastNotification.id
+  notifications: state.toastNotification.notifications
 });
 
 const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
@@ -33,26 +32,32 @@ const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
 
 export class Toastr extends React.Component<IStateProps & IDispatchProps> {
   public render() {
-    const dismissToastr = () =>
-      this.props.hideToastr({ id: this.props.id || 0 });
     return (
-      <div
-        className={[
-          styles.wrap,
-          this.props.isShown ? styles.shown : styles.hidden,
-          this.props.message == null
-            ? undefined
-            : this.props.kind === "success"
-              ? styles.success
-              : this.props.kind === "error"
-                ? styles.error
-                : undefined
-        ].join(" ")}
-      >
-        <span className={styles.message}>{this.props.message}</span>
-        <span className={styles.dismissButton} onClick={dismissToastr}>
-          &#x2716;
-        </span>
+      <div className={styles.wrap}>
+        {this.props.notifications.map(n => {
+          const dismissToastr = () => this.props.hideToastr({ id: n.id || 0 });
+          return (
+            <div
+              key={n.id}
+              className={[
+                styles.toastr,
+                n.isShown ? styles.shown : styles.hidden,
+                n.message == null
+                  ? undefined
+                  : n.kind === "success"
+                    ? styles.success
+                    : n.kind === "error"
+                      ? styles.error
+                      : undefined
+              ].join(" ")}
+            >
+              <span className={styles.message}>{n.message}</span>
+              <span className={styles.dismissButton} onClick={dismissToastr}>
+                &#x2716;
+              </span>
+            </div>
+          );
+        })}
       </div>
     );
   }
