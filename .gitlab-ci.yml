@@ -34,7 +34,7 @@ front-build:
         - cd front
         - yarn add --dev webpack webpack-cli
         - npm install
-        - PATH=$PATH:$(pwd)/node_modules/.bin yarn build --env.API_BASE_URL=${API_BASE_URL}
+        - PATH=$PATH:$(pwd)/node_modules/.bin yarn build
     cache:
         key: react
         paths:
@@ -43,8 +43,6 @@ front-build:
         paths:
             - front/public/
         expire_in: 1 day
-    variables:
-        API_BASE_URL: "http://faster.internal.worksap.com/api"
 
 push-images:
     only:
