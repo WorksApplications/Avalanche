@@ -216,7 +216,7 @@ export class SnapshotsView extends React.Component<IProps> {
               selectedValue={this.props.filteringEnvironment}
               onValueChanged={this.onEnvironmentChanged.bind(this)}
               placeholder="Select environment"
-              unselectOptionLabel="Deselect"
+              unselectOptionLabel="Unselect"
               disabled={!this.props.appName}
             />
           </div>
@@ -226,7 +226,7 @@ export class SnapshotsView extends React.Component<IProps> {
               selectedValue={this.props.filteringPod}
               onValueChanged={this.onPodChanged.bind(this)}
               placeholder="Select pod name"
-              unselectOptionLabel="Deselect"
+              unselectOptionLabel="Unselect"
               disabled={!this.props.filteringEnvironment}
             />
           </div>
