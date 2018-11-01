@@ -5,19 +5,22 @@ const DefinePlugin = require("webpack").DefinePlugin;
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
+const PreloadWebpackPlugin = require("preload-webpack-plugin");
 
 const dest = path.resolve(__dirname, "./public");
 const index = path.resolve(__dirname, "./src/index.tsx");
 
 module.exports = env => {
   const isProduction = env && env.production;
-  const apiBaseUrl = env.API_BASE_URL || process.env.API_BASE_URL;
+  const apiBaseUrl =
+    (env && env.API_BASE_URL) || process.env.API_BASE_URL || "/api";
   const appName = "Dynamic Analysis";
+  const isAnalyzing = env && env.IS_ANALYZING;
   if (!apiBaseUrl) {
     console.log(env);
-    throw new Error("API_BASE_URL env var is required.");
+    throw new Error("API_BASE_URL env var should not be empty.");
   }
-  return {
+  const option = {
     mode: isProduction ? "production" : "development",
     output: {
       filename: "[name].[hash:8].js",
@@ -39,12 +42,6 @@ module.exports = env => {
               loader: "babel-loader",
               options: {
                 cacheDirectory: true
-              }
-            },
-            {
-              loader: "ifdef-loader",
-              options: {
-                DEBUG: !isProduction
               }
             }
           ]
@@ -107,14 +104,23 @@ module.exports = env => {
         minify: isProduction,
         template: "src/index.html"
       }),
+      new PreloadWebpackPlugin({
+        rel: "preload",
+        include: "allAssets",
+        fileWhitelist: [
+          /app(\.[0-9a-f]+)?\.(js|css)$/
+          // /-page(\.[0-9a-f]+)?\.(js|css)$/
+        ]
+      }),
       new MiniCssExtractPlugin({
-        filename: "[name].[hash:8].css",
-        chunkFilename: "[id].[hash:8].css"
+        filename: "[name].[hash:8].css"
       }),
       new DefinePlugin({
         COLLECT_API_BASE: JSON.stringify(apiBaseUrl),
-        IS_DEBUG: !isProduction,
-        APP_NAME: `"${appName}"`
+        APP_NAME: `"${appName}"`,
+        "process.env.NODE_ENV": isProduction
+          ? JSON.stringify("production")
+          : process.env.NODE_ENV
       }),
       new ForkTsCheckerWebpackPlugin()
     ],
@@ -123,7 +129,12 @@ module.exports = env => {
         new UglifyJsPlugin({
           cache: true,
           parallel: true,
-          sourceMap: true
+          sourceMap: true,
+          uglifyOptions: {
+            output: {
+              comments: false
+            }
+          }
         }),
         new OptimizeCSSAssetsPlugin({
           cssProcessorOptions: {
@@ -140,4 +151,12 @@ module.exports = env => {
     },
     devtool: isProduction ? "source-map" : "cheap-module-eval-source-map"
   };
+
+  if (isAnalyzing) {
+    option.plugins.push(
+      new (require("webpack-bundle-analyzer")).BundleAnalyzerPlugin()
+    );
+  }
+
+  return option;
 };

@@ -1,7 +1,10 @@
-import { applyMiddleware, createStore, Middleware } from "redux";
-/// #if DEBUG
-import logger from "redux-logger";
-/// #endif
+import {
+  connectRouter,
+  routerMiddleware,
+  RouterState
+} from "connected-react-router";
+import { createBrowserHistory } from "history";
+import { applyMiddleware, compose, createStore, Middleware } from "redux";
 import thunk from "redux-thunk";
 import rootReducer from "../reducers";
 
@@ -44,6 +47,7 @@ export interface IApplicationState {
   readonly analysisData: IAnalysisDataState;
   readonly toastNotification: IToastNotificationState;
   readonly environmentConfig: IEnvironmentConfigState;
+  readonly router: RouterState;
 }
 
 export interface IAnalysisDataState {
@@ -58,30 +62,34 @@ export interface IAnalysisDataState {
 }
 
 export interface IToastNotificationState {
-  readonly isShown: boolean;
-  readonly message: string | null;
-  readonly kind: "success" | "error";
-  readonly id: number | null;
+  readonly notifications: Array<{
+    readonly isShown: boolean;
+    readonly message: string;
+    readonly kind: "success" | "error";
+    readonly id: number;
+  }>;
 }
 
 export interface IEnvironmentConfigState {
   readonly environmentConfigs: IEnvironmentConfig[];
 }
 
-let middlewares: Middleware[] = [thunk];
-/// #if DEBUG
-middlewares = [...middlewares, logger];
-/// #endif
+export const history = createBrowserHistory();
 
-const store = createStore(rootReducer, applyMiddleware(...middlewares));
+const middlewares: Middleware[] = [routerMiddleware(history), thunk];
 
-/// #if DEBUG
+// @ts-ignore
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const store = createStore(
+  connectRouter(history)(rootReducer),
+  composeEnhancers(applyMiddleware(...middlewares))
+);
+
 declare var module: any;
 if (module.hot) {
   module.hot.accept("../reducers", () =>
-    store.replaceReducer(require("../reducers").default)
+    store.replaceReducer(connectRouter(history)(require("../reducers").default))
   );
 }
-/// #endif
 
 export default store;

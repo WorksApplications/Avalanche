@@ -13,12 +13,12 @@ export interface IProperty {
 class PodCardList extends React.Component<IProperty, {}> {
   public render() {
     return (
-      <div className={styles.wrap} data-test="root">
+      <div className={styles.wrap} data-testid="root">
         <div className={styles.kindWrap}>
           <span className={styles.kind}>{this.props.kind}</span>
         </div>
         {this.props.data && this.props.data.length > 0 ? (
-          <ul className={styles.cardList} data-test="card-list">
+          <ul className={styles.cardList} data-testid="card-list">
             {this.props.data.map(x => (
               <li className={styles.card} key={x.id}>
                 <PodCard {...x} />
@@ -26,7 +26,7 @@ class PodCardList extends React.Component<IProperty, {}> {
             ))}
           </ul>
         ) : (
-          <div className={styles.empty} data-test="empty-message">
+          <div className={styles.empty} data-testid="empty-message">
             {this.props.noDataMessage}
           </div>
         )}

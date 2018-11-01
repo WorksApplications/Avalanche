@@ -26,7 +26,7 @@ class EnvironmentCard extends React.Component<IProperty, {}> {
         break;
     }
     return (
-      <div className={[styles.wrap, kind].join(" ")} data-test="root">
+      <div className={[styles.wrap, kind].join(" ")} data-testid="root">
         <div className={styles.name}>{this.props.name}</div>
         {this.props.version && (
           <div className={styles.version}>version {this.props.version}</div>
@@ -45,7 +45,7 @@ class EnvironmentCard extends React.Component<IProperty, {}> {
           className={styles.edit}
           onClick={this.props.onEdit.bind(this)}
           role="button"
-          data-test="edit-button"
+          data-testid="edit-button"
         >
           Edit
         </a>

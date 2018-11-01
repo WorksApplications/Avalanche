@@ -1,17 +1,20 @@
+import { ConnectedRouter } from "connected-react-router";
 import * as React from "react";
 import { render } from "react-dom";
+import * as ReactModal from "react-modal";
 import { Provider } from "react-redux";
-import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { APP_NAME } from "./constants";
-import index from "./store/index";
+import store, { history } from "./store/index";
 import "./wapicon/style.css";
 
+ReactModal.setAppElement("#root");
+
 render(
-  <Provider store={index}>
-    <BrowserRouter>
+  <Provider store={store}>
+    <ConnectedRouter history={history}>
       <App />
-    </BrowserRouter>
+    </ConnectedRouter>
   </Provider>,
   document.getElementById("root")
 );

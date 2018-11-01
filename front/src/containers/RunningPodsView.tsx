@@ -76,7 +76,7 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
     dispatch
   );
 
-class RunningPodsView extends React.Component<IProps, IState> {
+export class RunningPodsView extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
@@ -92,7 +92,7 @@ class RunningPodsView extends React.Component<IProps, IState> {
 
   public render() {
     const podInfo: IPodCardListData = this.props.pods
-      .filter(p => p.name.startsWith(this.state.filteringValue))
+      .filter(p => p.name.includes(this.state.filteringValue))
       .map(p => ({
         id: (p.id || "").toString(),
         name: p.name,

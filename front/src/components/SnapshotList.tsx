@@ -18,7 +18,7 @@ export interface IProperty {
   emptyMessage?: string;
 }
 
-class SnapshotList extends React.Component<IProperty, {}> {
+class SnapshotList extends React.Component<IProperty> {
   public render() {
     return (
       <div className={styles.wrap}>
@@ -30,33 +30,30 @@ class SnapshotList extends React.Component<IProperty, {}> {
               <th>Pod Name</th>
               <th>Environment</th>
               <th>Created at</th>
-              {/*<th>Labels</th>*/}
               <th>Link</th>
-              <th>&nbsp;</th>
             </tr>
           </thead>
-          <tbody>
-            {this.props.rows.map(r => (
-              <tr key={r.uuid}>
+          {this.props.rows.map(r => (
+            <tbody key={r.uuid}>
+              <tr>
                 <td>{r.uuid}</td>
                 <td>{r.name}</td>
                 <td>{r.pod}</td>
                 <td>{r.environment}</td>
                 <td>{r.createdAt}</td>
-                {/*<td>&nbsp;</td>*/}
                 <td>
                   <Link href={r.link}>Framescope</Link>
                 </td>
-                <td className={styles.statusColumn} />
-                {/* TODO status */}
               </tr>
-            ))}
-            {this.props.rows.length === 0 && (
+            </tbody>
+          ))}
+          {this.props.rows.length === 0 && (
+            <tbody>
               <tr className={styles.empty}>
-                <td colSpan={8}>{this.props.emptyMessage}</td>
+                <td colSpan={6}>{this.props.emptyMessage}</td>
               </tr>
-            )}
-          </tbody>
+            </tbody>
+          )}
         </table>
       </div>
     );

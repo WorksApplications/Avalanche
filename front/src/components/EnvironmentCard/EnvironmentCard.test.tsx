@@ -1,16 +1,11 @@
-// tslint:disable-next-line:no-implicit-dependencies
-import { shallow } from "enzyme";
+// tslint:disable:no-submodule-imports no-implicit-dependencies
+import "jest-dom/extend-expect";
 import * as React from "react";
+import { fireEvent, render } from "react-testing-library";
+import "react-testing-library/cleanup-after-each";
 import EnvironmentCard, {
   IProperty as EnvironmentCardProperty
 } from "./EnvironmentCard";
-
-const sel = (strings: TemplateStringsArray) => {
-  if (strings.length === 1) {
-    return `[data-test="${strings[0]}"]`;
-  }
-  throw new Error("Invalid argument");
-};
 
 const basicCardProps: EnvironmentCardProperty = {
   name: "jillk",
@@ -21,37 +16,37 @@ const basicCardProps: EnvironmentCardProperty = {
 
 describe("<EnvironmentCard />", () => {
   it("renders itself", () => {
-    const context = shallow(<EnvironmentCard {...basicCardProps} />);
-    expect(context.find(sel`root`).exists()).toBe(true);
+    const { getByTestId } = render(<EnvironmentCard {...basicCardProps} />);
+    expect(getByTestId("root")).not.toBeNull();
   });
 
   it("renders with 'unconfigured' style when it is unconfigured", () => {
-    const context = shallow(
+    const { getByTestId } = render(
       <EnvironmentCard {...basicCardProps} kind="unconfigured" />
     );
-    expect(context.find(sel`root`).hasClass("unconfigured")).toBe(true);
+    expect(getByTestId("root")).toHaveClass("unconfigured");
   });
 
   it("renders with 'configured' style when it is configured", () => {
-    const context = shallow(
+    const { getByTestId } = render(
       <EnvironmentCard {...basicCardProps} kind="configured" />
     );
-    expect(context.find(sel`root`).hasClass("configured")).toBe(true);
+    expect(getByTestId("root")).toHaveClass("configured");
   });
 
   it("renders with 'observed' style when it is observed", () => {
-    const context = shallow(
+    const { getByTestId } = render(
       <EnvironmentCard {...basicCardProps} kind="observed" />
     );
-    expect(context.find(sel`root`).hasClass("observed")).toBe(true);
+    expect(getByTestId("root")).toHaveClass("observed");
   });
 
   it("'s edit button is click-able", () => {
     const mockHandler = jest.fn();
-    const context = shallow(
+    const { getByTestId } = render(
       <EnvironmentCard {...basicCardProps} onEdit={mockHandler} />
     );
-    expect(context.find(sel`edit-button`).simulate("click"));
+    fireEvent.click(getByTestId("edit-button"));
     expect(mockHandler).toBeCalled();
   });
 });

@@ -11,6 +11,8 @@ export const showToastr = actionCreator<{
 
 export const hideToastr = actionCreator<{ id: number }>("HIDE_TOASTR");
 
+export const removeToastr = actionCreator<{ id: number }>("REMOVE_TOASTR");
+
 export const toastr = (
   message: string,
   kind: "success" | "error",
@@ -20,5 +22,8 @@ export const toastr = (
   dispatch(showToastr({ message, kind, id }));
   setTimeout(() => {
     dispatch(hideToastr({ id }));
+    setTimeout(() => {
+      dispatch(removeToastr({ id }));
+    }, 200);
   }, duration);
 };

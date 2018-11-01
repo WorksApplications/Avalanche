@@ -1,19 +1,26 @@
 {
   "presets": [
-    ["@babel/preset-env", { "targets": { "browsers": "last 2 versions" } }],
+    [
+      "@babel/preset-env",
+      { "targets": { "browsers": "last 2 versions" }, "modules": false }
+    ],
     "@babel/preset-typescript",
     "@babel/preset-react"
   ],
   "plugins": [
     ["@babel/plugin-proposal-decorators", { "legacy": true }],
     ["@babel/plugin-proposal-class-properties", { "loose": true }],
-    "react-hot-loader/babel"
+    "react-hot-loader/babel",
+    "@babel/plugin-syntax-dynamic-import"
   ],
   "env": {
+    "test": {
+      "presets": [["@babel/preset-env", { "modules": "commonjs" }]]
+    },
     "production": {
       "presets": ["react-optimize"],
       "plugins": [
-        ["react-remove-properties", { "properties": ["data-test"] }],
+        ["react-remove-properties", { "properties": ["data-testid"] }],
         "babel-plugin-closure-elimination"
       ]
     }

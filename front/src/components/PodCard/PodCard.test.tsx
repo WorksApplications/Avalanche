@@ -1,14 +1,9 @@
-// tslint:disable-next-line:no-implicit-dependencies
-import { shallow } from "enzyme";
+// tslint:disable:no-submodule-imports no-implicit-dependencies
+import "jest-dom/extend-expect";
 import * as React from "react";
+import { fireEvent, render, within } from "react-testing-library";
+import "react-testing-library/cleanup-after-each";
 import PodCard, { IProperty as PodCardProperty } from "./PodCard";
-
-const sel = (strings: TemplateStringsArray) => {
-  if (strings.length === 1) {
-    return `[data-test="${strings[0]}"]`;
-  }
-  throw new Error("Invalid argument");
-};
 
 const baseDateValue = Date.now();
 
@@ -51,174 +46,176 @@ const basicCardProps: PodCardProperty = {
 
 describe("<PodCard />", () => {
   it("renders itself", () => {
-    const context = shallow(<PodCard {...basicCardProps} />);
-    expect(context.find(sel`root`).exists()).toBe(true);
+    const { getByTestId } = render(<PodCard {...basicCardProps} />);
+    expect(getByTestId("root")).not.toBeNull();
   });
 
   it("renders save button when the user is not saving the snapshot", () => {
-    const context = shallow(<PodCard {...basicCardProps} isSaving={false} />);
-    expect(context.find(sel`save-button`).exists()).toBe(true);
-    expect(context.find(sel`spinner`).exists()).toBe(false);
+    const { queryByTestId } = render(
+      <PodCard {...basicCardProps} isSaving={false} />
+    );
+    expect(queryByTestId("save-button")).not.toBeNull();
+    expect(queryByTestId("spinner")).toBeNull();
   });
 
   it("renders spinner when the user is saving the snapshot", () => {
-    const context = shallow(<PodCard {...basicCardProps} isSaving={true} />);
-    expect(context.find(sel`save-button`).exists()).toBe(false);
-    expect(context.find(sel`spinner`).exists()).toBe(true);
+    const { queryByTestId } = render(
+      <PodCard {...basicCardProps} isSaving={true} />
+    );
+    expect(queryByTestId("save-button")).toBeNull();
+    expect(queryByTestId("spinner")).not.toBeNull();
   });
 
   describe("save button", () => {
     it("is click-able when the event handler is set and not saving", () => {
       const mockHandler = jest.fn();
-      const context = shallow(
+      const { getByTestId } = render(
         <PodCard
           {...basicCardProps}
           isSaving={false}
           onSaveButtonClick={mockHandler}
         />
       );
-      expect(context.find(sel`save-button-body`).simulate("click"));
+      fireEvent.click(getByTestId("save-button-body"));
       expect(mockHandler).toBeCalled();
     });
 
     it("is disabled when the event handler is not set", () => {
-      const context = shallow(<PodCard {...basicCardProps} isSaving={false} />);
-      expect(context.find(sel`save`).hasClass("disabled")).toBe(true);
+      const { getByTestId } = render(
+        <PodCard {...basicCardProps} isSaving={false} />
+      );
+      expect(getByTestId("save")).toHaveClass("disabled");
     });
 
     it("is not click-able when saving", () => {
       const mockHandler = jest.fn();
-      const context = shallow(
+      const { queryByTestId } = render(
         <PodCard
           {...basicCardProps}
           isSaving={true}
           onSaveButtonClick={mockHandler}
         />
       );
-      if (context.find(sel`save-button-body`).exists()) {
-        context.find(sel`save-button-body`).simulate("click");
-        expect(mockHandler).not.toHaveBeenCalled();
+      if (queryByTestId("save-button-body")) {
+        fireEvent.click(queryByTestId("save-button-body"));
       }
+      expect(mockHandler).not.toHaveBeenCalled();
     });
   });
 
   describe("snapshot list", () => {
     it("renders the list", () => {
-      const context = shallow(<PodCard {...basicCardProps} />);
-      expect(context.find(sel`info-root`).exists()).toBe(true);
-      expect(context.find(sel`snapshot-area`).exists()).toBe(false);
-      context.find(sel`info-root`).simulate("click");
-      expect(context.find(sel`snapshot-area`).exists()).toBe(true);
+      const { queryByTestId } = render(<PodCard {...basicCardProps} />);
+      expect(queryByTestId("info-root")).not.toBeNull();
+      expect(queryByTestId("snapshot-area")).toBeNull();
+      fireEvent.click(queryByTestId("info-root"));
+      expect(queryByTestId("snapshot-area")).not.toBeNull();
     });
 
     it("renders empty list when no snapshot data after clicked", () => {
-      const context = shallow(<PodCard {...basicCardProps} snapshots={[]} />);
-      context.find(sel`info-root`).simulate("click");
-      expect(context.find(sel`snapshot`).length).toBe(0);
-      expect(context.find(sel`empty-message`).exists()).toBe(true);
+      const { queryAllByTestId, queryByTestId } = render(
+        <PodCard {...basicCardProps} snapshots={[]} />
+      );
+      fireEvent.click(queryByTestId("info-root"));
+      expect(queryAllByTestId("snapshot")).toHaveLength(0);
+      expect(queryByTestId("empty-message")).not.toBeNull();
     });
 
     it("renders list with 1 element when 1 snapshot datum", () => {
-      const context = shallow(
+      const { getAllByTestId, queryByTestId } = render(
         <PodCard
           {...basicCardProps}
           snapshots={[basicCardProps.snapshots[0]]}
         />
       );
-      context.find(sel`info-root`).simulate("click");
-      expect(context.find(sel`snapshot`).length).toBe(1);
-      expect(context.find(sel`empty-message`).exists()).toBe(false);
+      fireEvent.click(queryByTestId("info-root"));
+      expect(getAllByTestId("snapshot")).toHaveLength(1);
+      expect(queryByTestId("empty-message")).toBeNull();
     });
 
     it("renders list with 3 element when 3 snapshot data", () => {
-      const context = shallow(
+      const { getAllByTestId, queryByTestId } = render(
         <PodCard
           {...basicCardProps}
           snapshots={basicCardProps.snapshots.slice(0, 3)}
         />
       );
-      context.find(sel`info-root`).simulate("click");
-      expect(context.find(sel`snapshot`).length).toBe(3);
-      expect(context.find(sel`empty-message`).exists()).toBe(false);
+      fireEvent.click(queryByTestId("info-root"));
+      expect(getAllByTestId("snapshot")).toHaveLength(3);
+      expect(queryByTestId("empty-message")).toBeNull();
     });
 
     it("renders list with only newest 3 element when 4+ snapshot data", () => {
-      const context = shallow(
+      const { getAllByTestId, queryByTestId } = render(
         <PodCard {...basicCardProps} snapshots={basicCardProps.snapshots} />
       );
-      context.find(sel`info-root`).simulate("click");
-      expect(context.find(sel`snapshot`).length).toBe(3);
-      expect(context.find(sel`empty-message`).exists()).toBe(false);
+      fireEvent.click(queryByTestId("info-root"));
+      const snapshotElements = getAllByTestId("snapshot");
+      expect(snapshotElements).toHaveLength(3);
+      expect(queryByTestId("empty-message")).toBeNull();
+
       expect(
         new Date(
-          context
-            .find(sel`snapshot`)
-            .first()
-            .find(sel`snapshot-date`)
-            .text()
+          within(snapshotElements[0]).getByTestId("snapshot-date").textContent!
         ).valueOf()
       ).toBe(Math.floor((baseDateValue + 10000) / 1000) * 1000); // since millisecond is missing
       expect(
         new Date(
-          context
-            .find(sel`snapshot`)
-            .last()
-            .find(sel`snapshot-date`)
-            .text()
+          within(snapshotElements[snapshotElements.length - 1]).getByTestId(
+            "snapshot-date"
+          ).textContent!
         ).valueOf()
       ).toBe(Math.floor((baseDateValue + 6000) / 1000) * 1000); // since millisecond is missing
     });
 
-    it("renders ordered list (the newest should be displayed on the top)", () => {
-      const contextNormal = shallow(
-        <PodCard
-          {...basicCardProps}
-          snapshots={basicCardProps.snapshots.slice(0, 3)}
-        />
-      );
-      contextNormal.find(sel`info-root`).simulate("click");
-      expect(
-        new Date(
-          contextNormal
-            .find(sel`snapshot`)
-            .first()
-            .find(sel`snapshot-date`)
-            .text()
-        ).valueOf()
-      ).toBeGreaterThan(
-        new Date(
-          contextNormal
-            .find(sel`snapshot`)
-            .last()
-            .find(sel`snapshot-date`)
-            .text()
-        ).valueOf()
-      );
+    describe("renders ordered list (the newest should be displayed on the top)", () => {
+      it("when ordered data", () => {
+        const { getAllByTestId, getByTestId } = render(
+          <PodCard
+            {...basicCardProps}
+            snapshots={basicCardProps.snapshots.slice(0, 3)}
+          />
+        );
+        fireEvent.click(getByTestId("info-root"));
+        const snapshotElements = getAllByTestId("snapshot");
+        expect(
+          new Date(
+            within(snapshotElements[0]).getByTestId(
+              "snapshot-date"
+            ).textContent!
+          ).valueOf()
+        ).toBeGreaterThan(
+          new Date(
+            within(snapshotElements[snapshotElements.length - 1]).getByTestId(
+              "snapshot-date"
+            ).textContent!
+          ).valueOf()
+        );
+      });
 
-      const contextReversed = shallow(
-        <PodCard
-          {...basicCardProps}
-          snapshots={basicCardProps.snapshots.slice(0, 3).reverse()}
-        />
-      );
-      contextReversed.find(sel`info-root`).simulate("click");
-      expect(
-        new Date(
-          contextReversed
-            .find(sel`snapshot`)
-            .first()
-            .find(sel`snapshot-date`)
-            .text()
-        ).valueOf()
-      ).toBeGreaterThan(
-        new Date(
-          contextReversed
-            .find(sel`snapshot`)
-            .last()
-            .find(sel`snapshot-date`)
-            .text()
-        ).valueOf()
-      );
+      it("when reversed data", () => {
+        const { getAllByTestId, getByTestId } = render(
+          <PodCard
+            {...basicCardProps}
+            snapshots={basicCardProps.snapshots.slice(0, 3).reverse()}
+          />
+        );
+        fireEvent.click(getByTestId("info-root"));
+        const snapshotElements = getAllByTestId("snapshot");
+        expect(
+          new Date(
+            within(snapshotElements[0]).getByTestId(
+              "snapshot-date"
+            ).textContent!
+          ).valueOf()
+        ).toBeGreaterThan(
+          new Date(
+            within(snapshotElements[snapshotElements.length - 1]).getByTestId(
+              "snapshot-date"
+            ).textContent!
+          ).valueOf()
+        );
+      });
     });
   });
 });

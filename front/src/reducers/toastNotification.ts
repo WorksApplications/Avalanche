@@ -1,13 +1,10 @@
 import { Action } from "redux";
 import { isType } from "typescript-fsa";
-import { hideToastr, showToastr } from "../actions";
+import { hideToastr, removeToastr, showToastr } from "../actions";
 import { IToastNotificationState } from "../store";
 
 const INIT: IToastNotificationState = {
-  isShown: false,
-  message: null,
-  kind: "error",
-  id: null
+  notifications: []
 };
 
 export function toastNotification(
@@ -17,17 +14,30 @@ export function toastNotification(
   if (isType(action, showToastr)) {
     return {
       ...state,
-      isShown: true,
-      message: action.payload.message,
-      kind: action.payload.kind,
-      id: action.payload.id
+      notifications: [
+        {
+          isShown: true,
+          message: action.payload.message,
+          kind: action.payload.kind,
+          id: action.payload.id
+        },
+        ...state.notifications
+      ]
     };
   }
   if (isType(action, hideToastr)) {
-    if (action.payload.id === state.id) {
-      return { ...state, isShown: false };
-    }
-    return state;
+    return {
+      ...state,
+      notifications: state.notifications.map(
+        x => (x.id === action.payload.id ? { ...x, isShown: false } : x)
+      )
+    };
+  }
+  if (isType(action, removeToastr)) {
+    return {
+      ...state,
+      notifications: state.notifications.filter(x => x.id !== action.payload.id)
+    };
   }
   return state;
 }
