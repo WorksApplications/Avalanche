@@ -118,6 +118,10 @@ export class SnapshotsView extends React.Component<IProps> {
       this.props.toastr(`Failed to get app names.`, "error");
     });
 
+    this.reloadView();
+  }
+
+  public reloadView() {
     const requested = qs.parse(location.search.substring(1));
     let requestedApp: string | null = null;
     let requestedEnv: string | null = null;
@@ -297,5 +301,7 @@ export class SnapshotsView extends React.Component<IProps> {
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
+  null,
+  { withRef: true }
 )(SnapshotsView) as React.ComponentClass;

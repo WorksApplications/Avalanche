@@ -28,7 +28,11 @@ const operations = {
 
 type IDispatchProps = typeof actions & OperationsToProps<typeof operations>;
 
-type IProps = IStateProps & IDispatchProps;
+interface IComponentProps {
+  snapshotCreated(): void;
+}
+
+type IProps = IComponentProps & IStateProps & IDispatchProps;
 
 function sortedPods(pods: IPodInfo[]): IPodInfo[] {
   return pods.sort((a, b) => {
@@ -120,6 +124,7 @@ export class RunningPodsView extends React.Component<IProps, IState> {
                       `New snapshot for "${newSnapshot.name} is created.`,
                       "success"
                     );
+                    this.props.snapshotCreated();
                   })
                   .catch(() => {
                     this.props.toastr(
@@ -185,4 +190,4 @@ export class RunningPodsView extends React.Component<IProps, IState> {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(RunningPodsView) as React.ComponentClass;
+)(RunningPodsView) as React.ComponentClass<IComponentProps>;
