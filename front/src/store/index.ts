@@ -4,10 +4,7 @@ import {
   RouterState
 } from "connected-react-router";
 import { createBrowserHistory } from "history";
-import { applyMiddleware, createStore, Middleware } from "redux";
-/// #if DEBUG
-import logger from "redux-logger";
-/// #endif
+import { applyMiddleware, compose, createStore, Middleware } from "redux";
 import thunk from "redux-thunk";
 import rootReducer from "../reducers";
 
@@ -79,23 +76,20 @@ export interface IEnvironmentConfigState {
 
 export const history = createBrowserHistory();
 
-let middlewares: Middleware[] = [routerMiddleware(history), thunk];
-/// #if DEBUG
-middlewares = [...middlewares, logger];
-/// #endif
+const middlewares: Middleware[] = [routerMiddleware(history), thunk];
 
+// @ts-ignore
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const store = createStore(
   connectRouter(history)(rootReducer),
-  applyMiddleware(...middlewares)
+  composeEnhancers(applyMiddleware(...middlewares))
 );
 
-/// #if DEBUG
 declare var module: any;
 if (module.hot) {
   module.hot.accept("../reducers", () =>
-    store.replaceReducer(require("../reducers").default)
+    store.replaceReducer(connectRouter(history)(require("../reducers").default))
   );
 }
-/// #endif
 
 export default store;
