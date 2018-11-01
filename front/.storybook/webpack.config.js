@@ -6,10 +6,18 @@
 // When you add this file, we won't add the default configurations which is similar
 // to "React Create App". This only has babel loader to load JavaScript.
 
-const webpackConfig = require("../webpack.config")({ API_BASE_URL: "?" });
+const webpackConfig = require("../webpack.config")();
 
-module.exports = {
-  plugins: webpackConfig.plugins,
-  module: webpackConfig.module,
-  resolve: webpackConfig.resolve
+module.exports = (baseConfig, env, config) => {
+  config.resolve = webpackConfig.resolve;
+  config.module.rules = webpackConfig.module.rules.map(
+    r =>
+      r.test.test(".tsx")
+        ? {
+            ...r,
+            use: [...r.use, require.resolve("react-docgen-typescript-loader")]
+          }
+        : r
+  );
+  return config;
 };
