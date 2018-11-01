@@ -4,17 +4,28 @@ import SnapshotsView from "../containers/SnapshotsView";
 import styles from "./SnapshotPage.scss";
 
 class SnapshotPage extends React.Component {
+  private viewRef = React.createRef<any>();
+
   public render() {
     return (
       <div className={styles.wrap}>
         <div className={styles.snapshots}>
-          <SnapshotsView />
+          <SnapshotsView ref={this.viewRef} />
         </div>
         <div className={styles.pods}>
-          <RunningPodsView />
+          <RunningPodsView snapshotCreated={this.onUpdate.bind(this)} />
         </div>
       </div>
     );
+  }
+  private onUpdate() {
+    // questionable impl...
+    if (this.viewRef.current && this.viewRef.current.getWrappedInstance) {
+      const viewInstance = this.viewRef.current.getWrappedInstance();
+      if (viewInstance) {
+        viewInstance.reloadView();
+      }
+    }
   }
 }
 

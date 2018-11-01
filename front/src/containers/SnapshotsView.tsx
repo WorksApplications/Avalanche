@@ -118,6 +118,10 @@ export class SnapshotsView extends React.Component<IProps> {
       this.props.toastr(`Failed to get app names.`, "error");
     });
 
+    this.reloadView();
+  }
+
+  public reloadView() {
     const requested = qs.parse(location.search.substring(1));
     let requestedApp: string | null = null;
     let requestedEnv: string | null = null;
@@ -216,7 +220,7 @@ export class SnapshotsView extends React.Component<IProps> {
               selectedValue={this.props.filteringEnvironment}
               onValueChanged={this.onEnvironmentChanged.bind(this)}
               placeholder="Select environment"
-              unselectOptionLabel="Deselect"
+              unselectOptionLabel="Unselect"
               disabled={!this.props.appName}
             />
           </div>
@@ -226,7 +230,7 @@ export class SnapshotsView extends React.Component<IProps> {
               selectedValue={this.props.filteringPod}
               onValueChanged={this.onPodChanged.bind(this)}
               placeholder="Select pod name"
-              unselectOptionLabel="Deselect"
+              unselectOptionLabel="Unselect"
               disabled={!this.props.filteringEnvironment}
             />
           </div>
@@ -297,5 +301,7 @@ export class SnapshotsView extends React.Component<IProps> {
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
+  null,
+  { withRef: true }
 )(SnapshotsView) as React.ComponentClass;

@@ -6,7 +6,9 @@ class TitleBar extends React.Component {
   public render() {
     return (
       <nav className={styles.main}>
-        <span className={styles.brand}>{APP_NAME}</span>
+        <a className={styles.brand} href={"/"}>
+          {APP_NAME}
+        </a>
       </nav>
     );
   }
