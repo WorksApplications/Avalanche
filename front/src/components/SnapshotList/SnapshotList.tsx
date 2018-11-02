@@ -1,19 +1,17 @@
 import * as React from "react";
-import Link from "./Link";
+import Link from "../Link";
 import styles from "./SnapshotList.scss";
 
-export interface IRowData {
+export interface IData {
   uuid: string;
   environment: string;
   podName: string;
-  createdAt: string;
-  labels: string[];
+  createdAt?: Date;
   link: string;
-  isReady: boolean;
 }
 
 export interface IProperty {
-  rows: IRowData[];
+  rows: IData[];
   emptyMessage?: string;
 }
 
@@ -37,7 +35,9 @@ class SnapshotList extends React.Component<IProperty> {
                 <td>{r.uuid}</td>
                 <td>{r.podName}</td>
                 <td>{r.environment}</td>
-                <td>{r.createdAt}</td>
+                <td>
+                  {(r.createdAt && r.createdAt.toLocaleString()) || "Unknown"}
+                </td>
                 <td>
                   <Link href={r.link}>Framescope</Link>
                 </td>

@@ -15,7 +15,7 @@ import {
 } from "../actions";
 import AppSelector from "../components/AppSelector";
 import SnapshotFilter from "../components/SnapshotFilter";
-import SnapshotList, { IRowData } from "../components/SnapshotList";
+import SnapshotList, { ISnapshotData } from "../components/SnapshotList";
 import { OperationsToProps, thunkToActionBulk } from "../helpers";
 import {
   IApplicationState,
@@ -170,17 +170,15 @@ export class SnapshotsView extends React.Component<IProps> {
 
     let emptyMessage =
       this.props.snapshots.length > 0 ? "Please select environment" : "No Data";
-    let showingSnapshots: IRowData[] = [];
+    let showingSnapshots: ISnapshotData[] = [];
 
     if (this.props.snapshots.length > 0) {
       showingSnapshots = this.props.snapshots.map(x => ({
         uuid: x.uuid,
         environment: x.environment || "Unknown",
         podName: x.pod || "Unknown",
-        createdAt: x.createdAt ? x.createdAt.toLocaleString() : "Unknown",
-        labels: [], // TODO
-        link: x.link || "#",
-        isReady: false // TODO
+        createdAt: x.createdAt,
+        link: x.link || "#"
       }));
       if (this.props.filteringEnvironment) {
         showingSnapshots = showingSnapshots.filter(
