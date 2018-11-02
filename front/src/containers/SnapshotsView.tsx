@@ -175,9 +175,8 @@ export class SnapshotsView extends React.Component<IProps> {
     if (this.props.snapshots.length > 0) {
       showingSnapshots = this.props.snapshots.map(x => ({
         uuid: x.uuid,
-        name: x.name || "Unknown",
         environment: x.environment || "Unknown",
-        pod: x.pod || "Unknown",
+        podName: x.pod || "Unknown",
         createdAt: x.createdAt ? x.createdAt.toLocaleString() : "Unknown",
         labels: [], // TODO
         link: x.link || "#",
@@ -190,7 +189,7 @@ export class SnapshotsView extends React.Component<IProps> {
       }
       if (this.props.filteringPod) {
         showingSnapshots = showingSnapshots.filter(
-          x => x.pod === this.props.filteringPod
+          x => x.podName === this.props.filteringPod
         );
       }
       if (showingSnapshots.length === 0) {

@@ -41,14 +41,15 @@ class EnvironmentCard extends React.Component<IProperty, {}> {
             {this.props.kind === "observed" ? "Enabled" : "Disabled"}
           </a>
         )}
-        <a
+        <button
           className={styles.edit}
           onClick={this.props.onEdit.bind(this)}
           role="button"
           data-testid="edit-button"
         >
-          Edit
-        </a>
+          <span className={styles.editToolbar}>Edit this environment</span>
+          <span className={styles.editLabel}>Edit</span>
+        </button>
       </div>
     );
   }
