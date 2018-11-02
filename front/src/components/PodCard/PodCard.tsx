@@ -38,6 +38,7 @@ class PodCard extends React.Component<IProperty, IState> {
           this.state.isOpen ? styles.isOpen : undefined
         ].join(" ")}
         data-testid="root"
+        onClick={this.onClick.bind(this)}
       >
         <div
           className={[
@@ -64,7 +65,7 @@ class PodCard extends React.Component<IProperty, IState> {
             </button>
           )}
         </div>
-        <div onClick={this.onClick.bind(this)} data-testid="info-root">
+        <div data-testid="info-root">
           <div className={styles.indicatorWrap}>
             <div className={styles.aliveIndicator}>
               <AliveIndicator isAlive={this.props.isAlive} />
