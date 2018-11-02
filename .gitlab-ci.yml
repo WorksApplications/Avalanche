@@ -52,6 +52,7 @@ push-images:
     script:
         - docker info
         - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} ${DOCKERHOST}
+        - export GIT_HASH=$(git show --quiet --format=%ha)
         - ls -lR
         - apk add make
         - touch bin/collect bin/detect
@@ -68,9 +69,4 @@ push-images:
     variables:
         DOCKERHOST: ""
         
-        COLLECT_VERSION: "r1l"
-        DETECT_VERSION: "r1d"
-        ENROLL_VERSION: "r1b"
-        EXTRACT_VERSION: "r1a"
-        FRONT_VERSION: "r1e"
 
