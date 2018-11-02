@@ -70,9 +70,7 @@ export class ConfigPage extends React.Component<IProps, IState> {
   }
 
   public componentDidMount() {
-    this.props.getEnvironmentConfigsThunk().catch(() => {
-      this.props.toastr(`Failed to get environment configs.`, "error");
-    });
+    this.updateConfigData();
   }
 
   public render() {
@@ -181,6 +179,12 @@ export class ConfigPage extends React.Component<IProps, IState> {
     );
   }
 
+  private updateConfigData() {
+    this.props.getEnvironmentConfigsThunk().catch(() => {
+      this.props.toastr(`Failed to get environment configs.`, "error");
+    });
+  }
+
   private onModifyDialogDismiss() {
     this.setState({
       showsModifyDialog: false,
@@ -213,6 +217,7 @@ export class ConfigPage extends React.Component<IProps, IState> {
       })
       .then(({ config }) => {
         this.props.toastr(`Config for "${config.name}" is updated.`, "success");
+        this.updateConfigData();
       })
       .catch(() => {
         this.props.toastr(`Failed to configure "${environmentName}".`, "error");
@@ -231,6 +236,7 @@ export class ConfigPage extends React.Component<IProps, IState> {
       })
       .then(({ config }) => {
         this.props.toastr(`Config for "${config.name}" is added.`, "success");
+        this.updateConfigData();
       })
       .catch(() => {
         this.props.toastr(`Failed to add "${environmentName}".`, "error");

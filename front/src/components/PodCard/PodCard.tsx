@@ -38,6 +38,7 @@ class PodCard extends React.Component<IProperty, IState> {
           this.state.isOpen ? styles.isOpen : undefined
         ].join(" ")}
         data-testid="root"
+        onClick={this.onClick.bind(this)}
       >
         <div
           className={[
@@ -52,15 +53,19 @@ class PodCard extends React.Component<IProperty, IState> {
               data-testid="spinner"
             />
           ) : (
-            <span className={styles.saveButton} data-testid="save-button">
+            <button className={styles.saveButton} data-testid="save-button">
               <span className={styles.saveTooltip}>Save snapshot</span>
-              <span onClick={onSave} data-testid="save-button-body">
+              <span
+                className={styles.saveLabel}
+                onClick={onSave}
+                data-testid="save-button-body"
+              >
                 Save
               </span>
-            </span>
+            </button>
           )}
         </div>
-        <div onClick={this.onClick.bind(this)} data-testid="info-root">
+        <div data-testid="info-root">
           <div className={styles.indicatorWrap}>
             <div className={styles.aliveIndicator}>
               <AliveIndicator isAlive={this.props.isAlive} />

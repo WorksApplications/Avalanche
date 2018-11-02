@@ -24,9 +24,9 @@ storiesOf("PodCard", module)
       <PodCard
         isAlive={boolean("Is alive", true)}
         isSaving={boolean("Is saving", false)}
-        app="ess"
+        app="scm"
         environment="jillk"
-        name="ess-765c6ccfcd-9hrsv"
+        name="scm-costallocation-5d4556db46-jzqp2"
         createdAt={new Date()}
         snapshots={[]}
         onSaveButtonClick={
@@ -40,9 +40,9 @@ storiesOf("PodCard", module)
       <PodCard
         isAlive={boolean("Is alive", true)}
         isSaving={boolean("Is saving", false)}
-        app="ess"
+        app="scm"
         environment="jillk"
-        name="ess-765c6ccfcd-9hrsv"
+        name="scm-costallocation-5d4556db46-jzqp2"
         createdAt={new Date()}
         snapshots={[
           {
@@ -63,9 +63,9 @@ storiesOf("PodCard", module)
       <PodCard
         isAlive={boolean("Is alive", true)}
         isSaving={boolean("Is saving", false)}
-        app="ess"
+        app="scm"
         environment="jillk"
-        name="ess-765c6ccfcd-9hrsv"
+        name="scm-costallocation-5d4556db46-jzqp2"
         createdAt={new Date()}
         snapshots={[
           {
