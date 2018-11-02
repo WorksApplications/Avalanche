@@ -1,5 +1,4 @@
 import * as React from "react";
-import AliveIndicator from "../AliveIndicator";
 import styles from "./PodCard.scss";
 
 export interface IProperty {
@@ -67,9 +66,12 @@ class PodCard extends React.Component<IProperty, IState> {
         </div>
         <div data-testid="info-root">
           <div className={styles.indicatorWrap}>
-            <div className={styles.aliveIndicator}>
-              <AliveIndicator isAlive={this.props.isAlive} />
-            </div>
+            <div
+              className={[
+                styles.aliveIndicator,
+                this.props.isAlive ? styles.alive : styles.dead
+              ].join(" ")}
+            />
           </div>
           {hashPart ? (
             <span className={styles.name}>
