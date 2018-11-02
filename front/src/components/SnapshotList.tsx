@@ -4,9 +4,8 @@ import styles from "./SnapshotList.scss";
 
 export interface IRowData {
   uuid: string;
-  name: string;
   environment: string;
-  pod: string;
+  podName: string;
   createdAt: string;
   labels: string[];
   link: string;
@@ -26,7 +25,6 @@ class SnapshotList extends React.Component<IProperty> {
           <thead>
             <tr>
               <th>UUID</th>
-              <th>Name</th>
               <th>Pod Name</th>
               <th>Environment</th>
               <th>Created at</th>
@@ -37,8 +35,7 @@ class SnapshotList extends React.Component<IProperty> {
             <tbody key={r.uuid}>
               <tr>
                 <td>{r.uuid}</td>
-                <td>{r.name}</td>
-                <td>{r.pod}</td>
+                <td>{r.podName}</td>
                 <td>{r.environment}</td>
                 <td>{r.createdAt}</td>
                 <td>
@@ -50,7 +47,7 @@ class SnapshotList extends React.Component<IProperty> {
           {this.props.rows.length === 0 && (
             <tbody>
               <tr className={styles.empty}>
-                <td colSpan={6}>{this.props.emptyMessage}</td>
+                <td colSpan={5}>{this.props.emptyMessage}</td>
               </tr>
             </tbody>
           )}
