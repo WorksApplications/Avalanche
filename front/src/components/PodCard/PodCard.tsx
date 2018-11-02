@@ -52,12 +52,16 @@ class PodCard extends React.Component<IProperty, IState> {
               data-testid="spinner"
             />
           ) : (
-            <span className={styles.saveButton} data-testid="save-button">
+            <button className={styles.saveButton} data-testid="save-button">
               <span className={styles.saveTooltip}>Save snapshot</span>
-              <span onClick={onSave} data-testid="save-button-body">
+              <span
+                className={styles.saveLabel}
+                onClick={onSave}
+                data-testid="save-button-body"
+              >
                 Save
               </span>
-            </span>
+            </button>
           )}
         </div>
         <div onClick={this.onClick.bind(this)} data-testid="info-root">
