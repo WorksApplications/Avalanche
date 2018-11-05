@@ -50,6 +50,7 @@ push-images:
     stage: deploy
     image: docker:stable
     script:
+        - apk add git
         - docker info
         - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} ${DOCKERHOST}
         - export GIT_HASH=$(git show --quiet --format=%ha)
