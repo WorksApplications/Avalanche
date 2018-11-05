@@ -14,7 +14,6 @@ module.exports = env => {
   const isProduction = env && env.production;
   const apiBaseUrl =
     (env && env.API_BASE_URL) || process.env.API_BASE_URL || "/api";
-  const appName = "Dynamic Analysis";
   const isAnalyzing = env && env.IS_ANALYZING;
   if (!apiBaseUrl) {
     console.log(env);
@@ -100,7 +99,7 @@ module.exports = env => {
     },
     plugins: [
       new HtmlPlugin({
-        title: appName,
+        title: "Avalanche",
         minify: isProduction,
         template: "src/index.html"
       }),
@@ -117,7 +116,7 @@ module.exports = env => {
       }),
       new DefinePlugin({
         COLLECT_API_BASE: JSON.stringify(apiBaseUrl),
-        APP_NAME: `"${appName}"`,
+        APP_NAME: `"🏔️ Avalanche"`,
         "process.env.NODE_ENV": isProduction
           ? JSON.stringify("production")
           : process.env.NODE_ENV

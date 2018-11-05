@@ -4,7 +4,6 @@ import { render } from "react-dom";
 import * as ReactModal from "react-modal";
 import { Provider } from "react-redux";
 import App from "./App";
-import { APP_NAME } from "./constants";
 import store, { history } from "./store/index";
 import "./wapicon/style.css";
 
@@ -18,5 +17,3 @@ render(
   </Provider>,
   document.getElementById("root")
 );
-
-document.title = APP_NAME;
