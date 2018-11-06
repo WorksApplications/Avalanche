@@ -7,7 +7,7 @@ export interface IProperty {
   noDataMessage?: string;
 }
 
-class EnvironmentCardList extends React.Component<IProperty, {}> {
+export class EnvironmentCardList extends React.Component<IProperty> {
   public render() {
     const isNotEmpty = this.props.data && this.props.data.length > 0;
     return (

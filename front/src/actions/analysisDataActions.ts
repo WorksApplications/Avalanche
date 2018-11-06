@@ -57,7 +57,7 @@ export const selectPod = actionCreator<{ podName: string | null }>(
   "SELECT_POD"
 );
 
-export const getAppsThunk = asyncActionCreator<{}, { apps: string[] }>(
+export const getAppsOperation = asyncActionCreator<{}, { apps: string[] }>(
   "GET_APPS",
   () =>
     collectClient.getApps().then((apps: string[]) => {
@@ -65,7 +65,7 @@ export const getAppsThunk = asyncActionCreator<{}, { apps: string[] }>(
     })
 );
 
-export const getEnvironmentsOfAppThunk = asyncActionCreator<
+export const getEnvironmentsOfAppOperation = asyncActionCreator<
   { app: string },
   { envs: IEnvironmentInfo[] }
 >("GET_ENVS_OF_APP", ({ app }) =>
@@ -77,16 +77,17 @@ export const getEnvironmentsOfAppThunk = asyncActionCreator<
     })
 );
 
-export const getRunningPodsThunk = asyncActionCreator<{}, { pods: IPodInfo[] }>(
-  "GET_RUNNING_PODS",
-  () =>
-    collectClient.listAvailablePods().then((podResults: collect.Pod[]) => {
-      const pods = podResults.map(pod => podInfoConvert(pod));
-      return { pods };
-    })
+export const getRunningPodsOperation = asyncActionCreator<
+  {},
+  { pods: IPodInfo[] }
+>("GET_RUNNING_PODS", () =>
+  collectClient.listAvailablePods().then((podResults: collect.Pod[]) => {
+    const pods = podResults.map(pod => podInfoConvert(pod));
+    return { pods };
+  })
 );
 
-export const postSnapshotThunk = asyncActionCreator<
+export const postSnapshotOperation = asyncActionCreator<
   {
     appId: string;
     environment: string;
@@ -106,7 +107,7 @@ export const postSnapshotThunk = asyncActionCreator<
     })
 );
 
-export const getLatestSnapshotsThunk = asyncActionCreator<
+export const getLatestSnapshotsOperation = asyncActionCreator<
   { count: number },
   { snapshots: ISnapshotInfo[] }
 >("GET_LATEST_SNAPSHOTS", ({ count }) =>

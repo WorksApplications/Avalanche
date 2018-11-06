@@ -3,7 +3,7 @@ import "jest-dom/extend-expect";
 import * as React from "react";
 import { fireEvent, render, within } from "react-testing-library";
 import "react-testing-library/cleanup-after-each";
-import PodCard, { IProperty as PodCardProperty } from "./PodCard";
+import { IProperty as PodCardProperty, PodCard } from "./PodCard";
 
 const baseDateValue = Date.now();
 

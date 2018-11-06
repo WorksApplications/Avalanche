@@ -15,7 +15,7 @@ export interface IProperty {
   emptyMessage?: string;
 }
 
-class SnapshotList extends React.Component<IProperty> {
+export class SnapshotList extends React.Component<IProperty> {
   public render() {
     return (
       <div className={styles.wrap} data-testid="root">

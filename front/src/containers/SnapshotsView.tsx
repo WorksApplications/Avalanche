@@ -1,13 +1,12 @@
 import { push } from "connected-react-router";
-import { Location } from "history";
 import * as qs from "querystring";
 import * as React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
 import {
-  getAppsThunk,
-  getEnvironmentsOfAppThunk,
-  getLatestSnapshotsThunk,
+  getAppsOperation,
+  getEnvironmentsOfAppOperation,
+  getLatestSnapshotsOperation,
   selectApp,
   selectEnv,
   selectPod,
@@ -16,43 +15,9 @@ import {
 import AppSelector from "../components/AppSelector";
 import SnapshotFilter from "../components/SnapshotFilter";
 import SnapshotList, { ISnapshotData } from "../components/SnapshotList";
-import { OperationsToProps, thunkToActionBulk } from "../helpers";
-import {
-  IApplicationState,
-  IEnvironmentInfo,
-  IPodInfo,
-  ISnapshotInfo
-} from "../store";
+import { operationsToActionCreators } from "../helpers";
+import { IApplicationState, ISnapshotInfo } from "../store";
 import styles from "./SnapshotsView.scss";
-
-interface IStateProps {
-  appName: string | null;
-  apps: string[];
-  environments: { [appName: string]: IEnvironmentInfo };
-  filteringEnvironment: string | null;
-  filteringPod: string | null;
-  pods: IPodInfo[];
-  snapshots: ISnapshotInfo[];
-  location: Location<any>;
-}
-
-const actions = {
-  selectApp,
-  selectEnv,
-  selectPod,
-  toastr,
-  pushHistory: push
-};
-
-const operations = {
-  getAppsThunk,
-  getEnvironmentsOfAppThunk,
-  getLatestSnapshotsThunk
-};
-
-type IDispatchProps = typeof actions & OperationsToProps<typeof operations>;
-
-type IProps = IStateProps & IDispatchProps;
 
 function sortedApplications(applications: string[]): string[] {
   return applications.sort();
@@ -93,28 +58,40 @@ function sortedSnapshots(snapshots: ISnapshotInfo[]): ISnapshotInfo[] {
   });
 }
 
-const mapStateToProps: (state: IApplicationState) => IStateProps = state => {
-  return {
-    appName: state.analysisData.applicationName,
-    apps: sortedApplications(state.analysisData.applications),
-    environments: state.analysisData.environments,
-    filteringEnvironment: state.analysisData.selectedEnvironment,
-    filteringPod: state.analysisData.selectedPod,
-    pods: state.analysisData.pods,
-    snapshots: sortedSnapshots(state.analysisData.snapshots),
-    location: state.router.location
-  };
-};
+const mapStateToProps = (state: IApplicationState) => ({
+  appName: state.analysisData.applicationName,
+  apps: sortedApplications(state.analysisData.applications),
+  environments: state.analysisData.environments,
+  filteringEnvironment: state.analysisData.selectedEnvironment,
+  filteringPod: state.analysisData.selectedPod,
+  pods: state.analysisData.pods,
+  snapshots: sortedSnapshots(state.analysisData.snapshots),
+  location: state.router.location
+});
 
 const mapDispatchToProps = (dispatch: Dispatch) =>
   bindActionCreators(
-    { ...actions, ...thunkToActionBulk(operations) },
+    {
+      selectApp,
+      selectEnv,
+      selectPod,
+      toastr,
+      pushHistory: push,
+      ...operationsToActionCreators({
+        getAppsOperation,
+        getEnvironmentsOfAppOperation,
+        getLatestSnapshotsOperation
+      })
+    },
     dispatch
   );
 
-export class SnapshotsView extends React.Component<IProps> {
+type Props = ReturnType<typeof mapStateToProps> &
+  ReturnType<typeof mapDispatchToProps>;
+
+export class SnapshotsView extends React.Component<Props> {
   public componentDidMount() {
-    this.props.getAppsThunk().catch(() => {
+    this.props.getAppsOperation().catch(() => {
       this.props.toastr(`Failed to get app names.`, "error");
     });
 
@@ -146,7 +123,7 @@ export class SnapshotsView extends React.Component<IProps> {
         this.prepareViewForEnv(requestedEnv);
       }
     } else {
-      this.props.getLatestSnapshotsThunk({ count: 10 }).catch(() => {
+      this.props.getLatestSnapshotsOperation({ count: 10 }).catch(() => {
         this.props.toastr(`Failed to get latest snapshots.`, "error");
       });
     }
@@ -261,7 +238,7 @@ export class SnapshotsView extends React.Component<IProps> {
   private prepareViewForApp(app: string) {
     this.props.selectApp({ appName: app });
     if (app) {
-      this.props.getEnvironmentsOfAppThunk({ app }).catch(() => {
+      this.props.getEnvironmentsOfAppOperation({ app }).catch(() => {
         this.props.toastr(`Failed to get environment info of ${app}`, "error");
       });
     }
@@ -301,4 +278,4 @@ export default connect(
   mapDispatchToProps,
   null,
   { withRef: true }
-)(SnapshotsView) as React.ComponentClass;
+)(SnapshotsView);

@@ -1,38 +1,16 @@
 import * as React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
-import { getRunningPodsThunk, postSnapshotThunk, toastr } from "../actions";
+import {
+  getRunningPodsOperation,
+  postSnapshotOperation,
+  toastr
+} from "../actions";
 import PodCardList, { IPodCardListData } from "../components/PodCardList";
 import PodFilter from "../components/PodFilter";
-import { OperationsToProps, thunkToActionBulk } from "../helpers";
+import { operationsToActionCreators } from "../helpers";
 import { IApplicationState, IPodInfo } from "../store";
 import styles from "./RunningPodsView.scss";
-
-interface IState {
-  filteringValue: string;
-}
-
-interface IStateProps {
-  applicationName: string | null;
-  pods: IPodInfo[];
-}
-
-const actions = {
-  toastr
-};
-
-const operations = {
-  postSnapshotThunk,
-  getRunningPodsThunk
-};
-
-type IDispatchProps = typeof actions & OperationsToProps<typeof operations>;
-
-interface IComponentProps {
-  snapshotCreated(): void;
-}
-
-type IProps = IComponentProps & IStateProps & IDispatchProps;
 
 function sortedPods(pods: IPodInfo[]): IPodInfo[] {
   return pods.sort((a, b) => {
@@ -69,27 +47,42 @@ function sortedPods(pods: IPodInfo[]): IPodInfo[] {
   });
 }
 
-const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
+const initialState = {
+  filteringValue: ""
+};
+
+type State = Readonly<typeof initialState>;
+
+const mapStateToProps = (state: IApplicationState) => ({
   applicationName: state.analysisData.applicationName,
   pods: sortedPods(state.analysisData.runningPods)
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) =>
   bindActionCreators(
-    { ...actions, ...thunkToActionBulk(operations) },
+    {
+      toastr,
+      ...operationsToActionCreators({
+        getRunningPodsOperation,
+        postSnapshotOperation
+      })
+    },
     dispatch
   );
 
-export class RunningPodsView extends React.Component<IProps, IState> {
-  constructor(props: IProps) {
-    super(props);
-    this.state = {
-      filteringValue: ""
-    };
-  }
+interface IComponentProps {
+  snapshotCreated(): void;
+}
+
+type Props = IComponentProps &
+  ReturnType<typeof mapStateToProps> &
+  ReturnType<typeof mapDispatchToProps>;
+
+export class RunningPodsView extends React.Component<Props, State> {
+  public readonly state: State = initialState;
 
   public componentDidMount(): void {
-    this.props.getRunningPodsThunk().catch(() => {
+    this.props.getRunningPodsOperation().catch(() => {
       this.props.toastr(`Failed to get running pod info.`, "error");
     });
   }
@@ -114,7 +107,7 @@ export class RunningPodsView extends React.Component<IProps, IState> {
           p.app && p.env && p.name
             ? () => {
                 this.props
-                  .postSnapshotThunk({
+                  .postSnapshotOperation({
                     appId: p.app!,
                     environment: p.env!,
                     podId: p.name!
@@ -190,4 +183,4 @@ export class RunningPodsView extends React.Component<IProps, IState> {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(RunningPodsView) as React.ComponentClass<IComponentProps>;
+)(RunningPodsView);

@@ -20,7 +20,7 @@ export interface IProperty {
   onAccept(): void;
 }
 
-class EnvironmentConfigAddModal extends React.Component<IProperty, {}> {
+export class EnvironmentConfigAddModal extends React.Component<IProperty> {
   public render() {
     // TODO url validation
     const isValidData =

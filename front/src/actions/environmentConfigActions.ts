@@ -27,7 +27,7 @@ function environmentConfigConvert(
   };
 }
 
-export const getEnvironmentConfigsThunk = asyncActionCreator<
+export const getEnvironmentConfigsOperation = asyncActionCreator<
   {},
   { configs: IEnvironmentConfig[] }
 >("GET_ENVIRONMENT_CONFIGS", () =>
@@ -41,7 +41,7 @@ export const getEnvironmentConfigsThunk = asyncActionCreator<
     })
 );
 
-export const postEnvironmentConfigThunk = asyncActionCreator<
+export const postEnvironmentConfigOperation = asyncActionCreator<
   {
     environmentName: string;
     isMultitenant: boolean;
@@ -73,7 +73,7 @@ export const postEnvironmentConfigThunk = asyncActionCreator<
       })
 );
 
-export const addEnvironmentConfigThunk = asyncActionCreator<
+export const addEnvironmentConfigOperation = asyncActionCreator<
   {
     environmentName: string;
     isMultitenant: boolean;
