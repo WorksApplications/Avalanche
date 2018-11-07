@@ -51,6 +51,12 @@ type Props = ReturnType<typeof mapStateToProps> &
   ReturnType<typeof mapDispatchToProps>;
 
 export class ConfigPage extends React.Component<Props, State> {
+  private static normalizeApiBase(apiBase: string): string {
+    const trimed = apiBase.trim();
+    return trimed.endsWith("/")
+      ? trimed.substring(0, trimed.length - 1)
+      : trimed;
+  }
   public readonly state: State = initialState;
 
   public componentDidMount() {
@@ -196,7 +202,7 @@ export class ConfigPage extends React.Component<Props, State> {
       .postEnvironmentConfigOperation({
         environmentName,
         isMultitenant: this.state.isMultitenant!,
-        kubernetesApi: this.state.kubernetesApi!,
+        kubernetesApi: ConfigPage.normalizeApiBase(this.state.kubernetesApi!),
         version
       })
       .then(({ config }) => {
@@ -215,7 +221,7 @@ export class ConfigPage extends React.Component<Props, State> {
       .addEnvironmentConfigOperation({
         environmentName,
         isMultitenant: this.state.isMultitenant!,
-        kubernetesApi: this.state.kubernetesApi!,
+        kubernetesApi: ConfigPage.normalizeApiBase(this.state.kubernetesApi!),
         version: this.state.version!
       })
       .then(({ config }) => {

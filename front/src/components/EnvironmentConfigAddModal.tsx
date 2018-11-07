@@ -78,7 +78,7 @@ export class EnvironmentConfigAddModal extends React.Component<IProperty> {
                 value={this.props.kubernetesApi || ""}
               />
               <div className={styles.description}>
-                {"ex: http://k8s-mischo.internal.worksap.com:52063/"}
+                {"ex: http://k8s-mischo.internal.worksap.com:52063"}
               </div>
             </div>
           </div>
