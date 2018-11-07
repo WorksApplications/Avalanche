@@ -1,14 +1,13 @@
+import { LOCATION_CHANGE } from "connected-react-router";
+import * as qs from "querystring";
 import { Action } from "redux";
 import { isType } from "typescript-fsa";
 import {
-  getAppsThunk,
-  getEnvironmentsOfAppThunk,
-  getLatestSnapshotsThunk,
-  getRunningPodsThunk,
-  postSnapshotThunk,
-  selectApp,
-  selectEnv,
-  selectPod
+  getAppsOperation,
+  getEnvironmentsOfAppOperation,
+  getLatestSnapshotsOperation,
+  getRunningPodsOperation,
+  postSnapshotOperation
 } from "../actions";
 import { IAnalysisDataState, IPodInfo, ISnapshotInfo } from "../store";
 
@@ -23,20 +22,73 @@ const INIT: IAnalysisDataState = {
   snapshots: []
 };
 
+function paramExists<K extends string>(
+  params: any,
+  paramName: K
+): params is { [P in K]: string } {
+  return (
+    paramName in params &&
+    typeof params[paramName] === "string" &&
+    !!params[paramName]
+  );
+}
+
 export function analysisData(
   state: IAnalysisDataState = INIT,
   action: Action
 ): IAnalysisDataState {
-  if (isType(action, selectApp)) {
-    return { ...state, applicationName: action.payload.appName };
+  if (action.type === LOCATION_CHANGE) {
+    // @ts-ignore
+    const search: string = action.payload.location.search;
+    if (!search.startsWith("?") || search === "?") {
+      // back to "/"
+      return {
+        ...state,
+        applicationName: null,
+        selectedEnvironment: null,
+        selectedPod: null
+      };
+    } else {
+      const params = qs.parse(search.substring(1));
+      if (paramExists(params, "app")) {
+        if (paramExists(params, "env")) {
+          if (paramExists(params, "pod")) {
+            return {
+              ...state,
+              applicationName: params.app,
+              selectedEnvironment: params.env,
+              selectedPod: params.pod
+            };
+          } else {
+            return {
+              ...state,
+              applicationName: params.app,
+              selectedEnvironment: params.env,
+              selectedPod: null
+            };
+          }
+        } else {
+          return {
+            ...state,
+            applicationName: params.app,
+            selectedEnvironment: null,
+            selectedPod: null
+          };
+        }
+      } else {
+        return {
+          ...state,
+          applicationName: null,
+          selectedEnvironment: null,
+          selectedPod: null
+        };
+      }
+    }
   }
-  if (isType(action, getAppsThunk.async.done)) {
+  if (isType(action, getAppsOperation.async.done)) {
     return { ...state, applications: action.payload.result.apps };
   }
-  if (isType(action, selectEnv)) {
-    return { ...state, selectedEnvironment: action.payload.envName };
-  }
-  if (isType(action, getEnvironmentsOfAppThunk.async.done)) {
+  if (isType(action, getEnvironmentsOfAppOperation.async.done)) {
     const environments = { ...state.environments };
     for (const e of action.payload.result.envs) {
       environments[e.name] = e;
@@ -60,13 +112,10 @@ export function analysisData(
       snapshots
     };
   }
-  if (isType(action, getRunningPodsThunk.async.done)) {
+  if (isType(action, getRunningPodsOperation.async.done)) {
     return { ...state, runningPods: action.payload.result.pods };
   }
-  if (isType(action, selectPod)) {
-    return { ...state, selectedPod: action.payload.podName };
-  }
-  if (isType(action, postSnapshotThunk.async.started)) {
+  if (isType(action, postSnapshotOperation.async.started)) {
     return {
       ...state,
       runningPods: state.runningPods.map(
@@ -75,7 +124,7 @@ export function analysisData(
       )
     };
   }
-  if (isType(action, postSnapshotThunk.async.done)) {
+  if (isType(action, postSnapshotOperation.async.done)) {
     return {
       ...state,
       runningPods: state.runningPods.map(
@@ -92,7 +141,7 @@ export function analysisData(
       )
     };
   }
-  if (isType(action, postSnapshotThunk.async.failed)) {
+  if (isType(action, postSnapshotOperation.async.failed)) {
     return {
       ...state,
       runningPods: state.runningPods.map(
@@ -103,7 +152,7 @@ export function analysisData(
       )
     };
   }
-  if (isType(action, getLatestSnapshotsThunk.async.done)) {
+  if (isType(action, getLatestSnapshotsOperation.async.done)) {
     return {
       ...state,
       snapshots: action.payload.result.snapshots

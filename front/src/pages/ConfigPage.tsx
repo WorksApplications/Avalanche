@@ -3,9 +3,9 @@ import * as ReactModal from "react-modal";
 import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
 import {
-  addEnvironmentConfigThunk,
-  getEnvironmentConfigsThunk,
-  postEnvironmentConfigThunk,
+  addEnvironmentConfigOperation,
+  getEnvironmentConfigsOperation,
+  postEnvironmentConfigOperation,
   toastr
 } from "../actions";
 import EnvironmentCardList from "../components/EnvironmentCardList";
@@ -13,61 +13,45 @@ import EnvironmentConfigAddModal from "../components/EnvironmentConfigAddModal";
 import EnvironmentConfigModifyModal from "../components/EnvironmentConfigModifyModal";
 import FabButton from "../components/FabButton";
 import FilterInput from "../components/FilterInput";
-import { OperationsToProps, thunkToActionBulk } from "../helpers";
+import { operationsToActionCreators } from "../helpers";
 import modalStyles from "../Modal.scss";
-import { IApplicationState, IEnvironmentConfig } from "../store";
+import { IApplicationState } from "../store";
 import styles from "./ConfigPage.scss";
 
-interface IState {
-  filteringValue: string;
-  showsModifyDialog: boolean;
-  showsAddDialog: boolean;
-  dialogTarget: string | null;
-  isMultitenant: boolean | null;
-  kubernetesApi: string | null;
-  version: string | null;
-}
-
-interface IStateProps {
-  environmentConfigs: IEnvironmentConfig[];
-}
-
-const actions = {
-  toastr
+const initialState = {
+  filteringValue: "",
+  showsModifyDialog: false,
+  showsAddDialog: false,
+  dialogTarget: null as string | null,
+  isMultitenant: null as boolean | null,
+  kubernetesApi: null as string | null,
+  version: null as string | null
 };
 
-const operations = {
-  getEnvironmentConfigsThunk,
-  postEnvironmentConfigThunk,
-  addEnvironmentConfigThunk
-};
+type State = Readonly<typeof initialState>;
 
-type IDispatchProps = typeof actions & OperationsToProps<typeof operations>;
-
-type IProps = IStateProps & IDispatchProps;
-
-const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
+const mapStateToProps = (state: IApplicationState) => ({
   environmentConfigs: state.environmentConfig.environmentConfigs
 });
+
 const mapDispatchToProps = (dispatch: Dispatch) =>
   bindActionCreators(
-    { ...actions, ...thunkToActionBulk(operations) },
+    {
+      toastr,
+      ...operationsToActionCreators({
+        getEnvironmentConfigsOperation,
+        postEnvironmentConfigOperation,
+        addEnvironmentConfigOperation
+      })
+    },
     dispatch
   );
 
-export class ConfigPage extends React.Component<IProps, IState> {
-  constructor(props: IProps) {
-    super(props);
-    this.state = {
-      filteringValue: "",
-      showsModifyDialog: false,
-      showsAddDialog: false,
-      dialogTarget: null,
-      isMultitenant: null,
-      kubernetesApi: null,
-      version: null
-    };
-  }
+type Props = ReturnType<typeof mapStateToProps> &
+  ReturnType<typeof mapDispatchToProps>;
+
+export class ConfigPage extends React.Component<Props, State> {
+  public readonly state: State = initialState;
 
   public componentDidMount() {
     this.updateConfigData();
@@ -180,7 +164,7 @@ export class ConfigPage extends React.Component<IProps, IState> {
   }
 
   private updateConfigData() {
-    this.props.getEnvironmentConfigsThunk().catch(() => {
+    this.props.getEnvironmentConfigsOperation().catch(() => {
       this.props.toastr(`Failed to get environment configs.`, "error");
     });
   }
@@ -209,7 +193,7 @@ export class ConfigPage extends React.Component<IProps, IState> {
     const version = this.state.version!;
     const environmentName = this.state.dialogTarget!;
     this.props
-      .postEnvironmentConfigThunk({
+      .postEnvironmentConfigOperation({
         environmentName,
         isMultitenant: this.state.isMultitenant!,
         kubernetesApi: this.state.kubernetesApi!,
@@ -228,7 +212,7 @@ export class ConfigPage extends React.Component<IProps, IState> {
   private onAddDialogAccept() {
     const environmentName = this.state.dialogTarget!;
     this.props
-      .addEnvironmentConfigThunk({
+      .addEnvironmentConfigOperation({
         environmentName,
         isMultitenant: this.state.isMultitenant!,
         kubernetesApi: this.state.kubernetesApi!,
@@ -257,4 +241,4 @@ export class ConfigPage extends React.Component<IProps, IState> {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(ConfigPage) as React.ComponentClass;
+)(ConfigPage);

@@ -25,13 +25,15 @@ export interface IProperty {
   unselectOptionLabel?: string;
 }
 
-interface IState {
-  isOpen: boolean;
-  searchingWord: string;
-  preSelectingIndex: number;
-}
+const initialState = {
+  isOpen: false,
+  searchingWord: "",
+  preSelectingIndex: -1
+};
 
-class SelectorBase extends React.Component<IProperty, IState> {
+type State = Readonly<typeof initialState>;
+
+class SelectorBase extends React.Component<IProperty, State> {
   public static defaultProps: Partial<IProperty> = {
     disabled: false,
     styles: {
@@ -39,6 +41,7 @@ class SelectorBase extends React.Component<IProperty, IState> {
       opened: "opened"
     }
   };
+  public readonly state: State = initialState;
 
   private container: HTMLElement | null = null;
 
@@ -144,7 +147,7 @@ class SelectorBase extends React.Component<IProperty, IState> {
 
   private onKeyPress = (e: KeyboardEvent) => {
     if (this.state.isOpen && e.key !== "Enter") {
-      this.setState((s: IState) => ({
+      this.setState((s: State) => ({
         searchingWord: s.searchingWord + e.key
       }));
     }
@@ -157,7 +160,7 @@ class SelectorBase extends React.Component<IProperty, IState> {
           this.setState({ searchingWord: "" });
           break;
         case "Backspace":
-          this.setState((s: IState) => ({
+          this.setState((s: State) => ({
             searchingWord: s.searchingWord.substring(
               0,
               s.searchingWord.length - 1
@@ -173,7 +176,7 @@ class SelectorBase extends React.Component<IProperty, IState> {
           this.setState({ preSelectingIndex: -1, searchingWord: "" });
           break;
         case "ArrowDown":
-          this.setState((s: IState) => {
+          this.setState((s: State) => {
             const i = s.preSelectingIndex + 1;
             const optionLength = this.props.options.filter(o =>
               o.label.startsWith(this.state.searchingWord)
@@ -184,7 +187,7 @@ class SelectorBase extends React.Component<IProperty, IState> {
           });
           break;
         case "ArrowUp":
-          this.setState((s: IState) => {
+          this.setState((s: State) => {
             const i = s.preSelectingIndex - 1;
             return {
               preSelectingIndex: i < 0 ? 0 : i

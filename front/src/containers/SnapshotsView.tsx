@@ -1,58 +1,20 @@
 import { push } from "connected-react-router";
-import { Location } from "history";
 import * as qs from "querystring";
 import * as React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
 import {
-  getAppsThunk,
-  getEnvironmentsOfAppThunk,
-  getLatestSnapshotsThunk,
-  selectApp,
-  selectEnv,
-  selectPod,
+  getAppsOperation,
+  getEnvironmentsOfAppOperation,
+  getLatestSnapshotsOperation,
   toastr
 } from "../actions";
 import AppSelector from "../components/AppSelector";
 import SnapshotFilter from "../components/SnapshotFilter";
-import SnapshotList, { IRowData } from "../components/SnapshotList";
-import { OperationsToProps, thunkToActionBulk } from "../helpers";
-import {
-  IApplicationState,
-  IEnvironmentInfo,
-  IPodInfo,
-  ISnapshotInfo
-} from "../store";
+import SnapshotList, { ISnapshotData } from "../components/SnapshotList";
+import { operationsToActionCreators } from "../helpers";
+import { IApplicationState, ISnapshotInfo } from "../store";
 import styles from "./SnapshotsView.scss";
-
-interface IStateProps {
-  appName: string | null;
-  apps: string[];
-  environments: { [appName: string]: IEnvironmentInfo };
-  filteringEnvironment: string | null;
-  filteringPod: string | null;
-  pods: IPodInfo[];
-  snapshots: ISnapshotInfo[];
-  location: Location<any>;
-}
-
-const actions = {
-  selectApp,
-  selectEnv,
-  selectPod,
-  toastr,
-  pushHistory: push
-};
-
-const operations = {
-  getAppsThunk,
-  getEnvironmentsOfAppThunk,
-  getLatestSnapshotsThunk
-};
-
-type IDispatchProps = typeof actions & OperationsToProps<typeof operations>;
-
-type IProps = IStateProps & IDispatchProps;
 
 function sortedApplications(applications: string[]): string[] {
   return applications.sort();
@@ -93,60 +55,61 @@ function sortedSnapshots(snapshots: ISnapshotInfo[]): ISnapshotInfo[] {
   });
 }
 
-const mapStateToProps: (state: IApplicationState) => IStateProps = state => {
-  return {
-    appName: state.analysisData.applicationName,
-    apps: sortedApplications(state.analysisData.applications),
-    environments: state.analysisData.environments,
-    filteringEnvironment: state.analysisData.selectedEnvironment,
-    filteringPod: state.analysisData.selectedPod,
-    pods: state.analysisData.pods,
-    snapshots: sortedSnapshots(state.analysisData.snapshots),
-    location: state.router.location
-  };
-};
+const mapStateToProps = (state: IApplicationState) => ({
+  appName: state.analysisData.applicationName,
+  apps: sortedApplications(state.analysisData.applications),
+  environments: state.analysisData.environments,
+  filteringEnvironment: state.analysisData.selectedEnvironment,
+  filteringPod: state.analysisData.selectedPod,
+  pods: state.analysisData.pods,
+  snapshots: sortedSnapshots(state.analysisData.snapshots),
+  location: state.router.location
+});
 
 const mapDispatchToProps = (dispatch: Dispatch) =>
   bindActionCreators(
-    { ...actions, ...thunkToActionBulk(operations) },
+    {
+      toastr,
+      pushHistory: push,
+      ...operationsToActionCreators({
+        getAppsOperation,
+        getEnvironmentsOfAppOperation,
+        getLatestSnapshotsOperation
+      })
+    },
     dispatch
   );
 
-export class SnapshotsView extends React.Component<IProps> {
+type Props = ReturnType<typeof mapStateToProps> &
+  ReturnType<typeof mapDispatchToProps>;
+
+export class SnapshotsView extends React.Component<Props> {
   public componentDidMount() {
-    this.props.getAppsThunk().catch(() => {
+    this.props.getAppsOperation().catch(() => {
       this.props.toastr(`Failed to get app names.`, "error");
     });
 
     this.reloadView();
   }
 
-  public reloadView() {
-    const requested = qs.parse(location.search.substring(1));
-    let requestedApp: string | null = null;
-    let requestedEnv: string | null = null;
-    if (
-      "app" in requested &&
-      typeof requested.app === "string" &&
-      requested.app
-    ) {
-      requestedApp = requested.app;
-      if (
-        "env" in requested &&
-        typeof requested.env === "string" &&
-        requested.env
-      ) {
-        requestedEnv = requested.env;
-      }
+  public componentDidUpdate(prevProps: Props) {
+    if (prevProps.appName !== this.props.appName) {
+      this.reloadView();
     }
+  }
 
-    if (requestedApp) {
-      this.prepareViewForApp(requestedApp);
-      if (requestedEnv) {
-        this.prepareViewForEnv(requestedEnv);
-      }
+  public reloadView() {
+    if (this.props.appName) {
+      this.props
+        .getEnvironmentsOfAppOperation({ app: this.props.appName })
+        .catch(() => {
+          this.props.toastr(
+            `Failed to get environment info of ${this.props.appName}`,
+            "error"
+          );
+        });
     } else {
-      this.props.getLatestSnapshotsThunk({ count: 10 }).catch(() => {
+      this.props.getLatestSnapshotsOperation({ count: 10 }).catch(() => {
         this.props.toastr(`Failed to get latest snapshots.`, "error");
       });
     }
@@ -170,17 +133,15 @@ export class SnapshotsView extends React.Component<IProps> {
 
     let emptyMessage =
       this.props.snapshots.length > 0 ? "Please select environment" : "No Data";
-    let showingSnapshots: IRowData[] = [];
+    let showingSnapshots: ISnapshotData[] = [];
 
     if (this.props.snapshots.length > 0) {
       showingSnapshots = this.props.snapshots.map(x => ({
         uuid: x.uuid,
         environment: x.environment || "Unknown",
         podName: x.pod || "Unknown",
-        createdAt: x.createdAt ? x.createdAt.toLocaleString() : "Unknown",
-        labels: [], // TODO
-        link: x.link || "#",
-        isReady: false // TODO
+        createdAt: x.createdAt,
+        link: x.link || "#"
       }));
       if (this.props.filteringEnvironment) {
         showingSnapshots = showingSnapshots.filter(
@@ -208,6 +169,7 @@ export class SnapshotsView extends React.Component<IProps> {
               options={showingApps}
               selectedValue={this.props.appName}
               onValueChanged={this.onAppChanged.bind(this)}
+              unselectOptionLabel="Unselect"
               placeholder="Select Application"
             />
           </div>
@@ -242,59 +204,44 @@ export class SnapshotsView extends React.Component<IProps> {
   }
 
   private onAppChanged(app: string) {
-    const requested = qs.parse(this.props.location.search.substring(1));
-
-    if (this.props.appName !== app) {
-      const newQuery = { ...requested };
-      if (app) {
-        newQuery.app = app;
-      } else {
-        delete newQuery.app;
-      }
-      delete newQuery.env;
-
-      this.props.pushHistory({
-        search: `?${qs.stringify(newQuery)}`
-      });
-    }
-    this.prepareViewForApp(app);
-  }
-
-  private prepareViewForApp(app: string) {
-    this.props.selectApp({ appName: app });
-    if (app) {
-      this.props.getEnvironmentsOfAppThunk({ app }).catch(() => {
-        this.props.toastr(`Failed to get environment info of ${app}`, "error");
-      });
-    }
-    this.props.selectEnv({ envName: null }); // unselect
-    this.props.selectPod({ podName: null }); // unselect
+    this.pushParams({ newApp: app, newEnv: null, newPod: null });
   }
 
   private onEnvironmentChanged(env: string) {
-    const requested = qs.parse(this.props.location.search.substring(1));
-
-    if (this.props.filteringEnvironment !== env) {
-      const newQuery = { ...requested };
-      if (env) {
-        newQuery.env = env;
-      } else {
-        delete newQuery.env;
-      }
-      this.props.pushHistory({
-        search: `?${qs.stringify(newQuery)}`
-      });
-    }
-    this.prepareViewForEnv(env);
-  }
-
-  private prepareViewForEnv(env: string) {
-    this.props.selectEnv({ envName: env });
-    this.props.selectPod({ podName: null }); // unselect
+    this.pushParams({ newEnv: env, newPod: null });
   }
 
   private onPodChanged(pod: string) {
-    this.props.selectPod({ podName: pod });
+    this.pushParams({ newPod: pod });
+  }
+
+  private pushParams(params: {
+    newApp?: string | null;
+    newEnv?: string | null;
+    newPod?: string | null;
+  }) {
+    const app =
+      typeof params.newApp === "undefined" ? this.props.appName : params.newApp;
+    const env =
+      app &&
+      (typeof params.newEnv === "undefined"
+        ? this.props.filteringEnvironment
+        : params.newEnv);
+    const pod =
+      env &&
+      (typeof params.newPod === "undefined"
+        ? this.props.filteringPod
+        : params.newPod);
+    const searchParams = { app, env, pod };
+    Object.keys(searchParams).forEach(
+      key =>
+        (typeof searchParams[key] === "undefined" ||
+          searchParams[key] === null) &&
+        delete searchParams[key]
+    );
+    this.props.pushHistory({
+      search: `?${qs.stringify(searchParams)}`
+    });
   }
 }
 
@@ -303,4 +250,4 @@ export default connect(
   mapDispatchToProps,
   null,
   { withRef: true }
-)(SnapshotsView) as React.ComponentClass;
+)(SnapshotsView);

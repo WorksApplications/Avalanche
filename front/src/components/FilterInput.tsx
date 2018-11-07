@@ -6,18 +6,14 @@ interface IProperty {
   onValueChange?(previous: string, current: string): void;
 }
 
-interface IState {
-  value: string;
-}
+const initialState = {
+  value: ""
+};
 
-class FilterInput extends React.Component<IProperty, IState> {
-  constructor(props: IProperty) {
-    super(props);
+type State = Readonly<typeof initialState>;
 
-    this.state = {
-      value: ""
-    };
-  }
+export class FilterInput extends React.Component<IProperty, State> {
+  public readonly state: State = initialState;
 
   public render() {
     return (

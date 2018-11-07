@@ -1,5 +1,4 @@
 import * as React from "react";
-import AliveIndicator from "../AliveIndicator";
 import styles from "./PodCard.scss";
 
 export interface IProperty {
@@ -14,16 +13,12 @@ export interface IProperty {
   onSaveButtonClick?(): void;
 }
 
-interface IState {
-  isOpen: boolean;
-}
+const initialState = { isOpen: false };
 
-class PodCard extends React.Component<IProperty, IState> {
-  constructor(props: IProperty) {
-    super(props);
+type State = Readonly<typeof initialState>;
 
-    this.state = { isOpen: false };
-  }
+export class PodCard extends React.Component<IProperty, State> {
+  public readonly state: State = initialState;
 
   public render() {
     const onSave = this.props.onSaveButtonClick || (() => undefined);
@@ -67,9 +62,12 @@ class PodCard extends React.Component<IProperty, IState> {
         </div>
         <div data-testid="info-root">
           <div className={styles.indicatorWrap}>
-            <div className={styles.aliveIndicator}>
-              <AliveIndicator isAlive={this.props.isAlive} />
-            </div>
+            <div
+              className={[
+                styles.aliveIndicator,
+                this.props.isAlive ? styles.alive : styles.dead
+              ].join(" ")}
+            />
           </div>
           {hashPart ? (
             <span className={styles.name}>

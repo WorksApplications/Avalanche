@@ -11,6 +11,7 @@ export default (props: IProperty) => {
     selector: styles.selector,
     wrap: styles.wrap,
     selected: styles.selected,
+    unselectOption: styles.unselectOption,
     placeholder: styles.placeholder,
     searching: styles.searching,
     preSelected: styles.preSelected

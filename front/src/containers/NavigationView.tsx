@@ -3,7 +3,7 @@ import * as React from "react";
 import { NavLink } from "react-router-dom";
 import styles from "./NavigationView.scss";
 
-class NavigationView extends React.Component {
+export class NavigationView extends React.Component {
   public render() {
     return (
       <div className={styles.wrap}>
