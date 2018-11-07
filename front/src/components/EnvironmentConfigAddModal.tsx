@@ -35,7 +35,7 @@ export class EnvironmentConfigAddModal extends React.Component<IProperty> {
         <div className={styles.content}>
           <div className={styles.group}>
             <label className={styles.label}>Name</label>
-            <div className={styles.input}>
+            <div className={styles.textInput}>
               <input
                 type="text"
                 name="target"
@@ -46,7 +46,7 @@ export class EnvironmentConfigAddModal extends React.Component<IProperty> {
           </div>
           <div className={styles.group}>
             <label className={styles.label}>Tenant Kind</label>
-            <div className={styles.input}>
+            <div className={styles.radioInput}>
               <input
                 type="radio"
                 id="kind-mt"
@@ -70,7 +70,7 @@ export class EnvironmentConfigAddModal extends React.Component<IProperty> {
           </div>
           <div className={styles.group}>
             <label className={styles.label}>Kubernetes API</label>
-            <div className={styles.input}>
+            <div className={styles.textInput}>
               <input
                 type="text"
                 name="api"
@@ -84,7 +84,7 @@ export class EnvironmentConfigAddModal extends React.Component<IProperty> {
           </div>
           <div className={styles.group}>
             <label className={styles.label}>HUE Version</label>
-            <div className={styles.input}>
+            <div className={styles.radioInput}>
               <input
                 type="radio"
                 id="ver-b1712"
