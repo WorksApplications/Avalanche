@@ -2,7 +2,7 @@ const HtmlPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const path = require("path");
 const DefinePlugin = require("webpack").DefinePlugin;
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const PreloadWebpackPlugin = require("preload-webpack-plugin");
@@ -125,15 +125,11 @@ module.exports = env => {
     ],
     optimization: {
       minimizer: [
-        new UglifyJsPlugin({
+        new TerserPlugin({
           cache: true,
           parallel: true,
           sourceMap: true,
-          uglifyOptions: {
-            output: {
-              comments: false
-            }
-          }
+          extractComments: true
         }),
         new OptimizeCSSAssetsPlugin({
           cssProcessorOptions: {
