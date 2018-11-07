@@ -207,12 +207,12 @@ export class ConfigPage extends React.Component<Props, State> {
       })
       .then(({ config }) => {
         this.props.toastr(`Config for "${config.name}" is updated.`, "success");
+        this.onModifyDialogDismiss();
         this.updateConfigData();
       })
       .catch(() => {
         this.props.toastr(`Failed to configure "${environmentName}".`, "error");
       });
-    this.onModifyDialogDismiss();
   }
 
   private onAddDialogAccept() {
@@ -227,11 +227,11 @@ export class ConfigPage extends React.Component<Props, State> {
       .then(({ config }) => {
         this.props.toastr(`Config for "${config.name}" is added.`, "success");
         this.updateConfigData();
+        this.onAddDialogDismiss();
       })
       .catch(() => {
         this.props.toastr(`Failed to add "${environmentName}".`, "error");
       });
-    this.onAddDialogDismiss();
   }
 
   // noinspection JSUnusedLocalSymbols
