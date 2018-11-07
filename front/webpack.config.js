@@ -97,6 +97,7 @@ module.exports = env => {
         }
       ]
     },
+    // see bottom of this file for conditional plugin usage
     plugins: [
       new HtmlPlugin({
         title: "Avalanche",
@@ -150,6 +151,21 @@ module.exports = env => {
   if (isAnalyzing) {
     option.plugins.push(
       new (require("webpack-bundle-analyzer")).BundleAnalyzerPlugin()
+    );
+  }
+  if (isProduction) {
+    const zopfli = require("@gfx/zopfli");
+    option.plugins.push(
+      new (require("compression-webpack-plugin"))({
+        test: /\.(js|css|html|svg)$/i, // woff2? are already compressed
+        cache: true,
+        compressionOptions: {
+          numiterations: 15
+        },
+        algorithm(input, compressionOptions, callback) {
+          return zopfli.gzip(input, compressionOptions, callback);
+        }
+      })
     );
   }
 
