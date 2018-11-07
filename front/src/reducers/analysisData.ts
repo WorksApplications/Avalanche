@@ -1,3 +1,5 @@
+import { LOCATION_CHANGE } from "connected-react-router";
+import * as qs from "querystring";
 import { Action } from "redux";
 import { isType } from "typescript-fsa";
 import {
@@ -5,10 +7,7 @@ import {
   getEnvironmentsOfAppOperation,
   getLatestSnapshotsOperation,
   getRunningPodsOperation,
-  postSnapshotOperation,
-  selectApp,
-  selectEnv,
-  selectPod
+  postSnapshotOperation
 } from "../actions";
 import { IAnalysisDataState, IPodInfo, ISnapshotInfo } from "../store";
 
@@ -23,18 +22,71 @@ const INIT: IAnalysisDataState = {
   snapshots: []
 };
 
+function paramExists<K extends string>(
+  params: any,
+  paramName: K
+): params is { [P in K]: string } {
+  return (
+    paramName in params &&
+    typeof params[paramName] === "string" &&
+    !!params[paramName]
+  );
+}
+
 export function analysisData(
   state: IAnalysisDataState = INIT,
   action: Action
 ): IAnalysisDataState {
-  if (isType(action, selectApp)) {
-    return { ...state, applicationName: action.payload.appName };
+  if (action.type === LOCATION_CHANGE) {
+    // @ts-ignore
+    const search: string = action.payload.location.search;
+    if (!search.startsWith("?") || search === "?") {
+      // back to "/"
+      return {
+        ...state,
+        applicationName: null,
+        selectedEnvironment: null,
+        selectedPod: null
+      };
+    } else {
+      const params = qs.parse(search.substring(1));
+      if (paramExists(params, "app")) {
+        if (paramExists(params, "env")) {
+          if (paramExists(params, "pod")) {
+            return {
+              ...state,
+              applicationName: params.app,
+              selectedEnvironment: params.env,
+              selectedPod: params.pod
+            };
+          } else {
+            return {
+              ...state,
+              applicationName: params.app,
+              selectedEnvironment: params.env,
+              selectedPod: null
+            };
+          }
+        } else {
+          return {
+            ...state,
+            applicationName: params.app,
+            selectedEnvironment: null,
+            selectedPod: null
+          };
+        }
+      } else {
+        return {
+          ...state,
+          applicationName: null,
+          selectedEnvironment: null,
+          selectedPod: null
+        };
+      }
+    }
   }
   if (isType(action, getAppsOperation.async.done)) {
     return { ...state, applications: action.payload.result.apps };
-  }
-  if (isType(action, selectEnv)) {
-    return { ...state, selectedEnvironment: action.payload.envName };
   }
   if (isType(action, getEnvironmentsOfAppOperation.async.done)) {
     const environments = { ...state.environments };
@@ -62,9 +114,6 @@ export function analysisData(
   }
   if (isType(action, getRunningPodsOperation.async.done)) {
     return { ...state, runningPods: action.payload.result.pods };
-  }
-  if (isType(action, selectPod)) {
-    return { ...state, selectedPod: action.payload.podName };
   }
   if (isType(action, postSnapshotOperation.async.started)) {
     return {

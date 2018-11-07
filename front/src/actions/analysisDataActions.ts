@@ -47,16 +47,6 @@ function snapshotInfoConvert(snapshot: collect.Snapshot): ISnapshotInfo {
   };
 }
 
-export const selectApp = actionCreator<{ appName: string }>("SELECT_APP");
-
-export const selectEnv = actionCreator<{ envName: string | null }>(
-  "SELECT_ENV"
-);
-
-export const selectPod = actionCreator<{ podName: string | null }>(
-  "SELECT_POD"
-);
-
 export const getAppsOperation = asyncActionCreator<{}, { apps: string[] }>(
   "GET_APPS",
   () =>

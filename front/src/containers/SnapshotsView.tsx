@@ -7,9 +7,6 @@ import {
   getAppsOperation,
   getEnvironmentsOfAppOperation,
   getLatestSnapshotsOperation,
-  selectApp,
-  selectEnv,
-  selectPod,
   toastr
 } from "../actions";
 import AppSelector from "../components/AppSelector";
@@ -72,9 +69,6 @@ const mapStateToProps = (state: IApplicationState) => ({
 const mapDispatchToProps = (dispatch: Dispatch) =>
   bindActionCreators(
     {
-      selectApp,
-      selectEnv,
-      selectPod,
       toastr,
       pushHistory: push,
       ...operationsToActionCreators({
@@ -98,30 +92,22 @@ export class SnapshotsView extends React.Component<Props> {
     this.reloadView();
   }
 
-  public reloadView() {
-    const requested = qs.parse(location.search.substring(1));
-    let requestedApp: string | null = null;
-    let requestedEnv: string | null = null;
-    if (
-      "app" in requested &&
-      typeof requested.app === "string" &&
-      requested.app
-    ) {
-      requestedApp = requested.app;
-      if (
-        "env" in requested &&
-        typeof requested.env === "string" &&
-        requested.env
-      ) {
-        requestedEnv = requested.env;
-      }
+  public componentDidUpdate(prevProps: Props) {
+    if (prevProps.appName !== this.props.appName) {
+      this.reloadView();
     }
+  }
 
-    if (requestedApp) {
-      this.prepareViewForApp(requestedApp);
-      if (requestedEnv) {
-        this.prepareViewForEnv(requestedEnv);
-      }
+  public reloadView() {
+    if (this.props.appName) {
+      this.props
+        .getEnvironmentsOfAppOperation({ app: this.props.appName })
+        .catch(() => {
+          this.props.toastr(
+            `Failed to get environment info of ${this.props.appName}`,
+            "error"
+          );
+        });
     } else {
       this.props.getLatestSnapshotsOperation({ count: 10 }).catch(() => {
         this.props.toastr(`Failed to get latest snapshots.`, "error");
@@ -183,6 +169,7 @@ export class SnapshotsView extends React.Component<Props> {
               options={showingApps}
               selectedValue={this.props.appName}
               onValueChanged={this.onAppChanged.bind(this)}
+              unselectOptionLabel="Unselect"
               placeholder="Select Application"
             />
           </div>
@@ -217,59 +204,44 @@ export class SnapshotsView extends React.Component<Props> {
   }
 
   private onAppChanged(app: string) {
-    const requested = qs.parse(this.props.location.search.substring(1));
-
-    if (this.props.appName !== app) {
-      const newQuery = { ...requested };
-      if (app) {
-        newQuery.app = app;
-      } else {
-        delete newQuery.app;
-      }
-      delete newQuery.env;
-
-      this.props.pushHistory({
-        search: `?${qs.stringify(newQuery)}`
-      });
-    }
-    this.prepareViewForApp(app);
-  }
-
-  private prepareViewForApp(app: string) {
-    this.props.selectApp({ appName: app });
-    if (app) {
-      this.props.getEnvironmentsOfAppOperation({ app }).catch(() => {
-        this.props.toastr(`Failed to get environment info of ${app}`, "error");
-      });
-    }
-    this.props.selectEnv({ envName: null }); // unselect
-    this.props.selectPod({ podName: null }); // unselect
+    this.pushParams({ newApp: app, newEnv: null, newPod: null });
   }
 
   private onEnvironmentChanged(env: string) {
-    const requested = qs.parse(this.props.location.search.substring(1));
-
-    if (this.props.filteringEnvironment !== env) {
-      const newQuery = { ...requested };
-      if (env) {
-        newQuery.env = env;
-      } else {
-        delete newQuery.env;
-      }
-      this.props.pushHistory({
-        search: `?${qs.stringify(newQuery)}`
-      });
-    }
-    this.prepareViewForEnv(env);
-  }
-
-  private prepareViewForEnv(env: string) {
-    this.props.selectEnv({ envName: env });
-    this.props.selectPod({ podName: null }); // unselect
+    this.pushParams({ newEnv: env, newPod: null });
   }
 
   private onPodChanged(pod: string) {
-    this.props.selectPod({ podName: pod });
+    this.pushParams({ newPod: pod });
+  }
+
+  private pushParams(params: {
+    newApp?: string | null;
+    newEnv?: string | null;
+    newPod?: string | null;
+  }) {
+    const app =
+      typeof params.newApp === "undefined" ? this.props.appName : params.newApp;
+    const env =
+      app &&
+      (typeof params.newEnv === "undefined"
+        ? this.props.filteringEnvironment
+        : params.newEnv);
+    const pod =
+      env &&
+      (typeof params.newPod === "undefined"
+        ? this.props.filteringPod
+        : params.newPod);
+    const searchParams = { app, env, pod };
+    Object.keys(searchParams).forEach(
+      key =>
+        (typeof searchParams[key] === "undefined" ||
+          searchParams[key] === null) &&
+        delete searchParams[key]
+    );
+    this.props.pushHistory({
+      search: `?${qs.stringify(searchParams)}`
+    });
   }
 }
 
