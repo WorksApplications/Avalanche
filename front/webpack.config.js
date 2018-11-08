@@ -67,33 +67,6 @@ module.exports = env => {
               }
             }
           ]
-        },
-        {
-          test: /\.css$/,
-          use: [
-            isProduction ? MiniCssExtractPlugin.loader : "style-loader",
-            {
-              loader: "css-loader",
-              options: {
-                localIdentName: isProduction
-                  ? "[hash:base64:5]"
-                  : "[name]__[local]--[hash:base64:5]"
-              }
-            }
-          ]
-        },
-        {
-          // WAP fonts
-          test: /\.(woff(2)?|ttf|eot|svg)(\?[a-z1-9]+)?$/,
-          use: [
-            {
-              loader: "file-loader",
-              options: {
-                name: "[name].[hash:base64:5].[ext]",
-                outputPath: "fonts/"
-              }
-            }
-          ]
         }
       ]
     },

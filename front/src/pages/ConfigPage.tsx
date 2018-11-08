@@ -128,7 +128,7 @@ export class ConfigPage extends React.Component<Props, State> {
         <FabButton
           tooltip="Add environment"
           onClick={this.addEnvironment}
-          icon="wap-icon-add"
+          icon="add"
         />
         <ReactModal
           isOpen={this.state.showsModifyDialog}

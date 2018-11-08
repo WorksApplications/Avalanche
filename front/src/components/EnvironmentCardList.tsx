@@ -27,7 +27,9 @@ export class EnvironmentCardList extends React.Component<IProperty> {
           </div>
         ) : (
           <div className={styles.empty}>
-            <div className={styles.emptyIcon}>⚲</div>
+            <div className={styles.emptyIcon}>
+              <i className="material-icons">search</i>
+            </div>
             <div className={styles.emptyTitle}>{this.props.noDataMessage}</div>
           </div>
         )}

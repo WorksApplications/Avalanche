@@ -19,7 +19,7 @@ export class PodFilter extends React.Component<IProperty, State> {
   public render() {
     return (
       <div className={styles.wrap}>
-        <i className={[styles.icon, "wap-icon-filter"].join(" ")} />
+        <i className={[styles.icon, "material-icons"].join(" ")}>filter_list</i>
         <input
           type="text"
           className={styles.textBox}
