@@ -1,6 +1,7 @@
 import * as React from "react";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { Route, Router, Switch } from "react-router-dom";
 
+import { history } from "../store";
 import NavigationView from "./NavigationView";
 import styles from "./Workspace.scss";
 
@@ -19,11 +20,11 @@ const Suspense = React.Suspense;
 export class Workspace extends React.Component {
   public render() {
     return (
-      <Router>
-        <div className={styles.wrap}>
-          <nav className={styles.nav}>
-            <NavigationView />
-          </nav>
+      <div className={styles.wrap}>
+        <nav className={styles.nav}>
+          <NavigationView />
+        </nav>
+        <Router history={history}>
           <main className={styles.main}>
             <Suspense
               fallback={<div className={styles.fallback}>Loading...</div>}
@@ -39,8 +40,8 @@ export class Workspace extends React.Component {
               </Switch>
             </Suspense>
           </main>
-        </div>
-      </Router>
+        </Router>
+      </div>
     );
   }
 }

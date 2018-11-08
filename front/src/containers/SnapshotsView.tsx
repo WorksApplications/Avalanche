@@ -62,8 +62,7 @@ const mapStateToProps = (state: IApplicationState) => ({
   filteringEnvironment: state.analysisData.selectedEnvironment,
   filteringPod: state.analysisData.selectedPod,
   pods: state.analysisData.pods,
-  snapshots: sortedSnapshots(state.analysisData.snapshots),
-  location: state.router.location
+  snapshots: sortedSnapshots(state.analysisData.snapshots)
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) =>
