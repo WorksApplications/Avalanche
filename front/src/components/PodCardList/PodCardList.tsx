@@ -10,7 +10,7 @@ export interface IProperty {
   kind: string;
 }
 
-class PodCardList extends React.Component<IProperty, {}> {
+export class PodCardList extends React.Component<IProperty, {}> {
   public render() {
     return (
       <div className={styles.wrap} data-testid="root">

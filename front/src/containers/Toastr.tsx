@@ -5,24 +5,11 @@ import { hideToastr } from "../actions";
 import { IApplicationState } from "../store";
 import styles from "./Toastr.scss";
 
-interface IStateProps {
-  notifications: Array<{
-    isShown: boolean;
-    message: string;
-    kind: "success" | "error";
-    id: number;
-  }>;
-}
-
-interface IDispatchProps {
-  hideToastr: typeof hideToastr;
-}
-
-const mapStateToProps: (state: IApplicationState) => IStateProps = state => ({
+const mapStateToProps = (state: IApplicationState) => ({
   notifications: state.toastNotification.notifications
 });
 
-const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
+const mapDispatchToProps = (dispatch: Dispatch) =>
   bindActionCreators(
     {
       hideToastr
@@ -30,7 +17,10 @@ const mapDispatchToProps: (dispatch: Dispatch) => IDispatchProps = dispatch =>
     dispatch
   );
 
-export class Toastr extends React.Component<IStateProps & IDispatchProps> {
+type Props = ReturnType<typeof mapStateToProps> &
+  ReturnType<typeof mapDispatchToProps>;
+
+export class Toastr extends React.Component<Props> {
   public render() {
     return (
       <div className={styles.wrap}>
@@ -66,4 +56,4 @@ export class Toastr extends React.Component<IStateProps & IDispatchProps> {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(Toastr) as React.ComponentClass;
+)(Toastr);

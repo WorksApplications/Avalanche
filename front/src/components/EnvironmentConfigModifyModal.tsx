@@ -18,7 +18,7 @@ export interface IProperty {
   onAccept(): void;
 }
 
-class EnvironmentConfigModifyModal extends React.Component<IProperty, {}> {
+export class EnvironmentConfigModifyModal extends React.Component<IProperty> {
   public render() {
     // TODO url validation
     const isValidData =
@@ -34,7 +34,7 @@ class EnvironmentConfigModifyModal extends React.Component<IProperty, {}> {
         <div className={styles.content}>
           <div className={styles.group}>
             <label className={styles.label}>Tenant Kind</label>
-            <div className={styles.input}>
+            <div className={styles.radioInput}>
               <input
                 type="radio"
                 id="kind-mt"
@@ -58,7 +58,7 @@ class EnvironmentConfigModifyModal extends React.Component<IProperty, {}> {
           </div>
           <div className={styles.group}>
             <label className={styles.label}>Kubernetes API</label>
-            <div className={styles.input}>
+            <div className={styles.textInput}>
               <input
                 type="text"
                 name="api"
@@ -66,13 +66,13 @@ class EnvironmentConfigModifyModal extends React.Component<IProperty, {}> {
                 value={this.props.kubernetesApi || ""}
               />
               <div className={styles.description}>
-                {"ex: http://k8s-mischo.internal.worksap.com:52063/"}
+                {"ex: http://k8s-mischo.internal.worksap.com:52063"}
               </div>
             </div>
           </div>
           <div className={styles.group}>
             <label className={styles.label}>HUE Version</label>
-            <div className={styles.input}>
+            <div className={styles.radioInput}>
               <input
                 type="radio"
                 id="ver-b1712"

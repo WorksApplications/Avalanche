@@ -1,14 +1,15 @@
 import * as React from "react";
+import { NavLink } from "react-router-dom";
 import { APP_NAME } from "../constants";
 import styles from "./TitleBar.scss";
 
-class TitleBar extends React.Component {
+export class TitleBar extends React.Component {
   public render() {
     return (
       <nav className={styles.main}>
-        <a className={styles.brand} href={"/"}>
+        <NavLink className={styles.brand} to={"/"}>
           {APP_NAME}
-        </a>
+        </NavLink>
       </nav>
     );
   }

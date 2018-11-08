@@ -16,7 +16,7 @@ const ConfigPage = React.lazy(() =>
 // @ts-ignore
 const Suspense = React.Suspense;
 
-class Workspace extends React.Component {
+export class Workspace extends React.Component {
   public render() {
     return (
       <Router>

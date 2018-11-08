@@ -2,7 +2,7 @@ const HtmlPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const path = require("path");
 const DefinePlugin = require("webpack").DefinePlugin;
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const PreloadWebpackPlugin = require("preload-webpack-plugin");
@@ -14,7 +14,6 @@ module.exports = env => {
   const isProduction = env && env.production;
   const apiBaseUrl =
     (env && env.API_BASE_URL) || process.env.API_BASE_URL || "/api";
-  const appName = "Dynamic Analysis";
   const isAnalyzing = env && env.IS_ANALYZING;
   if (!apiBaseUrl) {
     console.log(env);
@@ -98,9 +97,10 @@ module.exports = env => {
         }
       ]
     },
+    // see bottom of this file for conditional plugin usage
     plugins: [
       new HtmlPlugin({
-        title: appName,
+        title: "Avalanche",
         minify: isProduction,
         template: "src/index.html"
       }),
@@ -117,7 +117,7 @@ module.exports = env => {
       }),
       new DefinePlugin({
         COLLECT_API_BASE: JSON.stringify(apiBaseUrl),
-        APP_NAME: `"${appName}"`,
+        APP_NAME: `"🏔️ Avalanche"`,
         "process.env.NODE_ENV": isProduction
           ? JSON.stringify("production")
           : process.env.NODE_ENV
@@ -126,15 +126,11 @@ module.exports = env => {
     ],
     optimization: {
       minimizer: [
-        new UglifyJsPlugin({
+        new TerserPlugin({
           cache: true,
           parallel: true,
           sourceMap: true,
-          uglifyOptions: {
-            output: {
-              comments: false
-            }
-          }
+          extractComments: true
         }),
         new OptimizeCSSAssetsPlugin({
           cssProcessorOptions: {
@@ -155,6 +151,21 @@ module.exports = env => {
   if (isAnalyzing) {
     option.plugins.push(
       new (require("webpack-bundle-analyzer")).BundleAnalyzerPlugin()
+    );
+  }
+  if (isProduction) {
+    const zopfli = require("@gfx/zopfli");
+    option.plugins.push(
+      new (require("compression-webpack-plugin"))({
+        test: /\.(js|css|html|svg)$/i, // woff2? are already compressed
+        cache: true,
+        compressionOptions: {
+          numiterations: 15
+        },
+        algorithm(input, compressionOptions, callback) {
+          return zopfli.gzip(input, compressionOptions, callback);
+        }
+      })
     );
   }
 

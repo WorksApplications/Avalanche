@@ -11,7 +11,7 @@ export interface IProperty {
   onEdit(): void;
 }
 
-class EnvironmentCard extends React.Component<IProperty, {}> {
+export class EnvironmentCard extends React.Component<IProperty> {
   public render() {
     let kind: string | null = null;
     switch (this.props.kind) {

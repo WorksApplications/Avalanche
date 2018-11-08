@@ -3,7 +3,7 @@ import RunningPodsView from "../containers/RunningPodsView";
 import SnapshotsView from "../containers/SnapshotsView";
 import styles from "./SnapshotPage.scss";
 
-class SnapshotPage extends React.Component {
+export class SnapshotPage extends React.Component {
   private viewRef = React.createRef<any>();
 
   public render() {
@@ -29,4 +29,4 @@ class SnapshotPage extends React.Component {
   }
 }
 
-export default SnapshotPage as React.ComponentClass;
+export default SnapshotPage;
