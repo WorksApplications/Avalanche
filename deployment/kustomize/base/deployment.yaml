@@ -1,0 +1,138 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: detect
+spec:
+  selector:
+    matchLabels:
+      run: detect
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: detect
+    spec:
+      containers:
+      - name: detect
+        command:
+          - /detect
+          - --db=example:example@tcp(mariadb)/collekt?parseTime=True
+        image: /resource_optimization/detect:${GIT_HASH}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enroll
+spec:
+  selector:
+    matchLabels:
+      run: enroll
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: enroll
+    spec:
+      containers:
+      - name: enroll
+        command:
+          - /enroll
+          - --detect=http://detect:8080
+        image: /resource_optimization/enroll:r1b
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: extract
+spec:
+  selector:
+    matchLabels:
+      run: extract
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: extract
+    spec:
+      containers:
+      - name: extract
+        image: /resource_optimization/extract:r1a
+        ports:
+        - containerPort: 5000
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: collect
+spec:
+  selector:
+    matchLabels:
+      run: collect
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: collect
+    spec:
+      containers:
+      - name: collect
+        image: /resource_optimization/collect:r1l
+        ports:
+        - containerPort: 8080
+        imagePullPolicy: Always
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+        volumeMounts:
+          - name: perftank
+            mountPath: /persistent
+        command:
+          - /collect
+          - -port=8080
+          - -detect=http://detect:8080
+          - -enroll=http://enroll:8080
+          - -extract=http://extract:8080
+          - -db=example:example@tcp(mariadb)/collekt?parseTime=True
+          - -persistent=/persistent
+          - -volatile=/persistent/volatile
+          - -flamescope=http://flamescope.internal.worksap.com/#/heatmap/
+      volumes:
+        - name: perftank
+          persistentVolumeClaim:
+            claimName: perftank-pvc
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: static
+spec:
+  selector:
+    matchLabels:
+      run: static
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: static
+    spec:
+      containers:
+      - name: static
+        image: /resource_optimization/static:r1e
+        ports:
+        - containerPort: 80
+        imagePullPolicy: Always

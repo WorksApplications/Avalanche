@@ -1,0 +1,105 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: detect
+  name: detect
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: content
+  selector:
+    run: detect
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: enroll
+  name: enroll
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: content
+  selector:
+    run: enroll
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: extract
+  name: extract
+spec:
+  ports:
+  - port: 8080
+    targetPort: 5000
+    protocol: TCP
+    name: content
+  selector:
+    run: extract
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: collect
+  name: collect
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: content
+  selector:
+    run: collect
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: static
+  name: static
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: content
+  selector:
+    run: static
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+spec:
+  type: ExternalName
+  externalName: db.example.com
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: perftank-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi

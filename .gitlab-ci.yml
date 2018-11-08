@@ -23,7 +23,7 @@ backend-build:
             - bin/collect
             - bin/detect
             - bin/enroll
-        expire_in: 1 day
+        expire_in: 1 hour
 
 front-build:
     except:
@@ -42,7 +42,7 @@ front-build:
     artifacts:
         paths:
             - front/public/
-        expire_in: 1 day
+        expire_in: 1 hour
 
 push-images:
     only:
@@ -70,4 +70,21 @@ push-images:
     variables:
         DOCKERHOST: ""
         
+
+generate-kustomize:
+    only:
+        - master
+    stage: deploy
+    image: alpine:latest
+    script:
+        - apk add git
+        - export GIT_HASH=$(git show --quiet --format=%ha)
+        - wget -O /usr/local/bin/kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/v${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_amd64 && chmod +x /usr/local/bin/kustomize
+        - kustomize build 
+    artifacts:
+        paths:
+            - deployment/kustomize
+        expire_in: 7 day
+    variables:
+        KUSTOMIZE_VERSION: "1.0.10"
 
