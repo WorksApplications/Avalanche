@@ -5,7 +5,7 @@ const DefinePlugin = require("webpack").DefinePlugin;
 const TerserPlugin = require("terser-webpack-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
-const PreloadWebpackPlugin = require("preload-webpack-plugin");
+// const PreloadWebpackPlugin = require("preload-webpack-plugin");
 
 const dest = path.resolve(__dirname, "./public");
 const index = path.resolve(__dirname, "./src/index.tsx");
@@ -104,14 +104,14 @@ module.exports = env => {
         minify: isProduction,
         template: "src/index.html"
       }),
-      new PreloadWebpackPlugin({
-        rel: "preload",
-        include: "allAssets",
-        fileWhitelist: [
-          /app(\.[0-9a-f]+)?\.(js|css)$/
-          // /-page(\.[0-9a-f]+)?\.(js|css)$/
-        ]
-      }),
+      // new PreloadWebpackPlugin({
+      //   rel: "preload",
+      //   include: "allAssets",
+      //   fileWhitelist: [
+      //     /app(\.[0-9a-f]+)?\.(js|css)$/
+      //     // /-page(\.[0-9a-f]+)?\.(js|css)$/
+      //   ]
+      // }),
       new MiniCssExtractPlugin({
         filename: "[name].[hash:8].css"
       }),
