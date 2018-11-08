@@ -168,7 +168,7 @@ export class SnapshotsView extends React.Component<Props> {
             <AppSelector
               options={showingApps}
               selectedValue={this.props.appName}
-              onValueChanged={this.onAppChanged.bind(this)}
+              onValueChanged={this.onAppChanged}
               unselectOptionLabel="Unselect"
               placeholder="Select Application"
             />
@@ -179,7 +179,7 @@ export class SnapshotsView extends React.Component<Props> {
             <SnapshotFilter
               options={envFilterData}
               selectedValue={this.props.filteringEnvironment}
-              onValueChanged={this.onEnvironmentChanged.bind(this)}
+              onValueChanged={this.onEnvironmentChanged}
               placeholder="Select environment"
               unselectOptionLabel="Unselect"
               disabled={!this.props.appName}
@@ -189,7 +189,7 @@ export class SnapshotsView extends React.Component<Props> {
             <SnapshotFilter
               options={podFilterData}
               selectedValue={this.props.filteringPod}
-              onValueChanged={this.onPodChanged.bind(this)}
+              onValueChanged={this.onPodChanged}
               placeholder="Select pod name"
               unselectOptionLabel="Unselect"
               disabled={!this.props.filteringEnvironment}
@@ -203,17 +203,17 @@ export class SnapshotsView extends React.Component<Props> {
     );
   }
 
-  private onAppChanged(app: string) {
+  private onAppChanged = (app: string) => {
     this.pushParams({ newApp: app, newEnv: null, newPod: null });
-  }
+  };
 
-  private onEnvironmentChanged(env: string) {
+  private onEnvironmentChanged = (env: string) => {
     this.pushParams({ newEnv: env, newPod: null });
-  }
+  };
 
-  private onPodChanged(pod: string) {
+  private onPodChanged = (pod: string) => {
     this.pushParams({ newPod: pod });
-  }
+  };
 
   private pushParams(params: {
     newApp?: string | null;

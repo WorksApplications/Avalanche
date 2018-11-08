@@ -23,23 +23,27 @@ export class FilterInput extends React.Component<IProperty, State> {
           type="text"
           className={styles.textBox}
           value={this.state.value}
-          onKeyUp={this.change.bind(this)}
+          onKeyUp={this.onChange}
           placeholder={this.props.placeholder}
-          onChange={this.change.bind(this)}
+          onChange={this.onChange}
         />
       </div>
     );
   }
 
-  private change(e: Event) {
-    const newValue = (e.target as HTMLInputElement).value;
+  private onChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    const newValue = (e.target as HTMLInputElement).value; // questionable...
     if (newValue !== this.state.value) {
       if (this.props.onValueChange) {
         this.props.onValueChange(this.state.value, newValue);
       }
       this.setState({ value: newValue });
     }
-  }
+  };
 }
 
 export default FilterInput;

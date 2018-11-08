@@ -93,17 +93,17 @@ export class ConfigPage extends React.Component<Props, State> {
     }
 
     const onTargetChange = (target: string) => {
-      this.setState({ dialogTarget: target });
+      setState({ dialogTarget: target });
     };
 
     const onIsMultitenantChange = (isMultiTenant: boolean) => {
-      this.setState({ isMultitenant: isMultiTenant });
+      setState({ isMultitenant: isMultiTenant });
     };
     const onKubernetesApiChange = (kubernetesApi: string) => {
-      this.setState({ kubernetesApi });
+      setState({ kubernetesApi });
     };
     const onVersionChange = (version: string) => {
-      this.setState({ version });
+      setState({ version });
     };
 
     return (
@@ -111,7 +111,7 @@ export class ConfigPage extends React.Component<Props, State> {
         <div className={styles.filter}>
           <FilterInput
             placeholder="Filter with..."
-            onValueChange={this.onFilterChange.bind(this)}
+            onValueChange={this.onFilterChange}
           />
         </div>
         <div className={styles.cardList}>
@@ -127,7 +127,7 @@ export class ConfigPage extends React.Component<Props, State> {
 
         <FabButton
           tooltip="Add environment"
-          onClick={this.addEnvironment.bind(this)}
+          onClick={this.addEnvironment}
           icon="wap-icon-add"
         />
         <ReactModal
@@ -137,8 +137,8 @@ export class ConfigPage extends React.Component<Props, State> {
         >
           <EnvironmentConfigModifyModal
             target={this.state.dialogTarget || ""}
-            onDismiss={this.onModifyDialogDismiss.bind(this)}
-            onAccept={this.onModifyDialogAccept.bind(this)}
+            onDismiss={this.onModifyDialogDismiss}
+            onAccept={this.onModifyDialogAccept}
             isMultitenant={this.state.isMultitenant}
             onIsMultitenantChange={onIsMultitenantChange}
             kubernetesApi={this.state.kubernetesApi}
@@ -153,8 +153,8 @@ export class ConfigPage extends React.Component<Props, State> {
           className={modalStyles.inner}
         >
           <EnvironmentConfigAddModal
-            onDismiss={this.onAddDialogDismiss.bind(this)}
-            onAccept={this.onAddDialogAccept.bind(this)}
+            onDismiss={this.onAddDialogDismiss}
+            onAccept={this.onAddDialogAccept}
             target={this.state.dialogTarget}
             onTargetApiChange={onTargetChange}
             isMultitenant={this.state.isMultitenant}
@@ -175,7 +175,7 @@ export class ConfigPage extends React.Component<Props, State> {
     });
   }
 
-  private onModifyDialogDismiss() {
+  private onModifyDialogDismiss = () => {
     this.setState({
       showsModifyDialog: false,
       dialogTarget: null,
@@ -183,9 +183,9 @@ export class ConfigPage extends React.Component<Props, State> {
       kubernetesApi: null,
       version: null
     });
-  }
+  };
 
-  private onAddDialogDismiss() {
+  private onAddDialogDismiss = () => {
     this.setState({
       showsAddDialog: false,
       dialogTarget: null,
@@ -193,9 +193,9 @@ export class ConfigPage extends React.Component<Props, State> {
       kubernetesApi: null,
       version: null
     });
-  }
+  };
 
-  private onModifyDialogAccept() {
+  private onModifyDialogAccept = () => {
     const version = this.state.version!;
     const environmentName = this.state.dialogTarget!;
     this.props
@@ -213,9 +213,9 @@ export class ConfigPage extends React.Component<Props, State> {
       .catch(() => {
         this.props.toastr(`Failed to configure "${environmentName}".`, "error");
       });
-  }
+  };
 
-  private onAddDialogAccept() {
+  private onAddDialogAccept = () => {
     const environmentName = this.state.dialogTarget!;
     this.props
       .addEnvironmentConfigOperation({
@@ -232,16 +232,15 @@ export class ConfigPage extends React.Component<Props, State> {
       .catch(() => {
         this.props.toastr(`Failed to add "${environmentName}".`, "error");
       });
-  }
+  };
 
-  // noinspection JSUnusedLocalSymbols
-  private onFilterChange(previous: string, current: string) {
+  private onFilterChange = (previous: string, current: string) => {
     this.setState({ filteringValue: current });
-  }
+  };
 
-  private addEnvironment() {
+  private addEnvironment = () => {
     this.setState({ showsAddDialog: true });
-  }
+  };
 }
 
 export default connect(

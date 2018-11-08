@@ -33,7 +33,7 @@ export class PodCard extends React.Component<IProperty, State> {
           this.state.isOpen ? styles.isOpen : undefined
         ].join(" ")}
         data-testid="root"
-        onClick={this.onClick.bind(this)}
+        onClick={this.onClick}
       >
         <div
           className={[
@@ -142,10 +142,9 @@ export class PodCard extends React.Component<IProperty, State> {
     );
   }
 
-  private onClick() {
-    const willOpen = !this.state.isOpen;
-    this.setState({ isOpen: willOpen });
-  }
+  private onClick = () => {
+    this.setState({ isOpen: !this.state.isOpen });
+  };
 }
 
 export default PodCard;
