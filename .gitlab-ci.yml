@@ -71,7 +71,7 @@ push-images:
         DOCKERHOST: ""
         
 
-generate-kustomize:
+generate-kubefile:
     only:
         - master
     stage: deploy
@@ -80,10 +80,14 @@ generate-kustomize:
         - apk add git
         - export GIT_HASH=$(git show --quiet --format=%ha)
         - wget -O /usr/local/bin/kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/v${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_amd64 && chmod +x /usr/local/bin/kustomize
-        - kustomize build 
+        - apk add gettext
+        - envsubst < deployment/kustomize/template/imageTags.yaml >> deployment/kustomize/base/kustomization.yaml
+        - kustomize build deployment/kustomize/overlays/production > production.yaml
+        - kustomize build deployment/kustomize/overlays/devel > devel.yaml
     artifacts:
         paths:
-            - deployment/kustomize
+            - production.yaml
+            - devel.yaml
         expire_in: 7 day
     variables:
         KUSTOMIZE_VERSION: "1.0.10"

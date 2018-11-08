@@ -17,7 +17,7 @@ spec:
         command:
           - /detect
           - --db=example:example@tcp(mariadb)/collekt?parseTime=True
-        image: /resource_optimization/detect:${GIT_HASH}
+        image: /resource_optimization/detect
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -43,7 +43,7 @@ spec:
         command:
           - /enroll
           - --detect=http://detect:8080
-        image: /resource_optimization/enroll:r1b
+        image: /resource_optimization/enroll
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -66,7 +66,7 @@ spec:
     spec:
       containers:
       - name: extract
-        image: /resource_optimization/extract:r1a
+        image: /resource_optimization/extract
         ports:
         - containerPort: 5000
 
@@ -88,7 +88,7 @@ spec:
     spec:
       containers:
       - name: collect
-        image: /resource_optimization/collect:r1l
+        image: /resource_optimization/collect
         ports:
         - containerPort: 8080
         imagePullPolicy: Always
@@ -132,7 +132,7 @@ spec:
     spec:
       containers:
       - name: static
-        image: /resource_optimization/static:r1e
+        image: /resource_optimization/static
         ports:
         - containerPort: 80
         imagePullPolicy: Always

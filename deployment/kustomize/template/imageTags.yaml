@@ -1,0 +1,12 @@
+imageTags:
+  - name: /resource_optimization/detect
+    newTag: $GIT_HASH
+  - name: /resource_optimization/enroll
+    newTag: $GIT_HASH
+  - name: /resource_optimization/extract
+    newTag: $GIT_HASH
+  - name: /resource_optimization/collect
+    newTag: $GIT_HASH
+  - name: /resource_optimization/static
+    newTag: $GIT_HASH
+
