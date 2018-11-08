@@ -35,7 +35,7 @@ export class EnvironmentConfigAddModal extends React.Component<IProperty> {
         <div className={styles.content}>
           <div className={styles.group}>
             <label className={styles.label}>Name</label>
-            <div className={styles.input}>
+            <div className={styles.textInput}>
               <input
                 type="text"
                 name="target"
@@ -46,7 +46,7 @@ export class EnvironmentConfigAddModal extends React.Component<IProperty> {
           </div>
           <div className={styles.group}>
             <label className={styles.label}>Tenant Kind</label>
-            <div className={styles.input}>
+            <div className={styles.radioInput}>
               <input
                 type="radio"
                 id="kind-mt"
@@ -70,7 +70,7 @@ export class EnvironmentConfigAddModal extends React.Component<IProperty> {
           </div>
           <div className={styles.group}>
             <label className={styles.label}>Kubernetes API</label>
-            <div className={styles.input}>
+            <div className={styles.textInput}>
               <input
                 type="text"
                 name="api"
@@ -78,13 +78,13 @@ export class EnvironmentConfigAddModal extends React.Component<IProperty> {
                 value={this.props.kubernetesApi || ""}
               />
               <div className={styles.description}>
-                {"ex: http://k8s-mischo.internal.worksap.com:52063/"}
+                {"ex: http://k8s-mischo.internal.worksap.com:52063"}
               </div>
             </div>
           </div>
           <div className={styles.group}>
             <label className={styles.label}>HUE Version</label>
-            <div className={styles.input}>
+            <div className={styles.radioInput}>
               <input
                 type="radio"
                 id="ver-b1712"
