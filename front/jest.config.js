@@ -22,5 +22,10 @@ module.exports = {
     "json",
     "node"
   ],
-  unmockedModulePathPatterns: ["react"]
+  unmockedModulePathPatterns: ["react"],
+  globals: {
+    COLLECT_API_BASE: "[collect]",
+    FLAMESCOPE_API_BASE: "[flamescope]",
+    APP_NAME: "[Avalanche]"
+  }
 };
