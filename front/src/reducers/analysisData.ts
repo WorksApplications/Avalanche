@@ -10,6 +10,7 @@ import {
   getRunningPodsOperation,
   postSnapshotOperation
 } from "../actions";
+import { IHeatMap } from "../clients/heatMapClient";
 import { IAnalysisDataState, IPodInfo, ISnapshotInfo } from "../store";
 
 const INIT: IAnalysisDataState = {
@@ -22,6 +23,31 @@ const INIT: IAnalysisDataState = {
   pods: [],
   snapshots: []
 };
+
+export function reduceHeatMap(
+  heatMap: IHeatMap,
+  maxValueSize: number
+): IHeatMap {
+  const rawValues = heatMap.values;
+  let values: number[] = [];
+  if (rawValues.length > maxValueSize) {
+    for (let i = 0; i < maxValueSize; i++) {
+      let v = 0;
+      const start = Math.floor((rawValues.length / maxValueSize) * i);
+      const end = Math.ceil((rawValues.length / maxValueSize) * (i + 1));
+      for (let j = start; j < end; j++) {
+        const c = rawValues[j];
+        if (c > v) {
+          v = c;
+        }
+      }
+      values.push(v);
+    }
+  } else {
+    values = rawValues;
+  }
+  return { values, maxValue: heatMap.maxValue };
+}
 
 function paramExists<K extends string>(
   params: any,
@@ -161,16 +187,14 @@ export function analysisData(
   }
 
   if (isType(action, getHeatMapOperation.async.done)) {
+    // reduce `values` to 250 data for performance
+    const heatMap = reduceHeatMap(action.payload.result.heatMap, 250);
+
     return {
       ...state,
       snapshots: state.snapshots.map(
         x =>
-          x.uuid === action.payload.params.snapshotId
-            ? {
-                ...x,
-                heatMap: action.payload.result.heatMap
-              }
-            : x
+          x.uuid === action.payload.params.snapshotId ? { ...x, heatMap } : x
       )
     };
   }
