@@ -5,9 +5,17 @@ import { storiesOf } from "@storybook/react";
 import HeatMap from "./HeatMap";
 
 const commonWrapStyle: React.CSSProperties = {
+  width: "1200px",
   padding: "8px",
-  backgroundColor: "#e6e8ea"
+  backgroundColor: "white"
 };
+
+const N = 600 * 50;
+const parabolaData = Array.from(
+  new Array(N + 1),
+  (v, i) => (N * N) / 4 - (N / 2 - i) * (N / 2 - i)
+);
+const sawData = Array.from(new Array(N + 1), (v, i) => (i % 500) / 10);
 
 storiesOf("HeatMap", module)
   .add("Empty", () => (
@@ -18,5 +26,15 @@ storiesOf("HeatMap", module)
   .add("Proportion data", () => (
     <div style={commonWrapStyle}>
       <HeatMap hash="1" maxValue={3} values={[0, 1, 2, 3]} />
+    </div>
+  ))
+  .add("Parabola data", () => (
+    <div style={commonWrapStyle}>
+      <HeatMap hash="1" maxValue={(N * N) / 4} values={parabolaData} />
+    </div>
+  ))
+  .add("Saw data", () => (
+    <div style={commonWrapStyle}>
+      <HeatMap hash="1" maxValue={50} values={sawData} />
     </div>
   ));
