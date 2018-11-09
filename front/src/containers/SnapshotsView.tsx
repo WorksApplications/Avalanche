@@ -6,6 +6,7 @@ import { bindActionCreators, Dispatch } from "redux";
 import {
   getAppsOperation,
   getEnvironmentsOfAppOperation,
+  getHeatMapOperation,
   getLatestSnapshotsOperation,
   toastr
 } from "../actions";
@@ -73,7 +74,8 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
       ...operationsToActionCreators({
         getAppsOperation,
         getEnvironmentsOfAppOperation,
-        getLatestSnapshotsOperation
+        getLatestSnapshotsOperation,
+        getHeatMapOperation
       })
     },
     dispatch
@@ -140,7 +142,16 @@ export class SnapshotsView extends React.Component<Props> {
         environment: x.environment || "Unknown",
         podName: x.pod || "Unknown",
         createdAt: x.createdAt,
-        link: x.link || "#"
+        link: x.link || "#",
+        heatMap: x.heatMap,
+        getHeatMap: () => {
+          let heatMapId = "";
+          if (x.link) {
+            const tokens = x.link.split("/");
+            heatMapId = tokens[tokens.length - 1];
+          }
+          this.props.getHeatMapOperation({ snapshotId: x.uuid, heatMapId });
+        }
       }));
       if (this.props.filteringEnvironment) {
         showingSnapshots = showingSnapshots.filter(

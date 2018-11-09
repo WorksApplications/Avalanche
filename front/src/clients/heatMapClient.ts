@@ -1,8 +1,7 @@
 import { FLAMESCOPE_API_BASE } from "../constants";
 
 export default function(fileName: string): Promise<IHeatMap> {
-  const paramFileName = encodeURIComponent(fileName);
-  const url = `${FLAMESCOPE_API_BASE}/?filename=${paramFileName}`;
+  const url = `${FLAMESCOPE_API_BASE}/?filename=${fileName}`;
   return new Promise<IHeatMap>(async (resolve, reject) => {
     const res = await fetch(url);
     if (!res.ok) {

@@ -3,7 +3,7 @@ import "jest-dom/extend-expect";
 import * as React from "react";
 import { render } from "react-testing-library";
 import "react-testing-library/cleanup-after-each";
-import { IData as SnapshotData, SnapshotList } from "./SnapshotList";
+import { IItemProperty as SnapshotData, SnapshotList } from "./SnapshotList";
 
 const baseDateValue = Date.now();
 
@@ -13,21 +13,24 @@ const basicListProps: SnapshotData[] = [
     createdAt: new Date(baseDateValue + 10000),
     link: "#",
     environment: "jillk",
-    podName: "ess-765c6ccfcd-9hrsv"
+    podName: "ess-765c6ccfcd-9hrsv",
+    getHeatMap: jest.fn()
   },
   {
     uuid: "e7eec7c1-daf5-4198-9503-6957aea0bf90",
     createdAt: new Date(baseDateValue + 8000),
     link: "#",
     environment: "jillk",
-    podName: "ess-865c6ccfcd-9hrsv"
+    podName: "ess-865c6ccfcd-9hrsv",
+    getHeatMap: jest.fn()
   },
   {
     uuid: "f7eec7c1-daf5-4198-9503-6957aea0bf90",
     createdAt: new Date(baseDateValue + 6000),
     link: "#",
     environment: "jillk",
-    podName: "ess-965c6ccfcd-9hrsv"
+    podName: "ess-965c6ccfcd-9hrsv",
+    getHeatMap: jest.fn()
   }
 ];
 
