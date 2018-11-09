@@ -2,7 +2,7 @@
 import * as React from "react";
 
 import { storiesOf } from "@storybook/react";
-import HeatMap from "./HeatMap";
+import HeatMap from "./HeatLineChart";
 
 const commonWrapStyle: React.CSSProperties = {
   width: "1200px",

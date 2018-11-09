@@ -1,6 +1,6 @@
 // tslint:disable:max-classes-per-file
 import * as React from "react";
-import HeatMap, { HeatMapData } from "../HeatMap";
+import HeatLineChart, { HeatMapData } from "../HeatLineChart";
 import Link from "../Link";
 import Spinner from "../Spinner";
 import styles from "./SnapshotList.scss";
@@ -45,7 +45,10 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
             <td colSpan={5} className={styles.graphArea}>
               {this.props.heatMap ? (
                 <div className={styles.heatMap}>
-                  <HeatMap {...this.props.heatMap} hash={this.props.uuid} />
+                  <HeatLineChart
+                    {...this.props.heatMap}
+                    hash={this.props.uuid}
+                  />
                 </div>
               ) : (
                 <div className={styles.spinner}>
