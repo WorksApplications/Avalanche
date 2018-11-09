@@ -26,9 +26,8 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
   public readonly state: ItemState = initialItemState;
 
   public render() {
-    // noinspection TsLint
     return (
-      <tbody onClick={this.onRowClick.bind(this)} data-testid="snapshot">
+      <tbody onClick={this.onRowClick} data-testid="snapshot">
         <tr>
           <td>{this.props.uuid}</td>
           <td>{this.props.podName}</td>
@@ -60,13 +59,13 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
     );
   }
 
-  private onRowClick() {
+  private onRowClick = () => {
     const willGraphOpen = !this.state.isGraphOpen;
     if (!this.props.heatMap && willGraphOpen) {
       this.props.getHeatMap();
     }
     this.setState({ isGraphOpen: willGraphOpen });
-  }
+  };
 }
 
 export function Empty(props: { emptyMessage?: string }) {
