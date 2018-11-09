@@ -43,7 +43,7 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
         </tr>
         {this.state.isGraphOpen && (
           <tr>
-            <td colSpan={5}>
+            <td colSpan={5} className={styles.graphArea}>
               {this.props.heatMap ? (
                 <div className={styles.heatMap}>
                   <HeatMap {...this.props.heatMap} hash={this.props.uuid} />
