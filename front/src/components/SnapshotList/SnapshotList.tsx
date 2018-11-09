@@ -1,6 +1,8 @@
 // tslint:disable:max-classes-per-file
 import * as React from "react";
+import { IHeatMapInfo } from "../../store";
 import Link from "../Link";
+import Spinner from "../Spinner";
 import styles from "./SnapshotList.scss";
 
 export interface IData {
@@ -9,13 +11,23 @@ export interface IData {
   podName: string;
   createdAt?: Date;
   link: string;
+  heatMap?: IHeatMapInfo;
 }
 
+const initialItemState = {
+  isGraphOpen: false
+};
+
+type ItemState = Readonly<typeof initialItemState>;
+
 // This child component is tightly coupled as a table row element
-export class SnapshotItem extends React.Component<IData> {
+export class SnapshotItem extends React.Component<IData, ItemState> {
+  public readonly state: ItemState = initialItemState;
+
   public render() {
+    // noinspection TsLint
     return (
-      <tbody data-testid="snapshot">
+      <tbody onClick={this.onRowClick.bind(this)} data-testid="snapshot">
         <tr>
           <td>{this.props.uuid}</td>
           <td>{this.props.podName}</td>
@@ -28,8 +40,27 @@ export class SnapshotItem extends React.Component<IData> {
             <Link href={this.props.link}>Framescope</Link>
           </td>
         </tr>
+        {this.state.isGraphOpen && (
+          <tr>
+            <td colSpan={5}>
+              {this.props.heatMap ? (
+                <div className={styles.heatMap}>
+                  <div>HeatMap Stub</div>
+                </div>
+              ) : (
+                <div className={styles.spinner}>
+                  <Spinner />
+                </div>
+              )}
+            </td>
+          </tr>
+        )}
       </tbody>
     );
+  }
+
+  private onRowClick() {
+    this.setState({ isGraphOpen: !this.state.isGraphOpen });
   }
 }
 

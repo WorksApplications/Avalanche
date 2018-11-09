@@ -5,6 +5,7 @@ import { isType } from "typescript-fsa";
 import {
   getAppsOperation,
   getEnvironmentsOfAppOperation,
+  getHeatMapOperation,
   getLatestSnapshotsOperation,
   getRunningPodsOperation,
   postSnapshotOperation
@@ -156,6 +157,21 @@ export function analysisData(
     return {
       ...state,
       snapshots: action.payload.result.snapshots
+    };
+  }
+
+  if (isType(action, getHeatMapOperation.async.done)) {
+    return {
+      ...state,
+      snapshots: state.snapshots.map(
+        x =>
+          x.uuid === action.payload.params.snapshotId
+            ? {
+                ...x,
+                heatMap: action.payload.result.heatMap
+              }
+            : x
+      )
     };
   }
 

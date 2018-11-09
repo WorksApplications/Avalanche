@@ -1,7 +1,7 @@
 // tslint:disable:no-implicit-dependencies no-submodule-imports
 import * as React from "react";
 
-import { text, withKnobs } from "@storybook/addon-knobs";
+import { boolean, text, withKnobs } from "@storybook/addon-knobs";
 import { storiesOf } from "@storybook/react";
 import SnapshotList from "./SnapshotList";
 
@@ -30,7 +30,8 @@ storiesOf("SnapshotList", module)
             createdAt: new Date(),
             environment: "jillk",
             podName: "ess-765c6ccfcd-9hrsv",
-            link: "#"
+            link: "#",
+            heatMap: boolean("loading", true) ? undefined : { values: [] }
           }
         ]}
       />

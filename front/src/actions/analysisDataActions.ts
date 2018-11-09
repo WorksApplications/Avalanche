@@ -1,8 +1,14 @@
 import actionCreatorFactory from "typescript-fsa";
 import { asyncFactory } from "typescript-fsa-redux-thunk";
+import heatMapClient from "../clients/heatMapClient";
 import { COLLECT_API_BASE } from "../constants";
 import * as collect from "../generated/collect/api";
-import { IEnvironmentInfo, IPodInfo, ISnapshotInfo } from "../store";
+import {
+  IEnvironmentInfo,
+  IHeatMapInfo,
+  IPodInfo,
+  ISnapshotInfo
+} from "../store";
 
 const actionCreator = actionCreatorFactory();
 const asyncActionCreator = asyncFactory(actionCreator);
@@ -104,5 +110,15 @@ export const getLatestSnapshotsOperation = asyncActionCreator<
   collectClient.listSnapshots("date", count).then(snapshotResults => {
     const snapshots = snapshotResults.map(s => snapshotInfoConvert(s));
     return { snapshots };
+  })
+);
+
+export const getHeatMapOperation = asyncActionCreator<
+  { snapshotId: string; heatMapId: string },
+  { heatMap: IHeatMapInfo }
+>("GET_HEAT_MAP", ({ heatMapId }) =>
+  heatMapClient(heatMapId).then(result => {
+    const heatMap = result;
+    return { heatMap };
   })
 );

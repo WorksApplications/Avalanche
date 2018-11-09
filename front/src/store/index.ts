@@ -8,6 +8,11 @@ import { applyMiddleware, compose, createStore, Middleware } from "redux";
 import thunk from "redux-thunk";
 import rootReducer from "../reducers";
 
+export interface IHeatMapInfo {
+  values: number[];
+  maxValue: number;
+}
+
 export interface ISnapshotInfo {
   uuid: string;
   name?: string;
@@ -15,6 +20,7 @@ export interface ISnapshotInfo {
   environment?: string;
   createdAt?: Date;
   link?: string;
+  heatMap?: IHeatMapInfo;
 }
 
 export interface IPodInfo {
