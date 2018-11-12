@@ -10,7 +10,7 @@ export type Data = Pick<IProperty, Exclude<keyof IProperty, "hash">>;
 
 // width:height = (about) 10:1
 // currently, colored with relative value
-const HeatMap: React.StatelessComponent<IProperty> = ({
+const HeatLineChart: React.StatelessComponent<IProperty> = ({
   values,
   maxValue,
   hash
@@ -56,4 +56,4 @@ const HeatMap: React.StatelessComponent<IProperty> = ({
     </svg>
   );
 };
-export default HeatMap;
+export default HeatLineChart;
