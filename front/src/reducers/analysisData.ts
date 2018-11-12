@@ -11,7 +11,12 @@ import {
   postSnapshotOperation
 } from "../actions";
 import { IHeatMap } from "../clients/heatMapClient";
-import { IAnalysisDataState, IPodInfo, ISnapshotInfo } from "../store";
+import {
+  HeatMapState,
+  IAnalysisDataState,
+  IPodInfo,
+  ISnapshotInfo
+} from "../store";
 
 const INIT: IAnalysisDataState = {
   applicationName: null,
@@ -186,6 +191,17 @@ export function analysisData(
     };
   }
 
+  if (isType(action, getHeatMapOperation.async.started)) {
+    return {
+      ...state,
+      snapshots: state.snapshots.map(
+        x =>
+          x.uuid === action.payload.snapshotId
+            ? { ...x, heatMapStatus: "loading" as HeatMapState }
+            : x
+      )
+    };
+  }
   if (isType(action, getHeatMapOperation.async.done)) {
     // reduce `values` to 250 data for performance
     const heatMap = reduceHeatMap(action.payload.result.heatMap, 250);
@@ -194,7 +210,20 @@ export function analysisData(
       ...state,
       snapshots: state.snapshots.map(
         x =>
-          x.uuid === action.payload.params.snapshotId ? { ...x, heatMap } : x
+          x.uuid === action.payload.params.snapshotId
+            ? { ...x, heatMap, heatMapStatus: "loaded" as HeatMapState }
+            : x
+      )
+    };
+  }
+  if (isType(action, getHeatMapOperation.async.failed)) {
+    return {
+      ...state,
+      snapshots: state.snapshots.map(
+        x =>
+          x.uuid === action.payload.params.snapshotId
+            ? { ...x, heatMapStatus: "failed" as HeatMapState }
+            : x
       )
     };
   }

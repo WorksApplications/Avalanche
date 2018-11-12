@@ -13,6 +13,8 @@ export interface IHeatMapInfo {
   maxValue: number;
 }
 
+export type HeatMapState = "empty" | "loading" | "loaded" | "failed";
+
 export interface ISnapshotInfo {
   uuid: string;
   name?: string;
@@ -21,6 +23,7 @@ export interface ISnapshotInfo {
   createdAt?: Date;
   link?: string;
   heatMap?: IHeatMapInfo;
+  heatMapStatus: HeatMapState;
 }
 
 export interface IPodInfo {

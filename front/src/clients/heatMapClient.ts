@@ -3,7 +3,13 @@ import { FLAMESCOPE_API_BASE } from "../constants";
 export default function(fileName: string): Promise<IHeatMap> {
   const url = `${FLAMESCOPE_API_BASE}/?filename=${fileName}`;
   return new Promise<IHeatMap>(async (resolve, reject) => {
-    const res = await fetch(url);
+    let res;
+    try {
+      res = await fetch(url);
+    } catch (e) {
+      reject(e);
+      return;
+    }
     if (!res.ok) {
       reject(Error(`Failed to get from ${url}`));
       return;

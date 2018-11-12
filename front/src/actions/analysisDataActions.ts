@@ -49,7 +49,8 @@ function snapshotInfoConvert(snapshot: collect.Snapshot): ISnapshotInfo {
     pod: snapshot.pod,
     environment: snapshot.environment,
     createdAt: created,
-    link: snapshot.flamescopeLink
+    link: snapshot.flamescopeLink,
+    heatMapStatus: "empty"
   };
 }
 

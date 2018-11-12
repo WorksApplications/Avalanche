@@ -144,13 +144,24 @@ export class SnapshotsView extends React.Component<Props> {
         createdAt: x.createdAt,
         link: x.link || "#",
         heatMap: x.heatMap,
+        heatMapStatus: x.heatMapStatus,
         getHeatMap: () => {
           let heatMapId = "";
           if (x.link) {
             const tokens = x.link.split("/");
             heatMapId = tokens[tokens.length - 1];
           }
-          this.props.getHeatMapOperation({ snapshotId: x.uuid, heatMapId });
+          this.props
+            .getHeatMapOperation({
+              snapshotId: x.uuid,
+              heatMapId
+            })
+            .catch(() => {
+              this.props.toastr(
+                `Failed to get heat map for "${x.uuid}".`,
+                "error"
+              );
+            });
         }
       }));
       if (this.props.filteringEnvironment) {

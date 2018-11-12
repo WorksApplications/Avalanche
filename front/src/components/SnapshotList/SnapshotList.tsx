@@ -12,6 +12,7 @@ export interface IItemProperty {
   createdAt?: Date;
   link: string;
   heatMap?: HeatMapData;
+  heatMapStatus: "empty" | "loading" | "loaded" | "failed";
   getHeatMap(): void;
 }
 
@@ -43,18 +44,7 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
         {this.state.isGraphOpen && (
           <tr>
             <td colSpan={5} className={styles.graphArea}>
-              {this.props.heatMap ? (
-                <div className={styles.heatMap}>
-                  <HeatLineChart
-                    {...this.props.heatMap}
-                    hash={this.props.uuid}
-                  />
-                </div>
-              ) : (
-                <div className={styles.spinner}>
-                  <Spinner />
-                </div>
-              )}
+              {this.renderBody()}
             </td>
           </tr>
         )}
@@ -62,9 +52,42 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
     );
   }
 
+  private renderBody() {
+    switch (this.props.heatMapStatus) {
+      case "empty":
+        return <div />;
+      case "loading":
+        return (
+          <div className={styles.spinner}>
+            <Spinner />
+          </div>
+        );
+      case "loaded":
+        if (this.props.heatMap) {
+          return (
+            <div className={styles.heatMap}>
+              <HeatLineChart {...this.props.heatMap} hash={this.props.uuid} />
+            </div>
+          );
+        }
+      // fallthrough if heatMap === null && status === "loaded"
+      // noinspection FallThroughInSwitchStatementJS
+      case "failed":
+        return (
+          <div className={styles.errorMessage}>
+            <span>Failed to load</span>
+          </div>
+        );
+    }
+  }
+
   private onRowClick = () => {
     const willGraphOpen = !this.state.isGraphOpen;
-    if (!this.props.heatMap && willGraphOpen) {
+    if (
+      this.props.heatMapStatus === "empty" &&
+      !this.props.heatMap &&
+      willGraphOpen
+    ) {
       this.props.getHeatMap();
     }
     this.setState({ isGraphOpen: willGraphOpen });
