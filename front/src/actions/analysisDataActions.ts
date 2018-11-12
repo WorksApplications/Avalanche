@@ -5,7 +5,7 @@ import { COLLECT_API_BASE } from "../constants";
 import * as collect from "../generated/collect/api";
 import {
   IEnvironmentInfo,
-  IHeatMapInfo,
+  IHeatMapData,
   IPodInfo,
   ISnapshotInfo
 } from "../store";
@@ -49,8 +49,7 @@ function snapshotInfoConvert(snapshot: collect.Snapshot): ISnapshotInfo {
     pod: snapshot.pod,
     environment: snapshot.environment,
     createdAt: created,
-    link: snapshot.flamescopeLink,
-    heatMapStatus: "empty"
+    link: snapshot.flamescopeLink
   };
 }
 
@@ -116,7 +115,7 @@ export const getLatestSnapshotsOperation = asyncActionCreator<
 
 export const getHeatMapOperation = asyncActionCreator<
   { snapshotId: string; heatMapId: string },
-  { heatMap: IHeatMapInfo }
+  { heatMap: IHeatMapData }
 >("GET_HEAT_MAP", ({ heatMapId }) =>
   heatMapClient(heatMapId).then(result => {
     const heatMap = result;

@@ -63,7 +63,8 @@ const mapStateToProps = (state: IApplicationState) => ({
   filteringEnvironment: state.analysisData.selectedEnvironment,
   filteringPod: state.analysisData.selectedPod,
   pods: state.analysisData.pods,
-  snapshots: sortedSnapshots(state.analysisData.snapshots)
+  snapshots: sortedSnapshots(state.analysisData.snapshots),
+  heatMaps: state.analysisData.heatMaps
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) =>
@@ -137,33 +138,36 @@ export class SnapshotsView extends React.Component<Props> {
     let showingSnapshots: ISnapshotData[] = [];
 
     if (this.props.snapshots.length > 0) {
-      showingSnapshots = this.props.snapshots.map(x => ({
-        uuid: x.uuid,
-        environment: x.environment || "Unknown",
-        podName: x.pod || "Unknown",
-        createdAt: x.createdAt,
-        link: x.link || "#",
-        heatMap: x.heatMap,
-        heatMapStatus: x.heatMapStatus,
-        getHeatMap: () => {
-          let heatMapId = "";
-          if (x.link) {
-            const tokens = x.link.split("/");
-            heatMapId = tokens[tokens.length - 1];
-          }
-          this.props
-            .getHeatMapOperation({
-              snapshotId: x.uuid,
-              heatMapId
-            })
-            .catch(() => {
-              this.props.toastr(
-                `Failed to get heat map for "${x.uuid}".`,
-                "error"
-              );
-            });
+      showingSnapshots = this.props.snapshots.map(x => {
+        let heatMapId = "";
+        if (x.link) {
+          const tokens = x.link.split("/");
+          heatMapId = tokens[tokens.length - 1];
         }
-      }));
+        const heatMap = this.props.heatMaps.get(heatMapId);
+        return {
+          uuid: x.uuid,
+          environment: x.environment || "Unknown",
+          podName: x.pod || "Unknown",
+          createdAt: x.createdAt,
+          link: x.link || "#",
+          heatMap: heatMap && heatMap.data,
+          heatMapStatus: heatMap ? heatMap.status : "empty",
+          getHeatMap: () => {
+            this.props
+              .getHeatMapOperation({
+                snapshotId: x.uuid,
+                heatMapId
+              })
+              .catch(() => {
+                this.props.toastr(
+                  `Failed to get heat map for "${x.uuid}".`,
+                  "error"
+                );
+              });
+          }
+        };
+      });
       if (this.props.filteringEnvironment) {
         showingSnapshots = showingSnapshots.filter(
           x => x.environment === this.props.filteringEnvironment

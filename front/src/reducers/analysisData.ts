@@ -12,8 +12,8 @@ import {
 } from "../actions";
 import { IHeatMap } from "../clients/heatMapClient";
 import {
-  HeatMapState,
   IAnalysisDataState,
+  IHeatMapInfo,
   IPodInfo,
   ISnapshotInfo
 } from "../store";
@@ -26,7 +26,8 @@ const INIT: IAnalysisDataState = {
   runningPods: [],
   selectedPod: null,
   pods: [],
-  snapshots: []
+  snapshots: [],
+  heatMaps: new Map<string, IHeatMapInfo>()
 };
 
 export function reduceHeatMap(
@@ -192,39 +193,38 @@ export function analysisData(
   }
 
   if (isType(action, getHeatMapOperation.async.started)) {
+    const key = action.payload.heatMapId;
+    const current = state.heatMaps.get(key);
+    if (current && current.status === "loading") {
+      return state;
+    }
+
+    const newMaps = new Map(state.heatMaps);
+    newMaps.set(key, { status: "loading" });
     return {
       ...state,
-      snapshots: state.snapshots.map(
-        x =>
-          x.uuid === action.payload.snapshotId
-            ? { ...x, heatMapStatus: "loading" as HeatMapState }
-            : x
-      )
+      heatMaps: newMaps
     };
   }
   if (isType(action, getHeatMapOperation.async.done)) {
     // reduce `values` to 250 data for performance
     const heatMap = reduceHeatMap(action.payload.result.heatMap, 250);
 
+    const key = action.payload.params.heatMapId;
+    const newMaps = new Map(state.heatMaps);
+    newMaps.set(key, { status: "loaded", data: heatMap });
     return {
       ...state,
-      snapshots: state.snapshots.map(
-        x =>
-          x.uuid === action.payload.params.snapshotId
-            ? { ...x, heatMap, heatMapStatus: "loaded" as HeatMapState }
-            : x
-      )
+      heatMaps: newMaps
     };
   }
   if (isType(action, getHeatMapOperation.async.failed)) {
+    const key = action.payload.params.heatMapId;
+    const newMaps = new Map(state.heatMaps);
+    newMaps.set(key, { status: "failed" });
     return {
       ...state,
-      snapshots: state.snapshots.map(
-        x =>
-          x.uuid === action.payload.params.snapshotId
-            ? { ...x, heatMapStatus: "failed" as HeatMapState }
-            : x
-      )
+      heatMaps: newMaps
     };
   }
 

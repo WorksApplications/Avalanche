@@ -8,12 +8,17 @@ import { applyMiddleware, compose, createStore, Middleware } from "redux";
 import thunk from "redux-thunk";
 import rootReducer from "../reducers";
 
-export interface IHeatMapInfo {
+export interface IHeatMapData {
   values: number[];
   maxValue: number;
 }
 
 export type HeatMapState = "empty" | "loading" | "loaded" | "failed";
+
+export interface IHeatMapInfo {
+  data?: IHeatMapData;
+  status: HeatMapState;
+}
 
 export interface ISnapshotInfo {
   uuid: string;
@@ -22,8 +27,6 @@ export interface ISnapshotInfo {
   environment?: string;
   createdAt?: Date;
   link?: string;
-  heatMap?: IHeatMapInfo;
-  heatMapStatus: HeatMapState;
 }
 
 export interface IPodInfo {
@@ -68,6 +71,7 @@ export interface IAnalysisDataState {
   readonly selectedPod: string | null;
   readonly pods: IPodInfo[];
   readonly snapshots: ISnapshotInfo[];
+  readonly heatMaps: Map<string, IHeatMapInfo>;
 }
 
 export interface IToastNotificationState {
