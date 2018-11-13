@@ -13,6 +13,7 @@ import {
 import { IHeatMap } from "../clients/heatMapClient";
 import {
   IAnalysisDataState,
+  IHeatMapData,
   IHeatMapInfo,
   IPodInfo,
   ISnapshotInfo
@@ -30,29 +31,34 @@ const INIT: IAnalysisDataState = {
   heatMaps: new Map<string, IHeatMapInfo>()
 };
 
-export function reduceHeatMap(
+export function convertHeatMap(
   heatMap: IHeatMap,
   maxValueSize: number
-): IHeatMap {
+): IHeatMapData {
   const rawValues = heatMap.values;
-  let values: number[] = [];
+  let meanValues: number[] = [];
+  let maxValues: number[] = [];
   if (rawValues.length > maxValueSize) {
     for (let i = 0; i < maxValueSize; i++) {
-      let v = 0;
+      let sum = 0;
+      let max = 0;
       const start = Math.floor((rawValues.length / maxValueSize) * i);
       const end = Math.ceil((rawValues.length / maxValueSize) * (i + 1));
       for (let j = start; j < end; j++) {
-        const c = rawValues[j];
-        if (c > v) {
-          v = c;
+        const v = rawValues[j];
+        sum += v;
+        if (v > max) {
+          max = v;
         }
       }
-      values.push(v);
+      meanValues.push(sum / (end - start));
+      maxValues.push(max);
     }
   } else {
-    values = rawValues;
+    meanValues = rawValues;
+    maxValues = rawValues;
   }
-  return { values, maxValue: heatMap.maxValue };
+  return { meanValues, maxValues, maxValueOfData: heatMap.maxValue };
 }
 
 function paramExists<K extends string>(
@@ -207,8 +213,8 @@ export function analysisData(
     };
   }
   if (isType(action, getHeatMapOperation.async.done)) {
-    // reduce `values` to 250 data for performance
-    const heatMap = reduceHeatMap(action.payload.result.heatMap, 250);
+    // reduce `values` for performance
+    const heatMap = convertHeatMap(action.payload.result.heatMap, 1200 * 4);
 
     const key = action.payload.params.heatMapId;
     const newMaps = new Map(state.heatMaps);

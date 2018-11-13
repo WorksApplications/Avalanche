@@ -9,8 +9,9 @@ import thunk from "redux-thunk";
 import rootReducer from "../reducers";
 
 export interface IHeatMapData {
-  values: number[];
-  maxValue: number;
+  meanValues: number[];
+  maxValues: number[];
+  maxValueOfData: number;
 }
 
 export type HeatMapState = "empty" | "loading" | "loaded" | "failed";

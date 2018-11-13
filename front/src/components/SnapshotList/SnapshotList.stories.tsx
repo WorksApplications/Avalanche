@@ -52,8 +52,9 @@ storiesOf("SnapshotList", module)
               heatMap:
                 status === "loaded"
                   ? {
-                      values: sawData,
-                      maxValue: 50
+                      maxValueOfData: 50,
+                      maxValues: sawData,
+                      meanValues: sawData.map(x => x / 2)
                     }
                   : undefined,
               getHeatMap: action(
@@ -95,8 +96,9 @@ storiesOf("SnapshotList", module)
               heatMap:
                 status1 === "loaded"
                   ? {
-                      values: parabolaData,
-                      maxValue: (N * N) / 4
+                      maxValueOfData: (N * N) / 4,
+                      maxValues: parabolaData,
+                      meanValues: parabolaData.map(x => x / 2)
                     }
                   : undefined,
               getHeatMap: action(
@@ -113,8 +115,9 @@ storiesOf("SnapshotList", module)
               heatMap:
                 status2 === "loaded"
                   ? {
-                      values: sawData,
-                      maxValue: 50
+                      maxValueOfData: 50,
+                      maxValues: sawData,
+                      meanValues: sawData.map(x => x / 2)
                     }
                   : undefined,
               getHeatMap: action(
@@ -131,8 +134,9 @@ storiesOf("SnapshotList", module)
               heatMap:
                 status3 === "loaded"
                   ? {
-                      values: sawData,
-                      maxValue: 50
+                      maxValueOfData: 50,
+                      maxValues: sawData,
+                      meanValues: sawData.map(x => x / 2)
                     }
                   : undefined,
               getHeatMap: action(
