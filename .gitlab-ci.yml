@@ -74,7 +74,7 @@ push-images:
 generate-kubefile:
     only:
         - master
-    stage: deploy
+    stage: build
     image: alpine:latest
     script:
         - apk add git
@@ -91,4 +91,39 @@ generate-kubefile:
         expire_in: 7 day
     variables:
         KUSTOMIZE_VERSION: "1.0.10"
+
+deploy-develop:
+    only:
+        - master
+    stage: deploy
+    image: alpine:latest
+    script:
+        - curl -LO https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl
+        - chmod +x ./kubectl
+        - kubectl 
+        - mkdir -p .kube
+        - echo ${KUBECTL_CONFIG} | envsubst > .kube/config
+        - kubectl get node
+    variables:
+        KUBECTL_VERSION: "1.12.0"
+        KUBECTL_CONFIG: |
+            apiVersion: v1
+            contexts:
+            - context:
+                cluster: kubernetes
+                user: kubernetes-admin
+              name: cluster
+            current-context: cluster
+            clusters:
+            - cluster:
+                certificate-authority-data: ${KUBE__CLUSTER_CERT}
+                server: ${KUBE_SERVER}
+              name: kubernetes
+            kind: Config
+            users:
+            - name: kubernetes-admin
+              user:
+                client-certificate-data: ${KUBE_CLIENT_CERT}
+                client-key-data: ${KUBE_CLIENT_KEY}
+
 
