@@ -141,7 +141,7 @@ deploy-production:
     script:
         - apk add --no-cache ca-certificates
         - mkdir ~/.kube
-        - echo ${KUBECTL_CONFIG} | envsubst > ~/.kube/config
+        - echo "${KUBECTL_CONFIG}" | envsubst > ~/.kube/config
         - kubectl apply -f production.yaml
     variables:
         KUBECTL_CONFIG: |
