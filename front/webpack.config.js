@@ -12,13 +12,13 @@ const index = path.resolve(__dirname, "./src/index.tsx");
 
 module.exports = env => {
   const isProduction = env && env.production;
-  const apiBaseUrl =
-    (env && env.API_BASE_URL) || process.env.API_BASE_URL || "/api";
+  const collectApiBase =
+    (env && env.COLLECT_API_BASE) || process.env.COLLECT_API_BASE || "/api";
+  const flamescopeBase =
+    (env && env.FLAMESCOPE_API_BASE) ||
+    process.env.FLAMESCOPE_API_BASE ||
+    "/api";
   const isAnalyzing = env && env.IS_ANALYZING;
-  if (!apiBaseUrl) {
-    console.log(env);
-    throw new Error("API_BASE_URL env var should not be empty.");
-  }
   const option = {
     mode: isProduction ? "production" : "development",
     output: {
@@ -89,7 +89,8 @@ module.exports = env => {
         filename: "[name].[hash:8].css"
       }),
       new DefinePlugin({
-        COLLECT_API_BASE: JSON.stringify(apiBaseUrl),
+        COLLECT_API_BASE: JSON.stringify(collectApiBase),
+        FLAMESCOPE_API_BASE: JSON.stringify(flamescopeBase),
         APP_NAME: `"🏔️ Avalanche"`,
         "process.env.NODE_ENV": isProduction
           ? JSON.stringify("production")

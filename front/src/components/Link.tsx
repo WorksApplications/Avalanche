@@ -5,16 +5,23 @@ interface IProperty {
   href: string;
 }
 
-const Link: React.StatelessComponent<IProperty> = ({ children, ...props }) => (
-  <span className={styles.wrap}>
-    <a
-      className={styles.anchor}
-      href={props.href}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {children}
-    </a>
-  </span>
-);
+const onClick = (e: React.MouseEvent) => {
+  e.stopPropagation();
+};
+
+const Link: React.StatelessComponent<IProperty> = ({ children, ...props }) => {
+  return (
+    <span className={styles.wrap}>
+      <a
+        className={styles.anchor}
+        href={props.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={onClick}
+      >
+        {children}
+      </a>
+    </span>
+  );
+};
 export default Link;
