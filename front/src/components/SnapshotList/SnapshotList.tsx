@@ -62,10 +62,15 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
           <td>
             <Link href={this.props.link}>Framescope</Link>
           </td>
+          <td className={styles.expander}>
+            <i className={"material-icons"}>
+              {this.state.isGraphOpen ? "expand_less" : "expand_more"}
+            </i>
+          </td>
         </tr>
         {this.state.isGraphOpen && (
           <tr>
-            <td colSpan={5} className={styles.graphArea}>
+            <td colSpan={6} className={styles.graphArea}>
               {this.renderBody()}
             </td>
           </tr>
@@ -120,7 +125,7 @@ export function Empty(props: { emptyMessage?: string }) {
   return (
     <tbody>
       <tr className={styles.empty} data-testid="empty-message">
-        <td colSpan={5}>{props.emptyMessage}</td>
+        <td colSpan={6}>{props.emptyMessage}</td>
       </tr>
     </tbody>
   );
@@ -143,6 +148,7 @@ export class SnapshotList extends React.Component<IProperty> {
               <th>Environment</th>
               <th>Created at</th>
               <th>Link</th>
+              <th />
             </tr>
           </thead>
           {this.props.rows.map((r, i) => (
