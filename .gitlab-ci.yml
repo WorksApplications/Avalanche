@@ -37,9 +37,9 @@ front-build:
     image: node:10.8.0
     script:
         - cd front
-        - yarn add --dev webpack webpack-cli
-        - npm install
-        - PATH=$PATH:$(pwd)/node_modules/.bin yarn build
+        - time yarn add --dev webpack webpack-cli
+        - time npm install
+        - time PATH=$PATH:$(pwd)/node_modules/.bin yarn build
     cache:
         key: react
         paths:
@@ -102,9 +102,12 @@ deploy-develop:
         - master
     stage: deploy
     image: roffe/kubectl:v1.11.2
+    allow_failure: true
     script:
         - mkdir ~/.kube
         - echo ${KUBECTL_CONFIG} | envsubst > ~/.kube/config
+        - ls ~
+          ls ~/.kube
         - cat ~/.kube/config | grep -v cert | grep -v key
         - kubectl get no
         - kubectl apply -f devel.yaml
@@ -136,8 +139,10 @@ deploy-production:
     stage: deploy
     image: roffe/kubectl:v1.11.2
     script:
-        - mkdir .kube
-        - echo ${KUBECTL_CONFIG} | envsubst > .kube/config
+        - mkdir ~/.kube
+        - echo ${KUBECTL_CONFIG} | envsubst > ~/.kube/config
+        - cat ~/.kube/config | grep -v cert | grep -v key
+        - kubectl get no
         - kubectl apply -f production.yaml
     variables:
         KUBECTL_CONFIG: |
