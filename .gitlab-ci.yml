@@ -98,7 +98,7 @@ deploy-develop:
     stage: deploy
     image: alpine:latest
     script:
-        - curl -LO https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl
+        - wget https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl
         - chmod +x ./kubectl
         - kubectl 
         - mkdir -p .kube
