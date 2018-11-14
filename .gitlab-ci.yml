@@ -107,6 +107,7 @@ deploy-develop:
     image: roffe/kubectl:v1.11.2
     allow_failure: true
     script:
+        - apk add --no-cache ca-certificates
         - mkdir ~/.kube
         - echo "${KUBECTL_CONFIG}" | envsubst > ~/.kube/config
         - cat ~/.kube/config | grep -v data
@@ -140,6 +141,7 @@ deploy-production:
     stage: deploy
     image: roffe/kubectl:v1.11.2
     script:
+        - apk add --no-cache ca-certificates
         - mkdir ~/.kube
         - echo ${KUBECTL_CONFIG} | envsubst > ~/.kube/config
         - cat ~/.kube/config | grep -v cert | grep -v key
