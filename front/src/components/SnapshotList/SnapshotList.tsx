@@ -13,18 +13,40 @@ export interface IItemProperty {
   link: string;
   heatMap?: HeatMapData;
   heatMapStatus: "empty" | "loading" | "loaded" | "failed";
+  openByDefault?: boolean;
+
   getHeatMap(): void;
 }
 
 const initialItemState = {
-  isGraphOpen: false
+  isGraphOpen: null as boolean | null
 };
 
 type ItemState = Readonly<typeof initialItemState>;
 
 // This child component is tightly coupled as a table row element
 export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
+  public static getDerivedStateFromProps(
+    props: IItemProperty,
+    state: ItemState
+  ): ItemState {
+    // open the page by default if `openByDefault` is set
+    const isGraphOpen =
+      state.isGraphOpen !== null
+        ? state.isGraphOpen
+        : typeof props.openByDefault !== "undefined"
+          ? props.openByDefault
+          : state.isGraphOpen;
+    return { ...state, isGraphOpen };
+  }
+
   public readonly state: ItemState = initialItemState;
+
+  public componentDidMount() {
+    if (this.state.isGraphOpen && this.props.heatMapStatus === "empty") {
+      this.props.getHeatMap();
+    }
+  }
 
   public render() {
     return (
@@ -123,8 +145,12 @@ export class SnapshotList extends React.Component<IProperty> {
               <th>Link</th>
             </tr>
           </thead>
-          {this.props.rows.map(r => (
-            <SnapshotItem key={r.uuid} {...r} />
+          {this.props.rows.map((r, i) => (
+            <SnapshotItem
+              key={r.uuid}
+              {...r}
+              openByDefault={i === 0 ? true : undefined}
+            />
           ))}
           {this.props.rows.length === 0 && (
             <Empty emptyMessage={this.props.emptyMessage} />
