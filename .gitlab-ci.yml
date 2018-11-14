@@ -107,7 +107,7 @@ deploy-develop:
         - mkdir ~/.kube
         - echo ${KUBECTL_CONFIG} | envsubst > ~/.kube/config
         - ls ~
-          ls ~/.kube
+        - ls ~/.kube
         - cat ~/.kube/config | grep -v cert | grep -v key
         - kubectl get no
         - kubectl apply -f devel.yaml
