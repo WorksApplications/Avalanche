@@ -101,7 +101,7 @@ deploy-develop:
     only:
         - master
     stage: deploy
-    image: roffe/kubectl:1.11.2
+    image: roffe/kubectl:v1.11.2
     script:
         - echo ${KUBECTL_CONFIG} | envsubst > .kube/config
         - kubectl apply -f devel.yaml
@@ -131,7 +131,7 @@ deploy-production:
         - master
     when: manual
     stage: deploy
-    image: roffe/kubectl:1.11.2
+    image: roffe/kubectl:v1.11.2
     script:
         - echo ${KUBECTL_CONFIG} | envsubst > .kube/config
         - kubectl apply -f production.yaml
