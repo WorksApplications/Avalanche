@@ -19,28 +19,32 @@ export class PodFilter extends React.Component<IProperty, State> {
   public render() {
     return (
       <div className={styles.wrap}>
-        <i className={[styles.icon, "wap-icon-filter"].join(" ")} />
+        <i className={[styles.icon, "material-icons"].join(" ")}>filter_list</i>
         <input
           type="text"
           className={styles.textBox}
           value={this.state.value}
-          onKeyUp={this.change.bind(this)}
+          onKeyUp={this.onChange}
           placeholder={this.props.placeholder}
-          onChange={this.change.bind(this)}
+          onChange={this.onChange}
         />
       </div>
     );
   }
 
-  private change(e: Event) {
-    const newValue = (e.target as HTMLInputElement).value;
+  private onChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    const newValue = (e.target as HTMLInputElement).value; // questionable...
     if (newValue !== this.state.value) {
       if (this.props.onValueChange) {
         this.props.onValueChange(this.state.value, newValue);
       }
       this.setState({ value: newValue });
     }
-  }
+  };
 }
 
 export default PodFilter;

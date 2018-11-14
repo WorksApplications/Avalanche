@@ -5,7 +5,6 @@ import * as ReactModal from "react-modal";
 import { Provider } from "react-redux";
 import App from "./App";
 import store, { history } from "./store/index";
-import "./wapicon/style.css";
 
 ReactModal.setAppElement("#root");
 

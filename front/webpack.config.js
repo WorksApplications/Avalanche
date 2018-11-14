@@ -5,20 +5,20 @@ const DefinePlugin = require("webpack").DefinePlugin;
 const TerserPlugin = require("terser-webpack-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
-const PreloadWebpackPlugin = require("preload-webpack-plugin");
+// const PreloadWebpackPlugin = require("preload-webpack-plugin");
 
 const dest = path.resolve(__dirname, "./public");
 const index = path.resolve(__dirname, "./src/index.tsx");
 
 module.exports = env => {
   const isProduction = env && env.production;
-  const apiBaseUrl =
-    (env && env.API_BASE_URL) || process.env.API_BASE_URL || "/api";
+  const collectApiBase =
+    (env && env.COLLECT_API_BASE) || process.env.COLLECT_API_BASE || "/api";
+  const flamescopeBase =
+    (env && env.FLAMESCOPE_API_BASE) ||
+    process.env.FLAMESCOPE_API_BASE ||
+    "/api";
   const isAnalyzing = env && env.IS_ANALYZING;
-  if (!apiBaseUrl) {
-    console.log(env);
-    throw new Error("API_BASE_URL env var should not be empty.");
-  }
   const option = {
     mode: isProduction ? "production" : "development",
     output: {
@@ -67,33 +67,6 @@ module.exports = env => {
               }
             }
           ]
-        },
-        {
-          test: /\.css$/,
-          use: [
-            isProduction ? MiniCssExtractPlugin.loader : "style-loader",
-            {
-              loader: "css-loader",
-              options: {
-                localIdentName: isProduction
-                  ? "[hash:base64:5]"
-                  : "[name]__[local]--[hash:base64:5]"
-              }
-            }
-          ]
-        },
-        {
-          // WAP fonts
-          test: /\.(woff(2)?|ttf|eot|svg)(\?[a-z1-9]+)?$/,
-          use: [
-            {
-              loader: "file-loader",
-              options: {
-                name: "[name].[hash:base64:5].[ext]",
-                outputPath: "fonts/"
-              }
-            }
-          ]
         }
       ]
     },
@@ -104,19 +77,20 @@ module.exports = env => {
         minify: isProduction,
         template: "src/index.html"
       }),
-      new PreloadWebpackPlugin({
-        rel: "preload",
-        include: "allAssets",
-        fileWhitelist: [
-          /app(\.[0-9a-f]+)?\.(js|css)$/
-          // /-page(\.[0-9a-f]+)?\.(js|css)$/
-        ]
-      }),
+      // new PreloadWebpackPlugin({
+      //   rel: "preload",
+      //   include: "allAssets",
+      //   fileWhitelist: [
+      //     /app(\.[0-9a-f]+)?\.(js|css)$/
+      //     // /-page(\.[0-9a-f]+)?\.(js|css)$/
+      //   ]
+      // }),
       new MiniCssExtractPlugin({
         filename: "[name].[hash:8].css"
       }),
       new DefinePlugin({
-        COLLECT_API_BASE: JSON.stringify(apiBaseUrl),
+        COLLECT_API_BASE: JSON.stringify(collectApiBase),
+        FLAMESCOPE_API_BASE: JSON.stringify(flamescopeBase),
         APP_NAME: `"🏔️ Avalanche"`,
         "process.env.NODE_ENV": isProduction
           ? JSON.stringify("production")

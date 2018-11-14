@@ -1,4 +1,5 @@
 import * as React from "react";
+import Spinner from "../Spinner";
 import styles from "./PodCard.scss";
 
 export interface IProperty {
@@ -21,7 +22,6 @@ export class PodCard extends React.Component<IProperty, State> {
   public readonly state: State = initialState;
 
   public render() {
-    const onSave = this.props.onSaveButtonClick || (() => undefined);
     const hashPart = this.props.name.startsWith(this.props.app)
       ? this.props.name.substring(this.props.app.length)
       : "";
@@ -33,7 +33,7 @@ export class PodCard extends React.Component<IProperty, State> {
           this.state.isOpen ? styles.isOpen : undefined
         ].join(" ")}
         data-testid="root"
-        onClick={this.onClick.bind(this)}
+        onClick={this.onClick}
       >
         <div
           className={[
@@ -43,16 +43,15 @@ export class PodCard extends React.Component<IProperty, State> {
           data-testid="save"
         >
           {this.props.isSaving ? (
-            <i
-              className={[styles.spinner, "wap-icon-spinner"].join(" ")}
-              data-testid="spinner"
-            />
+            <div className={styles.spinner}>
+              <Spinner />
+            </div>
           ) : (
             <button className={styles.saveButton} data-testid="save-button">
               <span className={styles.saveTooltip}>Save snapshot</span>
               <span
                 className={styles.saveLabel}
-                onClick={onSave}
+                onClick={this.onSave}
                 data-testid="save-button-body"
               >
                 Save
@@ -142,10 +141,16 @@ export class PodCard extends React.Component<IProperty, State> {
     );
   }
 
-  private onClick() {
-    const willOpen = !this.state.isOpen;
-    this.setState({ isOpen: willOpen });
-  }
+  private onSave = (e: React.MouseEvent<HTMLSpanElement>) => {
+    e.stopPropagation();
+    if (this.props.onSaveButtonClick) {
+      this.props.onSaveButtonClick();
+    }
+  };
+
+  private onClick = () => {
+    this.setState({ isOpen: !this.state.isOpen });
+  };
 }
 
 export default PodCard;

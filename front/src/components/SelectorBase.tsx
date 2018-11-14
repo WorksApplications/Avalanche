@@ -43,7 +43,7 @@ class SelectorBase extends React.Component<IProperty, State> {
   };
   public readonly state: State = initialState;
 
-  private container: HTMLElement | null = null;
+  private container: HTMLDivElement | null = null;
 
   constructor(props: IProperty) {
     super(props);
@@ -62,7 +62,7 @@ class SelectorBase extends React.Component<IProperty, State> {
           <li
             className={[styles.optionItem, styles.unselectOption].join(" ")}
             key={"!!!!"}
-            onClick={this.setSelectingOption.bind(this, null)}
+            onClick={this.onOptionClick(null)}
           >
             {this.props.unselectOptionLabel}
           </li>
@@ -81,7 +81,7 @@ class SelectorBase extends React.Component<IProperty, State> {
                   : undefined
               ].join(" ")}
               key={o.value}
-              onClick={this.setSelectingOption.bind(this, o.value)}
+              onClick={this.onOptionClick(o.value)}
             >
               {o.label}
             </li>
@@ -99,7 +99,7 @@ class SelectorBase extends React.Component<IProperty, State> {
           styles.wrap,
           this.props.disabled ? styles.disabled : undefined
         ].join(" ")}
-        ref={this.getContainer.bind(this)}
+        ref={this.getContainer}
       >
         <div
           className={[
@@ -111,7 +111,7 @@ class SelectorBase extends React.Component<IProperty, State> {
                 ? ""
                 : styles.placeholder
           ].join(" ")}
-          onClick={this.onClickSelector.bind(this)}
+          onClick={this.onClickSelector}
         >
           {selectorString}
         </div>
@@ -132,9 +132,9 @@ class SelectorBase extends React.Component<IProperty, State> {
     document.removeEventListener("keydown", this.onKeyDown, true);
   }
 
-  private getContainer(ref: HTMLElement) {
+  private getContainer = (ref: HTMLDivElement) => {
     this.container = ref;
-  }
+  };
 
   private onClickOutside = (e: Event) => {
     if (e.target instanceof Node) {
@@ -198,7 +198,11 @@ class SelectorBase extends React.Component<IProperty, State> {
     }
   };
 
-  private setSelectingOption(value: string) {
+  private onOptionClick = (value: string | null) => () => {
+    this.setSelectingOption(value);
+  };
+
+  private setSelectingOption = (value: string | null) => {
     if (this.props.selectedValue === value) {
       this.setState({ isOpen: false });
       return;
@@ -213,18 +217,16 @@ class SelectorBase extends React.Component<IProperty, State> {
     if (this.props.onValueChanged) {
       this.props.onValueChanged(value);
     }
-  }
+  };
 
-  private onClickSelector(event: MouseEvent) {
+  private onClickSelector = (event: React.MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
     event.preventDefault();
 
     if (!this.props.disabled) {
-      this.setState({
-        isOpen: !this.state.isOpen
-      });
+      this.setState({ isOpen: !this.state.isOpen });
     }
-  }
+  };
 }
 
 export default SelectorBase;

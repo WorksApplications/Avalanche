@@ -139,7 +139,7 @@ export class RunningPodsView extends React.Component<Props, State> {
         <div className={styles.filter}>
           <PodFilter
             placeholder="Filter with..."
-            onValueChange={this.onFilterChange.bind(this)}
+            onValueChange={this.onFilterChange}
           />
         </div>
         {this.props.applicationName && (
@@ -174,10 +174,9 @@ export class RunningPodsView extends React.Component<Props, State> {
     );
   }
 
-  // noinspection JSUnusedLocalSymbols
-  private onFilterChange(previous: string, current: string) {
+  private onFilterChange = (previous: string, current: string) => {
     this.setState({ filteringValue: current });
-  }
+  };
 }
 
 export default connect(

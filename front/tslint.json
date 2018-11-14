@@ -3,8 +3,9 @@
   "extends": ["tslint:latest", "tslint-react", "tslint-config-prettier"],
   "rules": {
     "prettier": true,
-    "jsx-no-bind": false,
-    "object-literal-sort-keys": false,
-    "no-reference": false
+    "object-literal-sort-keys": false
+  },
+  "linterOptions": {
+    "exclude": ["src/generated/**/*"]
   }
 }

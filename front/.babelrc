@@ -2,7 +2,11 @@
   "presets": [
     [
       "@babel/preset-env",
-      { "targets": { "browsers": "last 2 versions" }, "modules": false }
+      {
+        "targets": { "browsers": "last 2 versions" },
+        "useBuiltIns": "usage",
+        "modules": false
+      }
     ],
     "@babel/preset-typescript",
     "@babel/preset-react"

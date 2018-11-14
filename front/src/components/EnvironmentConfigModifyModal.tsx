@@ -41,7 +41,7 @@ export class EnvironmentConfigModifyModal extends React.Component<IProperty> {
                 name="kind"
                 value="mt"
                 checked={this.props.isMultitenant === true}
-                onChange={this.onIsMultitenantChange.bind(this)}
+                onChange={this.onIsMultitenantChange}
               />
               <label htmlFor="kind-mt">MT</label>
               <input
@@ -50,7 +50,7 @@ export class EnvironmentConfigModifyModal extends React.Component<IProperty> {
                 name="kind"
                 value="st"
                 checked={this.props.isMultitenant === false}
-                onChange={this.onIsMultitenantChange.bind(this)}
+                onChange={this.onIsMultitenantChange}
               />
               <label htmlFor="kind-st">ST</label>
               {/*<div className={dialogStyles.description}>a</div>*/}
@@ -62,7 +62,7 @@ export class EnvironmentConfigModifyModal extends React.Component<IProperty> {
               <input
                 type="text"
                 name="api"
-                onChange={this.onKubernetesApiChange.bind(this)}
+                onChange={this.onKubernetesApiChange}
                 value={this.props.kubernetesApi || ""}
               />
               <div className={styles.description}>
@@ -79,7 +79,7 @@ export class EnvironmentConfigModifyModal extends React.Component<IProperty> {
                 name="version"
                 value="-17.12"
                 checked={this.props.version === "-17.12"}
-                onChange={this.onVersionChange.bind(this)}
+                onChange={this.onVersionChange}
               />
               <label htmlFor="ver-b1712">Before 17.12</label>
               <input
@@ -88,7 +88,7 @@ export class EnvironmentConfigModifyModal extends React.Component<IProperty> {
                 name="version"
                 value="18.03-"
                 checked={this.props.version === "18.03-"}
-                onChange={this.onVersionChange.bind(this)}
+                onChange={this.onVersionChange}
               />
               <label htmlFor="ver-a1803">After 18.03</label>
               {/*<div className={dialogStyles.description}>a</div>*/}
@@ -111,19 +111,17 @@ export class EnvironmentConfigModifyModal extends React.Component<IProperty> {
     );
   }
 
-  private onIsMultitenantChange(e: Event) {
-    const value = (e.target as HTMLInputElement).value;
-    this.props.onIsMultitenantChange(value === "mt");
-  }
+  private onIsMultitenantChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.props.onIsMultitenantChange(e.target.value === "mt");
+  };
 
-  private onKubernetesApiChange(e: Event) {
-    this.props.onKubernetesApiChange((e.target as HTMLInputElement)
-      .value as string);
-  }
+  private onKubernetesApiChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.props.onKubernetesApiChange(e.target.value);
+  };
 
-  private onVersionChange(e: Event) {
-    this.props.onVersionChange((e.target as HTMLInputElement).value as string);
-  }
+  private onVersionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.props.onVersionChange(e.target.value);
+  };
 }
 
 export default EnvironmentConfigModifyModal;

@@ -39,7 +39,7 @@ front-build:
         - cd front
         - time yarn add --dev webpack webpack-cli
         - time npm install
-        - time PATH=$PATH:$(pwd)/node_modules/.bin yarn build
+        - time PATH=$PATH:$(pwd)/node_modules/.bin yarn build --env.COLLECT_API_BASE=${COLLECT_API_BASE} --env.FLAMESCOPE_API_BASE=${FLAMESCOPE_API_BASE}
     cache:
         key: react
         paths:
@@ -48,6 +48,9 @@ front-build:
         paths:
             - front/public/
         expire_in: 1 hour
+    variables:
+        COLLECT_API_BASE: "/api"
+        FLAMESCOPE_API_BASE: "http://flamescope.internal.worksap.com/heatmap"
 
 push-images:
     only:

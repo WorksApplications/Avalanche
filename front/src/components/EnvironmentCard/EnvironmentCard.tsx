@@ -43,7 +43,7 @@ export class EnvironmentCard extends React.Component<IProperty> {
         )}
         <button
           className={styles.edit}
-          onClick={this.props.onEdit.bind(this)}
+          onClick={this.props.onEdit}
           role="button"
           data-testid="edit-button"
         >

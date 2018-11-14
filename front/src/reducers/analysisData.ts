@@ -5,11 +5,19 @@ import { isType } from "typescript-fsa";
 import {
   getAppsOperation,
   getEnvironmentsOfAppOperation,
+  getHeatMapOperation,
   getLatestSnapshotsOperation,
   getRunningPodsOperation,
   postSnapshotOperation
 } from "../actions";
-import { IAnalysisDataState, IPodInfo, ISnapshotInfo } from "../store";
+import { IHeatMap } from "../clients/heatMapClient";
+import {
+  IAnalysisDataState,
+  IHeatMapData,
+  IHeatMapInfo,
+  IPodInfo,
+  ISnapshotInfo
+} from "../store";
 
 const INIT: IAnalysisDataState = {
   applicationName: null,
@@ -19,8 +27,39 @@ const INIT: IAnalysisDataState = {
   runningPods: [],
   selectedPod: null,
   pods: [],
-  snapshots: []
+  snapshots: [],
+  heatMaps: new Map<string, IHeatMapInfo>()
 };
+
+export function convertHeatMap(
+  heatMap: IHeatMap,
+  maxValueSize: number
+): IHeatMapData {
+  const rawValues = heatMap.values;
+  let meanValues: number[] = [];
+  let maxValues: number[] = [];
+  if (rawValues.length > maxValueSize) {
+    for (let i = 0; i < maxValueSize; i++) {
+      let sum = 0;
+      let max = 0;
+      const start = Math.floor((rawValues.length / maxValueSize) * i);
+      const end = Math.ceil((rawValues.length / maxValueSize) * (i + 1));
+      for (let j = start; j < end; j++) {
+        const v = rawValues[j];
+        sum += v;
+        if (v > max) {
+          max = v;
+        }
+      }
+      meanValues.push(sum / (end - start));
+      maxValues.push(max);
+    }
+  } else {
+    meanValues = rawValues;
+    maxValues = rawValues;
+  }
+  return { meanValues, maxValues, maxValueOfData: heatMap.maxValue };
+}
 
 function paramExists<K extends string>(
   params: any,
@@ -156,6 +195,42 @@ export function analysisData(
     return {
       ...state,
       snapshots: action.payload.result.snapshots
+    };
+  }
+
+  if (isType(action, getHeatMapOperation.async.started)) {
+    const key = action.payload.heatMapId;
+    const current = state.heatMaps.get(key);
+    if (current && current.status === "loading") {
+      return state;
+    }
+
+    const newMaps = new Map(state.heatMaps);
+    newMaps.set(key, { status: "loading" });
+    return {
+      ...state,
+      heatMaps: newMaps
+    };
+  }
+  if (isType(action, getHeatMapOperation.async.done)) {
+    // reduce `values` for performance
+    const heatMap = convertHeatMap(action.payload.result.heatMap, 1200 * 4);
+
+    const key = action.payload.params.heatMapId;
+    const newMaps = new Map(state.heatMaps);
+    newMaps.set(key, { status: "loaded", data: heatMap });
+    return {
+      ...state,
+      heatMaps: newMaps
+    };
+  }
+  if (isType(action, getHeatMapOperation.async.failed)) {
+    const key = action.payload.params.heatMapId;
+    const newMaps = new Map(state.heatMaps);
+    newMaps.set(key, { status: "failed" });
+    return {
+      ...state,
+      heatMaps: newMaps
     };
   }
 

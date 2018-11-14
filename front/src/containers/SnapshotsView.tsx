@@ -6,6 +6,7 @@ import { bindActionCreators, Dispatch } from "redux";
 import {
   getAppsOperation,
   getEnvironmentsOfAppOperation,
+  getHeatMapOperation,
   getLatestSnapshotsOperation,
   toastr
 } from "../actions";
@@ -63,7 +64,7 @@ const mapStateToProps = (state: IApplicationState) => ({
   filteringPod: state.analysisData.selectedPod,
   pods: state.analysisData.pods,
   snapshots: sortedSnapshots(state.analysisData.snapshots),
-  location: state.router.location
+  heatMaps: state.analysisData.heatMaps
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) =>
@@ -74,7 +75,8 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
       ...operationsToActionCreators({
         getAppsOperation,
         getEnvironmentsOfAppOperation,
-        getLatestSnapshotsOperation
+        getLatestSnapshotsOperation,
+        getHeatMapOperation
       })
     },
     dispatch
@@ -136,13 +138,36 @@ export class SnapshotsView extends React.Component<Props> {
     let showingSnapshots: ISnapshotData[] = [];
 
     if (this.props.snapshots.length > 0) {
-      showingSnapshots = this.props.snapshots.map(x => ({
-        uuid: x.uuid,
-        environment: x.environment || "Unknown",
-        podName: x.pod || "Unknown",
-        createdAt: x.createdAt,
-        link: x.link || "#"
-      }));
+      showingSnapshots = this.props.snapshots.map(x => {
+        let heatMapId = "";
+        if (x.link) {
+          const tokens = x.link.split("/");
+          heatMapId = tokens[tokens.length - 1];
+        }
+        const heatMap = this.props.heatMaps.get(heatMapId);
+        return {
+          uuid: x.uuid,
+          environment: x.environment || "Unknown",
+          podName: x.pod || "Unknown",
+          createdAt: x.createdAt,
+          link: x.link || "#",
+          heatMap: heatMap && heatMap.data,
+          heatMapStatus: heatMap ? heatMap.status : "empty",
+          getHeatMap: () => {
+            this.props
+              .getHeatMapOperation({
+                snapshotId: x.uuid,
+                heatMapId
+              })
+              .catch(() => {
+                this.props.toastr(
+                  `Failed to get heat map for "${x.uuid}".`,
+                  "error"
+                );
+              });
+          }
+        };
+      });
       if (this.props.filteringEnvironment) {
         showingSnapshots = showingSnapshots.filter(
           x => x.environment === this.props.filteringEnvironment
@@ -168,7 +193,7 @@ export class SnapshotsView extends React.Component<Props> {
             <AppSelector
               options={showingApps}
               selectedValue={this.props.appName}
-              onValueChanged={this.onAppChanged.bind(this)}
+              onValueChanged={this.onAppChanged}
               unselectOptionLabel="Unselect"
               placeholder="Select Application"
             />
@@ -179,7 +204,7 @@ export class SnapshotsView extends React.Component<Props> {
             <SnapshotFilter
               options={envFilterData}
               selectedValue={this.props.filteringEnvironment}
-              onValueChanged={this.onEnvironmentChanged.bind(this)}
+              onValueChanged={this.onEnvironmentChanged}
               placeholder="Select environment"
               unselectOptionLabel="Unselect"
               disabled={!this.props.appName}
@@ -189,7 +214,7 @@ export class SnapshotsView extends React.Component<Props> {
             <SnapshotFilter
               options={podFilterData}
               selectedValue={this.props.filteringPod}
-              onValueChanged={this.onPodChanged.bind(this)}
+              onValueChanged={this.onPodChanged}
               placeholder="Select pod name"
               unselectOptionLabel="Unselect"
               disabled={!this.props.filteringEnvironment}
@@ -203,17 +228,17 @@ export class SnapshotsView extends React.Component<Props> {
     );
   }
 
-  private onAppChanged(app: string) {
+  private onAppChanged = (app: string) => {
     this.pushParams({ newApp: app, newEnv: null, newPod: null });
-  }
+  };
 
-  private onEnvironmentChanged(env: string) {
+  private onEnvironmentChanged = (env: string) => {
     this.pushParams({ newEnv: env, newPod: null });
-  }
+  };
 
-  private onPodChanged(pod: string) {
+  private onPodChanged = (pod: string) => {
     this.pushParams({ newPod: pod });
-  }
+  };
 
   private pushParams(params: {
     newApp?: string | null;

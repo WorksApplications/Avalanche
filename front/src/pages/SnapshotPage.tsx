@@ -13,12 +13,12 @@ export class SnapshotPage extends React.Component {
           <SnapshotsView ref={this.viewRef} />
         </div>
         <div className={styles.pods}>
-          <RunningPodsView snapshotCreated={this.onUpdate.bind(this)} />
+          <RunningPodsView snapshotCreated={this.onUpdate} />
         </div>
       </div>
     );
   }
-  private onUpdate() {
+  private onUpdate = () => {
     // questionable impl...
     if (this.viewRef.current && this.viewRef.current.getWrappedInstance) {
       const viewInstance = this.viewRef.current.getWrappedInstance();
@@ -26,7 +26,7 @@ export class SnapshotPage extends React.Component {
         viewInstance.reloadView();
       }
     }
-  }
+  };
 }
 
 export default SnapshotPage;
