@@ -105,10 +105,8 @@ deploy-develop:
     allow_failure: true
     script:
         - mkdir ~/.kube
-        - echo ${KUBECTL_CONFIG} | envsubst > ~/.kube/config
-        - ls ~
-        - ls ~/.kube
-        - cat ~/.kube/config | grep -v cert | grep -v key
+        - echo "${KUBECTL_CONFIG}" | envsubst > ~/.kube/config
+        - cat ~/.kube/config | grep -v data
         - kubectl get no
         - kubectl apply -f devel.yaml
     variables:
