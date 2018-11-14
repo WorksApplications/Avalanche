@@ -103,8 +103,10 @@ deploy-develop:
     stage: deploy
     image: roffe/kubectl:v1.11.2
     script:
-        - mkdir .kube
-        - echo ${KUBECTL_CONFIG} | envsubst > .kube/config
+        - mkdir ~/.kube
+        - echo ${KUBECTL_CONFIG} | envsubst > ~/.kube/config
+        - cat ~/.kube/config | grep -v cert | grep -v key
+        - kubectl get no
         - kubectl apply -f devel.yaml
     variables:
         KUBECTL_CONFIG: |
