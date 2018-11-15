@@ -40,7 +40,8 @@ module.exports = env => {
             {
               loader: "babel-loader",
               options: {
-                cacheDirectory: true
+                cacheDirectory: true,
+                envName: isProduction ? "production" : "development"
               }
             }
           ]
@@ -127,7 +128,7 @@ module.exports = env => {
       new (require("webpack-bundle-analyzer")).BundleAnalyzerPlugin()
     );
   }
-  if (isProduction) {
+  if (isProduction && !isAnalyzing) {
     const zopfli = require("@gfx/zopfli");
     option.plugins.push(
       new (require("compression-webpack-plugin"))({
