@@ -2,7 +2,7 @@ import * as React from "react";
 import styles from "./Spinner.scss";
 
 const Spinner: React.FunctionComponent = () => (
-  <svg className={styles.spinner} viewBox="0 0 50 50">
+  <svg className={styles.spinner} viewBox="0 0 50 50" data-testid="spinner">
     <circle
       className={styles.dash}
       fill="none"
