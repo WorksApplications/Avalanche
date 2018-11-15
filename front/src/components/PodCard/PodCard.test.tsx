@@ -97,7 +97,7 @@ describe("<PodCard />", () => {
         />
       );
       if (queryByTestId("save-button-body")) {
-        fireEvent.click(queryByTestId("save-button-body"));
+        fireEvent.click(queryByTestId("save-button-body")!);
       }
       expect(mockHandler).not.toHaveBeenCalled();
     });
@@ -108,7 +108,7 @@ describe("<PodCard />", () => {
       const { queryByTestId } = render(<PodCard {...basicCardProps} />);
       expect(queryByTestId("info-root")).not.toBeNull();
       expect(queryByTestId("snapshot-area")).toBeNull();
-      fireEvent.click(queryByTestId("info-root"));
+      fireEvent.click(queryByTestId("info-root")!);
       expect(queryByTestId("snapshot-area")).not.toBeNull();
     });
 
@@ -116,7 +116,7 @@ describe("<PodCard />", () => {
       const { queryAllByTestId, queryByTestId } = render(
         <PodCard {...basicCardProps} snapshots={[]} />
       );
-      fireEvent.click(queryByTestId("info-root"));
+      fireEvent.click(queryByTestId("info-root")!);
       expect(queryAllByTestId("snapshot")).toHaveLength(0);
       expect(queryByTestId("empty-message")).not.toBeNull();
     });
@@ -128,7 +128,7 @@ describe("<PodCard />", () => {
           snapshots={[basicCardProps.snapshots[0]]}
         />
       );
-      fireEvent.click(queryByTestId("info-root"));
+      fireEvent.click(queryByTestId("info-root")!);
       expect(getAllByTestId("snapshot")).toHaveLength(1);
       expect(queryByTestId("empty-message")).toBeNull();
     });
@@ -140,7 +140,7 @@ describe("<PodCard />", () => {
           snapshots={basicCardProps.snapshots.slice(0, 3)}
         />
       );
-      fireEvent.click(queryByTestId("info-root"));
+      fireEvent.click(queryByTestId("info-root")!);
       expect(getAllByTestId("snapshot")).toHaveLength(3);
       expect(queryByTestId("empty-message")).toBeNull();
     });
@@ -149,7 +149,7 @@ describe("<PodCard />", () => {
       const { getAllByTestId, queryByTestId } = render(
         <PodCard {...basicCardProps} snapshots={basicCardProps.snapshots} />
       );
-      fireEvent.click(queryByTestId("info-root"));
+      fireEvent.click(queryByTestId("info-root")!);
       const snapshotElements = getAllByTestId("snapshot");
       expect(snapshotElements).toHaveLength(3);
       expect(queryByTestId("empty-message")).toBeNull();
