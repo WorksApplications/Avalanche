@@ -1,7 +1,7 @@
 import * as React from "react";
 import styles from "./Spinner.scss";
 
-const Spinner: React.StatelessComponent = () => (
+const Spinner: React.FunctionComponent = () => (
   <svg className={styles.spinner} viewBox="0 0 50 50">
     <circle
       className={styles.dash}
