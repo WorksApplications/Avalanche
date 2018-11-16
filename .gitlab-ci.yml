@@ -50,7 +50,7 @@ front-build:
         expire_in: 1 hour
     variables:
         COLLECT_API_BASE: "/api"
-        FLAMESCOPE_API_BASE: "http://flamescope.internal.worksap.com/heatmap"
+        FLAMESCOPE_API_BASE: "http://flamescope.internal.worksap.com"
 
 push-images:
     only:

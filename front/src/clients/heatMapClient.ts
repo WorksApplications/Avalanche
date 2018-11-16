@@ -1,7 +1,7 @@
 import { FLAMESCOPE_API_BASE } from "../constants";
 
 export default function(fileName: string): Promise<IHeatMap> {
-  const url = `${FLAMESCOPE_API_BASE}/?filename=${fileName}`;
+  const url = `${FLAMESCOPE_API_BASE}/heatmap/?filename=${fileName}`;
   return fetch(url)
     .then(res => {
       if (!res.ok) {
