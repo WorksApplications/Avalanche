@@ -3,8 +3,8 @@ package pod
 import (
 	"database/sql"
 	"fmt"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/layout"
 	"github.com/go-openapi/strfmt"
 	"log"
 	"time"

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
+	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/pod"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 )
 
 /* +--+----+---------------------------+
