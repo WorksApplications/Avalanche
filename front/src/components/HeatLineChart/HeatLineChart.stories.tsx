@@ -1,6 +1,7 @@
 // tslint:disable:no-implicit-dependencies no-submodule-imports
 import * as React from "react";
 
+import { action } from "@storybook/addon-actions";
 import { storiesOf } from "@storybook/react";
 import HeatLineChart from "./HeatLineChart";
 
@@ -36,6 +37,7 @@ storiesOf("HeatLineChart", module)
         maxValueOfData={0}
         meanValues={[]}
         maxValues={[]}
+        onSectionSelect={action("Selected")}
       />
     </div>
   ))
@@ -46,6 +48,7 @@ storiesOf("HeatLineChart", module)
         maxValueOfData={1}
         maxValues={proportionData}
         meanValues={proportionData.map(x => (x * 3) / 4)}
+        onSectionSelect={action("Selected")}
       />
     </div>
   ))
@@ -56,6 +59,7 @@ storiesOf("HeatLineChart", module)
         maxValueOfData={(N * N) / 4}
         maxValues={parabolaData}
         meanValues={parabolaData.map(x => (x * 3) / 4)}
+        onSectionSelect={action("Selected")}
       />
     </div>
   ))
@@ -66,6 +70,7 @@ storiesOf("HeatLineChart", module)
         maxValueOfData={50}
         maxValues={sawData}
         meanValues={sawData.map(x => (x * 3) / 4)}
+        onSectionSelect={action("Selected")}
       />
     </div>
   ))
@@ -76,6 +81,7 @@ storiesOf("HeatLineChart", module)
         maxValueOfData={1}
         maxValues={logisticMapPow256Raw}
         meanValues={logisticMapPow256Raw.map(x => (x * 3) / 4)}
+        onSectionSelect={action("Selected")}
       />
     </div>
   ));

@@ -13,6 +13,7 @@ import {
 import AppSelector from "../components/AppSelector";
 import SnapshotFilter from "../components/SnapshotFilter";
 import SnapshotList, { ISnapshotData } from "../components/SnapshotList";
+import { FLAMESCOPE_API_BASE } from "../constants";
 import { operationsToActionCreators } from "../helpers";
 import { IApplicationState, ISnapshotInfo } from "../store";
 import styles from "./SnapshotsView.scss";
@@ -152,7 +153,27 @@ export class SnapshotsView extends React.Component<Props> {
           createdAt: x.createdAt,
           link: x.link || "#",
           heatMap: heatMap && heatMap.data,
+          heatMapId,
           heatMapStatus: heatMap ? heatMap.status : "empty",
+          onSectionSelect: (normalizedStart: number, normalizedEnd: number) => {
+            if (heatMap && heatMap.data) {
+              const start = normalizedStart * heatMap.data.numColumns;
+              const startColumn = Math.floor(start);
+              const startRow = Math.floor(
+                (start - startColumn) * heatMap.data.numRows
+              );
+
+              const end = normalizedEnd * heatMap.data.numColumns;
+              const endColumn = Math.floor(end);
+              const endRow = Math.floor(
+                (end - endColumn) * heatMap.data.numRows
+              );
+
+              window.open(
+                `${FLAMESCOPE_API_BASE}/#/heatmap/${heatMapId}/flamegraph/${startColumn}.${startRow}/${endColumn}.${endRow}/`
+              );
+            }
+          },
           getHeatMap: () => {
             this.props
               .getHeatMapOperation({

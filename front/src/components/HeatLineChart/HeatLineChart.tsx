@@ -2,11 +2,13 @@ import * as React from "react";
 
 import styles from "./HeatLineChart.scss";
 
-export interface IProperty {
+interface IProperty {
   meanValues: number[];
   maxValues: number[];
   maxValueOfData: number;
   hash: string;
+
+  onSectionSelect(start: number, end: number): void;
 }
 
 interface IPopoverState {
@@ -16,15 +18,23 @@ interface IPopoverState {
 }
 
 const initialState = {
-  popover: null as IPopoverState | null
+  popover: null as IPopoverState | null,
+  sectionStart: null as number | null,
+  sectionEnd: null as number | null
 };
 
 type State = Readonly<typeof initialState>;
 
-export type Data = Pick<IProperty, Exclude<keyof IProperty, "hash">>;
+export type Property = Pick<
+  IProperty,
+  Exclude<keyof IProperty, "hash" | "onSectionSelect">
+>;
 
-const padding = 0.05;
+const padding = 0.1;
 const markSize = 0.1;
+const svgHeight = 1;
+const svgWidth = 10;
+const strokeWidth = 0.008;
 
 function reduceMaxPoints(
   points: Array<{ x: number; y: number; i: number }>
@@ -42,11 +52,18 @@ function reduceMaxPoints(
   return ret;
 }
 
+function normalizeClamp(point: number, entireWidth: number) {
+  const val =
+    ((point / entireWidth) * svgWidth - padding) / (svgWidth - padding * 2);
+  return val < 0 ? 0 : 1 < val ? 1 : val;
+}
+
 // width:height = (about) 10:1
 // currently, colored with relative value
 class HeatLineChart extends React.Component<IProperty, State> {
   public readonly state: State = initialState;
   private wrapRef = React.createRef<HTMLDivElement>();
+  private svgRef = React.createRef<SVGSVGElement>();
 
   public render() {
     const { meanValues, maxValues, maxValueOfData, hash } = this.props;
@@ -54,22 +71,50 @@ class HeatLineChart extends React.Component<IProperty, State> {
 
     const meanPointsString = meanValues
       .map((v, i) => {
-        const x = (i / xNormalizer) * 10 * ((10 - padding * 2) / 10) + padding;
-        const y = (1 - v / maxValueOfData) * (1 - padding * 2) + padding;
+        const x =
+          (i / xNormalizer) * svgWidth * ((svgWidth - padding * 2) / svgWidth) +
+          padding;
+        const y =
+          (1 - v / maxValueOfData) * (svgHeight - padding * 2) + padding;
         return `${x},${y}`;
       })
       .join(" ");
     const maxPoints = maxValues
       .map((v, i) => {
-        const x = (i / xNormalizer) * 10 * ((10 - padding * 2) / 10) + padding;
+        const x =
+          (i / xNormalizer) * svgWidth * ((svgWidth - padding * 2) / svgWidth) +
+          padding;
         return { x, y: v / maxValueOfData, i };
       })
       .filter(v => v.y > 0.9);
     const reducedMaxPoints = reduceMaxPoints(maxPoints);
+    let section;
+    if (this.state.sectionStart && this.state.sectionEnd) {
+      const svgRect = this.svgRef.current!.getBoundingClientRect();
+      const point1 = (this.state.sectionStart / svgRect.width) * svgWidth;
+      const point2 = (this.state.sectionEnd / svgRect.width) * svgWidth;
+      section =
+        point1 < point2
+          ? {
+              // selecting rightward
+              x: point1,
+              width: point2 - point1
+            }
+          : // selecting leftward
+            {
+              x: point2,
+              width: point1 - point2
+            };
+    }
 
     return (
       <div className={styles.wrap} ref={this.wrapRef}>
-        <svg viewBox="0 0 10 1">
+        <svg
+          viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+          ref={this.svgRef}
+          onClick={this.onGraphClick}
+          onMouseMove={this.onGraphMove}
+        >
           <defs>
             <linearGradient
               id={`mean-color-${hash}`}
@@ -82,13 +127,19 @@ class HeatLineChart extends React.Component<IProperty, State> {
               <stop offset="40%" stopColor="#89b6f5" /* hsl(215, 85, 75) */ />
               <stop offset="90%" stopColor="#e5195d" /* hsl(340, 80, 50) */ />
             </linearGradient>
-            <mask id={`mean-line-${hash}`} x="0" y="0" width="10" height="1">
+            <mask
+              id={`mean-line-${hash}`}
+              x="0"
+              y="0"
+              width={svgWidth}
+              height={svgHeight}
+            >
               <polyline
                 strokeLinecap="round"
                 points={meanPointsString}
                 fill="transparent"
                 stroke="#e6f2fd"
-                strokeWidth="0.01"
+                strokeWidth={strokeWidth}
               />
             </mask>
             <g id={`notch-${hash}`}>
@@ -98,19 +149,17 @@ class HeatLineChart extends React.Component<IProperty, State> {
                   2} ${markSize}  ${(markSize * 3) / 4} 0`}
                 fill="none"
                 stroke="#e5195d" /* hsl(340, 80, 50) */
-                strokeWidth="0.008"
+                strokeWidth={strokeWidth * 0.8}
               />
             </g>
           </defs>
           <g>
             <rect
-              width="10"
-              height="1"
-              style={{
-                stroke: "none",
-                fill: `url(#mean-color-${hash})`,
-                mask: `url(#mean-line-${hash})`
-              }}
+              width={svgWidth}
+              height={svgHeight}
+              stroke="none"
+              fill={`url(#mean-color-${hash})`}
+              mask={`url(#mean-line-${hash})`}
             />
           </g>
           <g>
@@ -124,6 +173,18 @@ class HeatLineChart extends React.Component<IProperty, State> {
                 onMouseLeave={this.onMouseLeaveFromMarker}
               />
             ))}
+          </g>
+          <g>
+            {section && (
+              <rect
+                height={svgHeight}
+                fill="#dc1f5f40" /* hsl(340, 75, 50) + a */
+                stroke="#b2194c" /* hsl(340, 75, 50) */
+                strokeWidth={strokeWidth * 0.8}
+                x={section.x}
+                width={section.width}
+              />
+            )}
           </g>
         </svg>
         {this.state.popover && (
@@ -167,6 +228,42 @@ class HeatLineChart extends React.Component<IProperty, State> {
     this.setState((s: State) => ({
       popover: { ...s.popover!, exists: false }
     }));
+  };
+
+  private onGraphClick = (e: React.MouseEvent<SVGElement>) => {
+    e.stopPropagation();
+    const svgRect = this.svgRef.current!.getBoundingClientRect();
+    if (this.state.sectionStart === null) {
+      // start selecting section
+      this.setState({ sectionStart: e.clientX - svgRect.left }); // put point
+    } else if (this.state.sectionEnd !== null) {
+      // finish selecting section
+      let startPoint;
+      let endPoint;
+      if (this.state.sectionStart < this.state.sectionEnd) {
+        startPoint = this.state.sectionStart;
+        endPoint = this.state.sectionEnd;
+      } else {
+        startPoint = this.state.sectionEnd;
+        endPoint = this.state.sectionStart;
+      }
+
+      const normalizedStartPoint = normalizeClamp(startPoint, svgRect.width);
+      const normalizedEndPoint = normalizeClamp(endPoint, svgRect.width);
+
+      this.props.onSectionSelect(normalizedStartPoint, normalizedEndPoint);
+
+      this.setState({ sectionStart: null, sectionEnd: null });
+    }
+  };
+
+  private onGraphMove = (e: React.MouseEvent<SVGElement>) => {
+    if (this.state.sectionStart !== null) {
+      // during selecting section
+      e.stopPropagation();
+      const rect = this.svgRef.current!.getBoundingClientRect();
+      this.setState({ sectionEnd: e.clientX - rect.left }); // put point
+    }
   };
 }
 
