@@ -14,8 +14,8 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/google/uuid"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/pod"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/layout"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/pod"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"

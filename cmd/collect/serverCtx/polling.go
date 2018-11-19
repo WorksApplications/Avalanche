@@ -10,9 +10,9 @@ import (
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 
 	"database/sql"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/apps"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/layout"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/pod"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/app"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/layout"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/pod"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
