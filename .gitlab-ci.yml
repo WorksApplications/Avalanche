@@ -90,8 +90,8 @@ generate-kubefile:
         - wget -O /usr/local/bin/kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/v${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_amd64 && chmod +x /usr/local/bin/kustomize
         - apk add gettext
         - envsubst < deployment/kustomize/template/imageTags.yaml >> deployment/kustomize/base/kustomization.yaml
-        - envsubst < deployment/kustomize/template/deployment.yaml > deployment/kustomize/devel/deployment.yaml
-        - envsubst < deployment/kustomize/template/deployment.yaml > deployment/kustomize/production/deployment.yaml
+        - envsubst < deployment/kustomize/template/deployment.yaml > deployment/kustomize/overlays/devel/deployment.yaml
+        - envsubst < deployment/kustomize/template/deployment.yaml > deployment/kustomize/overlays/production/deployment.yaml
         - kustomize build deployment/kustomize/overlays/production > production.yaml
         - kustomize build deployment/kustomize/overlays/devel > devel.yaml
     artifacts:
