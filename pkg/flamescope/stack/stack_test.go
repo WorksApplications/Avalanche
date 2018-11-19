@@ -15,5 +15,5 @@ func TestReadRaw(t *testing.T) {
 func TestIntoStack(t *testing.T) {
 	example := []byte(`{"c": [{"c": [], "l": "", "n": "java", "v":1}, {"c": [], "l": "", "n": "kernel", "v":3}], "v": 5, "l": "", "n": "java"}`)
 	r, _ := readRaw(example)
-    r.intoStack(nil)
+	r.intoStack(nil)
 }

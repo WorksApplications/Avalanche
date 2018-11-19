@@ -8,7 +8,7 @@ type Stack struct {
 	Children []Stack
 	Parent   *Stack
 	Name     string
-    CodePath []string
+	CodePath []string
 }
 
 type rawStack struct {
@@ -28,18 +28,18 @@ func readRaw(data []byte) (*rawStack, error) {
 }
 
 func (r *rawStack) intoStack(parent *Stack) Stack {
-    me := Stack {
-        Parent: parent,
-        Name: r.name,
-    }
-    cs := make([]Stack, len(r.children))
-    for i, c := range r.children {
-        cs[i] = c.intoStack(&me)
-        if c.name == "Interpreter" {
-            tryEliminateInterpreter(cs[i])
-        }
-    }
-    return me
+	me := Stack{
+		Parent: parent,
+		Name:   r.name,
+	}
+	cs := make([]Stack, len(r.children))
+	for i, c := range r.children {
+		cs[i] = c.intoStack(&me)
+		if c.name == "Interpreter" {
+			tryEliminateInterpreter(cs[i])
+		}
+	}
+	return me
 }
 
 func assignCode(frame *Stack, name, mode string) {
