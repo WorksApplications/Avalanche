@@ -2,5 +2,6 @@ bases:
   - ../../base
 resources:
   - namespaces.yaml
+patchesStrategicMerge:
   - deployment.yaml
 namespace: production
