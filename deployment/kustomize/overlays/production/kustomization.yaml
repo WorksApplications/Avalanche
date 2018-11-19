@@ -2,4 +2,5 @@ bases:
   - ../../base
 resources:
   - namespaces.yaml
+  - deployment.yaml
 namespace: production

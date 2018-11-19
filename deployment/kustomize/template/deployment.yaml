@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: detect
+spec:
+  template:
+    spec:
+      containers:
+      - name: detect
+        command:
+          - /detect
+          - -db=$DB_CRED_USER:$DB_CRED_PASS@tcp(mariadb)/collekt?parseTime=True
+---
+
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  template:
+    spec:
+      containers:
+      - name: collect
+        command:
+          - /collect
+          - -port=8080
+          - -detect=http://detect:8080
+          - -enroll=http://enroll:8080
+          - -extract=http://extract:8080
+          - -db=$DB_CRED_USER:$DB_CRED_PASS@tcp(mariadb)/collekt?parseTime=True
+          - -persistent=/persistent
+          - -volatile=/persistent/volatile
+          - -flamescope=http://flamescope.internal.worksap.com/#/heatmap/
