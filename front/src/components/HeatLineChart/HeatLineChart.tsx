@@ -17,8 +17,14 @@ interface IMarkerPopoverState {
   exists: boolean;
 }
 
+interface ISectionSelectionPopoverState {
+  normalizedPositionX: number;
+  exists: boolean;
+}
+
 const initialState = {
   makerPopover: null as IMarkerPopoverState | null,
+  sectionSelectionPopover: null as ISectionSelectionPopoverState | null,
   isSelecting: false,
   sectionStart: null as number | null,
   sectionEnd: null as number | null,
@@ -92,7 +98,11 @@ class HeatLineChart extends React.Component<IProperty, State> {
     const reducedMaxPoints = reduceMaxPoints(maxPoints);
 
     return (
-      <div className={styles.wrap} ref={this.wrapRef}>
+      <div
+        className={styles.wrap}
+        ref={this.wrapRef}
+        onMouseLeave={this.onMouseLeave}
+      >
         <svg
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
           ref={this.svgRef}
@@ -163,6 +173,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
           {this.renderSelectingSection()}
         </svg>
         {this.renderMarkerPopOver()}
+        {this.renderSectionSelectionPopover()}
       </div>
     );
   }
@@ -188,6 +199,18 @@ class HeatLineChart extends React.Component<IProperty, State> {
     }
     return (
       <g>
+        {this.state.sectionSelectionPopover &&
+          this.state.sectionSelectionPopover.exists &&
+          !section && (
+            <path
+              d={`M ${this.state.sectionSelectionPopover.normalizedPositionX *
+                (svgWidth - padding * 2) +
+                padding} 0 V 1`}
+              fill="none"
+              stroke="#bfbfbf" /* hsl(0, 0, 75) */
+              strokeWidth={strokeWidth * 0.8}
+            />
+          )}
         {section && (
           <rect
             height={svgHeight}
@@ -221,6 +244,44 @@ class HeatLineChart extends React.Component<IProperty, State> {
           </span>
         </div>
       )
+    );
+  }
+
+  private renderSectionSelectionPopover() {
+    if (!this.state.sectionSelectionPopover || !this.svgRef.current) {
+      return false;
+    }
+    const svgRect = this.svgRef.current.getBoundingClientRect();
+    const popoverLeft =
+      (this.state.sectionSelectionPopover.normalizedPositionX *
+        svgRect.width *
+        (svgWidth - padding * 2)) /
+        svgWidth +
+      (svgRect.width * padding) / svgWidth; // consider padding in SVG coordinate system
+    const targetValue = this.props.meanValues[
+      this.state.sectionSelectionPopover.normalizedPositionX >= 1.0
+        ? this.props.meanValues.length - 1
+        : this.state.sectionSelectionPopover.normalizedPositionX <= 0.0
+        ? 0
+        : Math.round(
+            this.props.meanValues.length *
+              this.state.sectionSelectionPopover.normalizedPositionX
+          )
+    ];
+    return (
+      <div
+        className={[
+          styles.sectionSelectionPopover,
+          this.state.sectionSelectionPopover.exists ? styles.open : styles.close
+        ].join(" ")}
+        style={{
+          left: `${popoverLeft}px`
+        }}
+      >
+        <span className={styles.sectionSelectionPopoverMessage}>
+          {targetValue.toFixed(2)}
+        </span>
+      </div>
     );
   }
 
@@ -258,20 +319,25 @@ class HeatLineChart extends React.Component<IProperty, State> {
       this.setState({
         isSelecting: false,
         sectionStart: null,
-        sectionEnd: null
+        sectionEnd: null,
+        sectionSelectionPopover: null
       });
     } else if (!this.state.isSelecting) {
-      this.setState({ isSelecting: true, lastMouseDown: Date.now() });
-
       e.stopPropagation();
       const svgRect = this.svgRef.current!.getBoundingClientRect();
+      const relativeX = e.clientX - svgRect.left;
 
       // start selecting section
-      const sectionStart = normalizeClamp(
-        e.clientX - svgRect.left,
-        svgRect.width
-      );
-      this.setState({ sectionStart }); // put point
+      const sectionStart = normalizeClamp(relativeX, svgRect.width);
+      this.setState({
+        isSelecting: true,
+        lastMouseDown: Date.now(),
+        sectionStart, // put point
+        sectionSelectionPopover: {
+          exists: true,
+          normalizedPositionX: sectionStart
+        }
+      });
     }
   };
 
@@ -282,8 +348,6 @@ class HeatLineChart extends React.Component<IProperty, State> {
       this.state.sectionStart !== this.state.sectionEnd &&
       this.state.lastMouseDown + 250 < Date.now() // throttling
     ) {
-      this.setState({ isSelecting: false });
-
       const svgRect = this.svgRef.current!.getBoundingClientRect();
       const sectionEnd = normalizeClamp(
         e.clientX - svgRect.left,
@@ -303,7 +367,11 @@ class HeatLineChart extends React.Component<IProperty, State> {
 
       this.props.onSectionSelect(startPoint, endPoint);
 
-      this.setState({ sectionStart: null, sectionEnd: null });
+      this.setState({
+        isSelecting: false,
+        sectionStart: null,
+        sectionEnd: null
+      });
     }
   };
 
@@ -311,12 +379,34 @@ class HeatLineChart extends React.Component<IProperty, State> {
     if (this.state.isSelecting) {
       e.stopPropagation();
       const svgRect = this.svgRef.current!.getBoundingClientRect();
-      const sectionEnd = normalizeClamp(
-        e.clientX - svgRect.left,
-        svgRect.width
-      );
-      this.setState({ sectionEnd }); // put point
+      const relativeX = e.clientX - svgRect.left;
+
+      const sectionEnd = normalizeClamp(relativeX, svgRect.width);
+      this.setState({
+        sectionEnd, // put point
+        sectionSelectionPopover: {
+          exists: true,
+          normalizedPositionX: sectionEnd
+        }
+      });
+    } else {
+      const svgRect = this.svgRef.current!.getBoundingClientRect();
+      const relativeX = e.clientX - svgRect.left;
+
+      const sectionEnd = normalizeClamp(relativeX, svgRect.width);
+      this.setState({
+        sectionSelectionPopover: {
+          exists: true,
+          normalizedPositionX: sectionEnd
+        }
+      }); // does not put point
     }
+  };
+
+  private onMouseLeave = () => {
+    this.setState((s: State) => ({
+      sectionSelectionPopover: { ...s.sectionSelectionPopover!, exists: false }
+    }));
   };
 }
 
