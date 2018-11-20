@@ -19,6 +19,7 @@ interface IPopoverState {
 
 const initialState = {
   popover: null as IPopoverState | null,
+  isSelecting: false,
   sectionStart: null as number | null,
   sectionEnd: null as number | null
 };
@@ -112,7 +113,8 @@ class HeatLineChart extends React.Component<IProperty, State> {
         <svg
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
           ref={this.svgRef}
-          onClick={this.onGraphClick}
+          onMouseDown={this.onGraphMouseDown}
+          onMouseUp={this.onGraphMouseUp}
           onMouseMove={this.onGraphMove}
         >
           <defs>
@@ -230,25 +232,44 @@ class HeatLineChart extends React.Component<IProperty, State> {
     }));
   };
 
-  private onGraphClick = (e: React.MouseEvent<SVGElement>) => {
-    e.stopPropagation();
-    const svgRect = this.svgRef.current!.getBoundingClientRect();
-    if (this.state.sectionStart === null) {
+  private onGraphMouseDown = (e: React.MouseEvent<SVGElement>) => {
+    if (!this.state.isSelecting) {
+      this.setState({ isSelecting: true });
+
+      e.stopPropagation();
+      const svgRect = this.svgRef.current!.getBoundingClientRect();
+
       // start selecting section
       const sectionStart = normalizeClamp(
         e.clientX - svgRect.left,
         svgRect.width
       );
       this.setState({ sectionStart }); // put point
-    } else if (this.state.sectionEnd !== null) {
+    }
+  };
+
+  private onGraphMouseUp = (e: React.MouseEvent<SVGElement>) => {
+    if (
+      this.state.sectionStart !== null &&
+      this.state.sectionEnd !== null &&
+      this.state.sectionStart !== this.state.sectionEnd
+    ) {
+      this.setState({ isSelecting: false });
+
+      const svgRect = this.svgRef.current!.getBoundingClientRect();
+      const sectionEnd = normalizeClamp(
+        e.clientX - svgRect.left,
+        svgRect.width
+      );
+
       // finish selecting section
       let startPoint;
       let endPoint;
-      if (this.state.sectionStart < this.state.sectionEnd) {
+      if (this.state.sectionStart < sectionEnd) {
         startPoint = this.state.sectionStart;
-        endPoint = this.state.sectionEnd;
+        endPoint = sectionEnd;
       } else {
-        startPoint = this.state.sectionEnd;
+        startPoint = sectionEnd;
         endPoint = this.state.sectionStart;
       }
 
@@ -259,8 +280,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
   };
 
   private onGraphMove = (e: React.MouseEvent<SVGElement>) => {
-    if (this.state.sectionStart !== null) {
-      // during selecting section
+    if (this.state.isSelecting) {
       e.stopPropagation();
       const svgRect = this.svgRef.current!.getBoundingClientRect();
       const sectionEnd = normalizeClamp(
