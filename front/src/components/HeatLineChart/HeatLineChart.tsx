@@ -216,7 +216,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
             <path
               d={`M ${this.state.sectionSelectionTooltip.normalizedPositionX *
                 (svgWidth - padding * 2) +
-                padding} 0 V 1`}
+                padding} 0 V ${svgHeight}`}
               fill="none"
               stroke="#bfbfbf" /* hsl(0, 0, 75) */
               strokeWidth={strokeWidth * 0.8}
