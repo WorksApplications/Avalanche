@@ -4,16 +4,45 @@ import (
 	"testing"
 )
 
+func example() []byte {
+    example := []byte(
+    `{"c": [
+        {"c": [], "l": "", "n": "java", "v":1},
+        {"c": [{"c": [], "l": "", "n": "Interpreter", "v": 1}], "l": "", "n": "kernel", "v":3}
+     ], "v": 5, "l": "", "n": "java"}`)
+     return example
+}
+
 func TestReadRaw(t *testing.T) {
-	example := []byte(`{"c": [{"c": [], "l": "", "n": "java", "v":1}, {"c": [], "l": "", "n": "kernel", "v":3}], "v": 5, "l": "", "n": "java"}`)
-	_, err := readRaw(example)
+	r, err := readRaw(example())
 	if err != nil {
 		t.Fatal(err)
 	}
+    if len(r.Children) != 2 {
+		t.Fatal(r)
+    }
 }
 
 func TestIntoStack(t *testing.T) {
-	example := []byte(`{"c": [{"c": [], "l": "", "n": "java", "v":1}, {"c": [], "l": "", "n": "kernel", "v":3}], "v": 5, "l": "", "n": "java"}`)
-	r, _ := readRaw(example)
-	r.intoStack(nil)
+	r, _ := readRaw(example())
+    s := r.intoStack(nil)
+    if len(s.Children) != 2 {
+		t.Fatal(s)
+    }
 }
+
+func TestNewNameVec(t *testing.T) {
+	r, err := readRaw(example())
+	if err != nil {
+		t.Fatal(err)
+	}
+    t.Log(r)
+    m, rev := newNameVec(r)
+    if len(m) != len(rev) {
+        t.Fatalf("Dictionaries are inconsistent: %v, %v", m, rev)
+    }
+    if len(m) != 2 {
+        t.Fatalf("Unmatch with the example, map: %+v, rev: %+v", m, rev)
+    }
+}
+
