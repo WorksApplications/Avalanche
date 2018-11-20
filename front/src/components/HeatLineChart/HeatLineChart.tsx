@@ -99,6 +99,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
           onMouseDown={this.onGraphMouseDown}
           onMouseUp={this.onGraphMouseUp}
           onMouseMove={this.onGraphMove}
+          onContextMenu={this.onGraphContextMenu}
         >
           <defs>
             <linearGradient
@@ -245,8 +246,21 @@ class HeatLineChart extends React.Component<IProperty, State> {
     }));
   };
 
+  private onGraphContextMenu = (e: React.MouseEvent<SVGElement>) => {
+    e.preventDefault();
+  };
+
   private onGraphMouseDown = (e: React.MouseEvent<SVGElement>) => {
-    if (!this.state.isSelecting) {
+    if (e.nativeEvent.button === 2) {
+      // right click
+      // reset selection
+      e.preventDefault();
+      this.setState({
+        isSelecting: false,
+        sectionStart: null,
+        sectionEnd: null
+      });
+    } else if (!this.state.isSelecting) {
       this.setState({ isSelecting: true, lastMouseDown: Date.now() });
 
       e.stopPropagation();
