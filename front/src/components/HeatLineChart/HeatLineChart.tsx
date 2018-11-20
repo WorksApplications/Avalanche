@@ -73,6 +73,14 @@ class HeatLineChart extends React.Component<IProperty, State> {
   private wrapRef = React.createRef<HTMLDivElement>();
   private svgRef = React.createRef<SVGSVGElement>();
 
+  public componentDidMount() {
+    document.addEventListener("click", this.onClickOutside, true);
+  }
+
+  public componentWillUnmount() {
+    document.removeEventListener("click", this.onClickOutside, true);
+  }
+
   public render() {
     const { meanValues, maxValues, maxValueOfData, hash } = this.props;
     const xNormalizer = meanValues.length - 1;
@@ -407,6 +415,18 @@ class HeatLineChart extends React.Component<IProperty, State> {
     this.setState((s: State) => ({
       sectionSelectionPopover: { ...s.sectionSelectionPopover!, exists: false }
     }));
+  };
+
+  private onClickOutside = (e: Event) => {
+    if (e.target instanceof Node) {
+      if (!this.wrapRef.current!.contains(e.target)) {
+        this.setState({
+          isSelecting: false,
+          sectionStart: null,
+          sectionEnd: null
+        });
+      }
+    }
   };
 }
 
