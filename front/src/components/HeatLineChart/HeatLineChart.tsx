@@ -6,6 +6,8 @@ interface IProperty {
   meanValues: number[];
   maxValues: number[];
   maxValueOfData: number;
+  numColumns: number;
+  numRows: number;
   hash: string;
 
   onSectionSelect(start: number, end: number): void;
@@ -43,6 +45,7 @@ const markSize = 0.1;
 const svgHeight = 1;
 const svgWidth = 10;
 const strokeWidth = 0.008;
+const textSize = 0.1;
 
 function reduceMaxPoints(
   points: Array<{ x: number; y: number; i: number }>
@@ -157,6 +160,10 @@ class HeatLineChart extends React.Component<IProperty, State> {
                 strokeWidth={strokeWidth * 0.8}
               />
             </g>
+            <filter id={`text-bg-${hash}`}>
+              <feFlood floodColor="white" floodOpacity={0.8} result="goo" />
+              <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+            </filter>
           </defs>
           <g>
             <rect
@@ -188,29 +195,24 @@ class HeatLineChart extends React.Component<IProperty, State> {
   }
 
   private renderSelectingSection() {
-    let section;
+    let normalizedSection;
+    let sectionInSvg;
     if (this.state.sectionStart !== null && this.state.sectionEnd !== null) {
+      normalizedSection =
+        this.state.sectionStart < this.state.sectionEnd
+          ? { start: this.state.sectionStart, end: this.state.sectionEnd }
+          : { start: this.state.sectionEnd, end: this.state.sectionStart };
+
       const point1 =
-        this.state.sectionStart * (svgWidth - padding * 2) + padding;
-      const point2 = this.state.sectionEnd * (svgWidth - padding * 2) + padding;
-      section =
-        point1 < point2
-          ? {
-              // selecting rightward
-              x: point1,
-              width: point2 - point1
-            }
-          : // selecting leftward
-            {
-              x: point2,
-              width: point1 - point2
-            };
+        normalizedSection.start * (svgWidth - padding * 2) + padding;
+      const point2 = normalizedSection.end * (svgWidth - padding * 2) + padding;
+      sectionInSvg = { x: point1, width: point2 - point1 };
     }
     return (
       <g>
         {this.state.sectionSelectionPopover &&
           this.state.sectionSelectionPopover.exists &&
-          !section && (
+          !sectionInSvg && (
             <path
               d={`M ${this.state.sectionSelectionPopover.normalizedPositionX *
                 (svgWidth - padding * 2) +
@@ -220,15 +222,32 @@ class HeatLineChart extends React.Component<IProperty, State> {
               strokeWidth={strokeWidth * 0.8}
             />
           )}
-        {section && (
-          <rect
-            height={svgHeight}
-            fill="#dc1f5f40" /* hsl(340, 75, 50) + a */
-            stroke="#b2194c" /* hsl(340, 75, 50) */
-            strokeWidth={strokeWidth * 0.8}
-            x={section.x}
-            width={section.width}
-          />
+        {normalizedSection && sectionInSvg && (
+          <>
+            <rect
+              height={svgHeight}
+              fill="#dc1f5f40" /* hsl(340, 75, 50) + a */
+              stroke="#b2194c" /* hsl(340, 75, 50) */
+              strokeWidth={strokeWidth * 0.8}
+              x={sectionInSvg.x}
+              width={sectionInSvg.width}
+            />
+            <text
+              x={sectionInSvg.x + sectionInSvg.width / 2}
+              y={svgHeight - padding}
+              textAnchor="middle"
+              fontSize={textSize}
+              fill="#545454" /* hsl(0, 0, 33) */
+              filter={`url(#text-bg-${this.props.hash})`}
+            >
+              T +
+              {(
+                (normalizedSection.end - normalizedSection.start) *
+                this.props.numColumns
+              ).toFixed(1)}
+              s
+            </text>
+          </>
         )}
       </g>
     );
@@ -267,6 +286,9 @@ class HeatLineChart extends React.Component<IProperty, State> {
         (svgWidth - padding * 2)) /
         svgWidth +
       (svgRect.width * padding) / svgWidth; // consider padding in SVG coordinate system
+    const targetTime =
+      this.state.sectionSelectionPopover.normalizedPositionX *
+      this.props.numColumns;
     const targetValue = this.props.meanValues[
       this.state.sectionSelectionPopover.normalizedPositionX >= 1.0
         ? this.props.meanValues.length - 1
@@ -288,7 +310,9 @@ class HeatLineChart extends React.Component<IProperty, State> {
         }}
       >
         <span className={styles.sectionSelectionPopoverMessage}>
-          {targetValue.toFixed(2)}
+          T: {targetTime.toFixed(1)}s
+          <br />
+          V: {targetValue.toFixed(2)}
         </span>
       </div>
     );
