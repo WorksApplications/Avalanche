@@ -90,24 +90,6 @@ class HeatLineChart extends React.Component<IProperty, State> {
       })
       .filter(v => v.y > 0.9);
     const reducedMaxPoints = reduceMaxPoints(maxPoints);
-    let section;
-    if (this.state.sectionStart !== null && this.state.sectionEnd !== null) {
-      const point1 =
-        this.state.sectionStart * (svgWidth - padding * 2) + padding;
-      const point2 = this.state.sectionEnd * (svgWidth - padding * 2) + padding;
-      section =
-        point1 < point2
-          ? {
-              // selecting rightward
-              x: point1,
-              width: point2 - point1
-            }
-          : // selecting leftward
-            {
-              x: point2,
-              width: point1 - point2
-            };
-    }
 
     return (
       <div className={styles.wrap} ref={this.wrapRef}>
@@ -177,37 +159,67 @@ class HeatLineChart extends React.Component<IProperty, State> {
               />
             ))}
           </g>
-          <g>
-            {section && (
-              <rect
-                height={svgHeight}
-                fill="#dc1f5f40" /* hsl(340, 75, 50) + a */
-                stroke="#b2194c" /* hsl(340, 75, 50) */
-                strokeWidth={strokeWidth * 0.8}
-                x={section.x}
-                width={section.width}
-              />
-            )}
-          </g>
+          {this.renderSelectingSection()}
         </svg>
-        {this.state.popover && (
-          <div
-            className={[
-              styles.popover,
-              this.state.popover.exists ? styles.open : styles.close
-            ].join(" ")}
-            style={{
-              left: `${this.state.popover.positionX}px`
-            }}
-          >
-            <span className={styles.popoverMessage}>
-              {`spike: ${(this.state.popover.sparkValue * 100).toFixed(
-                0
-              )}% of max`}
-            </span>
-          </div>
-        )}
+        {this.renderPopOver()}
       </div>
+    );
+  }
+
+  private renderSelectingSection() {
+    let section;
+    if (this.state.sectionStart !== null && this.state.sectionEnd !== null) {
+      const point1 =
+        this.state.sectionStart * (svgWidth - padding * 2) + padding;
+      const point2 = this.state.sectionEnd * (svgWidth - padding * 2) + padding;
+      section =
+        point1 < point2
+          ? {
+              // selecting rightward
+              x: point1,
+              width: point2 - point1
+            }
+          : // selecting leftward
+            {
+              x: point2,
+              width: point1 - point2
+            };
+    }
+    return (
+      <g>
+        {section && (
+          <rect
+            height={svgHeight}
+            fill="#dc1f5f40" /* hsl(340, 75, 50) + a */
+            stroke="#b2194c" /* hsl(340, 75, 50) */
+            strokeWidth={strokeWidth * 0.8}
+            x={section.x}
+            width={section.width}
+          />
+        )}
+      </g>
+    );
+  }
+
+  private renderPopOver() {
+    return (
+      this.state.popover && (
+        <div
+          className={[
+            styles.popover,
+            this.state.popover.exists ? styles.open : styles.close
+          ].join(" ")}
+          style={{
+            left: `${this.state.popover.positionX}px`
+          }}
+        >
+          <span className={styles.popoverMessage}>
+            {`spike: ${(this.state.popover.sparkValue * 100).toFixed(
+              0
+            )}% of max`}
+          </span>
+        </div>
+      )
     );
   }
 
