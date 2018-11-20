@@ -11,14 +11,14 @@ interface IProperty {
   onSectionSelect(start: number, end: number): void;
 }
 
-interface IPopoverState {
+interface IMarkerPopoverState {
   sparkValue: number;
   positionX: number;
   exists: boolean;
 }
 
 const initialState = {
-  popover: null as IPopoverState | null,
+  makerPopover: null as IMarkerPopoverState | null,
   isSelecting: false,
   sectionStart: null as number | null,
   sectionEnd: null as number | null,
@@ -162,7 +162,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
           </g>
           {this.renderSelectingSection()}
         </svg>
-        {this.renderPopOver()}
+        {this.renderMarkerPopOver()}
       </div>
     );
   }
@@ -202,20 +202,20 @@ class HeatLineChart extends React.Component<IProperty, State> {
     );
   }
 
-  private renderPopOver() {
+  private renderMarkerPopOver() {
     return (
-      this.state.popover && (
+      this.state.makerPopover && (
         <div
           className={[
-            styles.popover,
-            this.state.popover.exists ? styles.open : styles.close
+            styles.markerPopover,
+            this.state.makerPopover.exists ? styles.open : styles.close
           ].join(" ")}
           style={{
-            left: `${this.state.popover.positionX}px`
+            left: `${this.state.makerPopover.positionX}px`
           }}
         >
-          <span className={styles.popoverMessage}>
-            {`spike: ${(this.state.popover.sparkValue * 100).toFixed(
+          <span className={styles.markerPopoverMessage}>
+            {`spike: ${(this.state.makerPopover.sparkValue * 100).toFixed(
               0
             )}% of max`}
           </span>
@@ -231,7 +231,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
       const wrapRect = this.wrapRef.current!.getBoundingClientRect();
       const y = parseFloat(dataY);
       this.setState({
-        popover: {
+        makerPopover: {
           exists: true,
           sparkValue: y,
           positionX: rect.left - wrapRect.left + rect.width / 2 - 60 // align middle
@@ -242,7 +242,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
 
   private onMouseLeaveFromMarker = () => {
     this.setState((s: State) => ({
-      popover: { ...s.popover!, exists: false }
+      makerPopover: { ...s.makerPopover!, exists: false }
     }));
   };
 
