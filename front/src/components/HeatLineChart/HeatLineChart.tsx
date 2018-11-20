@@ -21,7 +21,8 @@ const initialState = {
   popover: null as IPopoverState | null,
   isSelecting: false,
   sectionStart: null as number | null,
-  sectionEnd: null as number | null
+  sectionEnd: null as number | null,
+  lastMouseDown: 0
 };
 
 type State = Readonly<typeof initialState>;
@@ -234,7 +235,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
 
   private onGraphMouseDown = (e: React.MouseEvent<SVGElement>) => {
     if (!this.state.isSelecting) {
-      this.setState({ isSelecting: true });
+      this.setState({ isSelecting: true, lastMouseDown: Date.now() });
 
       e.stopPropagation();
       const svgRect = this.svgRef.current!.getBoundingClientRect();
@@ -252,7 +253,8 @@ class HeatLineChart extends React.Component<IProperty, State> {
     if (
       this.state.sectionStart !== null &&
       this.state.sectionEnd !== null &&
-      this.state.sectionStart !== this.state.sectionEnd
+      this.state.sectionStart !== this.state.sectionEnd &&
+      this.state.lastMouseDown + 250 < Date.now() // throttling
     ) {
       this.setState({ isSelecting: false });
 
