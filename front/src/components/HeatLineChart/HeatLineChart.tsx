@@ -13,20 +13,20 @@ interface IProperty {
   onSectionSelect(start: number, end: number): void;
 }
 
-interface IMarkerPopoverState {
+interface IMarkerTooltipState {
   sparkValue: number;
   positionX: number;
   exists: boolean;
 }
 
-interface ISectionSelectionPopoverState {
+interface ISectionSelectionTooltipState {
   normalizedPositionX: number;
   exists: boolean;
 }
 
 const initialState = {
-  makerPopover: null as IMarkerPopoverState | null,
-  sectionSelectionPopover: null as ISectionSelectionPopoverState | null,
+  makerTooltip: null as IMarkerTooltipState | null,
+  sectionSelectionTooltip: null as ISectionSelectionTooltipState | null,
   isSelecting: false,
   sectionStart: null as number | null,
   sectionEnd: null as number | null,
@@ -188,8 +188,8 @@ class HeatLineChart extends React.Component<IProperty, State> {
           </g>
           {this.renderSelectingSection()}
         </svg>
-        {this.renderMarkerPopOver()}
-        {this.renderSectionSelectionPopover()}
+        {this.renderMarkerTooltip()}
+        {this.renderSectionSelectionTooltip()}
       </div>
     );
   }
@@ -210,11 +210,11 @@ class HeatLineChart extends React.Component<IProperty, State> {
     }
     return (
       <g>
-        {this.state.sectionSelectionPopover &&
-          this.state.sectionSelectionPopover.exists &&
+        {this.state.sectionSelectionTooltip &&
+          this.state.sectionSelectionTooltip.exists &&
           !sectionInSvg && (
             <path
-              d={`M ${this.state.sectionSelectionPopover.normalizedPositionX *
+              d={`M ${this.state.sectionSelectionTooltip.normalizedPositionX *
                 (svgWidth - padding * 2) +
                 padding} 0 V 1`}
               fill="none"
@@ -253,20 +253,20 @@ class HeatLineChart extends React.Component<IProperty, State> {
     );
   }
 
-  private renderMarkerPopOver() {
+  private renderMarkerTooltip() {
     return (
-      this.state.makerPopover && (
+      this.state.makerTooltip && (
         <div
           className={[
-            styles.markerPopover,
-            this.state.makerPopover.exists ? styles.open : styles.close
+            styles.markerTooltip,
+            this.state.makerTooltip.exists ? styles.open : styles.close
           ].join(" ")}
           style={{
-            left: `${this.state.makerPopover.positionX}px`
+            left: `${this.state.makerTooltip.positionX}px`
           }}
         >
-          <span className={styles.markerPopoverMessage}>
-            {`spike: ${(this.state.makerPopover.sparkValue * 100).toFixed(
+          <span className={styles.markerTooltipMessage}>
+            {`spike: ${(this.state.makerTooltip.sparkValue * 100).toFixed(
               0
             )}% of max`}
           </span>
@@ -275,41 +275,41 @@ class HeatLineChart extends React.Component<IProperty, State> {
     );
   }
 
-  private renderSectionSelectionPopover() {
-    if (!this.state.sectionSelectionPopover || !this.svgRef.current) {
+  private renderSectionSelectionTooltip() {
+    if (!this.state.sectionSelectionTooltip || !this.svgRef.current) {
       return false;
     }
     const svgRect = this.svgRef.current.getBoundingClientRect();
-    const popoverLeft =
-      (this.state.sectionSelectionPopover.normalizedPositionX *
+    const tooltipLeft =
+      (this.state.sectionSelectionTooltip.normalizedPositionX *
         svgRect.width *
         (svgWidth - padding * 2)) /
         svgWidth +
       (svgRect.width * padding) / svgWidth; // consider padding in SVG coordinate system
     const targetTime =
-      this.state.sectionSelectionPopover.normalizedPositionX *
+      this.state.sectionSelectionTooltip.normalizedPositionX *
       this.props.numColumns;
     const targetValue = this.props.meanValues[
-      this.state.sectionSelectionPopover.normalizedPositionX >= 1.0
+      this.state.sectionSelectionTooltip.normalizedPositionX >= 1.0
         ? this.props.meanValues.length - 1
-        : this.state.sectionSelectionPopover.normalizedPositionX <= 0.0
+        : this.state.sectionSelectionTooltip.normalizedPositionX <= 0.0
         ? 0
         : Math.round(
             this.props.meanValues.length *
-              this.state.sectionSelectionPopover.normalizedPositionX
+              this.state.sectionSelectionTooltip.normalizedPositionX
           )
     ];
     return (
       <div
         className={[
-          styles.sectionSelectionPopover,
-          this.state.sectionSelectionPopover.exists ? styles.open : styles.close
+          styles.sectionSelectionTooltip,
+          this.state.sectionSelectionTooltip.exists ? styles.open : styles.close
         ].join(" ")}
         style={{
-          left: `${popoverLeft}px`
+          left: `${tooltipLeft}px`
         }}
       >
-        <span className={styles.sectionSelectionPopoverMessage}>
+        <span className={styles.sectionSelectionTooltipMessage}>
           T: {targetTime.toFixed(1)}s
           <br />
           V: {targetValue.toFixed(2)}
@@ -325,7 +325,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
       const wrapRect = this.wrapRef.current!.getBoundingClientRect();
       const y = parseFloat(dataY);
       this.setState({
-        makerPopover: {
+        makerTooltip: {
           exists: true,
           sparkValue: y,
           positionX: rect.left - wrapRect.left + rect.width / 2 - 60 // align middle
@@ -336,7 +336,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
 
   private onMouseLeaveFromMarker = () => {
     this.setState((s: State) => ({
-      makerPopover: { ...s.makerPopover!, exists: false }
+      makerTooltip: { ...s.makerTooltip!, exists: false }
     }));
   };
 
@@ -353,7 +353,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
         isSelecting: false,
         sectionStart: null,
         sectionEnd: null,
-        sectionSelectionPopover: null
+        sectionSelectionTooltip: null
       });
     } else if (!this.state.isSelecting) {
       e.stopPropagation();
@@ -366,7 +366,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
         isSelecting: true,
         lastMouseDown: Date.now(),
         sectionStart, // put point
-        sectionSelectionPopover: {
+        sectionSelectionTooltip: {
           exists: true,
           normalizedPositionX: sectionStart
         }
@@ -417,7 +417,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
       const sectionEnd = normalizeClamp(relativeX, svgRect.width);
       this.setState({
         sectionEnd, // put point
-        sectionSelectionPopover: {
+        sectionSelectionTooltip: {
           exists: true,
           normalizedPositionX: sectionEnd
         }
@@ -428,7 +428,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
 
       const sectionEnd = normalizeClamp(relativeX, svgRect.width);
       this.setState({
-        sectionSelectionPopover: {
+        sectionSelectionTooltip: {
           exists: true,
           normalizedPositionX: sectionEnd
         }
@@ -442,7 +442,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
 
   private onMouseLeave = () => {
     this.setState((s: State) => ({
-      sectionSelectionPopover: { ...s.sectionSelectionPopover!, exists: false }
+      sectionSelectionTooltip: { ...s.sectionSelectionTooltip!, exists: false }
     }));
   };
 
