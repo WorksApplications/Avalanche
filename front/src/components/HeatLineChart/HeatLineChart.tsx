@@ -89,10 +89,10 @@ class HeatLineChart extends React.Component<IProperty, State> {
       .filter(v => v.y > 0.9);
     const reducedMaxPoints = reduceMaxPoints(maxPoints);
     let section;
-    if (this.state.sectionStart && this.state.sectionEnd) {
-      const svgRect = this.svgRef.current!.getBoundingClientRect();
-      const point1 = (this.state.sectionStart / svgRect.width) * svgWidth;
-      const point2 = (this.state.sectionEnd / svgRect.width) * svgWidth;
+    if (this.state.sectionStart !== null && this.state.sectionEnd !== null) {
+      const point1 =
+        this.state.sectionStart * (svgWidth - padding * 2) + padding;
+      const point2 = this.state.sectionEnd * (svgWidth - padding * 2) + padding;
       section =
         point1 < point2
           ? {
@@ -235,7 +235,11 @@ class HeatLineChart extends React.Component<IProperty, State> {
     const svgRect = this.svgRef.current!.getBoundingClientRect();
     if (this.state.sectionStart === null) {
       // start selecting section
-      this.setState({ sectionStart: e.clientX - svgRect.left }); // put point
+      const sectionStart = normalizeClamp(
+        e.clientX - svgRect.left,
+        svgRect.width
+      );
+      this.setState({ sectionStart }); // put point
     } else if (this.state.sectionEnd !== null) {
       // finish selecting section
       let startPoint;
@@ -248,10 +252,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
         endPoint = this.state.sectionStart;
       }
 
-      const normalizedStartPoint = normalizeClamp(startPoint, svgRect.width);
-      const normalizedEndPoint = normalizeClamp(endPoint, svgRect.width);
-
-      this.props.onSectionSelect(normalizedStartPoint, normalizedEndPoint);
+      this.props.onSectionSelect(startPoint, endPoint);
 
       this.setState({ sectionStart: null, sectionEnd: null });
     }
@@ -261,8 +262,12 @@ class HeatLineChart extends React.Component<IProperty, State> {
     if (this.state.sectionStart !== null) {
       // during selecting section
       e.stopPropagation();
-      const rect = this.svgRef.current!.getBoundingClientRect();
-      this.setState({ sectionEnd: e.clientX - rect.left }); // put point
+      const svgRect = this.svgRef.current!.getBoundingClientRect();
+      const sectionEnd = normalizeClamp(
+        e.clientX - svgRect.left,
+        svgRect.width
+      );
+      this.setState({ sectionEnd }); // put point
     }
   };
 }
