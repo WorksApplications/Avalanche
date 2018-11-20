@@ -23,14 +23,6 @@ func TestReadRaw(t *testing.T) {
     }
 }
 
-func TestIntoStack(t *testing.T) {
-	r, _ := readRaw(example())
-    s := r.intoStack(nil)
-    if len(s.Children) != 2 {
-		t.Fatal(s)
-    }
-}
-
 func TestNewNameVec(t *testing.T) {
 	r, err := readRaw(example())
 	if err != nil {
@@ -43,6 +35,15 @@ func TestNewNameVec(t *testing.T) {
     }
     if len(m) != 2 {
         t.Fatalf("Unmatch with the example, map: %+v, rev: %+v", m, rev)
+    }
+}
+
+func TestIntoStack(t *testing.T) {
+	r, _ := readRaw(example())
+    m, _:= newNameVec(r)
+    s := r.intoStack(nil, &m)
+    if len(s.Children) != 2 {
+		t.Fatal(s)
     }
 }
 
