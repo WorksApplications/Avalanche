@@ -232,6 +232,13 @@ class HeatLineChart extends React.Component<IProperty, State> {
               x={sectionInSvg.x}
               width={sectionInSvg.width}
             />
+            <path
+              d={`M ${sectionInSvg.x} ${svgHeight -
+                padding -
+                textSize / 3} H ${sectionInSvg.x + sectionInSvg.width}`}
+              stroke="#191919" /* hsl(0, 0, 10) */
+              strokeWidth={strokeWidth * 0.8}
+            />
             <text
               x={sectionInSvg.x + sectionInSvg.width / 2}
               y={svgHeight - padding}
