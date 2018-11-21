@@ -68,9 +68,15 @@ func (r *Stack) process(parent *Stack, ndic *nameMap) *Stack {
     r.Parent = parent
     if r.Name == "Interpreter" {
         e := tryEliminateInterpreter(r, ndic)
-        if e {
-            /* Eliminatable. omit appending */
-            return nil
+        if e != nil {
+            /* Merge this into similar named node */
+            if delegate(r, e) {
+                /* Everything was delegated, so this is
+                 * eliminatable. omit appending */
+                return r
+            } else {
+                /* proceed to processing for rest of the children */
+            }
         }
     }
 	cs := make([]Stack, 0, len(r.Children))
@@ -87,38 +93,37 @@ func (r *Stack) process(parent *Stack, ndic *nameMap) *Stack {
 func assignCode(frame *Stack, name, mode, template string) {
 }
 
-func merge(src *Stack, dst *Stack) bool {
+func delegate(src *Stack, dst *Stack) bool {
     orphan := make([]Stack, 0)
+    adoptee := make([]Stack, 0)
     divestedVal := 0
     SEARCH:
     for _, c := range src.Children {
+        /* Find my doppelganger */
         for _, d := range dst.Children {
             if c.Name == d.Name {
                 divestedVal += c.Value
-                merge(&c, &d)
+                adoptee = append(adoptee, c)
                 continue SEARCH
             }
         }
         /* No adoptor found */
         orphan = append(orphan, c)
     }
-    if len(orphan) == 0 {
-        dst.Value += src.Value
-        return true
-    } else {
-        src.Value -= divestedVal
-        src.Children = orphan
-        return false
-    }
+    dst.Children = append(dst.Children, adoptee...)
+    dst.Value += divestedVal
+    src.Value -= divestedVal
+    src.Children = orphan
+    return len(orphan) == 0
 }
 
-func tryEliminateInterpreter(frame *Stack, ndic *nameMap) bool {
+func tryEliminateInterpreter(frame *Stack, ndic *nameMap) *Stack {
     sim := searchSimilarStack(frame, frame.Parent.Children, ndic)
     if sim == nil {
         /* leave as is */
-        return false
+        return nil
     } else {
-        return merge(frame, sim)
+        return sim
     }
 }
 
