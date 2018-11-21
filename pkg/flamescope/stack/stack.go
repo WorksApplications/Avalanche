@@ -178,8 +178,12 @@ func searchSimilarStack(frame *Stack, sibs []Stack, ndic *nameMap) *Stack {
 	/* shallow check for a node with very similar children */
 	myv := makeChildVec(frame, ndic)
 	max := float32(0.7)
-	var mostSimilar *Stack
+    var mostSimilar *Stack = nil
 	for _, sib := range sibs {
+        if sib.Name == "Interpreter" {
+            /* Oh? It's me!  */
+            continue
+        }
 		theirv := makeChildVec(&sib, ndic)
 		d := dist(myv, theirv)
 		if max < d {
