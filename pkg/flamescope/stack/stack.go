@@ -134,7 +134,6 @@ SEARCH:
 	}
 	dst.adoptees = adoptee
 	dst.Value += divestedVal
-	dst.adoptor = true
 	src.Value -= divestedVal
 	src.Children = orphan
 	return len(orphan) == 0
