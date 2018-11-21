@@ -15,6 +15,7 @@ type Stack struct {
 	Label    string  `json:"l"`
 	Value    int     `json:"v"`
 	Name     string  `json:"n"`
+	adoptees []Stack
 }
 
 func readRaw(data []byte) (*Stack, error) {
@@ -81,6 +82,27 @@ func (r *Stack) process(parent *Stack, ndic *nameMap) *Stack {
 	}
 	cs := make([]Stack, 0, len(r.Children))
 	for _, c := range r.Children {
+		/* Merge his doppelganger */
+		for i, d := range r.adoptees {
+			/* XXX faster merge may needed */
+			if d.Name == c.Name {
+				c.Value += d.Value
+				/* Delegate all the children of doppelganger to him */
+				c.adoptees = append(c.adoptees, d.Children...)
+				/* Delete */
+				r.adoptees = append(r.adoptees[:i], r.adoptees[i+1:]...)
+				break
+			}
+		}
+
+		k := c.process(r, ndic)
+		if k != nil {
+			cs = append(cs, *k)
+		}
+	}
+
+	/* Adopt orphans */
+	for _, c := range r.adoptees {
 		k := c.process(r, ndic)
 		if k != nil {
 			cs = append(cs, *k)
@@ -110,8 +132,9 @@ SEARCH:
 		/* No adoptor found */
 		orphan = append(orphan, c)
 	}
-	dst.Children = append(dst.Children, adoptee...)
+	dst.adoptees = adoptee
 	dst.Value += divestedVal
+	dst.adoptor = true
 	src.Value -= divestedVal
 	src.Children = orphan
 	return len(orphan) == 0
