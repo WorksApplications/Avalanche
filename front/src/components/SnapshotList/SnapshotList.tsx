@@ -35,8 +35,8 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
       state.isGraphOpen !== null
         ? state.isGraphOpen
         : typeof props.openByDefault !== "undefined"
-          ? props.openByDefault
-          : state.isGraphOpen;
+        ? props.openByDefault
+        : state.isGraphOpen;
     return { ...state, isGraphOpen };
   }
 
