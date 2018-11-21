@@ -1,17 +1,17 @@
 package stack
 
 import (
+	"encoding/json"
 	"testing"
-    "encoding/json"
 )
 
 var (
-    example = []byte(`{"c": [
+	example = []byte(`{"c": [
             {"c": [], "l": "", "n": "java", "v":1},
             {"c": [{"c": [], "l": "", "n": "Interpreter", "v": 1}], "l": "", "n": "kernel", "v":3}
          ], "v": 5, "l": "", "n": "java"}`)
 
-    tower = []byte(`{ "c": [
+	tower = []byte(`{ "c": [
             {"c": [
                 {"c": [
                     {"c": [
@@ -49,7 +49,7 @@ var (
             "v": 6
         }`)
 
-    wider = []byte(`{ "c": [
+	wider = []byte(`{ "c": [
             {"c": [
                 {"c": [{
                         "l": "jit",
@@ -133,7 +133,7 @@ func TestProcessWithLongerExample(t *testing.T) {
 	r, _ := readRaw(tower)
 	m, _ := newNameVec(r)
 	s := r.process(nil, &m)
-	if len(s.Children[0].Children) != 1  {
+	if len(s.Children[0].Children) != 1 {
 		t.Fatal(s)
 	}
 }
@@ -142,41 +142,55 @@ func TestProcessWithWiderExample(t *testing.T) {
 	r, _ := readRaw(wider)
 	m, _ := newNameVec(r)
 	s := r.process(nil, &m)
-    var adoptor *Stack
-    if len(s.Children) == 0 {
-        goto ERR
-    }
-    for _, a := range s.Children {
-        if a.Name == "Interpreter" {
-            adoptor = &a
-        }
-    }
-    /* Confirm Interpreter has only one child */
-	if len(adoptor.Children) != 1 || adoptor.Value != 4 {
-        goto ERR
-    }
+	adoptor := -1
+	if len(s.Children) == 0 {
+		goto ERR
+	}
+	for i, a := range s.Children {
+		if a.Name == "Interpreter" {
+			adoptor = i
+		}
+	}
+	if adoptor == -1 {
+		t.Log("No Interpreter")
+		goto ERR
+	}
+	/* Confirm Interpreter has only one child */
+	if len(s.Children[adoptor].Children) != 1 || s.Children[adoptor].Children[0].Value != 3 {
+		t.Log("Interpreter has no child (it should have an unique child actually)", s.Children[adoptor].Children[0])
+		goto ERR
+	}
 
-    for _, a := range s.Children {
-        if a.Name != "Interpreter" {
-            adoptor = &a
-        }
-    }
-    if adoptor == nil {
-        goto ERR
-    }
-	if len(adoptor.Children) != 1  {
-        goto ERR
-    }
-	if adoptor.Children[0].Value != 14  {
-        goto ERR
-    }
-    return
-    ERR:
-    b, err := json.MarshalIndent(s, " ", "    ")
-    if err != nil {
-        t.Fatal("[stack] Marshal error: ", err)
-    }
-    t.Fatal(string(b))
+	for i, a := range s.Children {
+		if a.Name != "Interpreter" {
+			adoptor = i
+		}
+	}
+
+	if adoptor == -1 {
+		t.Log("No JIT-ed method")
+		goto ERR
+	}
+
+	if len(s.Children[adoptor].Children) != 1 {
+		t.Log("Failed to raise my child =(")
+		goto ERR
+	}
+	if s.Children[adoptor].Value != 15 {
+		t.Log("No additional time given by adopt")
+		goto ERR
+	}
+	if s.Children[adoptor].Children[0].Value != 14 {
+		t.Log("No additional time given by adopt for children")
+		goto ERR
+	}
+	return
+ERR:
+	b, err := json.MarshalIndent(s, " ", "    ")
+	if err != nil {
+		t.Fatal("[stack] Marshal error: ", err)
+	}
+	t.Fatal(string(b))
 }
 
 func TestFilter(t *testing.T) {
@@ -189,4 +203,3 @@ func TestFilter(t *testing.T) {
 		t.Fatal(err, string(k))
 	}
 }
-

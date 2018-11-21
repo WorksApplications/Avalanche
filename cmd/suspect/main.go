@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
+	"io/ioutil"
 	"log"
-    "io/ioutil"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/flamescope/stack"
 )
@@ -17,14 +17,14 @@ func main() {
 	flag.Parse()
 	args := flag.Args()
 	log.Println(args)
-    data, err := ioutil.ReadFile(*sfn)
-    if err != nil {
-        panic(err)
-    }
-    fil, err := stack.Filter(data)
-    if err != nil {
-        panic(err)
-    }
+	data, err := ioutil.ReadFile(*sfn)
+	if err != nil {
+		panic(err)
+	}
+	fil, err := stack.Filter(data)
+	if err != nil {
+		panic(err)
+	}
 
-    ioutil.WriteFile(*dfn, fil, 0644)
+	ioutil.WriteFile(*dfn, fil, 0644)
 }

@@ -2,15 +2,15 @@ package stack
 
 import (
 	"encoding/json"
+	"log"
 	"math"
-    "log"
 )
 
 type nameMap map[string]int64
 type nameMapRev map[int64]string
 
 type Stack struct {
-    Parent   *Stack   `json:"-"`
+	Parent   *Stack   `json:"-"`
 	CodePath []string `json:"-"`
 	Children []Stack  `json:"c"`
 	Label    string   `json:"l"`
@@ -67,34 +67,38 @@ func newNameVec(root *Stack) (nameMap, nameMapRev) {
 }
 
 func Filter(input []byte) ([]byte, error) {
-    tree, err := readRaw(input)
+	tree, err := readRaw(input)
 	if err != nil {
-        log.Print("[stack] Parse error: ", err)
-        return nil, err
+		log.Print("[stack] Parse error: ", err)
+		return nil, err
 	}
 	m, _ := newNameVec(tree)
-    b, err := json.Marshal(tree.process(nil, &m))
-    if err != nil {
-        log.Print("[stack] Marshal error: ", err)
-        return b, err
-    }
+	b, err := json.Marshal(tree.process(nil, &m))
+	if err != nil {
+		log.Print("[stack] Marshal error: ", err)
+		return b, err
+	}
 
-    return b, nil
+	return b, nil
 }
 
 func (r *Stack) process(parent *Stack, ndic *nameMap) *Stack {
+	log.Printf("%s: %p", r.Name, r)
 	r.Parent = parent
 	if r.Name == "Interpreter" {
-		e := tryEliminateInterpreter(r, ndic)
+		/* Try elimination */
+		e := searchSimilarStack(r, r.Parent.Children, ndic)
 		if e != nil {
 			/* Merge this into similar named node */
 			if delegate(r, e) {
+
 				/* Everything was delegated, so this is
 				 * eliminatable. omit appending */
 				return r
 			} else {
 				/* proceed to processing for rest of the children */
 			}
+			log.Print(r, e)
 		}
 	}
 	cs := make([]Stack, 0, len(r.Children))
@@ -156,16 +160,6 @@ SEARCH:
 	return len(orphan) == 0
 }
 
-func tryEliminateInterpreter(frame *Stack, ndic *nameMap) *Stack {
-	sim := searchSimilarStack(frame, frame.Parent.Children, ndic)
-	if sim == nil {
-		/* leave as is */
-		return nil
-	} else {
-		return sim
-	}
-}
-
 func dist(v []float32, w []float32) float32 {
 	dist := float32(0.0)
 	for i, _ := range v {
@@ -178,19 +172,20 @@ func searchSimilarStack(frame *Stack, sibs []Stack, ndic *nameMap) *Stack {
 	/* shallow check for a node with very similar children */
 	myv := makeChildVec(frame, ndic)
 	max := float32(0.7)
-    var mostSimilar *Stack = nil
-	for _, sib := range sibs {
-        if sib.Name == "Interpreter" {
-            /* Oh? It's me!  */
-            continue
-        }
-		theirv := makeChildVec(&sib, ndic)
+	var mostSimilar *Stack = nil
+	for i := range sibs {
+		if sibs[i].Name == "Interpreter" {
+			/* Oh? It's me!  */
+			continue
+		}
+		theirv := makeChildVec(&sibs[i], ndic)
 		d := dist(myv, theirv)
 		if max < d {
 			max = d
-			mostSimilar = &sib
+			mostSimilar = &sibs[i]
 		}
 	}
+	log.Printf("addr: %p", mostSimilar)
 	return mostSimilar
 }
 
