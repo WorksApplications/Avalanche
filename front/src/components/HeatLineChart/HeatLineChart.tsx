@@ -174,6 +174,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
               mask={`url(#mean-line-${hash})`}
             />
           </g>
+          {this.renderSelectingSection()}
           <g>
             {reducedMaxPoints.map(p => (
               <use
@@ -186,7 +187,6 @@ class HeatLineChart extends React.Component<IProperty, State> {
               />
             ))}
           </g>
-          {this.renderSelectingSection()}
         </svg>
         {this.renderMarkerTooltip()}
         {this.renderSectionSelectionTooltip()}
