@@ -1,0 +1,90 @@
+@import "../common";
+
+.wrap {
+  background-color: $bg-color-white;
+  position: relative;
+  width: $base-space * 50;
+  color: $text-color-normal;
+  box-shadow: $layer-shadow-2;
+
+  &.disabled {
+    background-color: $bg-color-gray-2;
+  }
+}
+
+.selector {
+  height: $base-space * 5;
+  display: flex;
+  align-items: center;
+  font-size: $font-size-larger;
+  position: relative;
+  padding-left: $base-space * 2;
+
+  .disabled & {
+    color: $text-color-disabled;
+  }
+
+  &.opened {
+    border-color: $color-primary;
+  }
+
+  &:after {
+    position: absolute;
+    right: $base-space;
+    font-size: 0.7em;
+    color: $text-color-normal;
+  }
+
+  &.opened:after {
+    content: "\25B2";
+  }
+
+  &.closed:after {
+    content: "\25BC";
+  }
+}
+
+.optionView {
+  position: absolute;
+  background-color: $bg-color-white;
+  width: 100%;
+  box-shadow: $layer-shadow-2;
+  list-style-type: none;
+  margin: 0;
+  padding: $base-space * 0.5 0;
+
+  max-height: 60vh;
+
+  @include narrow-scrollbar;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.option {
+  font-size: $font-size-larger;
+  padding: $base-space $base-space * 3;
+
+  &:hover {
+    background-color: $bg-color-list-hover;
+  }
+}
+
+.preSelected {
+  background-color: $bg-color-list-hover;
+}
+
+.placeholder {
+  color: $text-color-hint;
+}
+
+.selected {
+  background-color: $bg-color-list-active;
+}
+
+.unselectOption {
+  color: $text-color-hint;
+}
+
+.searching {
+  color: $text-color-hint;
+}

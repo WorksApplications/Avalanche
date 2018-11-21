@@ -1,0 +1,31 @@
+@import "../common";
+
+.wrap {
+  height: calc(100vh - #{($title-height)});
+  background-color: $bg-color-gray-3;
+  border-left: 1px solid $bg-color-gray-12;
+  box-sizing: border-box;
+  padding: $base-space;
+  width: 100%;
+
+  @include narrow-scrollbar;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.filter {
+  width: calc(#{$pods-view-width} - #{$base-space} * 2);
+  text-align: right;
+}
+
+.title {
+  text-align: center;
+  font-weight: 700;
+  font-size: $font-size-large;
+  width: calc(#{$pods-view-width} - #{$base-space} * 2);
+}
+
+.cardList {
+  margin-top: $base-space;
+  width: calc(#{$pods-view-width} - #{$base-space} * 2);
+}

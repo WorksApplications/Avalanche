@@ -1,0 +1,47 @@
+@import "../common";
+
+.wrap {
+  height: calc(100vh - #{$title-height});
+  background-color: $bg-color-gray-3;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  //noinspection CssInvalidPropertyValue
+  overflow-y: overlay;
+}
+
+.appContext {
+  display: flex;
+  align-items: center;
+  background-color: $bg-color-gray-2;
+  padding: $base-space * 2 $base-space * 4;
+  font-size: $font-size-large;
+  box-shadow: $layer-shadow-1;
+
+  .label {
+    color: $text-color-bis;
+    margin-right: $base-space * 4;
+    width: $base-space * 22;
+  }
+
+  .selector {
+    //margin-top: $base-space * 2;
+    width: calc(100% - #{$base-space * (22 + 4)});
+  }
+}
+
+.innerWrap {
+  padding: $base-space * 4;
+}
+
+.environmentSelector {
+  display: inline-block;
+}
+
+.podSelector {
+  display: inline-block;
+  margin-left: $base-space * 4;
+}
+
+.snapshotList {
+  margin-top: $base-space * 4;
+}

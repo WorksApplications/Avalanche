@@ -1,0 +1,19 @@
+@import "../common";
+
+.wrap {
+  width: 100%;
+  height: calc(100vh - #{$title-height});
+  background-color: $bg-color-gray-3;
+  overflow-x: hidden;
+  //noinspection CssInvalidPropertyValue
+  overflow-y: overlay;
+}
+
+.filter {
+  margin: $base-space * 4;
+  text-align: center;
+}
+
+.cardList {
+  margin: $base-space * 4;
+}

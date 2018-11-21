@@ -1,0 +1,82 @@
+@import "../common";
+
+.wrap {
+  background-color: $bg-color-white;
+  position: relative;
+}
+
+.selector {
+  display: flex;
+  align-items: center;
+  height: $base-space * 5;
+  padding: 0 $base-space * 2;
+  font-size: $font-size-larger;
+  position: relative;
+  box-shadow: $layer-shadow-2;
+
+  &.opened {
+    border-color: $color-primary;
+  }
+
+  &:after {
+    color: $text-color-normal;
+    position: absolute;
+    right: $base-space;
+    font-size: 0.7em;
+  }
+
+  &.opened:after {
+    content: "\25B2";
+  }
+
+  &.closed:after {
+    content: "\25BC";
+  }
+}
+
+.optionView {
+  position: absolute;
+  background-color: $bg-color-white;
+  font-size: $font-size-larger;
+  width: 100%;
+  box-shadow: $layer-shadow-2;
+  padding: $base-space * 0.5 0;
+  max-height: 50vh;
+  margin: 0;
+  z-index: 1;
+
+  @include narrow-scrollbar;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.option {
+  font-size: $font-size-larger;
+  padding: $base-space $base-space * 2;
+  display: flex;
+  align-items: center;
+
+  &:hover {
+    background-color: $bg-color-list-hover;
+  }
+}
+
+.preSelected {
+  background-color: $bg-color-list-hover;
+}
+
+.selected {
+  background-color: $bg-color-list-active;
+}
+
+.placeholder {
+  color: $text-color-light;
+}
+
+.unselectOption {
+  color: $text-color-hint;
+}
+
+.searching {
+  color: $text-color-light;
+}

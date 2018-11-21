@@ -1,0 +1,69 @@
+@import "../../common";
+
+.wrap {
+  width: 100%;
+}
+
+.table {
+  background-color: $bg-color-white;
+  width: 100%;
+  box-shadow: $layer-shadow-2;
+  border-collapse: collapse;
+  font-size: $font-size-normal;
+
+  & th {
+    padding: $base-space $base-space * 2;
+    font-weight: normal;
+    text-align: left;
+  }
+
+  & td {
+    padding: $base-space * 2;
+  }
+
+  & thead {
+    color: $text-color-light;
+  }
+
+  & tbody {
+    border-top: 1px solid $border-color-light;
+  }
+}
+
+.statusColumn {
+  width: 1em;
+}
+
+.graphArea {
+  padding: 0 $base-space * 2 !important;
+}
+
+.heatMap {
+  height: $base-space * 15;
+}
+
+.spinner {
+  width: $base-space * 3;
+  height: $base-space * 3;
+  padding: $base-space * 6;
+  margin: 0 auto;
+}
+
+.errorMessage {
+  height: $base-space * 11;
+  margin: $base-space * 2 0;
+  color: $color-danger;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: $bg-color-gray-1;
+  border-radius: 4px;
+
+  .table tbody:hover & {
+    background-color: $bg-color-gray-4;
+  }
+}
+
+.expander {
+  text-align: right;
+}

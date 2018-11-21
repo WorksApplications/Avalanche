@@ -1,0 +1,56 @@
+@import "../common";
+
+.cards {
+  display: grid;
+  grid-gap: $base-space * 4;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  height: 100%;
+}
+
+.card {
+  margin: auto;
+}
+
+.empty {
+  display: flex;
+  font-size: $font-size-normal;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  color: $text-color-light;
+  flex-flow: column;
+}
+
+.emptyIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-color: $bg-color-white;
+  height: $base-space * 19;
+  width: $base-space * 19;
+  border-radius: 50%;
+
+  &:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: $layer-shadow-2;
+  }
+
+  & > i {
+    color: $text-color-hint;
+    font-size: $base-space * 10;
+  }
+}
+
+.emptyTitle {
+  margin-top: $base-space * 4;
+  font-size: $font-size-xlarge;
+}

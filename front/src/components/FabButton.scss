@@ -1,0 +1,57 @@
+@import "../common";
+
+.wrap {
+  box-shadow: $layer-shadow-8;
+  position: fixed;
+  bottom: $base-space * 3;
+  right: $base-space * 4;
+  background-color: $color-material-red;
+  width: $base-space * 7;
+  height: $base-space * 7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $text-color-white;
+}
+
+.innerWrap {
+  position: relative;
+  height: $base-space * 3;
+  width: $base-space * 3;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+}
+
+.icon {
+  display: flex;
+  justify-self: center;
+  align-self: center;
+  font-size: $base-space * 3;
+  font-weight: 700;
+}
+
+.tooltip {
+  visibility: hidden;
+  display: inline-block;
+  position: absolute;
+  right: $base-space * 7;
+  top: -$base-space * 0.5;
+  height: $base-space * 2;
+  font-weight: normal;
+  font-size: $font-size-normal;
+  white-space: nowrap;
+  border-radius: $border-radius;
+  opacity: 0;
+  background-color: rgba($text-color-normal, 0.5);
+  padding: $base-space;
+  color: $text-color-white;
+  transition: opacity 0.2s ease-out, visibility 0.3s linear;
+
+  .wrap:hover & {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.2s ease-in;
+  }
+}
