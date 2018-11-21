@@ -3,19 +3,20 @@ package stack
 import (
 	"encoding/json"
 	"math"
+    "log"
 )
 
 type nameMap map[string]int64
 type nameMapRev map[int64]string
 
 type Stack struct {
-	Parent   *Stack
-	CodePath []string
-	Children []Stack `json:"c"`
-	Label    string  `json:"l"`
-	Value    int     `json:"v"`
-	Name     string  `json:"n"`
-	adoptees []Stack
+    Parent   *Stack   `json:"-"`
+	CodePath []string `json:"-"`
+	Children []Stack  `json:"c"`
+	Label    string   `json:"l"`
+	Value    int      `json:"v"`
+	Name     string   `json:"n"`
+	adoptees []Stack  `json:"-"`
 }
 
 func readRaw(data []byte) (*Stack, error) {
@@ -65,20 +66,20 @@ func newNameVec(root *Stack) (nameMap, nameMapRev) {
 	return m, rev
 }
 
-func Filter(input []byte) []byte {
+func Filter(input []byte) ([]byte, error) {
     tree, err := readRaw(input)
 	if err != nil {
-        log.Print("[stack] Parse error", err)
-        return []
+        log.Print("[stack] Parse error: ", err)
+        return nil, err
 	}
-	m, _ := newNameVec(r)
-    b, err := json.Marshal(tree.process(nil, m))
+	m, _ := newNameVec(tree)
+    b, err := json.Marshal(tree.process(nil, &m))
     if err != nil {
-        log.Print("[stack] Marshal error", err)
-        return []
+        log.Print("[stack] Marshal error: ", err)
+        return b, err
     }
 
-    return b
+    return b, nil
 }
 
 func (r *Stack) process(parent *Stack, ndic *nameMap) *Stack {

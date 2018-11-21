@@ -2,20 +2,55 @@ package stack
 
 import (
 	"testing"
-    "fmt"
 )
 
-func example() []byte {
-	example := []byte(
-		`{"c": [
-        {"c": [], "l": "", "n": "java", "v":1},
-        {"c": [{"c": [], "l": "", "n": "Interpreter", "v": 1}], "l": "", "n": "kernel", "v":3}
-     ], "v": 5, "l": "", "n": "java"}`)
-	return example
-}
+var (
+    example = []byte(`{"c": [
+            {"c": [], "l": "", "n": "java", "v":1},
+            {"c": [{"c": [], "l": "", "n": "Interpreter", "v": 1}], "l": "", "n": "kernel", "v":3}
+         ], "v": 5, "l": "", "n": "java"}`)
+
+    long = []byte(`{ "c": [
+            {"c": [
+                {"c": [
+                    {"c": [
+                        {"c": [
+                            {"c": [
+                                  {"c": [], "l": "jit", "n": "[unknown]", "v": 1}
+                                ],
+                                "l": "jit",
+                                "n": "Interpreter",
+                                "v": 1
+                            }
+                            ],
+                        "l": "jit",
+                        "n": "Lsun/nio/ch/EPollSelectorImpl;::updateSelectedKeys",
+                        "v": 1
+                        }
+                    ],
+                    "l": "jit",
+                    "n": "Lsun/nio/ch/EPollSelectorImpl;::doSelect",
+                    "v": 5
+                    }
+                    ],
+                    "l": "jit",
+                    "n": "Lsun/nio/ch/SelectorImpl;::lockAndDoSelect",
+                    "v": 5
+                }
+                ],
+                "l": "jit",
+                "n": "Interpreter",
+                "v": 6
+            }
+            ],
+            "l": "user",
+            "n": "root",
+            "v": 6
+        }`)
+)
 
 func TestReadRaw(t *testing.T) {
-	r, err := readRaw(example())
+	r, err := readRaw(example)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,7 +60,7 @@ func TestReadRaw(t *testing.T) {
 }
 
 func TestNewNameVec(t *testing.T) {
-	r, err := readRaw(example())
+	r, err := readRaw(example)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,11 +75,31 @@ func TestNewNameVec(t *testing.T) {
 }
 
 func TestProcess(t *testing.T) {
-	r, _ := readRaw(example())
+	r, _ := readRaw(example)
 	m, _ := newNameVec(r)
 	s := r.process(nil, &m)
 	if len(s.Children) != 2 {
 		t.Fatal(s)
 	}
-    fmt.Print(s)
 }
+
+func TestProcessWithLongerExample(t *testing.T) {
+	r, _ := readRaw(long)
+	m, _ := newNameVec(r)
+	s := r.process(nil, &m)
+	if len(s.Children[0].Children) != 1  {
+		t.Fatal(s)
+	}
+}
+
+func TestFilter(t *testing.T) {
+	s, err := Filter(example)
+	if err != nil {
+		t.Fatal(err, string(s))
+	}
+	k, err := Filter(long)
+	if err != nil {
+		t.Fatal(err, string(k))
+	}
+}
+
