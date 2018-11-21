@@ -1,0 +1,18 @@
+@import "../common";
+
+.wrap {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.snapshots {
+  height: 100%;
+  width: calc(100% - #{$pods-view-width});
+}
+
+.pods {
+  width: $pods-view-width;
+  height: 100%;
+  box-shadow: $layer-shadow-1;
+}

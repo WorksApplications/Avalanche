@@ -78,16 +78,16 @@ class HeatLineChart extends React.Component<IProperty, State> {
               y1="1"
               y2="0"
             >
-              <stop offset="5%" stopColor="#deeafd" />
-              <stop offset="40%" stopColor="#7facf6" />
-              <stop offset="90%" stopColor="#e91e63" />
+              <stop offset="5%" stopColor="#e6f2fd" /* hsl(210, 90, 95) */ />
+              <stop offset="40%" stopColor="#89b6f5" /* hsl(215, 85, 75) */ />
+              <stop offset="90%" stopColor="#e5195d" /* hsl(340, 80, 50) */ />
             </linearGradient>
             <mask id={`mean-line-${hash}`} x="0" y="0" width="10" height="1">
               <polyline
                 strokeLinecap="round"
                 points={meanPointsString}
                 fill="transparent"
-                stroke="#c6dafb"
+                stroke="#e6f2fd"
                 strokeWidth="0.01"
               />
             </mask>
@@ -97,7 +97,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
                 d={`M ${markSize / 4} 0 L ${markSize /
                   2} ${markSize}  ${(markSize * 3) / 4} 0`}
                 fill="none"
-                stroke="#e91e63"
+                stroke="#e5195d" /* hsl(340, 80, 50) */
                 strokeWidth="0.008"
               />
             </g>

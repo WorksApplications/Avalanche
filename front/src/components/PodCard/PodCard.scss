@@ -1,0 +1,194 @@
+@import "../../common";
+
+.wrap {
+  background-color: $bg-color-white;
+  box-shadow: $layer-shadow-1;
+  border-radius: $border-radius-small;
+  box-sizing: border-box;
+  padding: $base-space * 2;
+  width: 100%;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: $layer-shadow-6;
+  }
+}
+
+.isOpen {
+  //background-color: $bg-color-active;
+}
+
+.indicatorWrap {
+  float: left;
+  height: 2em;
+  display: flex;
+  align-items: center;
+  padding-right: $base-space;
+}
+
+.aliveIndicator {
+  height: 1em;
+  width: 1em;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+.alive {
+  background-color: $color-success;
+  border: none;
+}
+
+.dead {
+  background-color: transparent;
+  border: 2px solid $bg-color-gray-8;
+}
+
+.name {
+  font-size: $font-size-larger;
+  display: block;
+}
+
+.appName {
+  color: $text-color-bis;
+  font-weight: 700;
+}
+
+.hashPart {
+  margin-left: 0.25em;
+}
+
+.saveTooltip {
+  visibility: hidden;
+  display: inline-block;
+  position: absolute;
+  right: -1em;
+  bottom: 1.5em;
+  margin-bottom: $base-space;
+  white-space: nowrap;
+  font-weight: normal;
+  border-radius: $border-radius;
+  background-color: rgba($text-color-normal, 0.5);
+  padding: $base-space;
+  color: $text-color-white;
+  transition: opacity 0.2s ease-out, visibility 0.3s linear;
+  opacity: 0;
+}
+
+.saveButton {
+  font-weight: 700;
+  border: none;
+  background-color: transparent;
+  color: $color-primary;
+  font-family: $font-family-sans-serif;
+  padding: $base-space;
+  margin-top: -$base-space;
+  margin-right: -$base-space * 2;
+  border-radius: $border-radius;
+}
+
+.saveLabel {
+  padding: 0 $base-space;
+}
+
+.save {
+  float: right;
+  font-size: $font-size-normal;
+  position: relative;
+
+  &.disabled {
+    color: $text-color-disabled;
+  }
+
+  &:not(.disabled) {
+    @include link-style-blue;
+    &:hover .saveTooltip {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity 0.2s ease-in;
+    }
+  }
+}
+
+.spinner {
+  margin-right: $base-space * 0.5;
+  width: $base-space * 2.2;
+  height: $base-space * 2.2;
+}
+
+.info {
+  margin-top: $base-space;
+  margin-left: $base-space * 2.25;
+}
+
+.environment {
+  font-size: $font-size-normal;
+}
+
+.createdAt {
+  font-size: $font-size-smaller;
+  color: $text-color-hint;
+  display: inline-block;
+  margin-left: $base-space;
+}
+
+.snapshotsArea {
+}
+
+.snapshotList {
+  list-style: none;
+  font-size: $font-size-smaller;
+  margin: $base-space * 2 0 0;
+  padding: 0;
+  border-bottom: 1px solid $border-color-normal;
+}
+
+.snapshot {
+  display: flex;
+  padding: $base-space;
+  border-top: 1px solid $border-color-normal;
+}
+
+.snapshotHash {
+  position: relative;
+  margin-right: auto;
+}
+
+.snapshotHashPopover {
+  visibility: hidden;
+  display: inline-block;
+  position: absolute;
+  left: -$base-space * 4;
+  bottom: 120%;
+  white-space: nowrap;
+  font-weight: normal;
+  border-radius: $border-radius;
+  background-color: rgba($text-color-normal, 0.5);
+  padding: $base-space;
+  color: $text-color-white;
+  transition: opacity 0.2s ease-out, visibility 0.3s linear;
+  opacity: 0;
+
+  .snapshotHash:hover & {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.2s ease-in;
+  }
+}
+
+.snapshotDate {
+  white-space: nowrap;
+  margin-left: $base-space;
+  color: $text-color-bis;
+}
+
+.snapshotLink {
+  @include link-style-blue();
+  margin-left: $base-space * 2;
+}
+
+.emptySnapshots {
+  font-size: $font-size-normal;
+  color: $text-color-hint;
+  margin-top: $base-space;
+  text-align: center;
+}

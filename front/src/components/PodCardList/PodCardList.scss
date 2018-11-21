@@ -1,0 +1,34 @@
+@import "../../common";
+
+.wrap {
+  box-sizing: content-box;
+}
+
+.kindWrap {
+  border-bottom: 1px solid $border-color-dark;
+  text-align: right;
+}
+
+.kind {
+  font-size: $font-size-smaller;
+  margin-right: $base-space;
+}
+
+.cardList {
+  list-style: none;
+  margin: $base-space 0 0;
+  padding: 0;
+}
+
+.card {
+  margin-top: $base-space;
+}
+
+.empty {
+  display: flex;
+  font-size: $font-size-normal;
+  height: $base-space * 10;
+  align-items: center;
+  justify-content: center;
+  color: $text-color-light;
+}

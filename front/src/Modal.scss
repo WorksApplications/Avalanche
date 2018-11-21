@@ -1,0 +1,185 @@
+@import "common";
+
+.overlay {
+  background-color: rgba($bg-color-black, 0.5);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.inner {
+  background-color: $bg-color-white;
+  box-shadow: $layer-shadow-24;
+}
+
+// for child
+
+.body {
+  display: flex;
+  flex-direction: column;
+  min-width: $base-space * 80;
+  min-height: $base-space * 60;
+}
+
+.header {
+  background-color: $color-material-cyan;
+  color: $text-color-white;
+  padding: $base-space * 3;
+  font-weight: 700;
+  font-size: $font-size-larger;
+}
+
+.content {
+  padding: $base-space * 3;
+  font-size: $font-size-normal;
+}
+
+.group {
+  display: grid;
+  grid-template-columns: $base-space * 15 1fr;
+  grid-column-gap: $base-space * 4;
+  margin-top: $base-space * 1.5;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.label {
+  color: $text-color-light;
+  height: $base-space * 3;
+  text-align: right;
+  display: flex;
+  justify-self: right;
+  align-items: center;
+}
+
+.input {
+  display: flex;
+  align-self: center;
+
+  & > label {
+    margin-left: $base-space;
+  }
+
+  & > input {
+    margin-left: $base-space * 2;
+
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+
+  .description {
+    margin-top: $base-space;
+    margin-left: $base-space;
+    color: $text-color-hint;
+  }
+}
+
+.textInput {
+  @extend .input;
+  flex-direction: column;
+
+  & > input[type="text"] {
+    width: 100%;
+    //padding: 2px;
+    box-sizing: border-box;
+    border: 1px solid $border-color-input;
+    height: $base-space * 3;
+    padding: 0 $base-space;
+    border-radius: $border-radius-small;
+
+    &:focus {
+      border-color: $color-primary;
+    }
+  }
+}
+
+.radioInput {
+  @extend .input;
+
+  & > input[type="radio"] {
+    -webkit-appearance: none;
+    border: 2px solid $bg-color-gray-9;
+    margin-top: 0;
+    vertical-align: middle;
+    width: $base-space * 2;
+    height: $base-space * 2;
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+
+    &:checked:before {
+      content: "";
+      position: absolute;
+      left: $base-space / 4;
+      top: $base-space/4;
+      display: block;
+      background-color: $bg-color-gray-9;
+      width: $base-space;
+      height: $base-space;
+      border-radius: 50%;
+    }
+  }
+}
+
+.navigation {
+  align-self: flex-end;
+  margin-top: auto;
+  padding: $base-space * 2 $base-space * 3;
+  width: 100%;
+  box-sizing: border-box;
+  border-top: 1px solid $border-color-light;
+}
+
+// flat
+@mixin dialog-button() {
+  height: $base-space * 4;
+  border-radius: $border-radius;
+  padding: $base-space;
+  border: none;
+  background-color: transparent;
+  color: $text-color-gray-9;
+  font-weight: 700;
+
+  &:hover {
+    background-color: $bg-color-flat-button-hover;
+    transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+      border-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  & > span {
+    min-width: $base-space * 8;
+    padding: 0 $base-space;
+  }
+}
+
+.cancel {
+  @include dialog-button();
+  float: right;
+  margin-left: $base-space;
+}
+
+.apply {
+  @include dialog-button();
+  color: $color-primary;
+  float: right;
+
+  &:hover {
+    background-color: lighten($color-primary-light, 7%);
+  }
+
+  &[disabled] {
+    color: lighten($color-primary, 8%);
+    opacity: 0.65;
+    &:hover {
+      background-color: transparent;
+    }
+  }
+}

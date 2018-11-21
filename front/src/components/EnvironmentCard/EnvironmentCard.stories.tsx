@@ -11,7 +11,7 @@ const commonWrapStyle: React.CSSProperties = {
   display: "flex",
   width: "360px",
   padding: "8px",
-  backgroundColor: "#e6e8ea",
+  backgroundColor: "#e3e6e8",
   justifyContent: "center",
   alignContent: "center"
 };

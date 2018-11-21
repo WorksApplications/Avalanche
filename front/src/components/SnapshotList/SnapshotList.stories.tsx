@@ -10,7 +10,7 @@ import SnapshotList from "./SnapshotList";
 const commonWrapStyle: React.CSSProperties = {
   width: "1200px",
   padding: "8px",
-  backgroundColor: "#e6e8ea"
+  backgroundColor: "#e3e6e8"
 };
 
 const N = 600 * 50;

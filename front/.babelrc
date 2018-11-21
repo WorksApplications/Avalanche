@@ -4,7 +4,6 @@
       "@babel/preset-env",
       {
         "targets": { "browsers": "last 2 versions" },
-        "useBuiltIns": "usage",
         "modules": false
       }
     ],
@@ -22,7 +21,6 @@
       "presets": [["@babel/preset-env", { "modules": "commonjs" }]]
     },
     "production": {
-      "presets": ["react-optimize"],
       "plugins": [
         ["react-remove-properties", { "properties": ["data-testid"] }],
         "babel-plugin-closure-elimination"

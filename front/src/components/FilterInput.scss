@@ -1,0 +1,28 @@
+@import "../common";
+
+.wrap {
+  background-color: $bg-color-white;
+  display: inline-flex;
+  font-size: $font-size-larger;
+  height: $base-space * 4;
+  border: 1px solid $bg-color-gray-5;
+  width: 60%;
+  align-items: center;
+
+  &:focus-within {
+    border-color: $color-primary;
+  }
+}
+
+.icon {
+  padding: 0 $base-space / 2 0 $base-space;
+  color: $text-color-light;
+  font-size: $font-size-smaller;
+}
+
+.textBox {
+  border: none;
+  width: 100%;
+  height: $base-space * 3;
+  padding: $base-space / 2;
+}

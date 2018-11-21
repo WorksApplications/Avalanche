@@ -9,7 +9,7 @@ const onClick = (e: React.MouseEvent) => {
   e.stopPropagation();
 };
 
-const Link: React.StatelessComponent<IProperty> = ({ children, ...props }) => {
+const Link: React.FunctionComponent<IProperty> = ({ children, ...props }) => {
   return (
     <span className={styles.wrap}>
       <a

@@ -1,0 +1,53 @@
+@import "../../common";
+
+$offset: 100;
+$duration: 1.5s;
+
+@keyframes rotator {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  animation: rotator $duration * 2 / 3 linear infinite;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, $offset * 2;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: $offset - 11, $offset * 2;
+    stroke-dashoffset: -($offset / 3 + 1);
+  }
+  100% {
+    stroke-dasharray: $offset - 11, $offset * 2;
+    stroke-dashoffset: -($offset * 4 / 3 - 11);
+  }
+}
+
+@keyframes colors {
+  100%,
+  0% {
+    stroke: hsl(60, 80, 65);
+  }
+  90% {
+    stroke: hsl(185, 90, 40);
+  }
+}
+
+.dash {
+  stroke-dasharray: $offset;
+  stroke-dashoffset: 0;
+  transform-origin: center;
+  animation: dash $duration ease-in-out infinite,
+    colors ($duration * 4) ease-in-out infinite;
+}

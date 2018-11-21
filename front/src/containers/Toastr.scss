@@ -1,0 +1,59 @@
+@import "../common";
+
+.wrap {
+  position: fixed;
+  display: flex;
+  align-items: flex-start;
+  bottom: $base-space * 3;
+  left: $base-space * 4;
+  z-index: 1000;
+
+  flex-direction: column;
+}
+
+.toastr {
+  padding: $base-space * 2;
+  font-size: $font-size-smaller;
+  min-width: $base-space * 20;
+  border-radius: $border-radius-small;
+  box-shadow: $layer-shadow-16;
+  margin-bottom: $base-space;
+}
+
+.shown {
+  opacity: 1;
+  transform: translate(0, 0px);
+  transition: opacity 0.2s, transform 0.3s cubic-bezier(0.16, 0.84, 0.44, 1);
+  visibility: visible;
+}
+
+.hidden {
+  opacity: 0;
+  transform: translate(0, 20px);
+  transition: opacity 0.2s, transform 0.3s cubic-bezier(0.84, 0.16, 1, 0.46),
+    visibility 0.3s linear;
+  visibility: hidden;
+}
+
+.success {
+  background-color: $bg-color-gray-11;
+  color: $text-color-white;
+}
+
+.error {
+  background-color: $color-danger;
+  color: $text-color-white;
+}
+
+.message {
+  display: inline-block;
+}
+
+.dismissButton {
+  float: right;
+  padding-left: $base-space * 2;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}

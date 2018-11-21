@@ -7,7 +7,7 @@ import Spinner from "./Spinner";
 const commonWrapStyle: React.CSSProperties = {
   width: "20px",
   padding: "8px",
-  backgroundColor: "#e6e8ea"
+  backgroundColor: "#e3e6e8"
 };
 
 storiesOf("Spinner", module)

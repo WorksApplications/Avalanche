@@ -1,0 +1,104 @@
+// background & border gray colors
+$bg-color-black: #000000;
+$bg-color-gray-12: hsl(210, 60, 10);
+$bg-color-gray-11: hsl(210, 25, 20);
+$bg-color-gray-10: hsl(210, 12.5, 33.3);
+$bg-color-gray-9: hsl(210, 6, 50);
+$bg-color-gray-8: hsl(210, 6, 60);
+$bg-color-gray-7: hsl(210, 6, 65);
+$bg-color-gray-6: hsl(210, 7, 75);
+$bg-color-gray-5: hsl(210, 7, 80);
+$bg-color-gray-4: hsl(210, 7, 85);
+$bg-color-gray-3: hsl(210, 8, 90);
+$bg-color-gray-2: hsl(210, 8, 94);
+$bg-color-gray-1: hsl(210, 8, 96);
+$bg-color-white: #ffffff;
+
+// text gray colors
+$text-color-black: #000000;
+$text-color-gray-12: hsl(0, 0, 10);
+$text-color-gray-11: hsl(0, 0, 20);
+$text-color-gray-10: hsl(0, 0, 33.3);
+$text-color-gray-9: hsl(0, 0, 50);
+$text-color-gray-8: hsl(0, 0, 60);
+$text-color-gray-7: hsl(0, 0, 65);
+$text-color-gray-6: hsl(0, 0, 75);
+$text-color-gray-5: hsl(0, 0, 80);
+$text-color-gray-4: hsl(0, 0, 85);
+$text-color-gray-3: hsl(0, 0, 90);
+$text-color-gray-2: hsl(0, 0, 94);
+$text-color-gray-1: hsl(0, 0, 96);
+$text-color-white: #ffffff;
+
+// info colors
+$color-primary-dark: hsl(215, 75, 50);
+$color-primary: hsl(215, 90, 60);
+$color-primary-light: hsl(215, 85, 90);
+
+$color-success-dark: hsl(170, 85, 30);
+$color-success: hsl(170, 100, 35);
+$color-success-light: hsl(170, 55, 90);
+
+$color-warning-dark: hsl(35, 80, 45);
+$color-warning: hsl(35, 90, 60);
+$color-warning-light: hsl(35, 85, 90);
+
+$color-danger-dark: hsl(340, 75, 40);
+$color-danger: hsl(340, 75, 50);
+$color-danger-light: hsl(340, 90, 90);
+
+// named color
+$text-color-disabled: $text-color-gray-4;
+$text-color-hint: $text-color-gray-6;
+$text-color-light: $text-color-gray-8;
+$text-color-bis: $text-color-gray-10;
+$text-color-normal: $text-color-gray-11;
+$border-color-light: $bg-color-gray-3;
+$border-color-normal: $bg-color-gray-4;
+$border-color-dark: $bg-color-gray-7;
+
+// box-shadow from MDL
+$layer-shadow-1: 0 1px 1.5px 0 rgba(0, 0, 0, 0.12),
+  0 1px 1px 0 rgba(0, 0, 0, 0.24);
+$layer-shadow-2: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+  0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+$layer-shadow-3: 0 3px 4px 0 rgba(0, 0, 0, 0.14),
+  0 3px 3px -2px rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.12);
+$layer-shadow-4: 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+  0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+$layer-shadow-6: 0 6px 10px 0 rgba(0, 0, 0, 0.14),
+  0 1px 18px 0 rgba(0, 0, 0, 0.12), 0 3px 5px -1px rgba(0, 0, 0, 0.2);
+$layer-shadow-8: 0 8px 10px 1px rgba(0, 0, 0, 0.14),
+  0 3px 14px 2px rgba(0, 0, 0, 0.12), 0 5px 5px -3px rgba(0, 0, 0, 0.2);
+$layer-shadow-16: 0 16px 24px 2px rgba(0, 0, 0, 0.14),
+  0 6px 30px 5px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
+$layer-shadow-24: 0 9px 46px 8px rgba(0, 0, 0, 0.14),
+  0 11px 15px -7px rgba(0, 0, 0, 0.12), 0 24px 38px 3px rgba(0, 0, 0, 0.2);
+
+// typography
+$font-family-sans-serif: "Roboto", sans-serif;
+$font-size-xlarge: 2.4rem;
+$font-size-large: 2rem;
+$font-size-larger: 1.7rem;
+$font-size-normal: 1.4rem;
+$font-size-smaller: 1.2rem;
+$font-size-small: 1rem;
+
+// others
+$base-space: 8px;
+$border-radius: 3px;
+$border-radius-small: 2px;
+$border-color-input: $bg-color-gray-5;
+
+$bg-color-title-bar: hsl(210, 20, 27.5);
+
+$link-color-blue: hsl(210, 80, 40);
+$link-color-blue-hover: lighten($link-color-blue, 20%);
+
+$bg-color-list-hover: $bg-color-gray-3;
+$bg-color-list-active: $bg-color-gray-5;
+$bg-color-flat-button-hover: $bg-color-gray-2;
+
+// from MDL
+$color-material-red: rgb(244, 67, 54);
+$color-material-cyan: rgb(0, 188, 212);

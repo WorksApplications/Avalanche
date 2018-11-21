@@ -1,0 +1,33 @@
+@import "common";
+
+html {
+  font-size: 62.5%;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  color: $text-color-normal;
+  font-family: $font-family-sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+:focus,
+:active {
+  outline: none;
+}
+
+.wrap {
+  height: 100%;
+}
+
+.title {
+  height: $title-height;
+}
+
+.content {
+  height: calc(100vh - #{$title-height});
+}
