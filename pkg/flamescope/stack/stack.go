@@ -65,6 +65,22 @@ func newNameVec(root *Stack) (nameMap, nameMapRev) {
 	return m, rev
 }
 
+func Filter(input []byte) []byte {
+    tree, err := readRaw(input)
+	if err != nil {
+        log.Print("[stack] Parse error", err)
+        return []
+	}
+	m, _ := newNameVec(r)
+    b, err := json.Marshal(tree.process(nil, m))
+    if err != nil {
+        log.Print("[stack] Marshal error", err)
+        return []
+    }
+
+    return b
+}
+
 func (r *Stack) process(parent *Stack, ndic *nameMap) *Stack {
 	r.Parent = parent
 	if r.Name == "Interpreter" {

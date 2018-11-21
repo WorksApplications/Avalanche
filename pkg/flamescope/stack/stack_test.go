@@ -2,6 +2,7 @@ package stack
 
 import (
 	"testing"
+    "fmt"
 )
 
 func example() []byte {
@@ -45,4 +46,5 @@ func TestProcess(t *testing.T) {
 	if len(s.Children) != 2 {
 		t.Fatal(s)
 	}
+    fmt.Print(s)
 }
