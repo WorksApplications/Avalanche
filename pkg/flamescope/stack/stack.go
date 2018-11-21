@@ -9,22 +9,16 @@ type nameMap map[string]int64
 type nameMapRev map[int64]string
 
 type Stack struct {
-	Children []Stack
 	Parent   *Stack
-	Name     string
 	CodePath []string
-    Value    int
-}
-
-type rawStack struct {
-	Children []rawStack `json:"c"`
+	Children []Stack `json:"c"`
 	Label    string     `json:"l"`
 	Value    int        `json:"v"`
 	Name     string     `json:"n"`
 }
 
-func readRaw(data []byte) (*rawStack, error) {
-	var ret rawStack
+func readRaw(data []byte) (*Stack, error) {
+	var ret Stack
 	err := json.Unmarshal(data, &ret)
 	if err != nil {
 		return nil, err
@@ -32,7 +26,7 @@ func readRaw(data []byte) (*rawStack, error) {
 	return &ret, nil
 }
 
-func idassign (node *rawStack, m *nameMap, rev *nameMapRev, idch <-chan int64) {
+func idassign (node *Stack, m *nameMap, rev *nameMapRev, idch <-chan int64) {
     if node.Name == "Interpreter" {
         /* Skip presense check assuming this is different method */
     } else if _, prs := (*m)[node.Name]; !prs {
@@ -46,7 +40,7 @@ func idassign (node *rawStack, m *nameMap, rev *nameMapRev, idch <-chan int64) {
     }
 }
 
-func newNameVec(root *rawStack) (nameMap, nameMapRev) {
+func newNameVec(root *Stack) (nameMap, nameMapRev) {
     done := make(chan struct{})
     idch := make(chan int64)
     m := make(nameMap)
@@ -70,50 +64,86 @@ func newNameVec(root *rawStack) (nameMap, nameMapRev) {
     return m, rev
 }
 
-func (r *rawStack) intoStack(parent *Stack, ndic *nameMap) Stack {
-	me := Stack{
-		Parent: parent,
-		Name:   r.Name,
+func (r *Stack) process(parent *Stack, ndic *nameMap) *Stack {
+    r.Parent = parent
+    if r.Name == "Interpreter" {
+        e := tryEliminateInterpreter(r, ndic)
+        if e {
+            /* Eliminatable. omit appending */
+            return nil
+        }
+    }
+	cs := make([]Stack, 0, len(r.Children))
+	for _, c := range r.Children {
+        k := c.process(r, ndic)
+        if k != nil {
+            cs = append(cs, *k)
+        }
 	}
-	cs := make([]Stack, len(r.Children))
-	for i, c := range r.Children {
-		cs[i] = c.intoStack(&me, ndic)
-		if c.Name == "Interpreter" {
-			tryEliminateInterpreter(&cs[i], ndic)
-		}
-	}
-    me.Children = cs
-	return me
+    r.Children = cs
+	return r
 }
 
 func assignCode(frame *Stack, name, mode, template string) {
 }
 
-func merge(*Stack, *Stack) {
+func merge(src *Stack, dst *Stack) bool {
+    orphan := make([]Stack, 0)
+    divestedVal := 0
+    SEARCH:
+    for _, c := range src.Children {
+        for _, d := range dst.Children {
+            if c.Name == d.Name {
+                divestedVal += c.Value
+                merge(&c, &d)
+                continue SEARCH
+            }
+        }
+        /* No adoptor found */
+        orphan = append(orphan, c)
+    }
+    if len(orphan) == 0 {
+        dst.Value += src.Value
+        return true
+    } else {
+        src.Value -= divestedVal
+        src.Children = orphan
+        return false
+    }
 }
 
-func tryEliminateInterpreter(frame *Stack, ndic *nameMap) {
+func tryEliminateInterpreter(frame *Stack, ndic *nameMap) bool {
     sim := searchSimilarStack(frame, frame.Parent.Children, ndic)
     if sim == nil {
         /* leave as is */
-        return
+        return false
     } else {
-        merge(frame, sim)
+        return merge(frame, sim)
     }
 }
 
 func dist(v []float32, w []float32) float32 {
-    return 0.0
+    dist := float32(0.0)
+    for i, _ := range v {
+        dist += v[i] * w[i]
+    }
+    return dist
 }
 
 func searchSimilarStack(frame *Stack, sibs []Stack, ndic *nameMap) *Stack {
     /* shallow check for a node with very similar children */
     myv := makeChildVec(frame, ndic)
+    max := float32(0.7)
+    var mostSimilar *Stack
     for _, sib := range sibs {
         theirv := makeChildVec(&sib, ndic)
         d := dist(myv, theirv)
+        if max < d {
+            max = d
+            mostSimilar = &sib
+        }
     }
-    return nil
+    return mostSimilar
 }
 
 func makeChildVec(frame *Stack, ndic *nameMap) []float32 {
@@ -124,6 +154,9 @@ func makeChildVec(frame *Stack, ndic *nameMap) []float32 {
     }
     length := float32(math.Sqrt(float64(l)))
     for _, n := range frame.Children {
+        if n.Name == "Interpreter" {
+            continue
+        }
         vec[(*ndic)[n.Name]] = float32(n.Value) / length
     }
     return vec

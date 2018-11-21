@@ -38,10 +38,10 @@ func TestNewNameVec(t *testing.T) {
     }
 }
 
-func TestIntoStack(t *testing.T) {
+func TestProcess(t *testing.T) {
 	r, _ := readRaw(example())
     m, _:= newNameVec(r)
-    s := r.intoStack(nil, &m)
+    s := r.process(nil, &m)
     if len(s.Children) != 2 {
 		t.Fatal(s)
     }
