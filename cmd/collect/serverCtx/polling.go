@@ -11,9 +11,9 @@ import (
 
 	"database/sql"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/app"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/pod"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
 	_ "github.com/go-sql-driver/mysql"
