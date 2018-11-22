@@ -69,8 +69,8 @@ export class ConfigPage extends React.Component<Props, State> {
       const kind = (x.version === null
         ? "unconfigured"
         : x.isObservationEnabled
-          ? "observed"
-          : "configured") as any;
+        ? "observed"
+        : "configured") as any;
       return {
         ...x,
         id: x.name,

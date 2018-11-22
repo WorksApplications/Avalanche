@@ -108,8 +108,8 @@ class SelectorBase extends React.Component<IProperty, State> {
             this.state.searchingWord
               ? styles.searching
               : this.props.selectedValue
-                ? ""
-                : styles.placeholder
+              ? ""
+              : styles.placeholder
           ].join(" ")}
           onClick={this.onClickSelector}
         >

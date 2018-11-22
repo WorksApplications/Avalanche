@@ -54,13 +54,17 @@ storiesOf("SnapshotList", module)
                   ? {
                       maxValueOfData: 50,
                       maxValues: sawData,
-                      meanValues: sawData.map(x => x / 2)
+                      meanValues: sawData.map(x => x / 2),
+                      numColumns: sawData.length / 50,
+                      numRows: 50
                     }
                   : undefined,
               getHeatMap: action(
                 "getHeatMap of d7eec7c1-daf5-4198-9503-6957aea0bf90"
               ),
-              heatMapStatus: status
+              heatMapStatus: status,
+              heatMapId: "d7eec7c1-daf5-4198-9503-6957aea0bf90",
+              onSectionSelect: action("Selected")
             }
           ]}
         />
@@ -98,13 +102,17 @@ storiesOf("SnapshotList", module)
                   ? {
                       maxValueOfData: (N * N) / 4,
                       maxValues: parabolaData,
-                      meanValues: parabolaData.map(x => x / 2)
+                      meanValues: parabolaData.map(x => x / 2),
+                      numColumns: parabolaData.length / 50,
+                      numRows: 50
                     }
                   : undefined,
               getHeatMap: action(
                 "getHeatMap of d7eec7c1-daf5-4198-9503-6957aea0bf90"
               ),
-              heatMapStatus: status1
+              heatMapStatus: status1,
+              heatMapId: "d7eec7c1-daf5-4198-9503-6957aea0bf90",
+              onSectionSelect: action("Selected")
             },
             {
               uuid: "e7eec7c1-daf5-4198-9503-6957aea0bf90",
@@ -117,13 +125,17 @@ storiesOf("SnapshotList", module)
                   ? {
                       maxValueOfData: 50,
                       maxValues: sawData,
-                      meanValues: sawData.map(x => x / 2)
+                      meanValues: sawData.map(x => x / 2),
+                      numColumns: sawData.length / 50,
+                      numRows: 50
                     }
                   : undefined,
               getHeatMap: action(
                 "getHeatMap of e7eec7c1-daf5-4198-9503-6957aea0bf90"
               ),
-              heatMapStatus: status2
+              heatMapStatus: status2,
+              heatMapId: "e7eec7c1-daf5-4198-9503-6957aea0bf90",
+              onSectionSelect: action("Selected")
             },
             {
               uuid: "f7eec7c1-daf5-4198-9503-6957aea0bf90",
@@ -136,13 +148,17 @@ storiesOf("SnapshotList", module)
                   ? {
                       maxValueOfData: 50,
                       maxValues: sawData,
-                      meanValues: sawData.map(x => x / 2)
+                      meanValues: sawData.map(x => x / 2),
+                      numColumns: sawData.length / 50,
+                      numRows: 50
                     }
                   : undefined,
               getHeatMap: action(
                 "getHeatMap of f7eec7c1-daf5-4198-9503-6957aea0bf90"
               ),
-              heatMapStatus: status3
+              heatMapStatus: status3,
+              heatMapId: "f7eec7c1-daf5-4198-9503-6957aea0bf90",
+              onSectionSelect: action("Selected")
             }
           ]}
         />

@@ -153,8 +153,8 @@ export class RunningPodsView extends React.Component<Props, State> {
                     ? "No pods available"
                     : "No pods available with current filter"
                   : podsOfApp.length === 0
-                    ? "No pods available for this app"
-                    : ""
+                  ? "No pods available for this app"
+                  : ""
               }
             />
           </div>

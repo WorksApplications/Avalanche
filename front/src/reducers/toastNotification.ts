@@ -28,8 +28,8 @@ export function toastNotification(
   if (isType(action, hideToastr)) {
     return {
       ...state,
-      notifications: state.notifications.map(
-        x => (x.id === action.payload.id ? { ...x, isShown: false } : x)
+      notifications: state.notifications.map(x =>
+        x.id === action.payload.id ? { ...x, isShown: false } : x
       )
     };
   }

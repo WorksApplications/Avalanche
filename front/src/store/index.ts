@@ -12,6 +12,8 @@ export interface IHeatMapData {
   meanValues: number[];
   maxValues: number[];
   maxValueOfData: number;
+  numColumns: number;
+  numRows: number;
 }
 
 export type HeatMapState = "empty" | "loading" | "loaded" | "failed";

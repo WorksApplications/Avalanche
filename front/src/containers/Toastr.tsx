@@ -35,10 +35,10 @@ export class Toastr extends React.Component<Props> {
                 n.message == null
                   ? undefined
                   : n.kind === "success"
-                    ? styles.success
-                    : n.kind === "error"
-                      ? styles.error
-                      : undefined
+                  ? styles.success
+                  : n.kind === "error"
+                  ? styles.error
+                  : undefined
               ].join(" ")}
             >
               <span className={styles.message}>{n.message}</span>

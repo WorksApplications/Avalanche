@@ -58,7 +58,13 @@ export function convertHeatMap(
     meanValues = rawValues;
     maxValues = rawValues;
   }
-  return { meanValues, maxValues, maxValueOfData: heatMap.maxValue };
+  return {
+    meanValues,
+    maxValues,
+    maxValueOfData: heatMap.maxValue,
+    numColumns: heatMap.numColumns,
+    numRows: heatMap.numRows
+  };
 }
 
 function paramExists<K extends string>(
@@ -157,37 +163,34 @@ export function analysisData(
   if (isType(action, postSnapshotOperation.async.started)) {
     return {
       ...state,
-      runningPods: state.runningPods.map(
-        pod =>
-          pod.name === action.payload.podId ? { ...pod, isSaving: true } : pod
+      runningPods: state.runningPods.map(pod =>
+        pod.name === action.payload.podId ? { ...pod, isSaving: true } : pod
       )
     };
   }
   if (isType(action, postSnapshotOperation.async.done)) {
     return {
       ...state,
-      runningPods: state.runningPods.map(
-        pod =>
-          pod.name === action.payload.params.podId
-            ? {
-                ...pod,
-                isSaving: false,
-                snapshots: pod.snapshots
-                  ? [...pod.snapshots, action.payload.result.newSnapshot]
-                  : [action.payload.result.newSnapshot]
-              }
-            : pod
+      runningPods: state.runningPods.map(pod =>
+        pod.name === action.payload.params.podId
+          ? {
+              ...pod,
+              isSaving: false,
+              snapshots: pod.snapshots
+                ? [...pod.snapshots, action.payload.result.newSnapshot]
+                : [action.payload.result.newSnapshot]
+            }
+          : pod
       )
     };
   }
   if (isType(action, postSnapshotOperation.async.failed)) {
     return {
       ...state,
-      runningPods: state.runningPods.map(
-        pod =>
-          pod.name === action.payload.params.podId
-            ? { ...pod, isSaving: false }
-            : pod
+      runningPods: state.runningPods.map(pod =>
+        pod.name === action.payload.params.podId
+          ? { ...pod, isSaving: false }
+          : pod
       )
     };
   }
