@@ -21,7 +21,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fil, err := stack.FilterAndExport(data)
+	fil, err := stack.FilterAndExport(data, 2)
 	if err != nil {
 		panic(err)
 	}

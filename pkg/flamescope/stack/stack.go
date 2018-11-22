@@ -94,14 +94,18 @@ func newNameVec(root *Stack) (nameMap, nameMapRev) {
 	return m, rev
 }
 
-func Filter(input []byte) ([]byte, error) {
+func Filter(input []byte, nLoop int) ([]byte, error) {
 	tree, err := readRaw(input)
 	if err != nil {
 		log.Print("[stack] Parse error: ", err)
 		return nil, err
 	}
-	m, _ := newNameVec(tree)
-	b, err := json.Marshal(tree.process(nil, &m))
+	var m nameMap
+	for i := 0; i < nLoop; i++ {
+		m, _ = newNameVec(tree)
+		tree = tree.process(nil, &m)
+	}
+	b, err := json.Marshal(tree)
 	if err != nil {
 		log.Print("[stack] Marshal error: ", err)
 		return b, err
@@ -110,16 +114,17 @@ func Filter(input []byte) ([]byte, error) {
 	return b, nil
 }
 
-func FilterAndExport(input []byte) ([]byte, error) {
+func FilterAndExport(input []byte, nLoop int) ([]byte, error) {
 	tree, err := readRaw(input)
 	if err != nil {
 		log.Print("[stack] Parse error: ", err)
 		return nil, err
 	}
-	m, _ := newNameVec(tree)
-	tree = tree.process(nil, &m)
-	m, _ = newNameVec(tree)
-	tree = tree.process(nil, &m)
+	var m nameMap
+	for i := 0; i < nLoop; i++ {
+		m, _ = newNameVec(tree)
+		tree = tree.process(nil, &m)
+	}
 	b, err := json.Marshal(exportFlameGraph(tree))
 	if err != nil {
 		log.Print("[stack] Marshal error: ", err)
@@ -282,4 +287,8 @@ func makeChildVec(frame *Stack, ndic *nameMap) []float32 {
 		vec[(*ndic)[n.Name]] = float32(n.Value) / length
 	}
 	return vec
+}
+
+func getDominantNode(frame *Stack, depth int) *Stack {
+	return nil
 }

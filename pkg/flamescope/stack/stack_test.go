@@ -194,11 +194,11 @@ ERR:
 }
 
 func TestFilter(t *testing.T) {
-	s, err := Filter(example)
+	s, err := Filter(example, 3)
 	if err != nil {
 		t.Fatal(err, string(s))
 	}
-	k, err := Filter(tower)
+	k, err := Filter(tower, 3)
 	if err != nil {
 		t.Fatal(err, string(k))
 	}
