@@ -30,7 +30,10 @@ const initialState = {
   isSelecting: false,
   sectionStart: null as number | null, // null if isSelecting===false
   sectionEnd: null as number | null, // null if isSelecting===false
-  lastMouseDown: 0
+  lastMouseDown: 0,
+
+  meanPointsStringMemo: "",
+  sparkPointsMemo: [] as Array<{ x: number; y: number; i: number }>
 };
 
 type State = Readonly<typeof initialState>;
@@ -79,6 +82,50 @@ function normalizeClampInSvg(x: number, width: number) {
 
 // currently, colored with relative value
 class HeatLineChart extends React.Component<IProperty, State> {
+  // @ts-ignore
+  private static getDerivedStateFromProps(
+    nextProps: IProperty
+  ): Partial<State> | null {
+    const { meanValues, maxValues, maxValueOfData } = nextProps;
+
+    const meanPointsString = meanValues
+      .map((v, i) => {
+        const normalizedX = i / (meanValues.length - 1);
+        // x in SVG coordinate
+        const x =
+          normalizedX *
+            svgWidth *
+            ((svgWidth - graphSvgPadding * 2) / svgWidth) +
+          graphSvgPadding;
+        const normalizedY = v / maxValueOfData;
+        // y in SVG coordinate
+        const y =
+          (1 - normalizedY) * (svgHeight - graphSvgPadding * 2) +
+          graphSvgPadding;
+        return `${x},${y}`;
+      })
+      .join(" ");
+
+    const maxPoints = maxValues
+      .map((v, i) => {
+        const normalizedX = i / (meanValues.length - 1);
+        // x in SVG coordinate
+        const x =
+          normalizedX *
+            svgWidth *
+            ((svgWidth - graphSvgPadding * 2) / svgWidth) +
+          graphSvgPadding;
+        return { x, y: v / maxValueOfData, i };
+      })
+      .filter(v => v.y > 0.9);
+    const reducedMaxPoints = reduceMaxPointsToShow(maxPoints);
+
+    return {
+      meanPointsStringMemo: meanPointsString,
+      sparkPointsMemo: reducedMaxPoints
+    };
+  }
+
   public readonly state: State = initialState;
   private wrapRef = React.createRef<HTMLDivElement>();
   private svgRef = React.createRef<SVGSVGElement>();
@@ -123,24 +170,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
   }
 
   private renderChartDef() {
-    const { meanValues, maxValueOfData, hash } = this.props;
-    const meanPointsString = meanValues
-      .map((v, i) => {
-        const normalizedX = i / (meanValues.length - 1);
-        // x in SVG coordinate
-        const x =
-          normalizedX *
-            svgWidth *
-            ((svgWidth - graphSvgPadding * 2) / svgWidth) +
-          graphSvgPadding;
-        const normalizedY = v / maxValueOfData;
-        // y in SVG coordinate
-        const y =
-          (1 - normalizedY) * (svgHeight - graphSvgPadding * 2) +
-          graphSvgPadding;
-        return `${x},${y}`;
-      })
-      .join(" ");
+    const { hash } = this.props;
 
     return (
       <>
@@ -158,7 +188,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
         >
           <polyline
             strokeLinecap="round"
-            points={meanPointsString}
+            points={this.state.meanPointsStringMemo}
             fill="transparent"
             stroke="#e6f2fd"
             strokeWidth={strokeWidth}
@@ -260,24 +290,11 @@ class HeatLineChart extends React.Component<IProperty, State> {
   }
 
   private renderSparkBodies() {
-    const { meanValues, maxValues, maxValueOfData, hash } = this.props;
-    const maxPoints = maxValues
-      .map((v, i) => {
-        const normalizedX = i / (meanValues.length - 1);
-        // x in SVG coordinate
-        const x =
-          normalizedX *
-            svgWidth *
-            ((svgWidth - graphSvgPadding * 2) / svgWidth) +
-          graphSvgPadding;
-        return { x, y: v / maxValueOfData, i };
-      })
-      .filter(v => v.y > 0.9);
-    const reducedMaxPoints = reduceMaxPointsToShow(maxPoints);
+    const { hash } = this.props;
 
     return (
       <g>
-        {reducedMaxPoints.map(p => (
+        {this.state.sparkPointsMemo.map(p => (
           <use
             key={p.x}
             href={`#spark-${hash}`}
