@@ -84,28 +84,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
   }
 
   public render() {
-    const { meanValues, maxValues, maxValueOfData, hash } = this.props;
-    const xNormalizer = meanValues.length - 1;
-
-    const meanPointsString = meanValues
-      .map((v, i) => {
-        const x =
-          (i / xNormalizer) * svgWidth * ((svgWidth - padding * 2) / svgWidth) +
-          padding;
-        const y =
-          (1 - v / maxValueOfData) * (svgHeight - padding * 2) + padding;
-        return `${x},${y}`;
-      })
-      .join(" ");
-    const maxPoints = maxValues
-      .map((v, i) => {
-        const x =
-          (i / xNormalizer) * svgWidth * ((svgWidth - padding * 2) / svgWidth) +
-          padding;
-        return { x, y: v / maxValueOfData, i };
-      })
-      .filter(v => v.y > 0.9);
-    const reducedMaxPoints = reduceMaxPoints(maxPoints);
+    const { hash } = this.props;
 
     return (
       <div
@@ -123,33 +102,9 @@ class HeatLineChart extends React.Component<IProperty, State> {
           onClick={this.onGraphClick}
         >
           <defs>
-            <linearGradient
-              id={`mean-color-${hash}`}
-              x1="0"
-              x2="0"
-              y1="1"
-              y2="0"
-            >
-              <stop offset="5%" stopColor="#e6f2fd" /* hsl(210, 90, 95) */ />
-              <stop offset="40%" stopColor="#89b6f5" /* hsl(215, 85, 75) */ />
-              <stop offset="90%" stopColor="#e5195d" /* hsl(340, 80, 50) */ />
-            </linearGradient>
-            <mask
-              id={`mean-line-${hash}`}
-              x="0"
-              y="0"
-              width={svgWidth}
-              height={svgHeight}
-            >
-              <polyline
-                strokeLinecap="round"
-                points={meanPointsString}
-                fill="transparent"
-                stroke="#e6f2fd"
-                strokeWidth={strokeWidth}
-              />
-            </mask>
+            {this.renderChartDef()}
             <g id={`notch-${hash}`}>
+              {/* sparkDef */}
               <rect fill="transparent" width={markSize} height={markSize} />
               <path
                 d={`M ${markSize / 4} 0 L ${markSize /
@@ -161,6 +116,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
             </g>
           </defs>
           <g>
+            {/* chart */}
             <rect
               width={svgWidth}
               height={svgHeight}
@@ -170,23 +126,53 @@ class HeatLineChart extends React.Component<IProperty, State> {
             />
           </g>
           {this.renderSelectingSection()}
-          <g>
-            {reducedMaxPoints.map(p => (
-              <use
-                key={p.x}
-                href={`#notch-${hash}`}
-                x={p.x - markSize / 2}
-                data-y={p.y}
-                onMouseMove={this.onMouseMoveOverMarker}
-                onMouseLeave={this.onMouseLeaveFromMarker}
-              />
-            ))}
-          </g>
+          {this.renderSparks()}
         </svg>
         {this.renderMarkerTooltip()}
         {this.renderSectionSelectionTooltip()}
         {this.renderSectionPeriodTooltip()}
       </div>
+    );
+  }
+
+  private renderChartDef() {
+    const { meanValues, maxValueOfData, hash } = this.props;
+    const meanPointsString = meanValues
+      .map((v, i) => {
+        const x =
+          (i / (meanValues.length - 1)) *
+            svgWidth *
+            ((svgWidth - padding * 2) / svgWidth) +
+          padding;
+        const y =
+          (1 - v / maxValueOfData) * (svgHeight - padding * 2) + padding;
+        return `${x},${y}`;
+      })
+      .join(" ");
+
+    return (
+      <>
+        <linearGradient id={`mean-color-${hash}`} x1="0" x2="0" y1="1" y2="0">
+          <stop offset="5%" stopColor="#e6f2fd" /* hsl(210, 90, 95) */ />
+          <stop offset="40%" stopColor="#89b6f5" /* hsl(215, 85, 75) */ />
+          <stop offset="90%" stopColor="#e5195d" /* hsl(340, 80, 50) */ />
+        </linearGradient>
+        <mask
+          id={`mean-line-${hash}`}
+          x="0"
+          y="0"
+          width={svgWidth}
+          height={svgHeight}
+        >
+          <polyline
+            strokeLinecap="round"
+            points={meanPointsString}
+            fill="transparent"
+            stroke="#e6f2fd"
+            strokeWidth={strokeWidth}
+          />
+        </mask>
+      </>
     );
   }
 
@@ -228,6 +214,36 @@ class HeatLineChart extends React.Component<IProperty, State> {
             width={sectionInSvg.width}
           />
         )}
+      </g>
+    );
+  }
+
+  private renderSparks() {
+    const { meanValues, maxValues, maxValueOfData, hash } = this.props;
+    const maxPoints = maxValues
+      .map((v, i) => {
+        const x =
+          (i / (meanValues.length - 1)) *
+            svgWidth *
+            ((svgWidth - padding * 2) / svgWidth) +
+          padding;
+        return { x, y: v / maxValueOfData, i };
+      })
+      .filter(v => v.y > 0.9);
+    const reducedMaxPoints = reduceMaxPoints(maxPoints);
+
+    return (
+      <g>
+        {reducedMaxPoints.map(p => (
+          <use
+            key={p.x}
+            href={`#notch-${hash}`}
+            x={p.x - markSize / 2}
+            data-y={p.y}
+            onMouseMove={this.onMouseMoveOverMarker}
+            onMouseLeave={this.onMouseLeaveFromMarker}
+          />
+        ))}
       </g>
     );
   }
