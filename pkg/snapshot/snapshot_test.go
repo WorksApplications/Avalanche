@@ -41,7 +41,7 @@ func TestToResponse(t *testing.T) {
 
 	id := "d7eec7c1-daf5-4198-9503-6957aea0bf90"
 	internal := SnapshotInternal{
-		UUID:    id,
+		uuid:    id,
 		appid:   1,
 		podid:   1,
 		envid:   2,
