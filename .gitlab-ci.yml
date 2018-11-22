@@ -28,6 +28,7 @@ backend-build:
             - bin/collect
             - bin/detect
             - bin/enroll
+            - bin/suspect
         expire_in: 1 hour
 
 front-build:
@@ -70,6 +71,8 @@ push-images:
         - docker build -f image/enroll/Dockerfile  --tag ${
 
         - docker build -f image/static/Dockerfile  --tag ${
+        - docker build -f image/suspect/Dockerfile  --tag ${
+        - docker push ${
         - docker push ${
         - docker push ${
         - docker push ${
