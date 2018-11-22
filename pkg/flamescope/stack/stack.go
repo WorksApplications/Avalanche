@@ -197,9 +197,20 @@ func tryEliminateInterpreter(cur *Stack, ndic *nameMap) *Stack {
 	}
 
 	/* No brother? Try search cousin */
-	for i := range cur.Parent.Parent.Parent.Children {
-		for j := range cur.Parent.Parent.Parent.Children[i].Children {
-			e := searchSimilarStack(cur, cur.Parent.Parent.Parent.Children[i].Children[j].Children, ndic)
+	ancestor := cur.Parent.Parent.Parent
+	for i := range ancestor.Children {
+		if an := ancestor.Children[i].Name; an != "Interpreter" &&
+			cur.Parent.Parent.Name != "Interpreter" && an != cur.Parent.Parent.Name {
+			/* This cannot be my branch family */
+			continue
+		}
+		for j := range ancestor.Children[i].Children {
+			if an := ancestor.Children[i].Children[j].Name; an != "Interpreter" &&
+				cur.Parent.Name != "Interpreter" && an != cur.Parent.Name {
+				/* This cannot be my branch family */
+				continue
+			}
+			e := searchSimilarStack(cur, ancestor.Children[i].Children[j].Children, ndic)
 			if e != nil {
 				return e
 			}
