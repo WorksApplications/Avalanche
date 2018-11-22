@@ -373,6 +373,25 @@ paths:
             $ref: "#/definitions/error"
       operationId: listSnapshots
 
+  /snapshots/{uuid}:
+    get:
+      parameters:
+        - name: uuid
+          type: string
+          in: path
+          required: true
+      responses:
+        200:
+          description: |
+            "returns list of snapshots across applications"
+          schema:
+            $ref: "#/definitions/snapshot"
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/error"
+      operationId: getSnapshot
+
   /available-pods:
     get:
       responses:
