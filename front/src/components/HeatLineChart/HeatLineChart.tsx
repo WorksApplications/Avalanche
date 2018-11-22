@@ -201,12 +201,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
   }
 
   private renderSelectingSection() {
-    if (
-      !(
-        this.state.sectionSelectionTooltip &&
-        this.state.sectionSelectionTooltip.exists
-      )
-    ) {
+    if (!this.state.sectionSelectionTooltip) {
       // empty group
       return <g />;
     }
@@ -346,7 +341,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
             this.props.meanValues.length *
               this.state.sectionSelectionTooltip.normalizedPositionX
           );
-    const targetValue = this.props.meanValues[targetIndex];
+    const targetValue = this.props.meanValues[targetIndex] || 0;
 
     return (
       <div
