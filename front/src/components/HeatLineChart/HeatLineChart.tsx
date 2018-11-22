@@ -246,12 +246,14 @@ class HeatLineChart extends React.Component<IProperty, State> {
       // vertical line during hover
       return (
         <g>
-          <path
-            d={`M ${beginX} 0 V ${svgHeight}`}
-            fill="none"
-            stroke="#bfbfbf" /* hsl(0, 0, 75) */
-            strokeWidth={strokeWidth * 0.8}
-          />
+          {this.state.sectionSelectionTooltip.exists && (
+            <path
+              d={`M ${beginX} 0 V ${svgHeight}`}
+              fill="none"
+              stroke="#bfbfbf" /* hsl(0, 0, 75) */
+              strokeWidth={strokeWidth * 0.8}
+            />
+          )}
         </g>
       );
     }
