@@ -84,8 +84,6 @@ class HeatLineChart extends React.Component<IProperty, State> {
   }
 
   public render() {
-    const { hash } = this.props;
-
     return (
       <div
         className={styles.wrap}
@@ -103,30 +101,11 @@ class HeatLineChart extends React.Component<IProperty, State> {
         >
           <defs>
             {this.renderChartDef()}
-            <g id={`notch-${hash}`}>
-              {/* sparkDef */}
-              <rect fill="transparent" width={markSize} height={markSize} />
-              <path
-                d={`M ${markSize / 4} 0 L ${markSize /
-                  2} ${markSize}  ${(markSize * 3) / 4} 0`}
-                fill="none"
-                stroke="#e5195d" /* hsl(340, 80, 50) */
-                strokeWidth={strokeWidth * 0.8}
-              />
-            </g>
+            {this.renderSparkDef()}
           </defs>
-          <g>
-            {/* chart */}
-            <rect
-              width={svgWidth}
-              height={svgHeight}
-              stroke="none"
-              fill={`url(#mean-color-${hash})`}
-              mask={`url(#mean-line-${hash})`}
-            />
-          </g>
+          {this.renderChartBody()}
           {this.renderSelectingSection()}
-          {this.renderSparks()}
+          {this.renderSparkBodies()}
         </svg>
         {this.renderMarkerTooltip()}
         {this.renderSectionSelectionTooltip()}
@@ -176,6 +155,40 @@ class HeatLineChart extends React.Component<IProperty, State> {
     );
   }
 
+  private renderSparkDef() {
+    const { hash } = this.props;
+
+    return (
+      <g id={`spark-${hash}`}>
+        <rect fill="transparent" width={markSize} height={markSize} />
+        <path
+          d={`M ${markSize / 4} 0 L ${markSize / 2} ${markSize}  ${(markSize *
+            3) /
+            4} 0`}
+          fill="none"
+          stroke="#e5195d" /* hsl(340, 80, 50) */
+          strokeWidth={strokeWidth * 0.8}
+        />
+      </g>
+    );
+  }
+
+  private renderChartBody() {
+    const { hash } = this.props;
+
+    return (
+      <g>
+        <rect
+          width={svgWidth}
+          height={svgHeight}
+          stroke="none"
+          fill={`url(#mean-color-${hash})`}
+          mask={`url(#mean-line-${hash})`}
+        />
+      </g>
+    );
+  }
+
   private renderSelectingSection() {
     let normalizedSection;
     let sectionInSvg;
@@ -218,7 +231,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
     );
   }
 
-  private renderSparks() {
+  private renderSparkBodies() {
     const { meanValues, maxValues, maxValueOfData, hash } = this.props;
     const maxPoints = maxValues
       .map((v, i) => {
@@ -237,7 +250,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
         {reducedMaxPoints.map(p => (
           <use
             key={p.x}
-            href={`#notch-${hash}`}
+            href={`#spark-${hash}`}
             x={p.x - markSize / 2}
             data-y={p.y}
             onMouseMove={this.onMouseMoveOverMarker}
