@@ -1,5 +1,5 @@
+import memoizeOne from "memoize-one";
 import * as React from "react";
-
 import styles from "./HeatLineChart.scss";
 
 interface IProperty {
@@ -30,10 +30,7 @@ const initialState = {
   isSelecting: false,
   sectionStart: null as number | null, // null if isSelecting===false
   sectionEnd: null as number | null, // null if isSelecting===false
-  lastMouseDown: 0,
-
-  meanPointsStringMemo: "",
-  sparkPointsMemo: [] as Array<{ x: number; y: number; i: number }>
+  lastMouseDown: 0
 };
 
 type State = Readonly<typeof initialState>;
@@ -82,53 +79,48 @@ function normalizeClampInSvg(x: number, width: number) {
 
 // currently, colored with relative value
 class HeatLineChart extends React.Component<IProperty, State> {
-  // @ts-ignore
-  private static getDerivedStateFromProps(
-    nextProps: IProperty
-  ): Partial<State> | null {
-    const { meanValues, maxValues, maxValueOfData } = nextProps;
-
-    const meanPointsString = meanValues
-      .map((v, i) => {
-        const normalizedX = i / (meanValues.length - 1);
-        // x in SVG coordinate
-        const x =
-          normalizedX *
-            svgWidth *
-            ((svgWidth - graphSvgPadding * 2) / svgWidth) +
-          graphSvgPadding;
-        const normalizedY = v / maxValueOfData;
-        // y in SVG coordinate
-        const y =
-          (1 - normalizedY) * (svgHeight - graphSvgPadding * 2) +
-          graphSvgPadding;
-        return `${x},${y}`;
-      })
-      .join(" ");
-
-    const maxPoints = maxValues
-      .map((v, i) => {
-        const normalizedX = i / (meanValues.length - 1);
-        // x in SVG coordinate
-        const x =
-          normalizedX *
-            svgWidth *
-            ((svgWidth - graphSvgPadding * 2) / svgWidth) +
-          graphSvgPadding;
-        return { x, y: v / maxValueOfData, i };
-      })
-      .filter(v => v.y > 0.9);
-    const reducedMaxPoints = reduceMaxPointsToShow(maxPoints);
-
-    return {
-      meanPointsStringMemo: meanPointsString,
-      sparkPointsMemo: reducedMaxPoints
-    };
-  }
-
   public readonly state: State = initialState;
   private wrapRef = React.createRef<HTMLDivElement>();
   private svgRef = React.createRef<SVGSVGElement>();
+
+  private calcMeanPointsString = memoizeOne(
+    (meanValues: number[], maxValueOfData: number) =>
+      meanValues
+        .map((v, i) => {
+          const normalizedX = i / (meanValues.length - 1);
+          // x in SVG coordinate
+          const x =
+            normalizedX *
+              svgWidth *
+              ((svgWidth - graphSvgPadding * 2) / svgWidth) +
+            graphSvgPadding;
+          const normalizedY = v / maxValueOfData;
+          // y in SVG coordinate
+          const y =
+            (1 - normalizedY) * (svgHeight - graphSvgPadding * 2) +
+            graphSvgPadding;
+          return `${x},${y}`;
+        })
+        .join(" ")
+  );
+
+  private calcSparks = memoizeOne(
+    (maxValues: number[], maxValueOfData: number) =>
+      reduceMaxPointsToShow(
+        maxValues
+          .map((v, i) => {
+            const normalizedX = i / (maxValues.length - 1);
+            // x in SVG coordinate
+            const x =
+              normalizedX *
+                svgWidth *
+                ((svgWidth - graphSvgPadding * 2) / svgWidth) +
+              graphSvgPadding;
+            return { x, y: v / maxValueOfData, i };
+          })
+          .filter(v => v.y > 0.9)
+      )
+  );
 
   public componentDidMount() {
     document.addEventListener("click", this.onClickOutside, true);
@@ -170,7 +162,12 @@ class HeatLineChart extends React.Component<IProperty, State> {
   }
 
   private renderChartDef() {
-    const { hash } = this.props;
+    const { meanValues, maxValueOfData, hash } = this.props;
+
+    const meanPointsString = this.calcMeanPointsString(
+      meanValues,
+      maxValueOfData
+    );
 
     return (
       <>
@@ -188,7 +185,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
         >
           <polyline
             strokeLinecap="round"
-            points={this.state.meanPointsStringMemo}
+            points={meanPointsString}
             fill="transparent"
             stroke="#e6f2fd"
             strokeWidth={strokeWidth}
@@ -292,11 +289,13 @@ class HeatLineChart extends React.Component<IProperty, State> {
   }
 
   private renderSparkBodies() {
-    const { hash } = this.props;
+    const { maxValues, maxValueOfData, hash } = this.props;
+
+    const sparks = this.calcSparks(maxValues, maxValueOfData);
 
     return (
       <g>
-        {this.state.sparkPointsMemo.map(p => (
+        {sparks.map(p => (
           <use
             key={p.x}
             href={`#spark-${hash}`}
