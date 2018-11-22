@@ -45,7 +45,6 @@ const markSize = 0.1;
 const svgHeight = 1;
 const svgWidth = 10;
 const strokeWidth = 0.008;
-const textSize = 0.1;
 
 function reduceMaxPoints(
   points: Array<{ x: number; y: number; i: number }>
@@ -160,10 +159,6 @@ class HeatLineChart extends React.Component<IProperty, State> {
                 strokeWidth={strokeWidth * 0.8}
               />
             </g>
-            <filter id={`text-bg-${hash}`}>
-              <feFlood floodColor="white" floodOpacity={0.8} result="goo" />
-              <feComposite in="SourceGraphic" in2="goo" operator="atop" />
-            </filter>
           </defs>
           <g>
             <rect
@@ -190,6 +185,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
         </svg>
         {this.renderMarkerTooltip()}
         {this.renderSectionSelectionTooltip()}
+        {this.renderSectionPeriodTooltip()}
       </div>
     );
   }
@@ -222,39 +218,15 @@ class HeatLineChart extends React.Component<IProperty, State> {
               strokeWidth={strokeWidth * 0.8}
             />
           )}
-        {normalizedSection && sectionInSvg && (
-          <>
-            <rect
-              height={svgHeight}
-              fill="#dc1f5f40" /* hsl(340, 75, 50) + a */
-              stroke="#b2194c" /* hsl(340, 75, 50) */
-              strokeWidth={strokeWidth * 0.8}
-              x={sectionInSvg.x}
-              width={sectionInSvg.width}
-            />
-            <path
-              d={`M ${sectionInSvg.x} ${svgHeight -
-                padding -
-                textSize / 3} H ${sectionInSvg.x + sectionInSvg.width}`}
-              stroke="#191919" /* hsl(0, 0, 10) */
-              strokeWidth={strokeWidth * 0.8}
-            />
-            <text
-              x={sectionInSvg.x + sectionInSvg.width / 2}
-              y={svgHeight - padding}
-              textAnchor="middle"
-              fontSize={textSize}
-              fill="#545454" /* hsl(0, 0, 33) */
-              filter={`url(#text-bg-${this.props.hash})`}
-            >
-              T +
-              {(
-                (normalizedSection.end - normalizedSection.start) *
-                this.props.numColumns
-              ).toFixed(1)}
-              s
-            </text>
-          </>
+        {sectionInSvg && (
+          <rect
+            height={svgHeight}
+            fill="#dc1f5f40" /* hsl(340, 75, 50) + a */
+            stroke="#b2194c" /* hsl(340, 75, 50) */
+            strokeWidth={strokeWidth * 0.8}
+            x={sectionInSvg.x}
+            width={sectionInSvg.width}
+          />
         )}
       </g>
     );
@@ -324,6 +296,45 @@ class HeatLineChart extends React.Component<IProperty, State> {
       </div>
     );
   }
+
+  private renderSectionPeriodTooltip = () => {
+    if (
+      this.state.sectionStart === null ||
+      this.state.sectionEnd === null ||
+      !this.svgRef.current
+    ) {
+      return;
+    }
+
+    const normalizedSection =
+      this.state.sectionStart < this.state.sectionEnd
+        ? { start: this.state.sectionStart, end: this.state.sectionEnd }
+        : { start: this.state.sectionEnd, end: this.state.sectionStart };
+
+    const point1 = normalizedSection.start * (svgWidth - padding * 2) + padding;
+    const point2 = normalizedSection.end * (svgWidth - padding * 2) + padding;
+    const sectionInSvg = { x: point1, width: point2 - point1 };
+    const svgRect = this.svgRef.current.getBoundingClientRect();
+
+    return (
+      <div
+        className={styles.sectionPeriodTooltip}
+        style={{
+          left: `${(sectionInSvg.x / svgWidth) * svgRect.width}px`,
+          width: `${(sectionInSvg.width / svgWidth) * svgRect.width}px`
+        }}
+      >
+        <span className={styles.sectionPeriodTooltipMessage}>
+          T +
+          {(
+            (normalizedSection.end - normalizedSection.start) *
+            this.props.numColumns
+          ).toFixed(1)}
+          s
+        </span>
+      </div>
+    );
+  };
 
   private onMouseMoveOverMarker = (e: React.MouseEvent<SVGUseElement>) => {
     const dataY = e.currentTarget.dataset.y;
