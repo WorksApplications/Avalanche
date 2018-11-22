@@ -12,7 +12,9 @@ describe("HeatMapClient", () => {
     );
     await expect(heatMapClient("")).resolves.toEqual({
       maxValue: 0,
-      values: []
+      values: [],
+      numColumns: 0,
+      numRows: 0
     });
   });
   describe("keeps `len(columns)` === `len(values)` and `len(rows)` === `len(values[x})", async () => {
@@ -27,7 +29,9 @@ describe("HeatMapClient", () => {
       );
       await expect(heatMapClient("")).resolves.toEqual({
         maxValue: 2,
-        values: [2]
+        values: [2],
+        numColumns: 1,
+        numRows: 1
       });
     });
     it("okay when 2 columns, 2 rows and 2 value arrays", async () => {
@@ -41,7 +45,9 @@ describe("HeatMapClient", () => {
       );
       await expect(heatMapClient("")).resolves.toEqual({
         maxValue: 6,
-        values: [3, 4, 5, 6]
+        values: [3, 4, 5, 6],
+        numColumns: 2,
+        numRows: 2
       });
     });
   });

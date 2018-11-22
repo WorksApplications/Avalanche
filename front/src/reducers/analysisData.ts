@@ -58,7 +58,13 @@ export function convertHeatMap(
     meanValues = rawValues;
     maxValues = rawValues;
   }
-  return { meanValues, maxValues, maxValueOfData: heatMap.maxValue };
+  return {
+    meanValues,
+    maxValues,
+    maxValueOfData: heatMap.maxValue,
+    numColumns: heatMap.numColumns,
+    numRows: heatMap.numRows
+  };
 }
 
 function paramExists<K extends string>(

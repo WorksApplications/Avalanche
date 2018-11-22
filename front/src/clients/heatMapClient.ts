@@ -33,7 +33,9 @@ export default function(fileName: string): Promise<IHeatMap> {
       }
       return {
         maxValue: data.maxvalue,
-        values
+        values,
+        numColumns: data.columns.length,
+        numRows: data.rows.length
       };
     });
 }
@@ -41,4 +43,6 @@ export default function(fileName: string): Promise<IHeatMap> {
 export interface IHeatMap {
   maxValue: number;
   values: number[];
+  numColumns: number;
+  numRows: number;
 }

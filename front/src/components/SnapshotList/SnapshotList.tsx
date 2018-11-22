@@ -1,9 +1,14 @@
 // tslint:disable:max-classes-per-file
 import * as React from "react";
-import HeatLineChart, { HeatMapData } from "../HeatLineChart";
+import HeatLineChart, { HeatLineChartProperty } from "../HeatLineChart";
 import Link from "../Link";
 import Spinner from "../Spinner";
 import styles from "./SnapshotList.scss";
+
+type HeatMapData = HeatLineChartProperty & {
+  numColumns: number;
+  numRows: number;
+};
 
 export interface IItemProperty {
   uuid: string;
@@ -12,10 +17,12 @@ export interface IItemProperty {
   createdAt?: Date;
   link: string;
   heatMap?: HeatMapData;
+  heatMapId: string;
   heatMapStatus: "empty" | "loading" | "loaded" | "failed";
   openByDefault?: boolean;
 
   getHeatMap(): void;
+  onSectionSelect(start: number, end: number): void;
 }
 
 const initialItemState = {
@@ -93,7 +100,11 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
         if (this.props.heatMap) {
           return (
             <div className={styles.heatMap}>
-              <HeatLineChart {...this.props.heatMap} hash={this.props.uuid} />
+              <HeatLineChart
+                {...this.props.heatMap}
+                hash={this.props.uuid}
+                onSectionSelect={this.props.onSectionSelect}
+              />
             </div>
           );
         }
