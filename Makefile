@@ -7,13 +7,16 @@ default: all
 
 all: front backend
 
-backend: bin/detect bin/collect bin/enroll
+backend: bin/detect bin/collect bin/enroll bin/suspect
 front: front/public/app.js
 
 collect: collect-img
 
 bin/enroll: $(shell find cmd/enroll -name *.go) $(PKG)
 	CGO_ENABLED=0 go build -o bin/enroll cmd/enroll/app.go
+
+bin/suspect: $(shell find cmd/suspect -name *.go) $(PKG)
+	CGO_ENABLED=0 go build -o bin/suspect cmd/suspect/main.go
 
 bin/collect: $(shell find cmd/collect -name *.go) $(PKG) generated_files/stub
 	CGO_ENABLED=0 go build -o bin/collect cmd/collect/server.go

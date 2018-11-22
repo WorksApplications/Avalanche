@@ -38,7 +38,7 @@ func InitTable(db *sql.DB) {
 }
 
 type SnapshotInternal struct {
-	UUID    string
+	uuid    string
 	appid   int64
 	podid   int64
 	envid   int64
@@ -58,7 +58,7 @@ func list(db *sql.DB, where *string) []*SnapshotInternal {
 	sxs := make([]*SnapshotInternal, 0)
 	for rows.Next() {
 		sx := SnapshotInternal{}
-		err = rows.Scan(&sx.UUID, &sx.created, &sx.appid, &sx.podid, &sx.envid, &sx.layid, &sx.link)
+		err = rows.Scan(&sx.uuid, &sx.created, &sx.appid, &sx.podid, &sx.envid, &sx.layid, &sx.link)
 		if err != nil {
 			log.Print("[DB/Snapshot] Scan", err)
 		}
@@ -77,6 +77,16 @@ func GetLatest(db *sql.DB, max int64) []*SnapshotInternal {
 	return list(db, &wh)
 }
 
+func GetByUuid(db *sql.DB, uuid string) (*SnapshotInternal, error) {
+	wh := fmt.Sprintf("WHERE uuid = \"%s\"", uuid)
+	l := list(db, &wh)
+	if l == nil || len(l) != 1 {
+		return nil, fmt.Errorf("No suitable snapshot data: %s", uuid)
+	} else {
+		return l[0], nil
+	}
+}
+
 func (s *SnapshotInternal) ToResponse(db *sql.DB, flamescope string) *models.Snapshot {
 	if s == nil {
 		return nil
@@ -88,7 +98,7 @@ func (s *SnapshotInternal) ToResponse(db *sql.DB, flamescope string) *models.Sna
 		e = *environ.FromId(db, s.envid).Name
 	}
 	r := models.Snapshot{
-		UUID:           &s.UUID,
+		UUID:           &s.uuid,
 		CreatedAt:      strfmt.DateTime(s.created),
 		Pod:            p,
 		Environment:    e,
@@ -97,7 +107,7 @@ func (s *SnapshotInternal) ToResponse(db *sql.DB, flamescope string) *models.Sna
 	return &r
 }
 
-func getSS(pvmountp *string, temporald *string, link *string, pname *string) (string, string, error) {
+func saveSnapshot(pvmountp *string, temporald *string, link *string, pname *string) (string, string, error) {
 	/* try access to the "perf.tar.gz" file for extract */
 	g, eg := http.Get(*link)
 	if eg != nil || g.StatusCode != http.StatusOK {
@@ -152,7 +162,7 @@ func New(extr *string, mount *string, tempd *string, db *sql.DB, a *models.App, 
 	}
 	link := *extr + "/?resource=" + k.Path + "perf-record/" + *a.Name + ".tar.gz"
 	log.Printf("LINK ADDRESS: %s", link)
-	g, loc, err := getSS(mount, tempd, &link, p.Name)
+	g, loc, err := saveSnapshot(mount, tempd, &link, p.Name)
 	if err != nil {
 		log.Printf("[Snapshot] Couldn't get snapshot")
 		return nil, err

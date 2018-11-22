@@ -2,6 +2,7 @@ package stack
 
 import (
 	"encoding/json"
+	"log"
 	"math"
 )
 
@@ -9,13 +10,40 @@ type nameMap map[string]int64
 type nameMapRev map[int64]string
 
 type Stack struct {
-	Parent   *Stack
-	CodePath []string
-	Children []Stack `json:"c"`
-	Label    string  `json:"l"`
-	Value    int     `json:"v"`
-	Name     string  `json:"n"`
-	adoptees []Stack
+	Parent   *Stack   `json:"-"`
+	CodePath []string `json:"-"`
+	Children []Stack  `json:"c"`
+	Label    string   `json:"l"`
+	Value    int      `json:"v"`
+	Name     string   `json:"n"`
+	adoptees []Stack  `json:"-"`
+}
+
+type Flamegraph struct {
+	Children []Flamegraph `json:"children"`
+	Label    string       `json:"-"`
+	Value    int          `json:"value"`
+	Delta    int          `json:"delta"`
+	Elided   int          `json:"elided"`
+	FullVal  int          `json:"full_value"`
+	Name     string       `json:"name"`
+	adoptees []Flamegraph `json:"-"`
+}
+
+func exportFlameGraph(s *Stack) Flamegraph {
+	cs := make([]Flamegraph, len(s.Children))
+	for i, c := range s.Children {
+		cs[i] = exportFlameGraph(&c)
+	}
+	node := Flamegraph{
+		Children: cs,
+		Value:    s.Value,
+		Delta:    0,
+		Elided:   0,
+		FullVal:  0,
+		Name:     s.Name,
+	}
+	return node
 }
 
 func readRaw(data []byte) (*Stack, error) {
@@ -36,8 +64,9 @@ func idassign(node *Stack, m *nameMap, rev *nameMapRev, idch <-chan int64) {
 		(*m)[node.Name] = id
 		(*rev)[id] = node.Name
 	}
-	for _, c := range node.Children {
-		idassign(&c, m, rev, idch)
+	for i, _ := range node.Children {
+		node.Children[i].Parent = node
+		idassign(&node.Children[i], m, rev, idch)
 	}
 }
 
@@ -65,70 +94,122 @@ func newNameVec(root *Stack) (nameMap, nameMapRev) {
 	return m, rev
 }
 
-func Filter(input []byte) []byte {
-    tree, err := readRaw(input)
+func Filter(input []byte, nLoop int) ([]byte, error) {
+	tree, err := readRaw(input)
 	if err != nil {
-        log.Print("[stack] Parse error", err)
-        return []
+		log.Print("[stack] Parse error: ", err)
+		return nil, err
 	}
-	m, _ := newNameVec(r)
-    b, err := json.Marshal(tree.process(nil, m))
-    if err != nil {
-        log.Print("[stack] Marshal error", err)
-        return []
-    }
+	var m nameMap
+	for i := 0; i < nLoop; i++ {
+		m, _ = newNameVec(tree)
+		tree.process(nil, &m)
+	}
+	b, err := json.Marshal(tree)
+	if err != nil {
+		log.Print("[stack] Marshal error: ", err)
+		return b, err
+	}
 
-    return b
+	return b, nil
 }
 
-func (r *Stack) process(parent *Stack, ndic *nameMap) *Stack {
-	r.Parent = parent
+func FilterAndExport(input []byte, nLoop int) ([]byte, error) {
+	tree, err := readRaw(input)
+	if err != nil {
+		log.Print("[stack] Parse error: ", err)
+		return nil, err
+	}
+	var m nameMap
+	for i := 0; i < nLoop; i++ {
+		m, _ = newNameVec(tree)
+		tree.process(nil, &m)
+	}
+	b, err := json.Marshal(exportFlameGraph(tree))
+	if err != nil {
+		log.Print("[stack] Marshal error: ", err)
+		return b, err
+	}
+
+	return b, nil
+}
+
+func (r *Stack) process(parent *Stack, ndic *nameMap) {
 	if r.Name == "Interpreter" {
+		/* Try elimination */
 		e := tryEliminateInterpreter(r, ndic)
 		if e != nil {
 			/* Merge this into similar named node */
 			if delegate(r, e) {
+
 				/* Everything was delegated, so this is
 				 * eliminatable. omit appending */
-				return r
+				return
 			} else {
 				/* proceed to processing for rest of the children */
 			}
 		}
 	}
-	cs := make([]Stack, 0, len(r.Children))
-	for _, c := range r.Children {
+	cs := make([]Stack, 0, len(r.Children)+len(r.adoptees))
+	for i, _ := range r.Children {
 		/* Merge his doppelganger */
-		for i, d := range r.adoptees {
+		for j, _ := range r.adoptees {
 			/* XXX faster merge may needed */
-			if d.Name == c.Name {
-				c.Value += d.Value
+			if r.Children[i].Name == r.adoptees[j].Name {
+				r.Children[i].Value += r.adoptees[j].Value
 				/* Delegate all the children of doppelganger to him */
-				c.adoptees = append(c.adoptees, d.Children...)
+				r.Children[i].adoptees = append(r.Children[i].adoptees, r.adoptees[j].Children...)
 				/* Delete */
-				r.adoptees = append(r.adoptees[:i], r.adoptees[i+1:]...)
+				r.adoptees = append(r.adoptees[:j], r.adoptees[j+1:]...)
 				break
 			}
 		}
 
-		k := c.process(r, ndic)
-		if k != nil {
-			cs = append(cs, *k)
-		}
+		r.Children[i].process(r, ndic)
+		cs = append(cs, r.Children[i])
 	}
 
 	/* Adopt orphans */
-	for _, c := range r.adoptees {
-		k := c.process(r, ndic)
-		if k != nil {
-			cs = append(cs, *k)
-		}
+	for i := range r.adoptees {
+		r.adoptees[i].process(r, ndic)
+		cs = append(cs, r.adoptees[i])
 	}
 	r.Children = cs
-	return r
+	return
 }
 
-func assignCode(frame *Stack, name, mode, template string) {
+func tryEliminateInterpreter(cur *Stack, ndic *nameMap) *Stack {
+	e := searchSimilarStack(cur, cur.Parent.Children, ndic)
+	if e != nil {
+		return e
+	}
+	if cur.Parent.Parent == nil {
+		return nil
+	} else if cur.Parent.Parent.Parent == nil {
+		return nil
+	}
+
+	/* No brother? Try search cousin */
+	ancestor := cur.Parent.Parent.Parent
+	for i := range ancestor.Children {
+		if an := ancestor.Children[i].Name; an != "Interpreter" &&
+			cur.Parent.Parent.Name != "Interpreter" && an != cur.Parent.Parent.Name {
+			/* This cannot be my branch family */
+			continue
+		}
+		for j := range ancestor.Children[i].Children {
+			if an := ancestor.Children[i].Children[j].Name; an != "Interpreter" &&
+				cur.Parent.Name != "Interpreter" && an != cur.Parent.Name {
+				/* This cannot be my branch family */
+				continue
+			}
+			e := searchSimilarStack(cur, ancestor.Children[i].Children[j].Children, ndic)
+			if e != nil {
+				return e
+			}
+		}
+	}
+	return nil
 }
 
 func delegate(src *Stack, dst *Stack) bool {
@@ -137,7 +218,10 @@ func delegate(src *Stack, dst *Stack) bool {
 	divestedVal := 0
 SEARCH:
 	for _, c := range src.Children {
-		/* Find my doppelganger */
+		/* Find my children's doppelgangers */
+		if c.Name == "Interpreter" {
+			goto END
+		}
 		for _, d := range dst.Children {
 			if c.Name == d.Name {
 				divestedVal += c.Value
@@ -145,24 +229,23 @@ SEARCH:
 				continue SEARCH
 			}
 		}
+	END:
 		/* No adoptor found */
 		orphan = append(orphan, c)
 	}
 	dst.adoptees = adoptee
-	dst.Value += divestedVal
-	src.Value -= divestedVal
 	src.Children = orphan
-	return len(orphan) == 0
-}
 
-func tryEliminateInterpreter(frame *Stack, ndic *nameMap) *Stack {
-	sim := searchSimilarStack(frame, frame.Parent.Children, ndic)
-	if sim == nil {
-		/* leave as is */
-		return nil
-	} else {
-		return sim
+	cur := [2]*Stack{dst, src}
+	log.Print(divestedVal)
+	for cur[0] != cur[1] {
+		cur[0].Value += divestedVal
+		cur[1].Value -= divestedVal
+		cur[0] = cur[0].Parent
+		cur[1] = cur[1].Parent
 	}
+
+	return len(orphan) == 0
 }
 
 func dist(v []float32, w []float32) float32 {
@@ -177,13 +260,18 @@ func searchSimilarStack(frame *Stack, sibs []Stack, ndic *nameMap) *Stack {
 	/* shallow check for a node with very similar children */
 	myv := makeChildVec(frame, ndic)
 	max := float32(0.7)
-	var mostSimilar *Stack
-	for _, sib := range sibs {
-		theirv := makeChildVec(&sib, ndic)
+	var mostSimilar *Stack = nil
+	/* do not take struct from range here; pointer sensitive! */
+	for i := range sibs {
+		if sibs[i].Name == "Interpreter" {
+			/* Oh? It's me!  */
+			continue
+		}
+		theirv := makeChildVec(&sibs[i], ndic)
 		d := dist(myv, theirv)
 		if max < d {
 			max = d
-			mostSimilar = &sib
+			mostSimilar = &sibs[i]
 		}
 	}
 	return mostSimilar

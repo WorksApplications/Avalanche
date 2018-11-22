@@ -250,6 +250,16 @@ func (s *ServerCtx) ListSnapshotsHandler(params operations.ListSnapshotsParams) 
 	return operations.NewListSnapshotsOK().WithPayload(ss)
 }
 
+func (s *ServerCtx) GetSnapshotHandler(params operations.GetSnapshotParams) middleware.Responder {
+	ss, err := snapshot.GetByUuid(s.Db, params.UUID)
+	if err != nil {
+		e := err.Error()
+		return operations.NewListSnapshotsDefault(400).WithPayload(&models.Error{Message: &e})
+	}
+
+	return operations.NewGetSnapshotOK().WithPayload(ss.ToResponse(s.Db, s.Flamescope))
+}
+
 func (s *ServerCtx) InitHandle() {
 	environ.InitTable(s.Db)
 	layout.InitTable(s.Db)
