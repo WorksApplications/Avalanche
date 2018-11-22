@@ -123,25 +123,25 @@ func TestNewNameVec(t *testing.T) {
 func TestProcess(t *testing.T) {
 	r, _ := readRaw(example)
 	m, _ := newNameVec(r)
-	s := r.process(nil, &m)
-	if len(s.Children) != 2 {
-		t.Fatal(s)
+	r.process(nil, &m)
+	if len(r.Children) != 2 {
+		t.Fatal(r)
 	}
 }
 
-func TestProcessWithLongerExample(t *testing.T) {
+func TestProcess_WithLongerExample(t *testing.T) {
 	r, _ := readRaw(tower)
 	m, _ := newNameVec(r)
-	s := r.process(nil, &m)
-	if len(s.Children[0].Children) != 1 {
-		t.Fatal(s)
+	r.process(nil, &m)
+	if len(r.Children[0].Children) != 1 {
+		t.Fatal(r)
 	}
 }
 
-func TestProcessWithWiderExample(t *testing.T) {
-	r, _ := readRaw(wider)
-	m, _ := newNameVec(r)
-	s := r.process(nil, &m)
+func TestProcess_WithWiderExample(t *testing.T) {
+	s, _ := readRaw(wider)
+	m, _ := newNameVec(s)
+	s.process(nil, &m)
 	adoptor := -1
 	if len(s.Children) == 0 {
 		goto ERR
@@ -193,13 +193,16 @@ ERR:
 	t.Fatal(string(b))
 }
 
-func TestFilter(t *testing.T) {
-	s, err := Filter(example, 3)
-	if err != nil {
-		t.Fatal(err, string(s))
+func BenchmarkFilter_WithLongerExample(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Filter(tower, 3)
 	}
-	k, err := Filter(tower, 3)
-	if err != nil {
-		t.Fatal(err, string(k))
+}
+
+func BenchmarkFilter_WithWiderExample(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Filter(tower, 3)
 	}
 }

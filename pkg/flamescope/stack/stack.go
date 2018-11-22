@@ -103,7 +103,7 @@ func Filter(input []byte, nLoop int) ([]byte, error) {
 	var m nameMap
 	for i := 0; i < nLoop; i++ {
 		m, _ = newNameVec(tree)
-		tree = tree.process(nil, &m)
+		tree.process(nil, &m)
 	}
 	b, err := json.Marshal(tree)
 	if err != nil {
@@ -123,7 +123,7 @@ func FilterAndExport(input []byte, nLoop int) ([]byte, error) {
 	var m nameMap
 	for i := 0; i < nLoop; i++ {
 		m, _ = newNameVec(tree)
-		tree = tree.process(nil, &m)
+		tree.process(nil, &m)
 	}
 	b, err := json.Marshal(exportFlameGraph(tree))
 	if err != nil {
@@ -134,7 +134,7 @@ func FilterAndExport(input []byte, nLoop int) ([]byte, error) {
 	return b, nil
 }
 
-func (r *Stack) process(parent *Stack, ndic *nameMap) *Stack {
+func (r *Stack) process(parent *Stack, ndic *nameMap) {
 	if r.Name == "Interpreter" {
 		/* Try elimination */
 		e := tryEliminateInterpreter(r, ndic)
@@ -144,13 +144,13 @@ func (r *Stack) process(parent *Stack, ndic *nameMap) *Stack {
 
 				/* Everything was delegated, so this is
 				 * eliminatable. omit appending */
-				return r
+				return
 			} else {
 				/* proceed to processing for rest of the children */
 			}
 		}
 	}
-	cs := make([]Stack, 0, len(r.Children))
+	cs := make([]Stack, 0, len(r.Children)+len(r.adoptees))
 	for i, _ := range r.Children {
 		/* Merge his doppelganger */
 		for j, _ := range r.adoptees {
@@ -165,24 +165,17 @@ func (r *Stack) process(parent *Stack, ndic *nameMap) *Stack {
 			}
 		}
 
-		k := r.Children[i].process(r, ndic)
-		if k != nil {
-			cs = append(cs, *k)
-		}
+		r.Children[i].process(r, ndic)
+		cs = append(cs, r.Children[i])
 	}
 
 	/* Adopt orphans */
-	for _, c := range r.adoptees {
-		k := c.process(r, ndic)
-		if k != nil {
-			cs = append(cs, *k)
-		}
+	for i := range r.adoptees {
+		r.adoptees[i].process(r, ndic)
+		cs = append(cs, r.adoptees[i])
 	}
 	r.Children = cs
-	return r
-}
-
-func assignCode(frame *Stack, name, mode, template string) {
+	return
 }
 
 func tryEliminateInterpreter(cur *Stack, ndic *nameMap) *Stack {
@@ -298,8 +291,4 @@ func makeChildVec(frame *Stack, ndic *nameMap) []float32 {
 		vec[(*ndic)[n.Name]] = float32(n.Value) / length
 	}
 	return vec
-}
-
-func getDominantNode(frame *Stack, depth int) *Stack {
-	return nil
 }
