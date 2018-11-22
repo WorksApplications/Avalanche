@@ -15,6 +15,7 @@
   transition: opacity 0.2s ease-out, visibility 0.3s linear;
   width: 120px;
   user-select: none;
+  pointer-events: none;
 }
 
 .sectionSelectionTooltip {
@@ -27,6 +28,7 @@
   transition: opacity 0.2s ease-out, visibility 0.3s linear;
   user-select: none;
   margin: 0 $base-space * 1.5;
+  pointer-events: none;
 }
 
 .sectionPeriodTooltip {
@@ -37,6 +39,7 @@
   bottom: -$base-space;
   font-size: $font-size-smaller;
   user-select: none;
+  pointer-events: none;
 }
 
 .open {
