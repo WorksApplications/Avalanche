@@ -19,6 +19,33 @@ type Stack struct {
 	adoptees []Stack  `json:"-"`
 }
 
+type Flamegraph struct {
+	Children []Flamegraph `json:"children"`
+	Label    string       `json:"-"`
+	Value    int          `json:"value"`
+	Delta    int          `json:"delta"`
+	Elided   int          `json:"elided"`
+	FullVal  int          `json:"full_value"`
+	Name     string       `json:"name"`
+	adoptees []Flamegraph `json:"-"`
+}
+
+func exportFlameGraph(s *Stack) Flamegraph {
+	cs := make([]Flamegraph, len(s.Children))
+	for i, c := range s.Children {
+		cs[i] = exportFlameGraph(&c)
+	}
+	node := Flamegraph{
+		Children: cs,
+		Value:    s.Value,
+		Delta:    0,
+		Elided:   0,
+		FullVal:  0,
+		Name:     s.Name,
+	}
+	return node
+}
+
 func readRaw(data []byte) (*Stack, error) {
 	var ret Stack
 	err := json.Unmarshal(data, &ret)
@@ -75,6 +102,25 @@ func Filter(input []byte) ([]byte, error) {
 	}
 	m, _ := newNameVec(tree)
 	b, err := json.Marshal(tree.process(nil, &m))
+	if err != nil {
+		log.Print("[stack] Marshal error: ", err)
+		return b, err
+	}
+
+	return b, nil
+}
+
+func FilterAndExport(input []byte) ([]byte, error) {
+	tree, err := readRaw(input)
+	if err != nil {
+		log.Print("[stack] Parse error: ", err)
+		return nil, err
+	}
+	m, _ := newNameVec(tree)
+	tree = tree.process(nil, &m)
+	m, _ = newNameVec(tree)
+	tree = tree.process(nil, &m)
+	b, err := json.Marshal(exportFlameGraph(tree))
 	if err != nil {
 		log.Print("[stack] Marshal error: ", err)
 		return b, err
