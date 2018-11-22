@@ -37,8 +37,9 @@ func idassign(node *Stack, m *nameMap, rev *nameMapRev, idch <-chan int64) {
 		(*m)[node.Name] = id
 		(*rev)[id] = node.Name
 	}
-	for _, c := range node.Children {
-		idassign(&c, m, rev, idch)
+	for i, _ := range node.Children {
+		node.Children[i].Parent = node
+		idassign(&node.Children[i], m, rev, idch)
 	}
 }
 
@@ -83,11 +84,9 @@ func Filter(input []byte) ([]byte, error) {
 }
 
 func (r *Stack) process(parent *Stack, ndic *nameMap) *Stack {
-	log.Printf("%s: %p", r.Name, r)
-	r.Parent = parent
 	if r.Name == "Interpreter" {
 		/* Try elimination */
-		e := searchSimilarStack(r, r.Parent.Children, ndic)
+		e := tryEliminateInterpreter(r, ndic)
 		if e != nil {
 			/* Merge this into similar named node */
 			if delegate(r, e) {
@@ -98,25 +97,24 @@ func (r *Stack) process(parent *Stack, ndic *nameMap) *Stack {
 			} else {
 				/* proceed to processing for rest of the children */
 			}
-			log.Print(r, e)
 		}
 	}
 	cs := make([]Stack, 0, len(r.Children))
-	for _, c := range r.Children {
+	for i, _ := range r.Children {
 		/* Merge his doppelganger */
-		for i, d := range r.adoptees {
+		for j, _ := range r.adoptees {
 			/* XXX faster merge may needed */
-			if d.Name == c.Name {
-				c.Value += d.Value
+			if r.Children[i].Name == r.adoptees[j].Name {
+				r.Children[i].Value += r.adoptees[j].Value
 				/* Delegate all the children of doppelganger to him */
-				c.adoptees = append(c.adoptees, d.Children...)
+				r.Children[i].adoptees = append(r.Children[i].adoptees, r.adoptees[j].Children...)
 				/* Delete */
-				r.adoptees = append(r.adoptees[:i], r.adoptees[i+1:]...)
+				r.adoptees = append(r.adoptees[:j], r.adoptees[j+1:]...)
 				break
 			}
 		}
 
-		k := c.process(r, ndic)
+		k := r.Children[i].process(r, ndic)
 		if k != nil {
 			cs = append(cs, *k)
 		}
@@ -136,13 +134,39 @@ func (r *Stack) process(parent *Stack, ndic *nameMap) *Stack {
 func assignCode(frame *Stack, name, mode, template string) {
 }
 
+func tryEliminateInterpreter(cur *Stack, ndic *nameMap) *Stack {
+	e := searchSimilarStack(cur, cur.Parent.Children, ndic)
+	if e != nil {
+		return e
+	}
+	if cur.Parent.Parent == nil {
+		return nil
+	} else if cur.Parent.Parent.Parent == nil {
+		return nil
+	}
+
+	/* No brother? Try search cousin */
+	for i := range cur.Parent.Parent.Parent.Children {
+		for j := range cur.Parent.Parent.Parent.Children[i].Children {
+			e := searchSimilarStack(cur, cur.Parent.Parent.Parent.Children[i].Children[j].Children, ndic)
+			if e != nil {
+				return e
+			}
+		}
+	}
+	return nil
+}
+
 func delegate(src *Stack, dst *Stack) bool {
 	orphan := make([]Stack, 0)
 	adoptee := make([]Stack, 0)
 	divestedVal := 0
 SEARCH:
 	for _, c := range src.Children {
-		/* Find my doppelganger */
+		/* Find my children's doppelgangers */
+		if c.Name == "Interpreter" {
+			goto END
+		}
 		for _, d := range dst.Children {
 			if c.Name == d.Name {
 				divestedVal += c.Value
@@ -150,13 +174,22 @@ SEARCH:
 				continue SEARCH
 			}
 		}
+	END:
 		/* No adoptor found */
 		orphan = append(orphan, c)
 	}
 	dst.adoptees = adoptee
-	dst.Value += divestedVal
-	src.Value -= divestedVal
 	src.Children = orphan
+
+	cur := [2]*Stack{dst, src}
+	log.Print(divestedVal)
+	for cur[0] != cur[1] {
+		cur[0].Value += divestedVal
+		cur[1].Value -= divestedVal
+		cur[0] = cur[0].Parent
+		cur[1] = cur[1].Parent
+	}
+
 	return len(orphan) == 0
 }
 
@@ -173,6 +206,7 @@ func searchSimilarStack(frame *Stack, sibs []Stack, ndic *nameMap) *Stack {
 	myv := makeChildVec(frame, ndic)
 	max := float32(0.7)
 	var mostSimilar *Stack = nil
+	/* do not take struct from range here; pointer sensitive! */
 	for i := range sibs {
 		if sibs[i].Name == "Interpreter" {
 			/* Oh? It's me!  */
@@ -185,7 +219,6 @@ func searchSimilarStack(frame *Stack, sibs []Stack, ndic *nameMap) *Stack {
 			mostSimilar = &sibs[i]
 		}
 	}
-	log.Printf("addr: %p", mostSimilar)
 	return mostSimilar
 }
 
