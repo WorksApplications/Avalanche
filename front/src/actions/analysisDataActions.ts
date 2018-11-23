@@ -38,13 +38,17 @@ function podInfoConvert(pod: collect.Pod): IPodInfo {
 
 function snapshotInfoConvert(snapshot: collect.Snapshot): ISnapshotInfo {
   const created = new Date(snapshot.createdAt ? snapshot.createdAt : 0);
+  const tokens = snapshot.flamescopeLink!.split("/");
+  const heatMapId = tokens[tokens.length - 1];
+
   return {
     uuid: snapshot.uuid,
     name: undefined,
     pod: snapshot.pod,
     environment: snapshot.environment,
     createdAt: created,
-    link: snapshot.flamescopeLink
+    link: snapshot.flamescopeLink!,
+    heatMapId
   };
 }
 

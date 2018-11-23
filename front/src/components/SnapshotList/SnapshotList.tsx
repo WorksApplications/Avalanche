@@ -21,8 +21,8 @@ export interface IItemProperty {
   heatMapStatus: "empty" | "loading" | "loaded" | "failed";
   openByDefault?: boolean;
 
-  getHeatMap(): void;
-  onRangeSelect(start: number, end: number): void;
+  getHeatMap(snapshotId: string, heatMapId: string): void;
+  onRangeSelect(heatMapId: string, start: number, end: number): void;
 }
 
 const initialItemState = {
@@ -51,7 +51,7 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
 
   public componentDidMount() {
     if (this.state.isGraphOpen && this.props.heatMapStatus === "empty") {
-      this.props.getHeatMap();
+      this.props.getHeatMap(this.props.uuid, this.props.heatMapId);
     }
   }
 
@@ -103,7 +103,7 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
               <HeatLineChart
                 {...this.props.heatMap}
                 hash={this.props.uuid}
-                onRangeSelect={this.props.onRangeSelect}
+                onRangeSelect={this.onRangeSelectWrap}
               />
             </div>
           );
@@ -126,9 +126,13 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
       !this.props.heatMap &&
       willGraphOpen
     ) {
-      this.props.getHeatMap();
+      this.props.getHeatMap(this.props.uuid, this.props.heatMapId);
     }
     this.setState({ isGraphOpen: willGraphOpen });
+  };
+
+  private onRangeSelectWrap = (start: number, end: number) => {
+    this.props.onRangeSelect(this.props.heatMapId, start, end);
   };
 }
 

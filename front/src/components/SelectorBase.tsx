@@ -139,8 +139,9 @@ class SelectorBase extends React.Component<IProperty, State> {
   private onClickOutside = (e: Event) => {
     if (e.target instanceof Node) {
       if (this.container && !this.container.contains(e.target)) {
-        this.setState({ isOpen: false });
-        this.setState({ searchingWord: "" });
+        if (this.state.isOpen) {
+          this.setState({ isOpen: false, searchingWord: "" });
+        }
       }
     }
   };

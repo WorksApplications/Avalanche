@@ -29,7 +29,8 @@ export interface ISnapshotInfo {
   pod?: string;
   environment?: string;
   createdAt?: Date;
-  link?: string;
+  link: string;
+  heatMapId: string;
 }
 
 export interface IPodInfo {
