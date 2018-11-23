@@ -55,23 +55,7 @@
   visibility: hidden;
 }
 
-.markerTooltipMessage {
-  display: inline-block;
-  background-color: rgba($text-color-normal, 0.6);
-  border-radius: $border-radius;
-  padding: $base-space / 2;
-  white-space: nowrap;
-}
-
-.sectionSelectionTooltipMessage {
-  display: inline-block;
-  background-color: rgba($text-color-normal, 0.6);
-  border-radius: $border-radius;
-  padding: $base-space / 2;
-  white-space: nowrap;
-}
-
-.sectionPeriodTooltipMessage {
+.tooltipMessage {
   display: inline-block;
   background-color: rgba($text-color-normal, 0.6);
   border-radius: $border-radius;

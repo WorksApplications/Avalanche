@@ -327,7 +327,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
           left: `${this.state.makerTooltip.positionX}px`
         }}
       >
-        <span className={styles.markerTooltipMessage}>{message}</span>
+        <span className={styles.tooltipMessage}>{message}</span>
       </div>
     );
   }
@@ -372,7 +372,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
         ].join(" ")}
         style={style}
       >
-        <span className={styles.rangeSelectionTooltipMessage}>
+        <span className={styles.tooltipMessage}>
           T: {targetTime.toFixed(1)}s
           <br />
           {targetValue.toFixed(2)}
@@ -427,7 +427,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
           width: `${rangeInHtmlLocal.width}px`
         }}
       >
-        <span className={styles.sectionPeriodTooltipMessage}>{message}</span>
+        <span className={styles.tooltipMessage}>{message}</span>
       </div>
     );
   };
