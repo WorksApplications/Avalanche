@@ -100,7 +100,7 @@ func main() {
 	args := flag.Args()
 	log.Println(args)
 
-	if at != nil {
+	if !*cli {
 		serve(*at, *collect)
 	} else {
 		data, err := ioutil.ReadFile(*sfn)
