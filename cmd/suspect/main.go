@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/flamescope/stack"
 
@@ -14,7 +15,8 @@ import (
 )
 
 type context struct {
-	collect string
+	collect   string
+	searchAPI string
 }
 
 func getMeta(url string) (*models.Snapshot, error) {
@@ -38,7 +40,7 @@ func getMeta(url string) (*models.Snapshot, error) {
 	return &meta, nil
 }
 
-func filter(url string) (*[]byte, error) {
+func getData(url string) (*[]byte, error) {
 	res, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -51,39 +53,61 @@ func filter(url string) (*[]byte, error) {
 	if res.StatusCode != 200 {
 		return nil, fmt.Errorf("Remote server %s is junk!: %s: %s", url, res.Status, string(data))
 	}
-	stack, err := stack.Filter(data, 3)
-	if err != nil {
-		return nil, err
-	}
-	return &stack, nil
-}
-
-func (ctx *context) getSnapshot(uuid string) (*[]byte, error) {
-	meta, err := getMeta(ctx.collect + "/snapshots/" + uuid)
-	if err != nil {
-		return nil, err
-	}
-	data, err := filter(meta.FlamescopeLink)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
+	return &data, nil
 }
 
 func (ctx *context) analyze(w http.ResponseWriter, r *http.Request) {
-	log.Print(r.Proto, r.Method, ": ", r.URL, " | Header: ", r.Header)
+	log.Print(r.Proto, "(", r.Method, "): ", r.URL)
 	if r.Method == "GET" {
-		data, err := ctx.getSnapshot(r.URL.Path)
+		uuid := r.URL.Path
+		strings.TrimPrefix(uuid, "/stacks/")
+		meta, err := getMeta(ctx.collect + "/snapshots/" + uuid)
 		if err != nil {
+			http.Error(w, "no such snapshot record", 404)
 			return
 		}
-		w.Write(*data)
+		data, err := getData(meta.FlamescopeLink)
+		if err != nil {
+			http.Error(w, "failed to retrieve Flamegraph data", 404)
+			return
+		}
+		stack, err := stack.Filter(*data, 3)
+		if err != nil {
+			http.Error(w, "failed to process Flamegraph data", 500)
+			return
+		}
+		w.Write(stack)
 	}
 }
 
-func serve(at, collect string) {
-	ctx := context{collect}
-	http.HandleFunc("/", ctx.analyze)
+func (ctx *context) report(w http.ResponseWriter, r *http.Request) {
+	log.Print(r.Proto, "(", r.Method, "): ", r.URL)
+	if r.Method == "GET" {
+		uuid := r.URL.Path
+		strings.TrimPrefix(uuid, "/stacks/")
+		meta, err := getMeta(ctx.collect + "/snapshots/" + uuid)
+		if err != nil {
+			http.Error(w, "no such snapshot record", 404)
+			return
+		}
+		data, err := getData(meta.FlamescopeLink)
+		if err != nil {
+			http.Error(w, "failed to retrieve Flamegraph data", 404)
+			return
+		}
+		stack, err := stack.GenReport(*data, 3, ctx.searchAPI)
+		if err != nil {
+			http.Error(w, "failed to process with the data", 500)
+			return
+		}
+		w.Write(stack)
+	}
+}
+
+func serve(at, collect, api string) {
+	ctx := context{collect, api}
+	http.HandleFunc("/stacks/", ctx.analyze)
+	http.HandleFunc("/reports/", ctx.report)
 	log.Fatal(http.ListenAndServe(at, nil))
 }
 
@@ -94,6 +118,7 @@ func main() {
 	sfn := flag.String("src", "test/stack", "file to read")
 	dfn := flag.String("dst", "test/filtered", "file to write")
 	cli := flag.Bool("cli", false, "run as cli(don't serve)")
+	api := flag.String("search", "https://github.com/search/code?q={}", "source code search API")
 	at := flag.String("http", "localhost:8080", "host:port")
 	collect := flag.String("collect", "http://collect:8080", "location for collect")
 	flag.Parse()
@@ -101,7 +126,7 @@ func main() {
 	log.Println(args)
 
 	if !*cli {
-		serve(*at, *collect)
+		serve(*at, *collect, *api)
 	} else {
 		data, err := ioutil.ReadFile(*sfn)
 		if err != nil {
