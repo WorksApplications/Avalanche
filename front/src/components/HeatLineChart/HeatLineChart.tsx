@@ -449,13 +449,24 @@ class HeatLineChart extends React.Component<IProperty, State> {
       // x in HTML coordinate (local)
       // message container width is 120px, so aligns middle
       const positionX = (xInSvg / widthInSvg) * svgWidth - 60;
-      this.setState({
-        spikeTooltip: {
-          exists: true,
-          spikeValue: y,
-          positionX
-        }
-      });
+
+      // to avoid unnecessary update
+      if (
+        !(
+          this.state.spikeTooltip &&
+          this.state.spikeTooltip.exists &&
+          this.state.spikeTooltip.spikeValue === y &&
+          this.state.spikeTooltip.positionX === positionX
+        )
+      ) {
+        this.setState({
+          spikeTooltip: {
+            exists: true,
+            spikeValue: y,
+            positionX
+          }
+        });
+      }
     }
   };
 
@@ -536,22 +547,43 @@ class HeatLineChart extends React.Component<IProperty, State> {
 
       const svgWidth = this.svgRef.current!.clientWidth;
       const rangeEnd = normalizeClampInSvg(e.nativeEvent.offsetX, svgWidth);
-      this.setState({
-        rangeEnd, // put point
-        rangeSelectionTooltip: {
-          exists: true,
-          normalizedPositionX: rangeEnd
-        }
-      });
+
+      // to avoid unnecessary update
+      if (
+        !(
+          this.state.rangeSelectionTooltip &&
+          this.state.rangeSelectionTooltip.exists &&
+          this.state.rangeSelectionTooltip.normalizedPositionX === rangeEnd &&
+          this.state.rangeEnd === rangeEnd
+        )
+      ) {
+        this.setState({
+          rangeEnd, // put point
+          rangeSelectionTooltip: {
+            exists: true,
+            normalizedPositionX: rangeEnd
+          }
+        });
+      }
     } else {
       const svgWidth = this.svgRef.current!.clientWidth;
       const rangeEnd = normalizeClampInSvg(e.nativeEvent.offsetX, svgWidth);
-      this.setState({
-        rangeSelectionTooltip: {
-          exists: true,
-          normalizedPositionX: rangeEnd
-        }
-      }); // does not put point
+
+      // to avoid unnecessary update
+      if (
+        !(
+          this.state.rangeSelectionTooltip &&
+          this.state.rangeSelectionTooltip.exists &&
+          this.state.rangeSelectionTooltip.normalizedPositionX === rangeEnd
+        )
+      ) {
+        this.setState({
+          rangeSelectionTooltip: {
+            exists: true,
+            normalizedPositionX: rangeEnd
+          }
+        }); // does not put point
+      }
     }
   };
 
