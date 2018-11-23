@@ -300,7 +300,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
             href={`#spark-${hash}`}
             x={p.x - markSize / 2}
             data-y={p.y}
-            onMouseMove={this.onMouseMoveOverMarker}
+            onMouseMove={this.onMouseMoveOverSpike}
             onMouseLeave={this.onMouseLeaveFromMarker}
           />
         ))}
@@ -432,7 +432,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
     );
   };
 
-  private onMouseMoveOverMarker = (e: React.MouseEvent<SVGUseElement>) => {
+  private onMouseMoveOverSpike = (e: React.MouseEvent<SVGUseElement>) => {
     const dataY = e.currentTarget.dataset.y;
     if (dataY) {
       const rect = e.currentTarget.getBoundingClientRect();
