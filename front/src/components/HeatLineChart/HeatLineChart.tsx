@@ -599,7 +599,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
 
   private onClickOutside = (e: Event) => {
     if (e.target instanceof Node) {
-      if (!this.wrapRef.current!.contains(e.target)) {
+      if (!this.wrapRef.current!.contains(e.target) && this.state.isSelecting) {
         this.setState({
           isSelecting: false,
           rangeStart: null,
