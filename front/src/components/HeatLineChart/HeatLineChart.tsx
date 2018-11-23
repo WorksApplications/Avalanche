@@ -346,6 +346,10 @@ class HeatLineChart extends React.Component<IProperty, State> {
         (svgWidth - graphSvgPadding * 2)) /
         svgWidth +
       (svgRect.width * graphSvgPadding) / svgWidth;
+    const style: React.CSSProperties =
+      tooltipLeft < svgRect.width - 100
+        ? { left: `${tooltipLeft}px`, textAlign: "left" }
+        : { right: `${svgRect.width - tooltipLeft}px`, textAlign: "right" };
 
     const targetTime =
       this.state.sectionSelectionTooltip.normalizedPositionX *
@@ -367,14 +371,12 @@ class HeatLineChart extends React.Component<IProperty, State> {
           styles.sectionSelectionTooltip,
           this.state.sectionSelectionTooltip.exists ? styles.open : styles.close
         ].join(" ")}
-        style={{
-          left: `${tooltipLeft}px`
-        }}
+        style={style}
       >
         <span className={styles.sectionSelectionTooltipMessage}>
           T: {targetTime.toFixed(1)}s
           <br />
-          V: {targetValue.toFixed(2)}
+          {targetValue.toFixed(2)}
         </span>
       </div>
     );
@@ -417,7 +419,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
     };
     const elapsedTime =
       (normalizedSectionEnd - normalizedSectionStart) * this.props.numColumns;
-    const message = `T +${elapsedTime.toFixed(1)}s`;
+    const message = `${elapsedTime.toFixed(1)}s`;
 
     return (
       <div
