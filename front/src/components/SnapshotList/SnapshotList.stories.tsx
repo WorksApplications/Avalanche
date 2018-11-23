@@ -64,7 +64,7 @@ storiesOf("SnapshotList", module)
               ),
               heatMapStatus: status,
               heatMapId: "d7eec7c1-daf5-4198-9503-6957aea0bf90",
-              onSectionSelect: action("Selected")
+              onRangeSelect: action("Selected")
             }
           ]}
         />
@@ -112,7 +112,7 @@ storiesOf("SnapshotList", module)
               ),
               heatMapStatus: status1,
               heatMapId: "d7eec7c1-daf5-4198-9503-6957aea0bf90",
-              onSectionSelect: action("Selected")
+              onRangeSelect: action("Selected")
             },
             {
               uuid: "e7eec7c1-daf5-4198-9503-6957aea0bf90",
@@ -135,7 +135,7 @@ storiesOf("SnapshotList", module)
               ),
               heatMapStatus: status2,
               heatMapId: "e7eec7c1-daf5-4198-9503-6957aea0bf90",
-              onSectionSelect: action("Selected")
+              onRangeSelect: action("Selected")
             },
             {
               uuid: "f7eec7c1-daf5-4198-9503-6957aea0bf90",
@@ -158,7 +158,7 @@ storiesOf("SnapshotList", module)
               ),
               heatMapStatus: status3,
               heatMapId: "f7eec7c1-daf5-4198-9503-6957aea0bf90",
-              onSectionSelect: action("Selected")
+              onRangeSelect: action("Selected")
             }
           ]}
         />
