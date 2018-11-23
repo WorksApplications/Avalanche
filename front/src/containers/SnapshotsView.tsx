@@ -140,12 +140,7 @@ export class SnapshotsView extends React.Component<Props> {
 
     if (this.props.snapshots.length > 0) {
       showingSnapshots = this.props.snapshots.map(x => {
-        let heatMapId = "";
-        if (x.link) {
-          const tokens = x.link.split("/");
-          heatMapId = tokens[tokens.length - 1];
-        }
-        const heatMap = this.props.heatMaps.get(heatMapId);
+        const heatMap = this.props.heatMaps.get(x.heatMapId);
         return {
           uuid: x.uuid,
           environment: x.environment || "Unknown",
@@ -153,7 +148,7 @@ export class SnapshotsView extends React.Component<Props> {
           createdAt: x.createdAt,
           link: x.link || "#",
           heatMap: heatMap && heatMap.data,
-          heatMapId,
+          heatMapId: x.heatMapId,
           heatMapStatus: heatMap ? heatMap.status : "empty",
           onRangeSelect: (normalizedStart: number, normalizedEnd: number) => {
             if (heatMap && heatMap.data) {
@@ -170,7 +165,9 @@ export class SnapshotsView extends React.Component<Props> {
               );
 
               window.open(
-                `${FLAMESCOPE_API_BASE}/#/heatmap/${heatMapId}/flamegraph/${startColumn}.${startRow}/${endColumn}.${endRow}/`
+                `${FLAMESCOPE_API_BASE}/#/heatmap/${
+                  x.heatMapId
+                }/flamegraph/${startColumn}.${startRow}/${endColumn}.${endRow}/`
               );
             }
           },
@@ -178,7 +175,7 @@ export class SnapshotsView extends React.Component<Props> {
             this.props
               .getHeatMapOperation({
                 snapshotId: x.uuid,
-                heatMapId
+                heatMapId: x.heatMapId
               })
               .catch(() => {
                 this.props.toastr(
