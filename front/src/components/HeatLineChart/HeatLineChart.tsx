@@ -13,8 +13,8 @@ interface IProperty {
   onRangeSelect(start: number, end: number): void;
 }
 
-interface IMarkerTooltipState {
-  sparkValue: number;
+interface ISpikeTooltipState {
+  spikeValue: number;
   positionX: number;
   exists: boolean;
 }
@@ -25,7 +25,7 @@ interface IRangeSelectionTooltipState {
 }
 
 const initialState = {
-  makerTooltip: null as IMarkerTooltipState | null,
+  spikeTooltip: null as ISpikeTooltipState | null,
   rangeSelectionTooltip: null as IRangeSelectionTooltipState | null,
   isSelecting: false,
   rangeStart: null as number | null, // null if isSelecting===false
@@ -41,14 +41,14 @@ export type Property = Pick<
 >;
 
 const paddingInSvg = 0.1;
-const sparkSizeInSvg = 0.1;
+const spikeSizeInSvg = 0.1;
 const heightInSvg = 1;
 const widthInSvg = 10;
 const strokeWidthInSvg = 0.008;
 
 // like V sign (h:w=2:1)
-const sparkDrawString = `M ${sparkSizeInSvg / 4} 0 L ${sparkSizeInSvg /
-  2} ${sparkSizeInSvg}  ${(sparkSizeInSvg * 3) / 4} 0`;
+const spikeDrawString = `M ${spikeSizeInSvg / 4} 0 L ${spikeSizeInSvg /
+  2} ${spikeSizeInSvg}  ${(spikeSizeInSvg * 3) / 4} 0`;
 
 /**
  * Reduce points
@@ -63,7 +63,7 @@ function reduceMaxPointsToShow(
 
   const ret = [points[0]];
   for (let i = 1; i < points.length; i++) {
-    if (points[i].x - ret[ret.length - 1].x > sparkSizeInSvg / 5) {
+    if (points[i].x - ret[ret.length - 1].x > spikeSizeInSvg / 5) {
       ret.push(points[i]);
     }
   }
@@ -102,7 +102,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
         .join(" ")
   );
 
-  private calcSparks = memoizeOne(
+  private calcSpikes = memoizeOne(
     (maxValues: number[], maxValueOfData: number) =>
       reduceMaxPointsToShow(
         maxValues
@@ -146,13 +146,13 @@ class HeatLineChart extends React.Component<IProperty, State> {
         >
           <defs>
             {this.renderChartDef()}
-            {this.renderSparkDef()}
+            {this.renderSpikeDef()}
           </defs>
           {this.renderChartBody()}
           {this.renderSelectingRange()}
-          {this.renderSparkBodies()}
+          {this.renderSpikeBodies()}
         </svg>
-        {this.renderMarkerTooltip()}
+        {this.renderSpikeTooltip()}
         {this.renderSelectionRangeTooltip()}
         {this.renderRangeLengthTooltip()}
       </div>
@@ -193,18 +193,18 @@ class HeatLineChart extends React.Component<IProperty, State> {
     );
   }
 
-  private renderSparkDef() {
+  private renderSpikeDef() {
     const { hash } = this.props;
 
     return (
-      <g id={`spark-${hash}`}>
+      <g id={`spike-${hash}`}>
         <rect
           fill="transparent"
-          width={sparkSizeInSvg}
-          height={sparkSizeInSvg}
+          width={spikeSizeInSvg}
+          height={spikeSizeInSvg}
         />
         <path
-          d={sparkDrawString}
+          d={spikeDrawString}
           fill="none"
           stroke="#e5195d" /* hsl(340, 80, 50) */
           strokeWidth={strokeWidthInSvg * 0.8}
@@ -289,45 +289,45 @@ class HeatLineChart extends React.Component<IProperty, State> {
     );
   }
 
-  private renderSparkBodies() {
+  private renderSpikeBodies() {
     const { maxValues, maxValueOfData, hash } = this.props;
 
-    const sparks = this.calcSparks(maxValues, maxValueOfData);
+    const spikes = this.calcSpikes(maxValues, maxValueOfData);
 
     return (
       <g>
-        {sparks.map(p => (
+        {spikes.map(p => (
           <use
             key={p.x}
-            href={`#spark-${hash}`}
-            x={p.x - sparkSizeInSvg / 2}
+            href={`#spike-${hash}`}
+            x={p.x - spikeSizeInSvg / 2}
             data-xinsvg={p.x}
             data-y={p.y}
             onMouseMove={this.onMouseMoveOverSpike}
-            onMouseLeave={this.onMouseLeaveFromMarker}
+            onMouseLeave={this.onMouseLeaveFromSpike}
           />
         ))}
       </g>
     );
   }
 
-  private renderMarkerTooltip() {
-    if (!this.state.makerTooltip) {
+  private renderSpikeTooltip() {
+    if (!this.state.spikeTooltip) {
       return;
     }
 
     const message = `spike: ${(
-      this.state.makerTooltip.sparkValue * 100
+      this.state.spikeTooltip.spikeValue * 100
     ).toFixed(0)}% of max`;
 
     return (
       <div
         className={[
-          styles.markerTooltip,
-          this.state.makerTooltip.exists ? styles.open : styles.close
+          styles.spikeTooltip,
+          this.state.spikeTooltip.exists ? styles.open : styles.close
         ].join(" ")}
         style={{
-          left: `${this.state.makerTooltip.positionX}px`
+          left: `${this.state.spikeTooltip.positionX}px`
         }}
       >
         <span className={styles.tooltipMessage}>{message}</span>
@@ -450,18 +450,18 @@ class HeatLineChart extends React.Component<IProperty, State> {
       // message container width is 120px, so aligns middle
       const positionX = (xInSvg / widthInSvg) * svgWidth - 60;
       this.setState({
-        makerTooltip: {
+        spikeTooltip: {
           exists: true,
-          sparkValue: y,
+          spikeValue: y,
           positionX
         }
       });
     }
   };
 
-  private onMouseLeaveFromMarker = () => {
+  private onMouseLeaveFromSpike = () => {
     this.setState((s: State) => ({
-      makerTooltip: { ...s.makerTooltip!, exists: false }
+      spikeTooltip: { ...s.spikeTooltip!, exists: false }
     }));
   };
 
