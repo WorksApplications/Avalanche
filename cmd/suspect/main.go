@@ -93,6 +93,7 @@ func main() {
 
 	sfn := flag.String("src", "test/stack", "file to read")
 	dfn := flag.String("dst", "test/filtered", "file to write")
+	cli := flag.Bool("cli", false, "run as cli(don't serve)")
 	at := flag.String("http", "localhost:8080", "host:port")
 	collect := flag.String("collect", "http://collect:8080", "location for collect")
 	flag.Parse()
