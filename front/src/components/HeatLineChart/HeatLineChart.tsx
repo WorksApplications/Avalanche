@@ -1,5 +1,5 @@
+import memoizeOne from "memoize-one";
 import * as React from "react";
-
 import styles from "./HeatLineChart.scss";
 
 interface IProperty {
@@ -10,7 +10,7 @@ interface IProperty {
   numRows: number;
   hash: string;
 
-  onSectionSelect(start: number, end: number): void;
+  onRangeSelect(start: number, end: number): void;
 }
 
 interface IMarkerTooltipState {
@@ -19,17 +19,17 @@ interface IMarkerTooltipState {
   exists: boolean;
 }
 
-interface ISectionSelectionTooltipState {
+interface IRangeSelectionTooltipState {
   normalizedPositionX: number;
   exists: boolean;
 }
 
 const initialState = {
   makerTooltip: null as IMarkerTooltipState | null,
-  sectionSelectionTooltip: null as ISectionSelectionTooltipState | null,
+  rangeSelectionTooltip: null as IRangeSelectionTooltipState | null,
   isSelecting: false,
-  sectionStart: null as number | null,
-  sectionEnd: null as number | null,
+  rangeStart: null as number | null, // null if isSelecting===false
+  rangeEnd: null as number | null, // null if isSelecting===false
   lastMouseDown: 0
 };
 
@@ -37,17 +37,24 @@ type State = Readonly<typeof initialState>;
 
 export type Property = Pick<
   IProperty,
-  Exclude<keyof IProperty, "hash" | "onSectionSelect">
+  Exclude<keyof IProperty, "hash" | "onRangeSelect">
 >;
 
-const padding = 0.1;
+const graphSvgPadding = 0.1;
 const markSize = 0.1;
 const svgHeight = 1;
 const svgWidth = 10;
 const strokeWidth = 0.008;
-const textSize = 0.1;
 
-function reduceMaxPoints(
+// like V sign (h:w=2:1)
+const sparkDrawString = `M ${markSize / 4} 0 L ${markSize /
+  2} ${markSize}  ${(markSize * 3) / 4} 0`;
+
+/**
+ * Reduce points
+ * @param points x: in SVG, y: relative value from max, i: seq no of original max values (including not spike)
+ */
+function reduceMaxPointsToShow(
   points: Array<{ x: number; y: number; i: number }>
 ): Array<{ x: number; y: number; i: number }> {
   if (points.length === 0) {
@@ -63,18 +70,57 @@ function reduceMaxPoints(
   return ret;
 }
 
-function normalizeClamp(point: number, entireWidth: number) {
+function normalizeClampInSvg(x: number, width: number) {
   const val =
-    ((point / entireWidth) * svgWidth - padding) / (svgWidth - padding * 2);
+    ((x / width) * svgWidth - graphSvgPadding) /
+    (svgWidth - graphSvgPadding * 2);
   return val < 0 ? 0 : 1 < val ? 1 : val;
 }
 
-// width:height = (about) 10:1
 // currently, colored with relative value
 class HeatLineChart extends React.Component<IProperty, State> {
   public readonly state: State = initialState;
   private wrapRef = React.createRef<HTMLDivElement>();
   private svgRef = React.createRef<SVGSVGElement>();
+
+  private calcMeanPointsString = memoizeOne(
+    (meanValues: number[], maxValueOfData: number) =>
+      meanValues
+        .map((v, i) => {
+          const normalizedX = i / (meanValues.length - 1);
+          // x in SVG coordinate
+          const x =
+            normalizedX *
+              svgWidth *
+              ((svgWidth - graphSvgPadding * 2) / svgWidth) +
+            graphSvgPadding;
+          const normalizedY = v / maxValueOfData;
+          // y in SVG coordinate
+          const y =
+            (1 - normalizedY) * (svgHeight - graphSvgPadding * 2) +
+            graphSvgPadding;
+          return `${x},${y}`;
+        })
+        .join(" ")
+  );
+
+  private calcSparks = memoizeOne(
+    (maxValues: number[], maxValueOfData: number) =>
+      reduceMaxPointsToShow(
+        maxValues
+          .map((v, i) => {
+            const normalizedX = i / (maxValues.length - 1);
+            // x in SVG coordinate
+            const x =
+              normalizedX *
+                svgWidth *
+                ((svgWidth - graphSvgPadding * 2) / svgWidth) +
+              graphSvgPadding;
+            return { x, y: v / maxValueOfData, i };
+          })
+          .filter(v => v.y > 0.9)
+      )
+  );
 
   public componentDidMount() {
     document.addEventListener("click", this.onClickOutside, true);
@@ -85,29 +131,6 @@ class HeatLineChart extends React.Component<IProperty, State> {
   }
 
   public render() {
-    const { meanValues, maxValues, maxValueOfData, hash } = this.props;
-    const xNormalizer = meanValues.length - 1;
-
-    const meanPointsString = meanValues
-      .map((v, i) => {
-        const x =
-          (i / xNormalizer) * svgWidth * ((svgWidth - padding * 2) / svgWidth) +
-          padding;
-        const y =
-          (1 - v / maxValueOfData) * (svgHeight - padding * 2) + padding;
-        return `${x},${y}`;
-      })
-      .join(" ");
-    const maxPoints = maxValues
-      .map((v, i) => {
-        const x =
-          (i / xNormalizer) * svgWidth * ((svgWidth - padding * 2) / svgWidth) +
-          padding;
-        return { x, y: v / maxValueOfData, i };
-      })
-      .filter(v => v.y > 0.9);
-    const reducedMaxPoints = reduceMaxPoints(maxPoints);
-
     return (
       <div
         className={styles.wrap}
@@ -124,206 +147,290 @@ class HeatLineChart extends React.Component<IProperty, State> {
           onClick={this.onGraphClick}
         >
           <defs>
-            <linearGradient
-              id={`mean-color-${hash}`}
-              x1="0"
-              x2="0"
-              y1="1"
-              y2="0"
-            >
-              <stop offset="5%" stopColor="#e6f2fd" /* hsl(210, 90, 95) */ />
-              <stop offset="40%" stopColor="#89b6f5" /* hsl(215, 85, 75) */ />
-              <stop offset="90%" stopColor="#e5195d" /* hsl(340, 80, 50) */ />
-            </linearGradient>
-            <mask
-              id={`mean-line-${hash}`}
-              x="0"
-              y="0"
-              width={svgWidth}
-              height={svgHeight}
-            >
-              <polyline
-                strokeLinecap="round"
-                points={meanPointsString}
-                fill="transparent"
-                stroke="#e6f2fd"
-                strokeWidth={strokeWidth}
-              />
-            </mask>
-            <g id={`notch-${hash}`}>
-              <rect fill="transparent" width={markSize} height={markSize} />
-              <path
-                d={`M ${markSize / 4} 0 L ${markSize /
-                  2} ${markSize}  ${(markSize * 3) / 4} 0`}
-                fill="none"
-                stroke="#e5195d" /* hsl(340, 80, 50) */
-                strokeWidth={strokeWidth * 0.8}
-              />
-            </g>
-            <filter id={`text-bg-${hash}`}>
-              <feFlood floodColor="white" floodOpacity={0.8} result="goo" />
-              <feComposite in="SourceGraphic" in2="goo" operator="atop" />
-            </filter>
+            {this.renderChartDef()}
+            {this.renderSparkDef()}
           </defs>
-          <g>
-            <rect
-              width={svgWidth}
-              height={svgHeight}
-              stroke="none"
-              fill={`url(#mean-color-${hash})`}
-              mask={`url(#mean-line-${hash})`}
-            />
-          </g>
-          <g>
-            {reducedMaxPoints.map(p => (
-              <use
-                key={p.x}
-                href={`#notch-${hash}`}
-                x={p.x - markSize / 2}
-                data-y={p.y}
-                onMouseMove={this.onMouseMoveOverMarker}
-                onMouseLeave={this.onMouseLeaveFromMarker}
-              />
-            ))}
-          </g>
-          {this.renderSelectingSection()}
+          {this.renderChartBody()}
+          {this.renderSelectingRange()}
+          {this.renderSparkBodies()}
         </svg>
         {this.renderMarkerTooltip()}
-        {this.renderSectionSelectionTooltip()}
+        {this.renderSelectionRangeTooltip()}
+        {this.renderRangeLengthTooltip()}
       </div>
     );
   }
 
-  private renderSelectingSection() {
-    let normalizedSection;
-    let sectionInSvg;
-    if (this.state.sectionStart !== null && this.state.sectionEnd !== null) {
-      normalizedSection =
-        this.state.sectionStart < this.state.sectionEnd
-          ? { start: this.state.sectionStart, end: this.state.sectionEnd }
-          : { start: this.state.sectionEnd, end: this.state.sectionStart };
+  private renderChartDef() {
+    const { meanValues, maxValueOfData, hash } = this.props;
 
-      const point1 =
-        normalizedSection.start * (svgWidth - padding * 2) + padding;
-      const point2 = normalizedSection.end * (svgWidth - padding * 2) + padding;
-      sectionInSvg = { x: point1, width: point2 - point1 };
-    }
+    const meanPointsString = this.calcMeanPointsString(
+      meanValues,
+      maxValueOfData
+    );
+
+    return (
+      <>
+        <linearGradient id={`mean-color-${hash}`} x1="0" x2="0" y1="1" y2="0">
+          <stop offset="5%" stopColor="#e6f2fd" /* hsl(210, 90, 95) */ />
+          <stop offset="40%" stopColor="#89b6f5" /* hsl(215, 85, 75) */ />
+          <stop offset="90%" stopColor="#e5195d" /* hsl(340, 80, 50) */ />
+        </linearGradient>
+        <mask
+          id={`mean-line-${hash}`}
+          x="0"
+          y="0"
+          width={svgWidth}
+          height={svgHeight}
+        >
+          <polyline
+            strokeLinecap="round"
+            points={meanPointsString}
+            fill="transparent"
+            stroke="#e6f2fd"
+            strokeWidth={strokeWidth}
+          />
+        </mask>
+      </>
+    );
+  }
+
+  private renderSparkDef() {
+    const { hash } = this.props;
+
+    return (
+      <g id={`spark-${hash}`}>
+        <rect fill="transparent" width={markSize} height={markSize} />
+        <path
+          d={sparkDrawString}
+          fill="none"
+          stroke="#e5195d" /* hsl(340, 80, 50) */
+          strokeWidth={strokeWidth * 0.8}
+        />
+      </g>
+    );
+  }
+
+  private renderChartBody() {
+    const { hash } = this.props;
+
     return (
       <g>
-        {this.state.sectionSelectionTooltip &&
-          this.state.sectionSelectionTooltip.exists &&
-          !sectionInSvg && (
+        <rect
+          width={svgWidth}
+          height={svgHeight}
+          stroke="none"
+          fill={`url(#mean-color-${hash})`}
+          mask={`url(#mean-line-${hash})`}
+        />
+      </g>
+    );
+  }
+
+  private renderSelectingRange() {
+    if (!this.state.rangeSelectionTooltip) {
+      // empty group
+      return <g />;
+    }
+
+    if (this.state.rangeStart === null || this.state.rangeEnd === null) {
+      // in SVG coordinate
+      const beginX =
+        this.state.rangeSelectionTooltip.normalizedPositionX *
+          (svgWidth - graphSvgPadding * 2) +
+        graphSvgPadding;
+
+      // vertical line during hover
+      return (
+        <g>
+          {this.state.rangeSelectionTooltip.exists && (
             <path
-              d={`M ${this.state.sectionSelectionTooltip.normalizedPositionX *
-                (svgWidth - padding * 2) +
-                padding} 0 V ${svgHeight}`}
+              d={`M ${beginX} 0 V ${svgHeight}`}
               fill="none"
               stroke="#bfbfbf" /* hsl(0, 0, 75) */
               strokeWidth={strokeWidth * 0.8}
             />
           )}
-        {normalizedSection && sectionInSvg && (
-          <>
-            <rect
-              height={svgHeight}
-              fill="#dc1f5f40" /* hsl(340, 75, 50) + a */
-              stroke="#b2194c" /* hsl(340, 75, 50) */
-              strokeWidth={strokeWidth * 0.8}
-              x={sectionInSvg.x}
-              width={sectionInSvg.width}
-            />
-            <path
-              d={`M ${sectionInSvg.x} ${svgHeight -
-                padding -
-                textSize / 3} H ${sectionInSvg.x + sectionInSvg.width}`}
-              stroke="#191919" /* hsl(0, 0, 10) */
-              strokeWidth={strokeWidth * 0.8}
-            />
-            <text
-              x={sectionInSvg.x + sectionInSvg.width / 2}
-              y={svgHeight - padding}
-              textAnchor="middle"
-              fontSize={textSize}
-              fill="#545454" /* hsl(0, 0, 33) */
-              filter={`url(#text-bg-${this.props.hash})`}
-            >
-              T +
-              {(
-                (normalizedSection.end - normalizedSection.start) *
-                this.props.numColumns
-              ).toFixed(1)}
-              s
-            </text>
-          </>
-        )}
+        </g>
+      );
+    }
+
+    let normalizedRangeStart;
+    let normalizedRangeEnd;
+    if (this.state.rangeStart < this.state.rangeEnd) {
+      normalizedRangeStart = this.state.rangeStart;
+      normalizedRangeEnd = this.state.rangeEnd;
+    } else {
+      normalizedRangeStart = this.state.rangeEnd;
+      normalizedRangeEnd = this.state.rangeStart;
+    }
+    const point1 =
+      normalizedRangeStart * (svgWidth - graphSvgPadding * 2) + graphSvgPadding;
+    const point2 =
+      normalizedRangeEnd * (svgWidth - graphSvgPadding * 2) + graphSvgPadding;
+
+    // range in SVG coordinate
+    const range = { x: point1, width: point2 - point1 };
+
+    // colored rectangle during selecting
+    return (
+      <g>
+        <rect
+          height={svgHeight}
+          fill="#dc1f5f40" /* hsl(340, 75, 50) + a */
+          stroke="#b2194c" /* hsl(340, 75, 50) */
+          strokeWidth={strokeWidth * 0.8}
+          x={range.x}
+          width={range.width}
+        />
+      </g>
+    );
+  }
+
+  private renderSparkBodies() {
+    const { maxValues, maxValueOfData, hash } = this.props;
+
+    const sparks = this.calcSparks(maxValues, maxValueOfData);
+
+    return (
+      <g>
+        {sparks.map(p => (
+          <use
+            key={p.x}
+            href={`#spark-${hash}`}
+            x={p.x - markSize / 2}
+            data-y={p.y}
+            onMouseMove={this.onMouseMoveOverMarker}
+            onMouseLeave={this.onMouseLeaveFromMarker}
+          />
+        ))}
       </g>
     );
   }
 
   private renderMarkerTooltip() {
-    return (
-      this.state.makerTooltip && (
-        <div
-          className={[
-            styles.markerTooltip,
-            this.state.makerTooltip.exists ? styles.open : styles.close
-          ].join(" ")}
-          style={{
-            left: `${this.state.makerTooltip.positionX}px`
-          }}
-        >
-          <span className={styles.markerTooltipMessage}>
-            {`spike: ${(this.state.makerTooltip.sparkValue * 100).toFixed(
-              0
-            )}% of max`}
-          </span>
-        </div>
-      )
-    );
-  }
-
-  private renderSectionSelectionTooltip() {
-    if (!this.state.sectionSelectionTooltip || !this.svgRef.current) {
-      return false;
+    if (!this.state.makerTooltip) {
+      return;
     }
-    const svgRect = this.svgRef.current.getBoundingClientRect();
-    const tooltipLeft =
-      (this.state.sectionSelectionTooltip.normalizedPositionX *
-        svgRect.width *
-        (svgWidth - padding * 2)) /
-        svgWidth +
-      (svgRect.width * padding) / svgWidth; // consider padding in SVG coordinate system
-    const targetTime =
-      this.state.sectionSelectionTooltip.normalizedPositionX *
-      this.props.numColumns;
-    const targetValue = this.props.meanValues[
-      this.state.sectionSelectionTooltip.normalizedPositionX >= 1.0
-        ? this.props.meanValues.length - 1
-        : this.state.sectionSelectionTooltip.normalizedPositionX <= 0.0
-        ? 0
-        : Math.round(
-            this.props.meanValues.length *
-              this.state.sectionSelectionTooltip.normalizedPositionX
-          )
-    ];
+
+    const message = `spike: ${(
+      this.state.makerTooltip.sparkValue * 100
+    ).toFixed(0)}% of max`;
+
     return (
       <div
         className={[
-          styles.sectionSelectionTooltip,
-          this.state.sectionSelectionTooltip.exists ? styles.open : styles.close
+          styles.markerTooltip,
+          this.state.makerTooltip.exists ? styles.open : styles.close
         ].join(" ")}
         style={{
-          left: `${tooltipLeft}px`
+          left: `${this.state.makerTooltip.positionX}px`
         }}
       >
-        <span className={styles.sectionSelectionTooltipMessage}>
+        <span className={styles.tooltipMessage}>{message}</span>
+      </div>
+    );
+  }
+
+  private renderSelectionRangeTooltip() {
+    if (!this.state.rangeSelectionTooltip || !this.svgRef.current) {
+      return false;
+    }
+
+    const svgRect = this.svgRef.current.getBoundingClientRect();
+    // left in SVG coordinate
+    const tooltipLeft =
+      (this.state.rangeSelectionTooltip.normalizedPositionX *
+        svgRect.width *
+        (svgWidth - graphSvgPadding * 2)) /
+        svgWidth +
+      (svgRect.width * graphSvgPadding) / svgWidth;
+    const style: React.CSSProperties =
+      tooltipLeft < svgRect.width - 100
+        ? { left: `${tooltipLeft}px`, textAlign: "left" }
+        : { right: `${svgRect.width - tooltipLeft}px`, textAlign: "right" };
+
+    const targetTime =
+      this.state.rangeSelectionTooltip.normalizedPositionX *
+      this.props.numColumns;
+    const targetIndex =
+      this.state.rangeSelectionTooltip.normalizedPositionX >= 1.0
+        ? this.props.meanValues.length - 1
+        : this.state.rangeSelectionTooltip.normalizedPositionX <= 0.0
+        ? 0
+        : Math.round(
+            this.props.meanValues.length *
+              this.state.rangeSelectionTooltip.normalizedPositionX
+          );
+    const targetValue = this.props.meanValues[targetIndex] || 0;
+
+    return (
+      <div
+        className={[
+          styles.rangeSelectionTooltip,
+          this.state.rangeSelectionTooltip.exists ? styles.open : styles.close
+        ].join(" ")}
+        style={style}
+      >
+        <span className={styles.tooltipMessage}>
           T: {targetTime.toFixed(1)}s
           <br />
-          V: {targetValue.toFixed(2)}
+          {targetValue.toFixed(2)}
         </span>
       </div>
     );
   }
+
+  private renderRangeLengthTooltip = () => {
+    if (
+      this.state.rangeStart === null ||
+      this.state.rangeEnd === null ||
+      !this.svgRef.current
+    ) {
+      return;
+    }
+
+    let normalizedRangeStart;
+    let normalizedRangeEnd;
+    if (this.state.rangeStart < this.state.rangeEnd) {
+      normalizedRangeStart = this.state.rangeStart;
+      normalizedRangeEnd = this.state.rangeEnd;
+    } else {
+      normalizedRangeStart = this.state.rangeEnd;
+      normalizedRangeEnd = this.state.rangeStart;
+    }
+
+    const point1 =
+      normalizedRangeStart * (svgWidth - graphSvgPadding * 2) + graphSvgPadding;
+    const point2 =
+      normalizedRangeEnd * (svgWidth - graphSvgPadding * 2) + graphSvgPadding;
+
+    // range in SVG coordinate
+    const rangeInSvg = { x: point1, width: point2 - point1 };
+
+    const svgRect = this.svgRef.current.getBoundingClientRect();
+
+    // range in HTML coordinate (local)
+    const rangeInHtmlLocal = {
+      x: (rangeInSvg.x / svgWidth) * svgRect.width,
+      width: (rangeInSvg.width / svgWidth) * svgRect.width
+    };
+    const elapsedTime =
+      (normalizedRangeEnd - normalizedRangeStart) * this.props.numColumns;
+    const message = `${elapsedTime.toFixed(1)}s`;
+
+    return (
+      <div
+        className={styles.rangeLengthTooltip}
+        style={{
+          left: `${rangeInHtmlLocal.x}px`,
+          width: `${rangeInHtmlLocal.width}px`
+        }}
+      >
+        <span className={styles.tooltipMessage}>{message}</span>
+      </div>
+    );
+  };
 
   private onMouseMoveOverMarker = (e: React.MouseEvent<SVGUseElement>) => {
     const dataY = e.currentTarget.dataset.y;
@@ -331,11 +438,14 @@ class HeatLineChart extends React.Component<IProperty, State> {
       const rect = e.currentTarget.getBoundingClientRect();
       const wrapRect = this.wrapRef.current!.getBoundingClientRect();
       const y = parseFloat(dataY);
+
+      // x in HTML coordinate (local)
+      const positionX = rect.left - wrapRect.left + rect.width / 2 - 60; // align middle
       this.setState({
         makerTooltip: {
           exists: true,
           sparkValue: y,
-          positionX: rect.left - wrapRect.left + rect.width / 2 - 60 // align middle
+          positionX
         }
       });
     }
@@ -358,24 +468,25 @@ class HeatLineChart extends React.Component<IProperty, State> {
       e.preventDefault();
       this.setState({
         isSelecting: false,
-        sectionStart: null,
-        sectionEnd: null,
-        sectionSelectionTooltip: null
+        rangeStart: null,
+        rangeEnd: null,
+        rangeSelectionTooltip: null
       });
     } else if (!this.state.isSelecting) {
       e.stopPropagation();
       const svgRect = this.svgRef.current!.getBoundingClientRect();
+      // x in HTML coordinate (local)
       const relativeX = e.clientX - svgRect.left;
 
-      // start selecting section
-      const sectionStart = normalizeClamp(relativeX, svgRect.width);
+      // start selecting range
+      const rangeStart = normalizeClampInSvg(relativeX, svgRect.width);
       this.setState({
         isSelecting: true,
         lastMouseDown: Date.now(),
-        sectionStart, // put point
-        sectionSelectionTooltip: {
+        rangeStart, // put point
+        rangeSelectionTooltip: {
           exists: true,
-          normalizedPositionX: sectionStart
+          normalizedPositionX: rangeStart
         }
       });
     }
@@ -383,34 +494,35 @@ class HeatLineChart extends React.Component<IProperty, State> {
 
   private onGraphMouseUp = (e: React.MouseEvent<SVGElement>) => {
     if (
-      this.state.sectionStart !== null &&
-      this.state.sectionEnd !== null &&
-      this.state.sectionStart !== this.state.sectionEnd &&
+      this.state.rangeStart !== null &&
+      this.state.rangeEnd !== null &&
+      this.state.rangeStart !== this.state.rangeEnd &&
       this.state.lastMouseDown + 250 < Date.now() // throttling
     ) {
       const svgRect = this.svgRef.current!.getBoundingClientRect();
-      const sectionEnd = normalizeClamp(
+      const rangeEnd = normalizeClampInSvg(
         e.clientX - svgRect.left,
         svgRect.width
       );
 
-      // finish selecting section
+      // finish selecting range
       let startPoint;
       let endPoint;
-      if (this.state.sectionStart < sectionEnd) {
-        startPoint = this.state.sectionStart;
-        endPoint = sectionEnd;
+      if (this.state.rangeStart < rangeEnd) {
+        startPoint = this.state.rangeStart;
+        endPoint = rangeEnd;
       } else {
-        startPoint = sectionEnd;
-        endPoint = this.state.sectionStart;
+        startPoint = rangeEnd;
+        endPoint = this.state.rangeStart;
       }
 
-      this.props.onSectionSelect(startPoint, endPoint);
+      // fire event with normalized coordinate
+      this.props.onRangeSelect(startPoint, endPoint);
 
       this.setState({
         isSelecting: false,
-        sectionStart: null,
-        sectionEnd: null
+        rangeStart: null,
+        rangeEnd: null
       });
     }
   };
@@ -421,23 +533,23 @@ class HeatLineChart extends React.Component<IProperty, State> {
       const svgRect = this.svgRef.current!.getBoundingClientRect();
       const relativeX = e.clientX - svgRect.left;
 
-      const sectionEnd = normalizeClamp(relativeX, svgRect.width);
+      const rangeEnd = normalizeClampInSvg(relativeX, svgRect.width);
       this.setState({
-        sectionEnd, // put point
-        sectionSelectionTooltip: {
+        rangeEnd, // put point
+        rangeSelectionTooltip: {
           exists: true,
-          normalizedPositionX: sectionEnd
+          normalizedPositionX: rangeEnd
         }
       });
     } else {
       const svgRect = this.svgRef.current!.getBoundingClientRect();
       const relativeX = e.clientX - svgRect.left;
 
-      const sectionEnd = normalizeClamp(relativeX, svgRect.width);
+      const rangeEnd = normalizeClampInSvg(relativeX, svgRect.width);
       this.setState({
-        sectionSelectionTooltip: {
+        rangeSelectionTooltip: {
           exists: true,
-          normalizedPositionX: sectionEnd
+          normalizedPositionX: rangeEnd
         }
       }); // does not put point
     }
@@ -449,7 +561,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
 
   private onMouseLeave = () => {
     this.setState((s: State) => ({
-      sectionSelectionTooltip: { ...s.sectionSelectionTooltip!, exists: false }
+      rangeSelectionTooltip: { ...s.rangeSelectionTooltip!, exists: false }
     }));
   };
 
@@ -458,8 +570,8 @@ class HeatLineChart extends React.Component<IProperty, State> {
       if (!this.wrapRef.current!.contains(e.target)) {
         this.setState({
           isSelecting: false,
-          sectionStart: null,
-          sectionEnd: null
+          rangeStart: null,
+          rangeEnd: null
         });
       }
     }

@@ -22,7 +22,7 @@ export interface IItemProperty {
   openByDefault?: boolean;
 
   getHeatMap(): void;
-  onSectionSelect(start: number, end: number): void;
+  onRangeSelect(start: number, end: number): void;
 }
 
 const initialItemState = {
@@ -103,7 +103,7 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
               <HeatLineChart
                 {...this.props.heatMap}
                 hash={this.props.uuid}
-                onSectionSelect={this.props.onSectionSelect}
+                onRangeSelect={this.props.onRangeSelect}
               />
             </div>
           );

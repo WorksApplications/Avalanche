@@ -39,7 +39,7 @@ storiesOf("HeatLineChart", module)
         maxValues={[]}
         numColumns={0}
         numRows={0}
-        onSectionSelect={action("Selected")}
+        onRangeSelect={action("Selected")}
       />
     </div>
   ))
@@ -52,7 +52,7 @@ storiesOf("HeatLineChart", module)
         meanValues={proportionData.map(x => (x * 3) / 4)}
         numColumns={proportionData.length / 50}
         numRows={50}
-        onSectionSelect={action("Selected")}
+        onRangeSelect={action("Selected")}
       />
     </div>
   ))
@@ -65,7 +65,7 @@ storiesOf("HeatLineChart", module)
         meanValues={parabolaData.map(x => (x * 3) / 4)}
         numColumns={parabolaData.length / 50}
         numRows={50}
-        onSectionSelect={action("Selected")}
+        onRangeSelect={action("Selected")}
       />
     </div>
   ))
@@ -78,7 +78,7 @@ storiesOf("HeatLineChart", module)
         meanValues={sawData.map(x => (x * 3) / 4)}
         numColumns={sawData.length / 50}
         numRows={50}
-        onSectionSelect={action("Selected")}
+        onRangeSelect={action("Selected")}
       />
     </div>
   ))
@@ -91,7 +91,7 @@ storiesOf("HeatLineChart", module)
         meanValues={logisticMapPow256Raw.map(x => (x * 3) / 4)}
         numColumns={logisticMapPow256Raw.length / 50}
         numRows={50}
-        onSectionSelect={action("Selected")}
+        onRangeSelect={action("Selected")}
       />
     </div>
   ));

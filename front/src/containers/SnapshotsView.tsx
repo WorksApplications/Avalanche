@@ -155,7 +155,7 @@ export class SnapshotsView extends React.Component<Props> {
           heatMap: heatMap && heatMap.data,
           heatMapId,
           heatMapStatus: heatMap ? heatMap.status : "empty",
-          onSectionSelect: (normalizedStart: number, normalizedEnd: number) => {
+          onRangeSelect: (normalizedStart: number, normalizedEnd: number) => {
             if (heatMap && heatMap.data) {
               const start = normalizedStart * heatMap.data.numColumns;
               const startColumn = Math.floor(start);

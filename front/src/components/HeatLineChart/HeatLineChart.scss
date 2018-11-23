@@ -15,9 +15,11 @@
   transition: opacity 0.2s ease-out, visibility 0.3s linear;
   width: 120px;
   user-select: none;
+  pointer-events: none;
+  z-index: 100;
 }
 
-.sectionSelectionTooltip {
+.rangeSelectionTooltip {
   display: flex;
   justify-content: center;
   position: absolute;
@@ -26,7 +28,21 @@
   font-size: $font-size-smaller;
   transition: opacity 0.2s ease-out, visibility 0.3s linear;
   user-select: none;
-  margin: 0 $base-space * 1.5;
+  margin: 0 $base-space;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.rangeLengthTooltip {
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  color: $text-color-white;
+  bottom: -$base-space;
+  font-size: $font-size-smaller;
+  user-select: none;
+  pointer-events: none;
+  z-index: 100;
 }
 
 .open {
@@ -39,17 +55,9 @@
   visibility: hidden;
 }
 
-.markerTooltipMessage {
+.tooltipMessage {
   display: inline-block;
-  background-color: rgba($text-color-normal, 0.5);
-  border-radius: $border-radius;
-  padding: $base-space / 2;
-  white-space: nowrap;
-}
-
-.sectionSelectionTooltipMessage {
-  display: inline-block;
-  background-color: rgba($text-color-normal, 0.5);
+  background-color: rgba($text-color-normal, 0.6);
   border-radius: $border-radius;
   padding: $base-space / 2;
   white-space: nowrap;
