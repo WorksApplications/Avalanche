@@ -299,6 +299,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
             key={p.x}
             href={`#spark-${hash}`}
             x={p.x - markSize / 2}
+            data-xinsvg={p.x}
             data-y={p.y}
             onMouseMove={this.onMouseMoveOverSpike}
             onMouseLeave={this.onMouseLeaveFromMarker}
@@ -337,18 +338,21 @@ class HeatLineChart extends React.Component<IProperty, State> {
       return false;
     }
 
-    const svgRect = this.svgRef.current.getBoundingClientRect();
+    const svgRectWidth = this.svgRef.current.clientWidth; // no border for SVG element
     // left in SVG coordinate
     const tooltipLeft =
       (this.state.rangeSelectionTooltip.normalizedPositionX *
-        svgRect.width *
+        svgRectWidth *
         (svgWidth - graphSvgPadding * 2)) /
         svgWidth +
-      (svgRect.width * graphSvgPadding) / svgWidth;
+      (svgRectWidth * graphSvgPadding) / svgWidth;
     const style: React.CSSProperties =
-      tooltipLeft < svgRect.width - 100
+      tooltipLeft < svgRectWidth - 100
         ? { left: `${tooltipLeft}px`, textAlign: "left" }
-        : { right: `${svgRect.width - tooltipLeft}px`, textAlign: "right" };
+        : {
+            right: `${svgRectWidth - tooltipLeft}px`,
+            textAlign: "right"
+          };
 
     const targetTime =
       this.state.rangeSelectionTooltip.normalizedPositionX *
@@ -408,12 +412,12 @@ class HeatLineChart extends React.Component<IProperty, State> {
     // range in SVG coordinate
     const rangeInSvg = { x: point1, width: point2 - point1 };
 
-    const svgRect = this.svgRef.current.getBoundingClientRect();
+    const svgRectWidth = this.svgRef.current.clientWidth; // no border for SVG element
 
     // range in HTML coordinate (local)
     const rangeInHtmlLocal = {
-      x: (rangeInSvg.x / svgWidth) * svgRect.width,
-      width: (rangeInSvg.width / svgWidth) * svgRect.width
+      x: (rangeInSvg.x / svgWidth) * svgRectWidth,
+      width: (rangeInSvg.width / svgWidth) * svgRectWidth
     };
     const elapsedTime =
       (normalizedRangeEnd - normalizedRangeStart) * this.props.numColumns;
@@ -433,14 +437,16 @@ class HeatLineChart extends React.Component<IProperty, State> {
   };
 
   private onMouseMoveOverSpike = (e: React.MouseEvent<SVGUseElement>) => {
+    const dataXInSvg = e.currentTarget.dataset.xinsvg;
     const dataY = e.currentTarget.dataset.y;
-    if (dataY) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const wrapRect = this.wrapRef.current!.getBoundingClientRect();
+    if (dataXInSvg && dataY) {
+      const xInSvg = parseFloat(dataXInSvg);
+      const svgRectWidth = this.svgRef.current!.clientWidth;
       const y = parseFloat(dataY);
 
       // x in HTML coordinate (local)
-      const positionX = rect.left - wrapRect.left + rect.width / 2 - 60; // align middle
+      // message container width is 120px, so aligns middle
+      const positionX = (xInSvg / svgWidth) * svgRectWidth - 60;
       this.setState({
         makerTooltip: {
           exists: true,
@@ -474,12 +480,13 @@ class HeatLineChart extends React.Component<IProperty, State> {
       });
     } else if (!this.state.isSelecting) {
       e.stopPropagation();
-      const svgRect = this.svgRef.current!.getBoundingClientRect();
-      // x in HTML coordinate (local)
-      const relativeX = e.clientX - svgRect.left;
 
+      const svgRectWidth = this.svgRef.current!.clientWidth;
       // start selecting range
-      const rangeStart = normalizeClampInSvg(relativeX, svgRect.width);
+      const rangeStart = normalizeClampInSvg(
+        e.nativeEvent.offsetX,
+        svgRectWidth
+      );
       this.setState({
         isSelecting: true,
         lastMouseDown: Date.now(),
@@ -499,11 +506,8 @@ class HeatLineChart extends React.Component<IProperty, State> {
       this.state.rangeStart !== this.state.rangeEnd &&
       this.state.lastMouseDown + 250 < Date.now() // throttling
     ) {
-      const svgRect = this.svgRef.current!.getBoundingClientRect();
-      const rangeEnd = normalizeClampInSvg(
-        e.clientX - svgRect.left,
-        svgRect.width
-      );
+      const svgRectWidth = this.svgRef.current!.clientWidth;
+      const rangeEnd = normalizeClampInSvg(e.nativeEvent.offsetX, svgRectWidth);
 
       // finish selecting range
       let startPoint;
@@ -530,10 +534,9 @@ class HeatLineChart extends React.Component<IProperty, State> {
   private onGraphMove = (e: React.MouseEvent<SVGElement>) => {
     if (this.state.isSelecting) {
       e.stopPropagation();
-      const svgRect = this.svgRef.current!.getBoundingClientRect();
-      const relativeX = e.clientX - svgRect.left;
 
-      const rangeEnd = normalizeClampInSvg(relativeX, svgRect.width);
+      const svgRectWidth = this.svgRef.current!.clientWidth;
+      const rangeEnd = normalizeClampInSvg(e.nativeEvent.offsetX, svgRectWidth);
       this.setState({
         rangeEnd, // put point
         rangeSelectionTooltip: {
@@ -542,10 +545,8 @@ class HeatLineChart extends React.Component<IProperty, State> {
         }
       });
     } else {
-      const svgRect = this.svgRef.current!.getBoundingClientRect();
-      const relativeX = e.clientX - svgRect.left;
-
-      const rangeEnd = normalizeClampInSvg(relativeX, svgRect.width);
+      const svgRectWidth = this.svgRef.current!.clientWidth;
+      const rangeEnd = normalizeClampInSvg(e.nativeEvent.offsetX, svgRectWidth);
       this.setState({
         rangeSelectionTooltip: {
           exists: true,
