@@ -70,6 +70,23 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
+    run: suspect
+  name: suspect
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: content
+  selector:
+    run: suspect
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
     run: static
   name: static
 spec:

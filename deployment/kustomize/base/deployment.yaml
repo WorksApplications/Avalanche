@@ -136,3 +136,26 @@ spec:
         ports:
         - containerPort: 80
         imagePullPolicy: Always
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: suspect
+spec:
+  selector:
+    matchLabels:
+      run: suspect
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: suspect
+    spec:
+      containers:
+      - name: suspect
+        image: /resource_optimization/suspect
+        ports:
+        - containerPort: 8080
+        imagePullPolicy: Always
