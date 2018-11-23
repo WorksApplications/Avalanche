@@ -150,40 +150,8 @@ export class SnapshotsView extends React.Component<Props> {
           heatMap: heatMap && heatMap.data,
           heatMapId: x.heatMapId,
           heatMapStatus: heatMap ? heatMap.status : "empty",
-          onRangeSelect: (normalizedStart: number, normalizedEnd: number) => {
-            if (heatMap && heatMap.data) {
-              const start = normalizedStart * heatMap.data.numColumns;
-              const startColumn = Math.floor(start);
-              const startRow = Math.floor(
-                (start - startColumn) * heatMap.data.numRows
-              );
-
-              const end = normalizedEnd * heatMap.data.numColumns;
-              const endColumn = Math.floor(end);
-              const endRow = Math.floor(
-                (end - endColumn) * heatMap.data.numRows
-              );
-
-              window.open(
-                `${FLAMESCOPE_API_BASE}/#/heatmap/${
-                  x.heatMapId
-                }/flamegraph/${startColumn}.${startRow}/${endColumn}.${endRow}/`
-              );
-            }
-          },
-          getHeatMap: () => {
-            this.props
-              .getHeatMapOperation({
-                snapshotId: x.uuid,
-                heatMapId: x.heatMapId
-              })
-              .catch(() => {
-                this.props.toastr(
-                  `Failed to get heat map for "${x.uuid}".`,
-                  "error"
-                );
-              });
-          }
+          onRangeSelect: this.onRangeSelectWrap,
+          getHeatMap: this.getHeatMapWrap
         };
       });
       if (this.props.filteringEnvironment) {
@@ -245,6 +213,33 @@ export class SnapshotsView extends React.Component<Props> {
       </div>
     );
   }
+
+  private onRangeSelectWrap = (
+    heatMapId: string,
+    normalizedStart: number,
+    normalizedEnd: number
+  ) => {
+    const heatMap = this.props.heatMaps.get(heatMapId);
+    if (heatMap && heatMap.data) {
+      const start = normalizedStart * heatMap.data.numColumns;
+      const startColumn = Math.floor(start);
+      const startRow = Math.floor((start - startColumn) * heatMap.data.numRows);
+
+      const end = normalizedEnd * heatMap.data.numColumns;
+      const endColumn = Math.floor(end);
+      const endRow = Math.floor((end - endColumn) * heatMap.data.numRows);
+
+      window.open(
+        `${FLAMESCOPE_API_BASE}/#/heatmap/${heatMapId}/flamegraph/${startColumn}.${startRow}/${endColumn}.${endRow}/`
+      );
+    }
+  };
+
+  private getHeatMapWrap = (snapshotId: string, heatMapId: string) => {
+    this.props.getHeatMapOperation({ snapshotId, heatMapId }).catch(() => {
+      this.props.toastr(`Failed to get heat map for "${snapshotId}".`, "error");
+    });
+  };
 
   private onAppChanged = (app: string) => {
     this.pushParams({ newApp: app, newEnv: null, newPod: null });
