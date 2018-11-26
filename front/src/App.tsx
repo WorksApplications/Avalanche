@@ -5,9 +5,12 @@ import { NavLink } from "react-router-dom";
 import styles from "./App.scss";
 import { APP_NAME } from "./constants";
 import Toastr from "./containers/Toastr";
-import ConfigPage from "./pages/ConfigPage";
 import SnapshotPage from "./pages/SnapshotPage";
 import { history } from "./store";
+
+const ConfigPage = React.lazy(() =>
+  import(/* webpackChunkName: "config-page" */ "./pages/ConfigPage")
+);
 
 class App extends React.Component {
   public render() {
@@ -34,15 +37,17 @@ class App extends React.Component {
         <div className={styles.content}>
           <Router history={history}>
             <main className={styles.main}>
-              <Switch>
-                <Route
-                  exact={true}
-                  component={SnapshotPage}
-                  path="/"
-                  default={true}
-                />
-                <Route component={ConfigPage} path="/config" />
-              </Switch>
+              <React.Suspense fallback={<div>Loading</div>}>
+                <Switch>
+                  <Route
+                    exact={true}
+                    component={SnapshotPage}
+                    path="/"
+                    default={true}
+                  />
+                  <Route component={ConfigPage} path="/config" />
+                </Switch>
+              </React.Suspense>
             </main>
           </Router>
         </div>
