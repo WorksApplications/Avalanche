@@ -2,6 +2,7 @@ package stack
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"math"
 )
@@ -97,8 +98,8 @@ func newNameVec(root *Stack) (nameMap, nameMapRev) {
 func Filter(input []byte, nLoop int) ([]byte, error) {
 	tree, err := readRaw(input)
 	if err != nil {
-		log.Print("[stack] Parse error: ", err)
-		return nil, err
+		log.Print("[stack] Parse error: ", err, string(input))
+		return nil, fmt.Errorf("error: %+v\n input: %s", err, input)
 	}
 	var m nameMap
 	for i := 0; i < nLoop; i++ {
@@ -117,8 +118,8 @@ func Filter(input []byte, nLoop int) ([]byte, error) {
 func FilterAndExport(input []byte, nLoop int) ([]byte, error) {
 	tree, err := readRaw(input)
 	if err != nil {
-		log.Print("[stack] Parse error: ", err)
-		return nil, err
+		log.Print("[stack] Parse error: ", err, string(input))
+		return nil, fmt.Errorf("error: %+v\n input: %s", err, input)
 	}
 	var m nameMap
 	for i := 0; i < nLoop; i++ {

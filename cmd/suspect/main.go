@@ -35,9 +35,9 @@ func getMeta(url string) (*models.Snapshot, error) {
 		return nil, fmt.Errorf("Remote server %s is junk!: %s: %s", url, res.Status, string(data))
 	}
 	var meta models.Snapshot
-	err = json.Unmarshal(data, meta)
+	err = json.Unmarshal(data, &meta)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error: %+v\n data: %s", err, string(data))
 	}
 	return &meta, nil
 }
@@ -74,7 +74,7 @@ func (cfg *config) analyze(w http.ResponseWriter, r *http.Request) {
 		}
 		stack, err := stack.Filter(*data, 3)
 		if err != nil {
-            http.Error(w, fmt.Sprintf("failed to process Flamegraph data: %+v", err), 500)
+			http.Error(w, fmt.Sprintf("failed to process Flamegraph data of %+v: %+v", meta, err), 500)
 			return
 		}
 		w.Write(stack)
@@ -97,7 +97,7 @@ func (cfg *config) report(w http.ResponseWriter, r *http.Request) {
 		}
 		stack, err := stack.GenReport(*data, 3, cfg.searchAPI)
 		if err != nil {
-            http.Error(w, fmt.Sprintf("failed to process Flamegraph data: %+v", err), 500)
+			http.Error(w, fmt.Sprintf("failed to process Flamegraph data: %+v", err), 500)
 			return
 		}
 		w.Write(stack)
