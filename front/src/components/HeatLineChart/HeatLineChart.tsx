@@ -43,7 +43,7 @@ export type Property = Pick<
 const paddingInSvg = 0.1;
 const spikeSizeInSvg = 0.1;
 const heightInSvg = 1;
-const widthInSvg = 10;
+const widthInSvg = 12;
 const strokeWidthInSvg = 0.008;
 
 // like V sign (h:w=2:1)
