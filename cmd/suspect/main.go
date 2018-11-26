@@ -8,15 +8,16 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"text/template"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/flamescope/stack"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 )
 
-type context struct {
+type config struct {
 	collect   string
-	searchAPI string
+	searchAPI stack.Search
 }
 
 func getMeta(url string) (*models.Snapshot, error) {
@@ -56,12 +57,12 @@ func getData(url string) (*[]byte, error) {
 	return &data, nil
 }
 
-func (ctx *context) analyze(w http.ResponseWriter, r *http.Request) {
+func (cfg *config) analyze(w http.ResponseWriter, r *http.Request) {
 	log.Print(r.Proto, "(", r.Method, "): ", r.URL)
 	if r.Method == "GET" {
 		uuid := r.URL.Path
 		strings.TrimPrefix(uuid, "/stacks/")
-		meta, err := getMeta(ctx.collect + "/snapshots/" + uuid)
+		meta, err := getMeta(cfg.collect + "/snapshots/" + uuid)
 		if err != nil {
 			http.Error(w, "no such snapshot record", 404)
 			return
@@ -80,12 +81,12 @@ func (ctx *context) analyze(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (ctx *context) report(w http.ResponseWriter, r *http.Request) {
+func (cfg *config) report(w http.ResponseWriter, r *http.Request) {
 	log.Print(r.Proto, "(", r.Method, "): ", r.URL)
 	if r.Method == "GET" {
 		uuid := r.URL.Path
 		strings.TrimPrefix(uuid, "/stacks/")
-		meta, err := getMeta(ctx.collect + "/snapshots/" + uuid)
+		meta, err := getMeta(cfg.collect + "/snapshots/" + uuid)
 		if err != nil {
 			http.Error(w, "no such snapshot record", 404)
 			return
@@ -95,7 +96,7 @@ func (ctx *context) report(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "failed to retrieve Flamegraph data", 404)
 			return
 		}
-		stack, err := stack.GenReport(*data, 3, ctx.searchAPI)
+		stack, err := stack.GenReport(*data, 3, cfg.searchAPI)
 		if err != nil {
 			http.Error(w, "failed to process with the data", 500)
 			return
@@ -104,10 +105,10 @@ func (ctx *context) report(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func serve(at, collect, api string) {
-	ctx := context{collect, api}
-	http.HandleFunc("/stacks/", ctx.analyze)
-	http.HandleFunc("/reports/", ctx.report)
+func serve(at, collect string, api stack.Search) {
+	cfg := config{collect, api}
+	http.HandleFunc("/stacks/", cfg.analyze)
+	http.HandleFunc("/reports/", cfg.report)
 	log.Fatal(http.ListenAndServe(at, nil))
 }
 
@@ -118,15 +119,28 @@ func main() {
 	sfn := flag.String("src", "test/stack", "file to read")
 	dfn := flag.String("dst", "test/filtered", "file to write")
 	cli := flag.Bool("cli", false, "run as cli(don't serve)")
-	api := flag.String("search", "https://github.com/search/code?q={}", "source code search API")
+	apiurl := flag.String("searchUrl", "https://github.com/search/code?q={{.}}", "source code search API")
+	apipost := flag.String("searchPost", "", "The data to send to the source code search API if it requires \"POST\" (empty indicates \"GET\").")
 	at := flag.String("http", "localhost:8080", "host:port")
 	collect := flag.String("collect", "http://collect:8080", "location for collect")
 	flag.Parse()
 	args := flag.Args()
 	log.Println(args)
 
+	var urltempl *template.Template
+	var datatempl *template.Template
+	urltempl, err := template.New("url").Parse(*apiurl)
+	if err != nil {
+		log.Fatal("Parse error at reading \"-apiurl\" flag", err)
+	}
+	if *apipost != "" {
+		datatempl, err = template.New("data").Parse(*apipost)
+		if err != nil {
+			log.Fatal("Parse error at reading \"-apipost\" flag", err)
+		}
+	}
 	if !*cli {
-		serve(*at, *collect, *api)
+		serve(*at, *collect, stack.Search{urltempl, datatempl})
 	} else {
 		data, err := ioutil.ReadFile(*sfn)
 		if err != nil {

@@ -1,12 +1,26 @@
 package stack
 
 import (
+	"bytes"
 	"encoding/json"
-	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"sort"
 	"strings"
+	"text/template"
 )
+
+type Search struct {
+	Url  *template.Template
+	Post *template.Template
+}
+
+type searchResult struct {
+	code []Code
+	ref  string
+	line int
+}
 
 type Code struct {
 	Snip      string `json:"snippet"`
@@ -53,7 +67,7 @@ func sortByValue(frames *[]Stack) {
 	sort.Sort(byValue(*frames))
 }
 
-func GenReport(input []byte, nLoop int, searchAPI string) ([]byte, error) {
+func GenReport(input []byte, nLoop int, searchAPI Search) ([]byte, error) {
 	tree, err := readRaw(input)
 	if err != nil {
 		log.Print("[stack] Parse error: ", err)
@@ -74,9 +88,39 @@ func GenReport(input []byte, nLoop int, searchAPI string) ([]byte, error) {
 	return b, nil
 }
 
-func search(url string, token []string) ([]Code, string, int) {
-	var c []Code
-	return c, url, 0
+func analyze(res string) *searchResult {
+	return nil
+}
+
+func search(searchAPI Search, token []string) (*searchResult, error) {
+	var u bytes.Buffer
+	var d bytes.Buffer
+	var body []byte
+	/* serialize tokens */
+	q := strings.Join(token, " ")
+	if err := searchAPI.Url.Execute(&u, q); err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	if searchAPI.Post == nil {
+		// resp, err := http.Get(string(u))
+		log.Fatal("not implemented: search with get method")
+
+	} else {
+		if err := searchAPI.Post.Execute(&d, q); err != nil {
+			log.Print(err)
+			return nil, err
+		}
+		/* XXX which content-type would you like? */
+		resp, err := http.Post(u.String(), "application/x-www-form-urlencoded; charset=UTF-8", &d)
+		if err != nil {
+			log.Print(err)
+			return nil, err
+		}
+		defer resp.Body.Close()
+		body, err = ioutil.ReadAll(resp.Body)
+	}
+	return analyze(string(body)), nil
 }
 
 func tokenize(name, label string) []string {
@@ -99,15 +143,18 @@ func tokenize(name, label string) []string {
 	}
 }
 
-func assignCode(name, label, searchAPI string) ([]Code, string, int) {
+func assignCode(name, label string, searchAPI Search) ([]Code, string, int) {
 	t := tokenize(name, label)
 	/* Example of searchAPI */
 	/* http://hound.lan.tohaheavyindustrials.com/search?files=&repos=&i=nope&q={} */
-	code, ref, line := search(fmt.Sprintf(searchAPI, t), t)
-	return code, ref, line
+	res, err := search(searchAPI, t)
+	if err != nil {
+		/* XXX */
+	}
+	return res.code, res.ref, res.line
 }
 
-func (s *Stack) toReport(searchAPI string, rootVal float64) Report {
+func (s *Stack) toReport(searchAPI Search, rootVal float64) Report {
 	c, ref, line := assignCode(s.Name, s.Label, searchAPI)
 	v := 0
 	cs := make([]Report, len(s.Children))
