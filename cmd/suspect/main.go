@@ -10,8 +10,8 @@ import (
 	"strings"
 	"text/template"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/flamescope/stack"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/codesearch"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/flamescope/stack"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 )
@@ -113,23 +113,10 @@ func serve(at, collect string, api codesearch.Search) {
 	log.Fatal(http.ListenAndServe(at, nil))
 }
 
-func main() {
-	log.SetPrefix("suspect:\t")
-	log.SetFlags(log.Lshortfile | log.Ltime | log.Ldate)
-
-	sfn := flag.String("src", "test/stack", "file to read")
-	dfn := flag.String("dst", "test/filtered", "file to write")
-	cli := flag.Bool("cli", false, "run as cli(don't serve)")
-	apiurl := flag.String("searchUrl", "https://github.com/search/code?q={{.}}", "source code search API")
-	apipost := flag.String("searchPost", "", "The data to send to the source code search API if it requires \"POST\" (empty indicates \"GET\").")
-	at := flag.String("http", "localhost:8080", "host:port")
-	collect := flag.String("collect", "http://collect:8080", "location for collect")
-	flag.Parse()
-	args := flag.Args()
-	log.Println(args)
-
+func toSearch(apiurl, apipost, apitype *string) codesearch.Search {
 	var urltempl *template.Template
 	var datatempl *template.Template
+	var engine codesearch.EngineType
 	urltempl, err := template.New("url").Parse(*apiurl)
 	if err != nil {
 		log.Fatal("Parse error at reading \"-apiurl\" flag", err)
@@ -140,8 +127,40 @@ func main() {
 			log.Fatal("Parse error at reading \"-apipost\" flag", err)
 		}
 	}
+
+	switch *apitype {
+	case "github":
+		engine = codesearch.Github
+	case "hound":
+		engine = codesearch.Hound
+	case "gitlab":
+		engine = codesearch.Gitlab
+	case "internal-use":
+		engine = codesearch.InternalSearch
+	default:
+		log.Fatal("No API kind", *apitype)
+	}
+	return codesearch.Search{urltempl, datatempl, engine}
+}
+
+func main() {
+	log.SetPrefix("suspect:\t")
+	log.SetFlags(log.Lshortfile | log.Ltime | log.Ldate)
+
+	sfn := flag.String("src", "test/stack", "file to read")
+	dfn := flag.String("dst", "test/filtered", "file to write")
+	cli := flag.Bool("cli", false, "run as cli(don't serve)")
+	apiurl := flag.String("searchUrl", "https://github.com/search/code?q={{.}}", "source code search API")
+	apipost := flag.String("searchPost", "", "The data to send to the source code search API if it requires \"POST\" (empty indicates \"GET\").")
+	apitype := flag.String("searchType", "github", "type of the search engine. \"github\", \"gitlab\", \"hound\", \"internal-use\"")
+	at := flag.String("http", "localhost:8080", "host:port")
+	collect := flag.String("collect", "http://collect:8080", "location for collect")
+	flag.Parse()
+	args := flag.Args()
+	log.Println(args)
+
 	if !*cli {
-		serve(*at, *collect, codesearch.Search{urltempl, datatempl})
+		serve(*at, *collect, toSearch(apiurl, apipost, apitype))
 	} else {
 		data, err := ioutil.ReadFile(*sfn)
 		if err != nil {

@@ -1,11 +1,6 @@
 package codesearch
 
 import (
-	"bytes"
-	"io/ioutil"
-	"log"
-	"net/http"
-	"strings"
 	"text/template"
 )
 
@@ -15,9 +10,20 @@ type Code struct {
 	Highlight bool   `json:"highlight"`
 }
 
+type EngineType int
+
+const (
+	Undefined = iota
+	InternalSearch
+	Github
+	Gitlab
+	Hound
+)
+
 type Search struct {
 	Url  *template.Template
 	Post *template.Template
+	Type EngineType
 }
 
 type searchResult struct {
@@ -26,37 +32,21 @@ type searchResult struct {
 	Line int
 }
 
-func analyze(res string) *searchResult {
-	return nil
+type searchEngine interface {
+	//    isMatchFeature([]byte) bool
+	//    getCode([]byte) []Code
+	search(Search, []string) (*searchResult, error)
 }
 
-func Run(searchAPI Search, token []string) (*searchResult, error) {
-	var u bytes.Buffer
-	var d bytes.Buffer
-	var body []byte
-	/* serialize tokens */
-	q := strings.Join(token, " ")
-	if err := searchAPI.Url.Execute(&u, q); err != nil {
-		log.Print(err)
-		return nil, err
+func Run(api Search, token []string) (*searchResult, error) {
+	var s searchEngine
+	switch api.Type {
+	default:
+		fallthrough
+	case InternalSearch:
+		s = internal{}
+	case Github:
+		s = github{}
 	}
-	if searchAPI.Post == nil {
-		// resp, err := http.Get(string(u))
-		log.Fatal("not implemented: search with get method")
-
-	} else {
-		if err := searchAPI.Post.Execute(&d, q); err != nil {
-			log.Print(err)
-			return nil, err
-		}
-		/* XXX which content-type would you like? */
-		resp, err := http.Post(u.String(), "application/x-www-form-urlencoded; charset=UTF-8", &d)
-		if err != nil {
-			log.Print(err)
-			return nil, err
-		}
-		defer resp.Body.Close()
-		body, err = ioutil.ReadAll(resp.Body)
-	}
-	return analyze(string(body)), nil
+	return s.search(api, token)
 }
