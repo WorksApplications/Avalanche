@@ -62,20 +62,19 @@ func (cfg *config) analyze(w http.ResponseWriter, r *http.Request) {
 	log.Print(r.Proto, "(", r.Method, "): ", r.URL)
 	if r.Method == "GET" {
 		uuid := r.URL.Path
-		strings.TrimPrefix(uuid, "/stacks/")
-		meta, err := getMeta(cfg.collect + "/snapshots/" + uuid)
+		meta, err := getMeta(cfg.collect + "/snapshots/" + strings.TrimPrefix(uuid, "/stacks/")
 		if err != nil {
-			http.Error(w, "no such snapshot record", 404)
+			http.Error(w, fmt.Sprintf("no such snapshot record: %+v", err), 404)
 			return
 		}
 		data, err := getData(meta.FlamescopeLink)
 		if err != nil {
-			http.Error(w, "failed to retrieve Flamegraph data", 404)
+			http.Error(w, fmt.Sprintf("failed to retrieve Flamegraph data: %+v", err), 404)
 			return
 		}
 		stack, err := stack.Filter(*data, 3)
 		if err != nil {
-			http.Error(w, "failed to process Flamegraph data", 500)
+            http.Error(w, fmt.Sprintf("failed to process Flamegraph data: %+v", err), 500)
 			return
 		}
 		w.Write(stack)
@@ -86,20 +85,19 @@ func (cfg *config) report(w http.ResponseWriter, r *http.Request) {
 	log.Print(r.Proto, "(", r.Method, "): ", r.URL)
 	if r.Method == "GET" {
 		uuid := r.URL.Path
-		strings.TrimPrefix(uuid, "/stacks/")
-		meta, err := getMeta(cfg.collect + "/snapshots/" + uuid)
+		meta, err := getMeta(cfg.collect + "/snapshots/" + strings.TrimPrefix(uuid, "/stacks/")
 		if err != nil {
-			http.Error(w, "no such snapshot record", 404)
+			http.Error(w, fmt.Sprintf("no such snapshot record: %+v", err), 404)
 			return
 		}
 		data, err := getData(meta.FlamescopeLink)
 		if err != nil {
-			http.Error(w, "failed to retrieve Flamegraph data", 404)
+			http.Error(w, fmt.Sprintf("failed to retrieve Flamegraph data: %+v", err), 404)
 			return
 		}
 		stack, err := stack.GenReport(*data, 3, cfg.searchAPI)
 		if err != nil {
-			http.Error(w, "failed to process with the data", 500)
+            http.Error(w, fmt.Sprintf("failed to process Flamegraph data: %+v", err), 500)
 			return
 		}
 		w.Write(stack)
