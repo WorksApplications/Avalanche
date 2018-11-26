@@ -1,40 +1,22 @@
 package stack
 
 import (
-	"bytes"
 	"encoding/json"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"sort"
 	"strings"
-	"text/template"
+
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/codesearch"
 )
-
-type Search struct {
-	Url  *template.Template
-	Post *template.Template
-}
-
-type searchResult struct {
-	code []Code
-	ref  string
-	line int
-}
-
-type Code struct {
-	Snip      string `json:"snippet"`
-	Link      string `json:"link"`
-	Highlight bool   `json:"highlight"`
-}
 
 type Report struct {
 	Name   string  `json:"name"`
 	RefUrl string  `json:"search_url"`
-	Code   []Code  `json:"code"`
 	Line   int     `json:"line_start_at"`
 	Total  float64 `json:"total_ratio"`
 	Imm    float64 `json:"immidiate_ratio"`
+
+	Code []codesearch.Code `json:"code"`
 
 	Children []Report `json:"children"`
 }
@@ -67,7 +49,7 @@ func sortByValue(frames *[]Stack) {
 	sort.Sort(byValue(*frames))
 }
 
-func GenReport(input []byte, nLoop int, searchAPI Search) ([]byte, error) {
+func GenReport(input []byte, nLoop int, searchAPI codesearch.Search) ([]byte, error) {
 	tree, err := readRaw(input)
 	if err != nil {
 		log.Print("[stack] Parse error: ", err)
@@ -88,46 +70,11 @@ func GenReport(input []byte, nLoop int, searchAPI Search) ([]byte, error) {
 	return b, nil
 }
 
-func analyze(res string) *searchResult {
-	return nil
-}
-
-func search(searchAPI Search, token []string) (*searchResult, error) {
-	var u bytes.Buffer
-	var d bytes.Buffer
-	var body []byte
-	/* serialize tokens */
-	q := strings.Join(token, " ")
-	if err := searchAPI.Url.Execute(&u, q); err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	if searchAPI.Post == nil {
-		// resp, err := http.Get(string(u))
-		log.Fatal("not implemented: search with get method")
-
-	} else {
-		if err := searchAPI.Post.Execute(&d, q); err != nil {
-			log.Print(err)
-			return nil, err
-		}
-		/* XXX which content-type would you like? */
-		resp, err := http.Post(u.String(), "application/x-www-form-urlencoded; charset=UTF-8", &d)
-		if err != nil {
-			log.Print(err)
-			return nil, err
-		}
-		defer resp.Body.Close()
-		body, err = ioutil.ReadAll(resp.Body)
-	}
-	return analyze(string(body)), nil
-}
-
 func tokenize(name, label string) []string {
 	switch label {
 	case "jit":
 		/* "This is non-authentic Java wisdom", a Duke said,
-		 * Assume the last part of the FQDN is the full of information portion. */
+		 * Assume the last part of the FQDN is the portion with full of information. */
 		t := strings.Split(name, ",")
 		for i := len(t)/2 - 1; i >= 0; i-- {
 			opp := len(t) - 1 - i
@@ -143,18 +90,18 @@ func tokenize(name, label string) []string {
 	}
 }
 
-func assignCode(name, label string, searchAPI Search) ([]Code, string, int) {
+func assignCode(name, label string, searchAPI codesearch.Search) ([]codesearch.Code, string, int) {
 	t := tokenize(name, label)
 	/* Example of searchAPI */
 	/* http://hound.lan.tohaheavyindustrials.com/search?files=&repos=&i=nope&q={} */
-	res, err := search(searchAPI, t)
+	res, err := codesearch.Run(searchAPI, t)
 	if err != nil {
 		/* XXX */
 	}
-	return res.code, res.ref, res.line
+	return res.Code, res.Ref, res.Line
 }
 
-func (s *Stack) toReport(searchAPI Search, rootVal float64) Report {
+func (s *Stack) toReport(searchAPI codesearch.Search, rootVal float64) Report {
 	c, ref, line := assignCode(s.Name, s.Label, searchAPI)
 	v := 0
 	cs := make([]Report, len(s.Children))

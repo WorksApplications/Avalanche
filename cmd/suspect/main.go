@@ -11,13 +11,14 @@ import (
 	"text/template"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/flamescope/stack"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/codesearch"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
 )
 
 type config struct {
 	collect   string
-	searchAPI stack.Search
+	searchAPI codesearch.Search
 }
 
 func getMeta(url string) (*models.Snapshot, error) {
@@ -105,7 +106,7 @@ func (cfg *config) report(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func serve(at, collect string, api stack.Search) {
+func serve(at, collect string, api codesearch.Search) {
 	cfg := config{collect, api}
 	http.HandleFunc("/stacks/", cfg.analyze)
 	http.HandleFunc("/reports/", cfg.report)
@@ -140,7 +141,7 @@ func main() {
 		}
 	}
 	if !*cli {
-		serve(*at, *collect, stack.Search{urltempl, datatempl})
+		serve(*at, *collect, codesearch.Search{urltempl, datatempl})
 	} else {
 		data, err := ioutil.ReadFile(*sfn)
 		if err != nil {
