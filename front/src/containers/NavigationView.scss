@@ -3,28 +3,7 @@
 .wrap {
   height: calc(100vh - #{$title-height});
   background-color: $bg-color-white;
-  width: $navigation-width;
   display: flex;
   flex-flow: column;
 }
 
-.viewList {
-  overflow: auto;
-  flex: 1;
-  margin-top: $base-space * 3;
-}
-
-.controlList {
-}
-
-.viewItem {
-  display: block;
-  text-decoration: none;
-  color: $text-color-normal;
-  margin-bottom: $base-space * 3;
-  padding: $base-space * 3 $base-space * 5;
-  font-size: $font-size-large;
-  &.selected {
-    background-color: $bg-color-list-hover;
-  }
-}

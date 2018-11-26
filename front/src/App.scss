@@ -25,7 +25,51 @@ body {
 }
 
 .title {
+  display: flex;
+  flex-direction: row;
   height: $title-height;
+  background-color: $bg-color-title-bar;
+}
+
+.brand {
+  display: inline-flex;
+  height: $title-height;
+  justify-content: center;
+  align-items: center;
+  color: $text-color-white;
+  padding: 0 $base-space * 2;
+  font-size: $font-size-xlarge;
+  letter-spacing: 0.5px;
+}
+
+.viewItem {
+  display: inline-flex;
+  height: $title-height;
+  justify-content: center;
+  align-items: center;
+  color: $text-color-gray-2;
+  padding: 0 $base-space;
+  font-size: $font-size-large;
+  text-decoration: none;
+  width: $base-space * 15;
+  transition: background-color 0.2s ease-in;
+
+  &:first-of-type {
+    margin-left: $base-space * 3;
+  }
+
+  &.selected {
+    background-color: $bg-color-gray-11;
+  }
+
+  &:hover {
+    background-color: $bg-color-gray-11;
+    color: $text-color-white;
+  }
+}
+
+.config {
+  margin-left: auto;
 }
 
 .content {
