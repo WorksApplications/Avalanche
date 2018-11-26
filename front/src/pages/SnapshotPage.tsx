@@ -1,7 +1,10 @@
 import * as React from "react";
-import RunningPodsView from "../containers/RunningPodsView";
 import SnapshotsView from "../containers/SnapshotsView";
 import styles from "./SnapshotPage.scss";
+
+const RunningPodsView = React.lazy(() =>
+  import(/* webpackChunkName: "pods-view" */ "../containers/RunningPodsView")
+);
 
 export class SnapshotPage extends React.Component {
   private viewRef = React.createRef<any>();
@@ -13,7 +16,9 @@ export class SnapshotPage extends React.Component {
           <SnapshotsView ref={this.viewRef} />
         </div>
         <div className={styles.pods}>
-          <RunningPodsView snapshotCreated={this.onUpdate} />
+          <React.Suspense fallback={<div className={styles.podsViewLoading} />}>
+            <RunningPodsView snapshotCreated={this.onUpdate} />
+          </React.Suspense>
         </div>
       </div>
     );
