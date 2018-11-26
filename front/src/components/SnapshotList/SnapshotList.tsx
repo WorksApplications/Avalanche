@@ -1,9 +1,13 @@
 // tslint:disable:max-classes-per-file
 import * as React from "react";
-import HeatLineChart, { HeatLineChartProperty } from "../HeatLineChart";
+import { HeatLineChartProperty } from "../HeatLineChart";
 import Link from "../Link";
 import Spinner from "../Spinner";
 import styles from "./SnapshotList.scss";
+
+const HeatLineChart = React.lazy(() =>
+  import(/* webpackChunkName: "heat-line-chart" */ "../HeatLineChart")
+);
 
 type HeatMapData = HeatLineChartProperty & {
   numColumns: number;
@@ -30,6 +34,12 @@ const initialItemState = {
 };
 
 type ItemState = Readonly<typeof initialItemState>;
+
+const spinner = (
+  <div className={styles.spinner}>
+    <Spinner />
+  </div>
+);
 
 // This child component is tightly coupled as a table row element
 export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
@@ -91,21 +101,19 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
       case "empty":
         return <div />;
       case "loading":
-        return (
-          <div className={styles.spinner}>
-            <Spinner />
-          </div>
-        );
+        return spinner;
       case "loaded":
         if (this.props.heatMap) {
           return (
-            <div className={styles.heatMap}>
-              <HeatLineChart
-                {...this.props.heatMap}
-                hash={this.props.uuid}
-                onRangeSelect={this.onRangeSelectWrap}
-              />
-            </div>
+            <React.Suspense fallback={spinner}>
+              <div className={styles.heatMap}>
+                <HeatLineChart
+                  {...this.props.heatMap}
+                  hash={this.props.uuid}
+                  onRangeSelect={this.onRangeSelectWrap}
+                />
+              </div>
+            </React.Suspense>
           );
         }
       // fallthrough if heatMap === null && status === "loaded"
