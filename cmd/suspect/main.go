@@ -62,7 +62,7 @@ func (cfg *config) analyze(w http.ResponseWriter, r *http.Request) {
 	log.Print(r.Proto, "(", r.Method, "): ", r.URL)
 	if r.Method == "GET" {
 		uuid := r.URL.Path
-		meta, err := getMeta(cfg.collect + "/snapshots/" + strings.TrimPrefix(uuid, "/stacks/")
+		meta, err := getMeta(cfg.collect + "/snapshots/" + strings.TrimPrefix(uuid, "/stacks/"))
 		if err != nil {
 			http.Error(w, fmt.Sprintf("no such snapshot record: %+v", err), 404)
 			return
@@ -85,7 +85,7 @@ func (cfg *config) report(w http.ResponseWriter, r *http.Request) {
 	log.Print(r.Proto, "(", r.Method, "): ", r.URL)
 	if r.Method == "GET" {
 		uuid := r.URL.Path
-		meta, err := getMeta(cfg.collect + "/snapshots/" + strings.TrimPrefix(uuid, "/stacks/")
+		meta, err := getMeta(cfg.collect + "/snapshots/" + strings.TrimPrefix(uuid, "/stacks/"))
 		if err != nil {
 			http.Error(w, fmt.Sprintf("no such snapshot record: %+v", err), 404)
 			return
