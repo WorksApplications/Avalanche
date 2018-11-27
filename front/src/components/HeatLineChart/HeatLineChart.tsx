@@ -13,8 +13,8 @@ interface IProperty {
   onRangeSelect(start: number, end: number): void;
 }
 
-interface IMarkerTooltipState {
-  sparkValue: number;
+interface ISpikeTooltipState {
+  spikeValue: number;
   positionX: number;
   exists: boolean;
 }
@@ -25,7 +25,7 @@ interface IRangeSelectionTooltipState {
 }
 
 const initialState = {
-  makerTooltip: null as IMarkerTooltipState | null,
+  spikeTooltip: null as ISpikeTooltipState | null,
   rangeSelectionTooltip: null as IRangeSelectionTooltipState | null,
   isSelecting: false,
   rangeStart: null as number | null, // null if isSelecting===false
@@ -40,15 +40,15 @@ export type Property = Pick<
   Exclude<keyof IProperty, "hash" | "onRangeSelect">
 >;
 
-const graphSvgPadding = 0.1;
-const markSize = 0.1;
-const svgHeight = 1;
-const svgWidth = 10;
-const strokeWidth = 0.008;
+const paddingInSvg = 0.1;
+const spikeSizeInSvg = 0.1;
+const heightInSvg = 1;
+const widthInSvg = 12;
+const strokeWidthInSvg = 0.008;
 
 // like V sign (h:w=2:1)
-const sparkDrawString = `M ${markSize / 4} 0 L ${markSize /
-  2} ${markSize}  ${(markSize * 3) / 4} 0`;
+const spikeDrawString = `M ${spikeSizeInSvg / 4} 0 L ${spikeSizeInSvg /
+  2} ${spikeSizeInSvg}  ${(spikeSizeInSvg * 3) / 4} 0`;
 
 /**
  * Reduce points
@@ -63,7 +63,7 @@ function reduceMaxPointsToShow(
 
   const ret = [points[0]];
   for (let i = 1; i < points.length; i++) {
-    if (points[i].x - ret[ret.length - 1].x > markSize / 5) {
+    if (points[i].x - ret[ret.length - 1].x > spikeSizeInSvg / 5) {
       ret.push(points[i]);
     }
   }
@@ -72,8 +72,7 @@ function reduceMaxPointsToShow(
 
 function normalizeClampInSvg(x: number, width: number) {
   const val =
-    ((x / width) * svgWidth - graphSvgPadding) /
-    (svgWidth - graphSvgPadding * 2);
+    ((x / width) * widthInSvg - paddingInSvg) / (widthInSvg - paddingInSvg * 2);
   return val < 0 ? 0 : 1 < val ? 1 : val;
 }
 
@@ -91,20 +90,19 @@ class HeatLineChart extends React.Component<IProperty, State> {
           // x in SVG coordinate
           const x =
             normalizedX *
-              svgWidth *
-              ((svgWidth - graphSvgPadding * 2) / svgWidth) +
-            graphSvgPadding;
+              widthInSvg *
+              ((widthInSvg - paddingInSvg * 2) / widthInSvg) +
+            paddingInSvg;
           const normalizedY = v / maxValueOfData;
           // y in SVG coordinate
           const y =
-            (1 - normalizedY) * (svgHeight - graphSvgPadding * 2) +
-            graphSvgPadding;
+            (1 - normalizedY) * (heightInSvg - paddingInSvg * 2) + paddingInSvg;
           return `${x},${y}`;
         })
         .join(" ")
   );
 
-  private calcSparks = memoizeOne(
+  private calcSpikes = memoizeOne(
     (maxValues: number[], maxValueOfData: number) =>
       reduceMaxPointsToShow(
         maxValues
@@ -113,9 +111,9 @@ class HeatLineChart extends React.Component<IProperty, State> {
             // x in SVG coordinate
             const x =
               normalizedX *
-                svgWidth *
-                ((svgWidth - graphSvgPadding * 2) / svgWidth) +
-              graphSvgPadding;
+                widthInSvg *
+                ((widthInSvg - paddingInSvg * 2) / widthInSvg) +
+              paddingInSvg;
             return { x, y: v / maxValueOfData, i };
           })
           .filter(v => v.y > 0.9)
@@ -138,7 +136,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
         onMouseLeave={this.onMouseLeave}
       >
         <svg
-          viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+          viewBox={`0 0 ${widthInSvg} ${heightInSvg}`}
           ref={this.svgRef}
           onMouseDown={this.onGraphMouseDown}
           onMouseUp={this.onGraphMouseUp}
@@ -148,13 +146,13 @@ class HeatLineChart extends React.Component<IProperty, State> {
         >
           <defs>
             {this.renderChartDef()}
-            {this.renderSparkDef()}
+            {this.renderSpikeDef()}
           </defs>
           {this.renderChartBody()}
           {this.renderSelectingRange()}
-          {this.renderSparkBodies()}
+          {this.renderSpikeBodies()}
         </svg>
-        {this.renderMarkerTooltip()}
+        {this.renderSpikeTooltip()}
         {this.renderSelectionRangeTooltip()}
         {this.renderRangeLengthTooltip()}
       </div>
@@ -180,32 +178,36 @@ class HeatLineChart extends React.Component<IProperty, State> {
           id={`mean-line-${hash}`}
           x="0"
           y="0"
-          width={svgWidth}
-          height={svgHeight}
+          width={widthInSvg}
+          height={heightInSvg}
         >
           <polyline
             strokeLinecap="round"
             points={meanPointsString}
             fill="transparent"
             stroke="#e6f2fd"
-            strokeWidth={strokeWidth}
+            strokeWidth={strokeWidthInSvg}
           />
         </mask>
       </>
     );
   }
 
-  private renderSparkDef() {
+  private renderSpikeDef() {
     const { hash } = this.props;
 
     return (
-      <g id={`spark-${hash}`}>
-        <rect fill="transparent" width={markSize} height={markSize} />
+      <g id={`spike-${hash}`}>
+        <rect
+          fill="transparent"
+          width={spikeSizeInSvg}
+          height={spikeSizeInSvg}
+        />
         <path
-          d={sparkDrawString}
+          d={spikeDrawString}
           fill="none"
           stroke="#e5195d" /* hsl(340, 80, 50) */
-          strokeWidth={strokeWidth * 0.8}
+          strokeWidth={strokeWidthInSvg * 0.8}
         />
       </g>
     );
@@ -217,8 +219,8 @@ class HeatLineChart extends React.Component<IProperty, State> {
     return (
       <g>
         <rect
-          width={svgWidth}
-          height={svgHeight}
+          width={widthInSvg}
+          height={heightInSvg}
           stroke="none"
           fill={`url(#mean-color-${hash})`}
           mask={`url(#mean-line-${hash})`}
@@ -237,18 +239,18 @@ class HeatLineChart extends React.Component<IProperty, State> {
       // in SVG coordinate
       const beginX =
         this.state.rangeSelectionTooltip.normalizedPositionX *
-          (svgWidth - graphSvgPadding * 2) +
-        graphSvgPadding;
+          (widthInSvg - paddingInSvg * 2) +
+        paddingInSvg;
 
       // vertical line during hover
       return (
         <g>
           {this.state.rangeSelectionTooltip.exists && (
             <path
-              d={`M ${beginX} 0 V ${svgHeight}`}
+              d={`M ${beginX} 0 V ${heightInSvg}`}
               fill="none"
               stroke="#bfbfbf" /* hsl(0, 0, 75) */
-              strokeWidth={strokeWidth * 0.8}
+              strokeWidth={strokeWidthInSvg * 0.8}
             />
           )}
         </g>
@@ -265,9 +267,9 @@ class HeatLineChart extends React.Component<IProperty, State> {
       normalizedRangeEnd = this.state.rangeStart;
     }
     const point1 =
-      normalizedRangeStart * (svgWidth - graphSvgPadding * 2) + graphSvgPadding;
+      normalizedRangeStart * (widthInSvg - paddingInSvg * 2) + paddingInSvg;
     const point2 =
-      normalizedRangeEnd * (svgWidth - graphSvgPadding * 2) + graphSvgPadding;
+      normalizedRangeEnd * (widthInSvg - paddingInSvg * 2) + paddingInSvg;
 
     // range in SVG coordinate
     const range = { x: point1, width: point2 - point1 };
@@ -276,10 +278,10 @@ class HeatLineChart extends React.Component<IProperty, State> {
     return (
       <g>
         <rect
-          height={svgHeight}
+          height={heightInSvg}
           fill="#dc1f5f40" /* hsl(340, 75, 50) + a */
           stroke="#b2194c" /* hsl(340, 75, 50) */
-          strokeWidth={strokeWidth * 0.8}
+          strokeWidth={strokeWidthInSvg * 0.8}
           x={range.x}
           width={range.width}
         />
@@ -287,44 +289,45 @@ class HeatLineChart extends React.Component<IProperty, State> {
     );
   }
 
-  private renderSparkBodies() {
+  private renderSpikeBodies() {
     const { maxValues, maxValueOfData, hash } = this.props;
 
-    const sparks = this.calcSparks(maxValues, maxValueOfData);
+    const spikes = this.calcSpikes(maxValues, maxValueOfData);
 
     return (
       <g>
-        {sparks.map(p => (
+        {spikes.map(p => (
           <use
             key={p.x}
-            href={`#spark-${hash}`}
-            x={p.x - markSize / 2}
+            href={`#spike-${hash}`}
+            x={p.x - spikeSizeInSvg / 2}
+            data-xinsvg={p.x}
             data-y={p.y}
-            onMouseMove={this.onMouseMoveOverMarker}
-            onMouseLeave={this.onMouseLeaveFromMarker}
+            onMouseMove={this.onMouseMoveOverSpike}
+            onMouseLeave={this.onMouseLeaveFromSpike}
           />
         ))}
       </g>
     );
   }
 
-  private renderMarkerTooltip() {
-    if (!this.state.makerTooltip) {
+  private renderSpikeTooltip() {
+    if (!this.state.spikeTooltip) {
       return;
     }
 
     const message = `spike: ${(
-      this.state.makerTooltip.sparkValue * 100
+      this.state.spikeTooltip.spikeValue * 100
     ).toFixed(0)}% of max`;
 
     return (
       <div
         className={[
-          styles.markerTooltip,
-          this.state.makerTooltip.exists ? styles.open : styles.close
+          styles.spikeTooltip,
+          this.state.spikeTooltip.exists ? styles.open : styles.close
         ].join(" ")}
         style={{
-          left: `${this.state.makerTooltip.positionX}px`
+          left: `${this.state.spikeTooltip.positionX}px`
         }}
       >
         <span className={styles.tooltipMessage}>{message}</span>
@@ -337,18 +340,21 @@ class HeatLineChart extends React.Component<IProperty, State> {
       return false;
     }
 
-    const svgRect = this.svgRef.current.getBoundingClientRect();
+    const svgWidth = this.svgRef.current.clientWidth; // no border for SVG element
     // left in SVG coordinate
     const tooltipLeft =
       (this.state.rangeSelectionTooltip.normalizedPositionX *
-        svgRect.width *
-        (svgWidth - graphSvgPadding * 2)) /
-        svgWidth +
-      (svgRect.width * graphSvgPadding) / svgWidth;
+        svgWidth *
+        (widthInSvg - paddingInSvg * 2)) /
+        widthInSvg +
+      (svgWidth * paddingInSvg) / widthInSvg;
     const style: React.CSSProperties =
-      tooltipLeft < svgRect.width - 100
+      tooltipLeft < svgWidth - 100
         ? { left: `${tooltipLeft}px`, textAlign: "left" }
-        : { right: `${svgRect.width - tooltipLeft}px`, textAlign: "right" };
+        : {
+            right: `${svgWidth - tooltipLeft}px`,
+            textAlign: "right"
+          };
 
     const targetTime =
       this.state.rangeSelectionTooltip.normalizedPositionX *
@@ -401,19 +407,19 @@ class HeatLineChart extends React.Component<IProperty, State> {
     }
 
     const point1 =
-      normalizedRangeStart * (svgWidth - graphSvgPadding * 2) + graphSvgPadding;
+      normalizedRangeStart * (widthInSvg - paddingInSvg * 2) + paddingInSvg;
     const point2 =
-      normalizedRangeEnd * (svgWidth - graphSvgPadding * 2) + graphSvgPadding;
+      normalizedRangeEnd * (widthInSvg - paddingInSvg * 2) + paddingInSvg;
 
     // range in SVG coordinate
     const rangeInSvg = { x: point1, width: point2 - point1 };
 
-    const svgRect = this.svgRef.current.getBoundingClientRect();
+    const svgWidth = this.svgRef.current.clientWidth; // no border for SVG element
 
     // range in HTML coordinate (local)
     const rangeInHtmlLocal = {
-      x: (rangeInSvg.x / svgWidth) * svgRect.width,
-      width: (rangeInSvg.width / svgWidth) * svgRect.width
+      x: (rangeInSvg.x / widthInSvg) * svgWidth,
+      width: (rangeInSvg.width / widthInSvg) * svgWidth
     };
     const elapsedTime =
       (normalizedRangeEnd - normalizedRangeStart) * this.props.numColumns;
@@ -432,28 +438,41 @@ class HeatLineChart extends React.Component<IProperty, State> {
     );
   };
 
-  private onMouseMoveOverMarker = (e: React.MouseEvent<SVGUseElement>) => {
+  private onMouseMoveOverSpike = (e: React.MouseEvent<SVGUseElement>) => {
+    const dataXInSvg = e.currentTarget.dataset.xinsvg;
     const dataY = e.currentTarget.dataset.y;
-    if (dataY) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const wrapRect = this.wrapRef.current!.getBoundingClientRect();
+    if (dataXInSvg && dataY) {
+      const xInSvg = parseFloat(dataXInSvg);
+      const svgWidth = this.svgRef.current!.clientWidth;
       const y = parseFloat(dataY);
 
       // x in HTML coordinate (local)
-      const positionX = rect.left - wrapRect.left + rect.width / 2 - 60; // align middle
-      this.setState({
-        makerTooltip: {
-          exists: true,
-          sparkValue: y,
-          positionX
-        }
-      });
+      // message container width is 120px, so aligns middle
+      const positionX = (xInSvg / widthInSvg) * svgWidth - 60;
+
+      // to avoid unnecessary update
+      if (
+        !(
+          this.state.spikeTooltip &&
+          this.state.spikeTooltip.exists &&
+          this.state.spikeTooltip.spikeValue === y &&
+          this.state.spikeTooltip.positionX === positionX
+        )
+      ) {
+        this.setState({
+          spikeTooltip: {
+            exists: true,
+            spikeValue: y,
+            positionX
+          }
+        });
+      }
     }
   };
 
-  private onMouseLeaveFromMarker = () => {
+  private onMouseLeaveFromSpike = () => {
     this.setState((s: State) => ({
-      makerTooltip: { ...s.makerTooltip!, exists: false }
+      spikeTooltip: { ...s.spikeTooltip!, exists: false }
     }));
   };
 
@@ -474,12 +493,10 @@ class HeatLineChart extends React.Component<IProperty, State> {
       });
     } else if (!this.state.isSelecting) {
       e.stopPropagation();
-      const svgRect = this.svgRef.current!.getBoundingClientRect();
-      // x in HTML coordinate (local)
-      const relativeX = e.clientX - svgRect.left;
 
+      const svgWidth = this.svgRef.current!.clientWidth;
       // start selecting range
-      const rangeStart = normalizeClampInSvg(relativeX, svgRect.width);
+      const rangeStart = normalizeClampInSvg(e.nativeEvent.offsetX, svgWidth);
       this.setState({
         isSelecting: true,
         lastMouseDown: Date.now(),
@@ -499,11 +516,8 @@ class HeatLineChart extends React.Component<IProperty, State> {
       this.state.rangeStart !== this.state.rangeEnd &&
       this.state.lastMouseDown + 250 < Date.now() // throttling
     ) {
-      const svgRect = this.svgRef.current!.getBoundingClientRect();
-      const rangeEnd = normalizeClampInSvg(
-        e.clientX - svgRect.left,
-        svgRect.width
-      );
+      const svgWidth = this.svgRef.current!.clientWidth;
+      const rangeEnd = normalizeClampInSvg(e.nativeEvent.offsetX, svgWidth);
 
       // finish selecting range
       let startPoint;
@@ -530,28 +544,46 @@ class HeatLineChart extends React.Component<IProperty, State> {
   private onGraphMove = (e: React.MouseEvent<SVGElement>) => {
     if (this.state.isSelecting) {
       e.stopPropagation();
-      const svgRect = this.svgRef.current!.getBoundingClientRect();
-      const relativeX = e.clientX - svgRect.left;
 
-      const rangeEnd = normalizeClampInSvg(relativeX, svgRect.width);
-      this.setState({
-        rangeEnd, // put point
-        rangeSelectionTooltip: {
-          exists: true,
-          normalizedPositionX: rangeEnd
-        }
-      });
+      const svgWidth = this.svgRef.current!.clientWidth;
+      const rangeEnd = normalizeClampInSvg(e.nativeEvent.offsetX, svgWidth);
+
+      // to avoid unnecessary update
+      if (
+        !(
+          this.state.rangeSelectionTooltip &&
+          this.state.rangeSelectionTooltip.exists &&
+          this.state.rangeSelectionTooltip.normalizedPositionX === rangeEnd &&
+          this.state.rangeEnd === rangeEnd
+        )
+      ) {
+        this.setState({
+          rangeEnd, // put point
+          rangeSelectionTooltip: {
+            exists: true,
+            normalizedPositionX: rangeEnd
+          }
+        });
+      }
     } else {
-      const svgRect = this.svgRef.current!.getBoundingClientRect();
-      const relativeX = e.clientX - svgRect.left;
+      const svgWidth = this.svgRef.current!.clientWidth;
+      const rangeEnd = normalizeClampInSvg(e.nativeEvent.offsetX, svgWidth);
 
-      const rangeEnd = normalizeClampInSvg(relativeX, svgRect.width);
-      this.setState({
-        rangeSelectionTooltip: {
-          exists: true,
-          normalizedPositionX: rangeEnd
-        }
-      }); // does not put point
+      // to avoid unnecessary update
+      if (
+        !(
+          this.state.rangeSelectionTooltip &&
+          this.state.rangeSelectionTooltip.exists &&
+          this.state.rangeSelectionTooltip.normalizedPositionX === rangeEnd
+        )
+      ) {
+        this.setState({
+          rangeSelectionTooltip: {
+            exists: true,
+            normalizedPositionX: rangeEnd
+          }
+        }); // does not put point
+      }
     }
   };
 
@@ -567,7 +599,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
 
   private onClickOutside = (e: Event) => {
     if (e.target instanceof Node) {
-      if (!this.wrapRef.current!.contains(e.target)) {
+      if (!this.wrapRef.current!.contains(e.target) && this.state.isSelecting) {
         this.setState({
           isSelecting: false,
           rangeStart: null,

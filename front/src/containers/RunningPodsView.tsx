@@ -104,29 +104,7 @@ export class RunningPodsView extends React.Component<Props, State> {
           link: s.link
         })),
         onSaveButtonClick:
-          p.app && p.env && p.name
-            ? () => {
-                this.props
-                  .postSnapshotOperation({
-                    appId: p.app!,
-                    environment: p.env!,
-                    podId: p.name!
-                  })
-                  .then(({ newSnapshot }) => {
-                    this.props.toastr(
-                      `New snapshot for "${newSnapshot.name} is created.`,
-                      "success"
-                    );
-                    this.props.snapshotCreated();
-                  })
-                  .catch(() => {
-                    this.props.toastr(
-                      `Failed to make a new snapshot for "${p.name!}.`,
-                      "error"
-                    );
-                  });
-              }
-            : undefined
+          p.app && p.env && p.name ? this.onSaveButtonClickWrap : undefined
       }));
 
     const podsOfApp = this.props.applicationName
@@ -176,6 +154,24 @@ export class RunningPodsView extends React.Component<Props, State> {
 
   private onFilterChange = (previous: string, current: string) => {
     this.setState({ filteringValue: current });
+  };
+
+  private onSaveButtonClickWrap = (app: string, env: string, pod: string) => {
+    this.props
+      .postSnapshotOperation({ appId: app, environment: env, podId: pod })
+      .then(({ newSnapshot }) => {
+        this.props.toastr(
+          `New snapshot for "${newSnapshot.name} is created.`,
+          "success"
+        );
+        this.props.snapshotCreated();
+      })
+      .catch(() => {
+        this.props.toastr(
+          `Failed to make a new snapshot for "${pod}.`,
+          "error"
+        );
+      });
   };
 }
 

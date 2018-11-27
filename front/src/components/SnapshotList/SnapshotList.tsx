@@ -1,9 +1,13 @@
 // tslint:disable:max-classes-per-file
 import * as React from "react";
-import HeatLineChart, { HeatLineChartProperty } from "../HeatLineChart";
+import { HeatLineChartProperty } from "../HeatLineChart";
 import Link from "../Link";
 import Spinner from "../Spinner";
 import styles from "./SnapshotList.scss";
+
+const HeatLineChart = React.lazy(() =>
+  import(/* webpackChunkName: "heat-line-chart" */ "../HeatLineChart")
+);
 
 type HeatMapData = HeatLineChartProperty & {
   numColumns: number;
@@ -21,8 +25,8 @@ export interface IItemProperty {
   heatMapStatus: "empty" | "loading" | "loaded" | "failed";
   openByDefault?: boolean;
 
-  getHeatMap(): void;
-  onRangeSelect(start: number, end: number): void;
+  getHeatMap(snapshotId: string, heatMapId: string): void;
+  onRangeSelect(heatMapId: string, start: number, end: number): void;
 }
 
 const initialItemState = {
@@ -30,6 +34,12 @@ const initialItemState = {
 };
 
 type ItemState = Readonly<typeof initialItemState>;
+
+const spinner = (
+  <div className={styles.spinner}>
+    <Spinner />
+  </div>
+);
 
 // This child component is tightly coupled as a table row element
 export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
@@ -51,7 +61,7 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
 
   public componentDidMount() {
     if (this.state.isGraphOpen && this.props.heatMapStatus === "empty") {
-      this.props.getHeatMap();
+      this.props.getHeatMap(this.props.uuid, this.props.heatMapId);
     }
   }
 
@@ -91,21 +101,19 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
       case "empty":
         return <div />;
       case "loading":
-        return (
-          <div className={styles.spinner}>
-            <Spinner />
-          </div>
-        );
+        return spinner;
       case "loaded":
         if (this.props.heatMap) {
           return (
-            <div className={styles.heatMap}>
-              <HeatLineChart
-                {...this.props.heatMap}
-                hash={this.props.uuid}
-                onRangeSelect={this.props.onRangeSelect}
-              />
-            </div>
+            <React.Suspense fallback={spinner}>
+              <div className={styles.heatMap}>
+                <HeatLineChart
+                  {...this.props.heatMap}
+                  hash={this.props.uuid}
+                  onRangeSelect={this.onRangeSelectWrap}
+                />
+              </div>
+            </React.Suspense>
           );
         }
       // fallthrough if heatMap === null && status === "loaded"
@@ -126,9 +134,13 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
       !this.props.heatMap &&
       willGraphOpen
     ) {
-      this.props.getHeatMap();
+      this.props.getHeatMap(this.props.uuid, this.props.heatMapId);
     }
     this.setState({ isGraphOpen: willGraphOpen });
+  };
+
+  private onRangeSelectWrap = (start: number, end: number) => {
+    this.props.onRangeSelect(this.props.heatMapId, start, end);
   };
 }
 
@@ -154,12 +166,12 @@ export class SnapshotList extends React.Component<IProperty> {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>UUID</th>
-              <th>Pod Name</th>
-              <th>Environment</th>
-              <th>Created at</th>
-              <th>Link</th>
-              <th />
+              <th className={styles.uuidHeader}>UUID</th>
+              <th className={styles.podNameHeader}>Pod Name</th>
+              <th className={styles.environmentHeader}>Environment</th>
+              <th className={styles.createdAtHeader}>Created at</th>
+              <th className={styles.linkHeader}>Link</th>
+              <th className={styles.expanderHeader} />
             </tr>
           </thead>
           {this.props.rows.map((r, i) => (

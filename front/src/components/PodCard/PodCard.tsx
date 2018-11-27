@@ -11,7 +11,7 @@ export interface IProperty {
   isAlive: boolean;
   isSaving?: boolean;
 
-  onSaveButtonClick?(): void;
+  onSaveButtonClick?(app: string, env: string, pod: string): void;
 }
 
 const initialState = { isOpen: false };
@@ -144,7 +144,11 @@ export class PodCard extends React.Component<IProperty, State> {
   private onSave = (e: React.MouseEvent<HTMLSpanElement>) => {
     e.stopPropagation();
     if (this.props.onSaveButtonClick) {
-      this.props.onSaveButtonClick();
+      this.props.onSaveButtonClick(
+        this.props.app,
+        this.props.environment,
+        this.props.name
+      );
     }
   };
 

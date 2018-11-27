@@ -6,6 +6,12 @@ import { Provider } from "react-redux";
 import App from "./App";
 import store, { history } from "./store/index";
 
+if (process.env.NODE_ENV !== "production") {
+  // tslint:disable-next-line
+  const { whyDidYouUpdate } = require("why-did-you-update");
+  whyDidYouUpdate(React);
+}
+
 ReactModal.setAppElement("#root");
 
 render(

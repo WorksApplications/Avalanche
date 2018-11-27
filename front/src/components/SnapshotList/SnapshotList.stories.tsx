@@ -8,7 +8,7 @@ import { HeatMapState } from "../../store";
 import SnapshotList from "./SnapshotList";
 
 const commonWrapStyle: React.CSSProperties = {
-  width: "1200px",
+  width: "1400px",
   padding: "8px",
   backgroundColor: "#e3e6e8"
 };

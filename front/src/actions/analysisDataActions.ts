@@ -2,19 +2,20 @@ import actionCreatorFactory from "typescript-fsa";
 import { asyncFactory } from "typescript-fsa-redux-thunk";
 import heatMapClient, { IHeatMap } from "../clients/heatMapClient";
 import { COLLECT_API_BASE } from "../constants";
-import * as collect from "../generated/collect/api";
+import {
+  DefaultApiFactory as collectApiFactory,
+  Environment,
+  Pod,
+  Snapshot
+} from "../generated/collect/api";
 import { IEnvironmentInfo, IPodInfo, ISnapshotInfo } from "../store";
 
 const actionCreator = actionCreatorFactory();
 const asyncActionCreator = asyncFactory(actionCreator);
 
-const collectClient = collect.DefaultApiFactory(
-  {},
-  undefined,
-  COLLECT_API_BASE
-);
+const collectClient = collectApiFactory({}, undefined, COLLECT_API_BASE);
 
-function environmentInfoConvert(env: collect.Environment): IEnvironmentInfo {
+function environmentInfoConvert(env: Environment): IEnvironmentInfo {
   return {
     id: env.id,
     name: env.name,
@@ -23,7 +24,7 @@ function environmentInfoConvert(env: collect.Environment): IEnvironmentInfo {
   };
 }
 
-function podInfoConvert(pod: collect.Pod): IPodInfo {
+function podInfoConvert(pod: Pod): IPodInfo {
   const created = new Date(pod.createdAt ? pod.createdAt : 0);
   return {
     id: pod.id,
@@ -36,15 +37,19 @@ function podInfoConvert(pod: collect.Pod): IPodInfo {
   };
 }
 
-function snapshotInfoConvert(snapshot: collect.Snapshot): ISnapshotInfo {
+function snapshotInfoConvert(snapshot: Snapshot): ISnapshotInfo {
   const created = new Date(snapshot.createdAt ? snapshot.createdAt : 0);
+  const tokens = snapshot.flamescopeLink!.split("/");
+  const heatMapId = tokens[tokens.length - 1];
+
   return {
     uuid: snapshot.uuid,
     name: undefined,
     pod: snapshot.pod,
     environment: snapshot.environment,
     createdAt: created,
-    link: snapshot.flamescopeLink
+    link: snapshot.flamescopeLink!,
+    heatMapId
   };
 }
 
@@ -60,19 +65,17 @@ export const getEnvironmentsOfAppOperation = asyncActionCreator<
   { app: string },
   { envs: IEnvironmentInfo[] }
 >("GET_ENVS_OF_APP", ({ app }) =>
-  collectClient
-    .getEnvironments(app)
-    .then((envResults: collect.Environment[]) => {
-      const envs = envResults.map(env => environmentInfoConvert(env));
-      return { envs };
-    })
+  collectClient.getEnvironments(app).then((envResults: Environment[]) => {
+    const envs = envResults.map(env => environmentInfoConvert(env));
+    return { envs };
+  })
 );
 
 export const getRunningPodsOperation = asyncActionCreator<
   {},
   { pods: IPodInfo[] }
 >("GET_RUNNING_PODS", () =>
-  collectClient.listAvailablePods().then((podResults: collect.Pod[]) => {
+  collectClient.listAvailablePods().then((podResults: Pod[]) => {
     const pods = podResults.map(pod => podInfoConvert(pod));
     return { pods };
   })
@@ -92,7 +95,7 @@ export const postSnapshotOperation = asyncActionCreator<
         "Content-Type": "application/json"
       } // This is due to "typescript-fetch"
     })
-    .then((snapshot: collect.Snapshot) => {
+    .then((snapshot: Snapshot) => {
       const newSnapshot = snapshotInfoConvert(snapshot);
       return { newSnapshot };
     })
@@ -113,7 +116,6 @@ export const getHeatMapOperation = asyncActionCreator<
   { heatMap: IHeatMap }
 >("GET_HEAT_MAP", ({ heatMapId }) =>
   heatMapClient(heatMapId).then(result => {
-    const heatMap = result;
-    return { heatMap };
+    return { heatMap: result };
   })
 );

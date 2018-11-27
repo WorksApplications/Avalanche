@@ -5,7 +5,7 @@
 }
 
 // transition: translate(-50%) caused blurry text
-.markerTooltip {
+.spikeTooltip {
   display: flex;
   justify-content: center;
   position: absolute;
@@ -61,4 +61,5 @@
   border-radius: $border-radius;
   padding: $base-space / 2;
   white-space: nowrap;
+  line-height: $base-space * 1.75;
 }

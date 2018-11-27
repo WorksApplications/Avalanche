@@ -6,7 +6,7 @@ import { storiesOf } from "@storybook/react";
 import HeatLineChart from "./HeatLineChart";
 
 const commonWrapStyle: React.CSSProperties = {
-  width: "1200px",
+  width: "1400px",
   padding: "8px",
   backgroundColor: "white"
 };
@@ -21,8 +21,7 @@ const sawData = Array.from(new Array(N + 1), (v, i) => i % 50);
 const logisticMapPow256Raw = (() => {
   const ret = Array.from(new Array(N + 1)).map((v, i) => i / N);
   const a = 4;
-  const x0 = 0.1;
-  ret[0] = x0;
+  ret[0] = 0.1; // x_0
   for (let i = 1; i < ret.length; i++) {
     ret[i] = a * ret[i - 1] * (1 - ret[i - 1]);
   }

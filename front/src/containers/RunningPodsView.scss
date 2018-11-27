@@ -23,6 +23,7 @@
   font-weight: 700;
   font-size: $font-size-large;
   width: calc(#{$pods-view-width} - #{$base-space} * 2);
+  line-height: $base-space * 3; // prevent layout flash after fonts are loaded
 }
 
 .cardList {
