@@ -1,20 +1,19 @@
 import actionCreatorFactory from "typescript-fsa";
 import { asyncFactory } from "typescript-fsa-redux-thunk";
 import { COLLECT_API_BASE } from "../constants";
-import * as collect from "../generated/collect/api";
+import {
+  DefaultApiFactory as collectApiFactory,
+  EnvironmentConfig
+} from "../generated/collect/api";
 import { IEnvironmentConfig } from "../store";
 
 const actionCreator = actionCreatorFactory();
 const asyncActionCreator = asyncFactory(actionCreator);
 
-const collectClient = collect.DefaultApiFactory(
-  {},
-  undefined,
-  COLLECT_API_BASE
-);
+const collectClient = collectApiFactory({}, undefined, COLLECT_API_BASE);
 
 function environmentConfigConvert(
-  config: collect.EnvironmentConfig
+  config: EnvironmentConfig
 ): IEnvironmentConfig {
   return {
     name: config.name,
@@ -33,7 +32,7 @@ export const getEnvironmentConfigsOperation = asyncActionCreator<
 >("GET_ENVIRONMENT_CONFIGS", () =>
   collectClient
     .listEnvironmentConfig()
-    .then((configResults: collect.EnvironmentConfig[]) => {
+    .then((configResults: EnvironmentConfig[]) => {
       const configs = configResults.map(config =>
         environmentConfigConvert(config)
       );
@@ -67,7 +66,7 @@ export const postEnvironmentConfigOperation = asyncActionCreator<
           } // This is due to "typescript-fetch")
         }
       )
-      .then((configResult: collect.EnvironmentConfig) => {
+      .then((configResult: EnvironmentConfig) => {
         const config = environmentConfigConvert(configResult);
         return { config };
       })
@@ -98,7 +97,7 @@ export const addEnvironmentConfigOperation = asyncActionCreator<
           } // This is due to "typescript-fetch")
         }
       )
-      .then((newConfig: collect.EnvironmentConfig) => {
+      .then((newConfig: EnvironmentConfig) => {
         const config = environmentConfigConvert(newConfig);
         return { config };
       })
