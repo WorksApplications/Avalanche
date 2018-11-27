@@ -106,8 +106,6 @@ func assignCode(name, label string, searchAPI codesearch.Search) *codesearch.Res
 	if res == nil {
 		res, _ = codesearch.Search{Type: codesearch.Undefined}.Run(t)
 		return res
-	} else if searchAPI.Type != codesearch.Undefined {
-		log.Print(res)
 	}
 	return res
 }

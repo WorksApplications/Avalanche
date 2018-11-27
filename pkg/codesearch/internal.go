@@ -53,7 +53,6 @@ func (i *internalResult) toResult() *Result {
 	if len(i.Results) == 0 {
 		return nil
 	}
-	log.Print(i.Results)
 
 	c := make([]Code, 1)
 	c[0].Snip = i.Results[p].Snippet.Code
