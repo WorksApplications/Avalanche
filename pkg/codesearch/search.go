@@ -4,12 +4,6 @@ import (
 	"text/template"
 )
 
-type Code struct {
-	Snip      string `json:"snippet"`
-	Link      string `json:"link"`
-	Highlight bool   `json:"highlight"`
-}
-
 type EngineType int
 
 const (
@@ -24,6 +18,12 @@ type Search struct {
 	Url  *template.Template
 	Post *template.Template
 	Type EngineType
+}
+
+type Code struct {
+	Snip      string `json:"snippet"`
+	Link      string `json:"link"`
+	Highlight bool   `json:"highlight"`
 }
 
 type searchResult struct {
