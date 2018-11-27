@@ -2,6 +2,7 @@ package stack
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"sort"
 	"strings"
@@ -27,6 +28,7 @@ func getDominantNode(frame *Stack, threashold float32, maxDepth int) *Stack {
 		return frame
 	}
 	var choosen *Stack
+	sortByValue(&frame.Children)
 	for i, c := range frame.Children {
 		per := float32(c.Value) / float32(frame.Value)
 		if threashold <= per {
@@ -44,7 +46,7 @@ type byValue []Stack
 
 func (a byValue) Len() int           { return len(a) }
 func (a byValue) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a byValue) Less(i, j int) bool { return a[i].Value < a[j].Value }
+func (a byValue) Less(i, j int) bool { return a[i].Value > a[j].Value }
 
 func sortByValue(frames *[]Stack) {
 	sort.Sort(byValue(*frames))
@@ -61,8 +63,8 @@ func GenReport(input []byte, nLoop int, searchAPI codesearch.Search) ([]byte, er
 		m, _ = newNameVec(tree)
 		tree.process(nil, &m)
 	}
-	tree = getDominantNode(tree, 0.8, 100)
-	report := tree.toReport(searchAPI, float64(tree.Value))
+	tree = getDominantNode(tree, 0.6, 100)
+	report := tree.toReport(searchAPI, float64(tree.Value), 3)
 	b, err := json.Marshal(report)
 	if err != nil {
 		log.Print("[stack] Marshal error: ", err)
@@ -82,9 +84,6 @@ func tokenize(name, label string) []string {
 			opp := len(t) - 1 - i
 			t[i], t[opp] = t[opp], t[i]
 		}
-		if len(t) < 2 {
-			log.Print(t)
-		}
 		return append(strings.Split(t[0], ";::"), t[1:]...)
 	case "user":
 		return strings.Split(name, "_")
@@ -97,24 +96,28 @@ func tokenize(name, label string) []string {
 
 func assignCode(name, label string, searchAPI codesearch.Search) *codesearch.Result {
 	t := tokenize(name, label)
+	t = t[0:1]
 	/* Example of searchAPI */
 	/* http://hound.lan.tohaheavyindustrials.com/search?files=&repos=&i=nope&q={} */
-	res, err := codesearch.Run(searchAPI, t)
+	res, err := searchAPI.Run(t)
 	if err != nil {
-		/* XXX */
+		log.Fatal("search runner has failed", err)
 	}
 	if res == nil {
-		return nil
+		res, _ = codesearch.Search{Type: codesearch.Undefined}.Run(t)
+		return res
+	} else if searchAPI.Type != codesearch.Undefined {
+		log.Print(res)
 	}
 	return res
 }
 
-func (s *Stack) toReport(searchAPI codesearch.Search, rootVal float64) Report {
+func (s *Stack) toReport(searchAPI codesearch.Search, rootVal float64, searchDepth int) Report {
 	v := 0
 	var res *codesearch.Result
 	cs := make([]Report, len(s.Children))
 	for i, c := range s.Children {
-		cs[i] = c.toReport(searchAPI, rootVal)
+		cs[i] = c.toReport(searchAPI, rootVal, searchDepth-1)
 		v += c.Value
 	}
 	api := searchAPI
@@ -128,9 +131,25 @@ func (s *Stack) toReport(searchAPI codesearch.Search, rootVal float64) Report {
 	case "[SafepointBlob]":
 		api.Type = codesearch.Undefined
 	default:
-
+		if searchDepth < 0 {
+			api.Type = codesearch.Undefined
+		}
+	}
+	if (float64(s.Value) / rootVal) < 0.1 {
+		api.Type = codesearch.Undefined
+	}
+	switch s.Label {
+	case "jit":
+		if t := strings.Trim(s.Name, "[]"); fmt.Sprintf("[%s]", t) == s.Name {
+			api.Type = codesearch.Undefined
+		}
+	default:
+		api.Type = codesearch.Undefined
 	}
 	res = assignCode(s.Name, s.Label, api)
+	if res == nil {
+		log.Fatal("res is nil", api, s.Name)
+	}
 	node := Report{
 		Name:     s.Name,
 		RefUrl:   res.Ref,

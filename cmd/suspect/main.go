@@ -161,7 +161,17 @@ func toSearch(apiurl, apipost, apitype *string) codesearch.Search {
 	default:
 		log.Fatal("No API kind", *apitype)
 	}
-	return codesearch.Search{urltempl, datatempl, engine}
+	ch := make(chan []string, 1)
+	go incrementLog(ch)
+	return codesearch.Search{urltempl, datatempl, engine, ch}
+}
+
+func incrementLog(c chan []string) {
+	count := 0
+	for i := range c {
+		count++
+		log.Print(count, i)
+	}
 }
 
 func main() {

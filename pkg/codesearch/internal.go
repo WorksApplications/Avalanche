@@ -14,19 +14,19 @@ import (
 type internal struct{}
 
 type internalResult struct {
-	hits    int `json:"hits"`
-	results []struct {
-		filePaths []struct {
-			project  string `json:"project"`
-			git_link string `json:"git_link"`
+	Hits    int `json:"hits"`
+	Results []struct {
+		FilePaths []struct {
+			Project string `json:"project"`
+			GitLink string `json:"git_link"`
 		} `json:"filePaths"`
-		snippet struct {
-			code string `json:"code"`
-			line int    `json:"lineNumber"`
+		Snippet struct {
+			Code string `json:"code"`
+			Line int    `json:"lineNumber"`
 		} `json:"snippet"`
 	} `json:"results"`
-	took   int    `json:"took"`
-	requrl string `json:"-"`
+	Took   int    `json:"took"`
+	Requrl string `json:"-"`
 }
 
 /*
@@ -50,17 +50,17 @@ func getRelevantResult(i *internalResult) int {
 
 func (i *internalResult) toResult() *Result {
 	p := getRelevantResult(i)
-	if len(i.results) == 0 {
+	if len(i.Results) == 0 {
 		return nil
 	}
-	log.Print(i.results)
+	log.Print(i.Results)
 
 	c := make([]Code, 1)
-	c[0].Snip = i.results[p].snippet.code
+	c[0].Snip = i.Results[p].Snippet.Code
 	r := Result{
 		Code: c,
-		Ref:  i.results[p].filePaths[0].git_link,
-		Line: i.results[p].snippet.line,
+		Ref:  i.Results[p].FilePaths[0].GitLink,
+		Line: i.Results[p].Snippet.Line,
 	}
 	return &r
 }
@@ -84,14 +84,15 @@ func (s internal) search(api Search, token []string) (*Result, error) {
 		return nil, fmt.Errorf("templating error at constructing search query: %+v", err)
 	}
 	resp, err := http.Post(u.String(), "application/x-www-form-urlencoded; charset=UTF-8", &d)
-	if err != nil {
-		return nil, fmt.Errorf("search query failed to post: %+v (%s)", err, u)
+	if err != nil || resp.StatusCode != 200 {
+		return nil, fmt.Errorf("search query failed to post: %+v (%s){%+v}", err, u.String(), resp)
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	err = json.Unmarshal(body, &r)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse search result: %+v (%s)", err, u)
+		return nil, fmt.Errorf("failed to parse search result: %+v (%s)", err, u.String())
 	}
+	log.Print(r)
 	return r.toResult(), nil
 }

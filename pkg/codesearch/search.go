@@ -15,9 +15,10 @@ const (
 )
 
 type Search struct {
-	Url  *template.Template
-	Post *template.Template
-	Type EngineType
+	Url   *template.Template
+	Post  *template.Template
+	Type  EngineType
+	Count chan []string
 }
 
 type Code struct {
@@ -49,13 +50,14 @@ func (s dummy) search(api Search, token []string) (*Result, error) {
 	return &r, nil
 }
 
-func Run(api Search, token []string) (*Result, error) {
+func (api Search) Run(token []string) (*Result, error) {
 	var s searchEngine
 	switch api.Type {
 	default:
 		fallthrough
 	case InternalSearch:
 		s = internal{}
+		api.Count <- token
 	case Github:
 		s = github{}
 	case Undefined:
