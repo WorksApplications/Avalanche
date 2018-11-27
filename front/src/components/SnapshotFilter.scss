@@ -51,6 +51,7 @@
   box-shadow: $layer-shadow-2;
   list-style-type: none;
   margin: 0;
+  z-index: 1;
   padding: $base-space * 0.5 0;
 
   max-height: 60vh;
