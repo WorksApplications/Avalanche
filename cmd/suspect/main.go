@@ -156,6 +156,8 @@ func toSearch(apiurl, apipost, apitype *string) codesearch.Search {
 		engine = codesearch.Gitlab
 	case "internal-use":
 		engine = codesearch.InternalSearch
+	case "dummy":
+		engine = codesearch.Undefined
 	default:
 		log.Fatal("No API kind", *apitype)
 	}

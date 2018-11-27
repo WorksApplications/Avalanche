@@ -2,6 +2,8 @@ package codesearch
 
 import (
 	"bytes"
+	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -23,7 +25,8 @@ type internalResult struct {
 			line int    `json:"lineNumber"`
 		} `json:"snippet"`
 	} `json:"results"`
-	took int `json:"took"`
+	took   int    `json:"took"`
+	requrl string `json:"-"`
 }
 
 /*
@@ -40,14 +43,32 @@ type searchResult struct {
 }
 */
 
-func analyze(res string) *searchResult {
-	return nil
+func getRelevantResult(i *internalResult) int {
+	/* XXX */
+	return 0
 }
 
-func (s internal) search(api Search, token []string) (*searchResult, error) {
+func (i *internalResult) toResult() *Result {
+	p := getRelevantResult(i)
+	if len(i.results) == 0 {
+		return nil
+	}
+	log.Print(i.results)
+
+	c := make([]Code, 1)
+	c[0].Snip = i.results[p].snippet.code
+	r := Result{
+		Code: c,
+		Ref:  i.results[p].filePaths[0].git_link,
+		Line: i.results[p].snippet.line,
+	}
+	return &r
+}
+
+func (s internal) search(api Search, token []string) (*Result, error) {
 	var u bytes.Buffer
 	var d bytes.Buffer
-	var body []byte
+	var r internalResult
 	/* serialize tokens */
 	q := strings.Join(token, " ")
 	if err := api.Url.Execute(&u, q); err != nil {
@@ -56,21 +77,21 @@ func (s internal) search(api Search, token []string) (*searchResult, error) {
 	}
 	if api.Post == nil {
 		// resp, err := http.Get(string(u))
-		log.Fatal("not implemented: search with GET")
-
-	} else {
-		if err := api.Post.Execute(&d, q); err != nil {
-			log.Print(err)
-			return nil, err
-		}
-		/* XXX which content-type would you like? */
-		resp, err := http.Post(u.String(), "application/x-www-form-urlencoded; charset=UTF-8", &d)
-		if err != nil {
-			log.Print(err)
-			return nil, err
-		}
-		defer resp.Body.Close()
-		body, err = ioutil.ReadAll(resp.Body)
+		return nil, fmt.Errorf("not implemented: search with GET")
 	}
-	return analyze(string(body)), nil
+
+	if err := api.Post.Execute(&d, q); err != nil {
+		return nil, fmt.Errorf("templating error at constructing search query: %+v", err)
+	}
+	resp, err := http.Post(u.String(), "application/x-www-form-urlencoded; charset=UTF-8", &d)
+	if err != nil {
+		return nil, fmt.Errorf("search query failed to post: %+v (%s)", err, u)
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	err = json.Unmarshal(body, &r)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse search result: %+v (%s)", err, u)
+	}
+	return r.toResult(), nil
 }

@@ -14,6 +14,7 @@ type Report struct {
 	RefUrl string  `json:"search_url"`
 	Line   int     `json:"line_start_at"`
 	Total  float64 `json:"total_ratio"`
+	Label  string  `json:"label"`
 	Imm    float64 `json:"immidiate_ratio"`
 
 	Code []codesearch.Code `json:"code"`
@@ -60,6 +61,7 @@ func GenReport(input []byte, nLoop int, searchAPI codesearch.Search) ([]byte, er
 		m, _ = newNameVec(tree)
 		tree.process(nil, &m)
 	}
+	tree = getDominantNode(tree, 0.8, 100)
 	report := tree.toReport(searchAPI, float64(tree.Value))
 	b, err := json.Marshal(report)
 	if err != nil {
@@ -75,12 +77,15 @@ func tokenize(name, label string) []string {
 	case "jit":
 		/* "This is non-authentic Java wisdom", a Duke said,
 		 * Assume the last part of the FQDN is the portion with full of information. */
-		t := strings.Split(name, ",")
+		t := strings.Split(name, "/")
 		for i := len(t)/2 - 1; i >= 0; i-- {
 			opp := len(t) - 1 - i
 			t[i], t[opp] = t[opp], t[i]
 		}
-		return append(strings.Split(t[len(t)], ";::"), t[1:]...)
+		if len(t) < 2 {
+			log.Print(t)
+		}
+		return append(strings.Split(t[0], ";::"), t[1:]...)
 	case "user":
 		return strings.Split(name, "_")
 	case "kernel":
@@ -90,7 +95,7 @@ func tokenize(name, label string) []string {
 	}
 }
 
-func assignCode(name, label string, searchAPI codesearch.Search) ([]codesearch.Code, string, int) {
+func assignCode(name, label string, searchAPI codesearch.Search) *codesearch.Result {
 	t := tokenize(name, label)
 	/* Example of searchAPI */
 	/* http://hound.lan.tohaheavyindustrials.com/search?files=&repos=&i=nope&q={} */
@@ -98,22 +103,39 @@ func assignCode(name, label string, searchAPI codesearch.Search) ([]codesearch.C
 	if err != nil {
 		/* XXX */
 	}
-	return res.Code, res.Ref, res.Line
+	if res == nil {
+		return nil
+	}
+	return res
 }
 
 func (s *Stack) toReport(searchAPI codesearch.Search, rootVal float64) Report {
-	c, ref, line := assignCode(s.Name, s.Label, searchAPI)
 	v := 0
+	var res *codesearch.Result
 	cs := make([]Report, len(s.Children))
 	for i, c := range s.Children {
 		cs[i] = c.toReport(searchAPI, rootVal)
 		v += c.Value
 	}
+	api := searchAPI
+	switch s.Name {
+	case "[[unknown]]":
+		fallthrough
+	case "[Interpreter]":
+		fallthrough
+	case "[call_stub]":
+		fallthrough
+	case "[SafepointBlob]":
+		api.Type = codesearch.Undefined
+	default:
+
+	}
+	res = assignCode(s.Name, s.Label, api)
 	node := Report{
 		Name:     s.Name,
-		RefUrl:   ref,
-		Code:     c,
-		Line:     line,
+		RefUrl:   res.Ref,
+		Code:     res.Code,
+		Line:     res.Line,
 		Total:    float64(s.Value) / rootVal,
 		Imm:      float64(v) / rootVal,
 		Children: cs,

@@ -26,7 +26,7 @@ type Code struct {
 	Highlight bool   `json:"highlight"`
 }
 
-type searchResult struct {
+type Result struct {
 	Code []Code
 	Ref  string
 	Line int
@@ -35,10 +35,21 @@ type searchResult struct {
 type searchEngine interface {
 	//    isMatchFeature([]byte) bool
 	//    getCode([]byte) []Code
-	search(Search, []string) (*searchResult, error)
+	search(Search, []string) (*Result, error)
 }
 
-func Run(api Search, token []string) (*searchResult, error) {
+type dummy struct{}
+
+func (s dummy) search(api Search, token []string) (*Result, error) {
+	r := Result{
+		Code: make([]Code, 0),
+		Ref:  "",
+		Line: 0,
+	}
+	return &r, nil
+}
+
+func Run(api Search, token []string) (*Result, error) {
 	var s searchEngine
 	switch api.Type {
 	default:
@@ -47,6 +58,8 @@ func Run(api Search, token []string) (*searchResult, error) {
 		s = internal{}
 	case Github:
 		s = github{}
+	case Undefined:
+		s = dummy{}
 	}
 	return s.search(api, token)
 }
