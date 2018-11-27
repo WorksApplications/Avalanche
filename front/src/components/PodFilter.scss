@@ -17,6 +17,7 @@
   padding: 0 $base-space / 2;
   color: $text-color-light;
   font-size: $font-size-normal;
+  width: $font-size-normal; // prevent layout flash after fonts are loaded
 }
 
 .textBox {

@@ -169,8 +169,6 @@ export class SnapshotsView extends React.Component<Props> {
       }
     }
 
-    // TODO fix cell width value
-
     return (
       <div className={styles.wrap}>
         <div className={styles.appContext}>

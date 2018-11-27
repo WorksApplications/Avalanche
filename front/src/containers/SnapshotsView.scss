@@ -11,16 +11,18 @@
 
 .appContext {
   display: flex;
-  align-items: center;
   background-color: $bg-color-gray-2;
   padding: $base-space * 2 $base-space * 4;
-  font-size: $font-size-large;
   box-shadow: $layer-shadow-1;
 
   .label {
+    display: inline-flex;
     color: $text-color-bis;
     margin-right: $base-space * 4;
     width: $base-space * 22;
+    font-size: $font-size-large;
+    height: $base-space * 5; // prevent layout flash after fonts are loaded
+    align-items: center;
   }
 
   .selector {

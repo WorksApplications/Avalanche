@@ -10,6 +10,7 @@
   box-shadow: $layer-shadow-2;
   border-collapse: collapse;
   font-size: $font-size-normal;
+  line-height: $base-space * 2.5;
 
   & th {
     padding: $base-space $base-space * 2;
@@ -64,6 +65,39 @@
   }
 }
 
+/*
+ prevent layout flash after fonts are loaded
+*/
+.uuidHeader {
+  width: $base-space * 40;
+}
+
+.podNameHeader {
+  width: $base-space * 40;
+}
+
+.environmentHeader {
+  width: $base-space * 25;
+}
+
+.createdAtHeader {
+  width: $base-space * 25;
+}
+
+.linkHeader {
+  //width: $base-space * 25;
+}
+
+.expanderHeader {
+  width: $base-space * 5;
+}
+
 .expander {
   text-align: right;
+
+  & > i {
+    overflow: hidden;
+    width: 24px;
+    height: 24px;
+  }
 }

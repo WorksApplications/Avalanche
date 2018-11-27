@@ -166,12 +166,12 @@ export class SnapshotList extends React.Component<IProperty> {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>UUID</th>
-              <th>Pod Name</th>
-              <th>Environment</th>
-              <th>Created at</th>
-              <th>Link</th>
-              <th />
+              <th className={styles.uuidHeader}>UUID</th>
+              <th className={styles.podNameHeader}>Pod Name</th>
+              <th className={styles.environmentHeader}>Environment</th>
+              <th className={styles.createdAtHeader}>Created at</th>
+              <th className={styles.linkHeader}>Link</th>
+              <th className={styles.expanderHeader} />
             </tr>
           </thead>
           {this.props.rows.map((r, i) => (

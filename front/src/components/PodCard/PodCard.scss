@@ -43,18 +43,28 @@
   border: 2px solid $bg-color-gray-8;
 }
 
+/*
+ prevent layout flash after fonts are loaded
+*/
 .name {
   font-size: $font-size-larger;
   display: block;
+  height: $base-space * 2.5;
 }
 
 .appName {
+  display: inline-block;
   color: $text-color-bis;
   font-weight: 700;
+  height: $base-space * 2.5;
+  vertical-align: bottom;
 }
 
 .hashPart {
+  display: inline-block;
   margin-left: 0.25em;
+  height: $base-space * 2.5;
+  vertical-align: bottom;
 }
 
 .saveTooltip {
