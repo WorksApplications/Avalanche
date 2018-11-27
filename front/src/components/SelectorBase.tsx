@@ -45,15 +45,6 @@ class SelectorBase extends React.Component<IProperty, State> {
 
   private container: HTMLDivElement | null = null;
 
-  constructor(props: IProperty) {
-    super(props);
-    this.state = {
-      isOpen: false,
-      searchingWord: "",
-      preSelectingIndex: -1
-    };
-  }
-
   public render() {
     const styles = this.props.styles!;
     const optionsView = this.state.isOpen && (
@@ -158,7 +149,7 @@ class SelectorBase extends React.Component<IProperty, State> {
     if (this.state.isOpen) {
       switch (e.code) {
         case "Escape":
-          this.setState({ searchingWord: "" });
+          this.setState({ searchingWord: "", isOpen: false });
           break;
         case "Backspace":
           this.setState((s: State) => ({
@@ -177,6 +168,7 @@ class SelectorBase extends React.Component<IProperty, State> {
           this.setState({ preSelectingIndex: -1, searchingWord: "" });
           break;
         case "ArrowDown":
+          e.preventDefault();
           this.setState((s: State) => {
             const i = s.preSelectingIndex + 1;
             const optionLength = this.props.options.filter(o =>
@@ -188,6 +180,7 @@ class SelectorBase extends React.Component<IProperty, State> {
           });
           break;
         case "ArrowUp":
+          e.preventDefault();
           this.setState((s: State) => {
             const i = s.preSelectingIndex - 1;
             return {
