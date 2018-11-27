@@ -93,6 +93,5 @@ func (s internal) search(api Search, token []string) (*Result, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse search result: %+v (%s)", err, u.String())
 	}
-	log.Print(r)
 	return r.toResult(), nil
 }

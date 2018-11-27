@@ -1,0 +1,73 @@
+swagger: '2.0'
+info:
+  version: '0.1'
+  title: 'suspect the origin of the slow codepath'
+
+schemes:
+  - http
+
+consumes:
+  - application/json
+produces:
+  - application/json
+
+definitions:
+  code:
+    type: object
+    properties:
+      snippet:
+        type: string
+      link:
+        type: string
+      highlight:
+        type: boolean
+  report:
+    type: object
+    properties:
+      name:
+        type: string
+      search_url:
+        type: string
+      line_start_at:
+        type: integer
+      total_ratio:
+        type: number
+        format: float
+      immidiate_ratio:
+        type: number
+        format: float
+      label:
+        type: string
+      code:
+        type: array
+        items:
+          $ref: "#/definitions/code"
+      children:
+        type: array
+        items:
+          $ref: "#/definitions/report"
+
+paths:
+  /reports/{uuid}:
+    get:
+      parameters:
+        - name: uuid
+          type: string
+          in: path
+          required: true
+          description: "the uuid of the snapshot"
+        - in: query
+          name: start
+          type: number
+          format: float
+          required: true
+        - in: query
+          name: end
+          type: number
+          format: float
+          required: true
+      responses:
+        200:
+          schema:
+            $ref: "#/definitions/report"
+          description: "this endpoint returns the report"
