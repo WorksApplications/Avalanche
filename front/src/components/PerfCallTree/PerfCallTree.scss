@@ -1,0 +1,30 @@
+@import "../../common";
+
+.wrap {
+  font-size: $font-size-normal;
+}
+
+.element {
+  text-align: center;
+}
+
+.label {
+  display: inline-block;
+  padding: $base-space / 2;
+  border: 1px solid black;
+}
+
+.childList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  margin: 0;
+  padding: 0;
+}
+
+.child {
+  display: block;
+
+  & > .element {
+    padding-top: $base-space;
+  }
+}
