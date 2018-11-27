@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 	"text/template"
 
@@ -42,10 +43,25 @@ func getMeta(url string) (*models.Snapshot, error) {
 	return &meta, nil
 }
 
-func getData(url string) (*[]byte, error) {
-	res, err := http.Get(url)
+func getData(fu, start, end string) (*[]byte, error) {
+	// http://flamescope/#/heatmap/collabo-54448bd996-xtrk5%2F61%2F8b997a66-d61c-4846-b0b9-44f7da612143
+	// |
+	// V
+	// http://flamescope/stack/?filename=collabo-54448bd996-xtrk5%2F61%2F8b997a66-d61c-4846-b0b9-44f7da612143&start=...
+	u, err := url.Parse(fu)
 	if err != nil {
 		return nil, err
+	}
+	q := u.Query()
+	filename := strings.TrimPrefix(u.Fragment, "/heatmap/")
+	q.Set("filename", filename)
+	q.Set("start", start)
+	q.Set("end", end)
+	u.Path = u.Path + "stack/"
+	u.RawQuery = q.Encode()
+	res, err := http.Get(u.String())
+	if err != nil {
+		return nil, fmt.Errorf("Request failed with %+v (%s)<-(%s)", err, u, fu)
 	}
 	data, err := ioutil.ReadAll(res.Body)
 	res.Body.Close()
@@ -53,55 +69,60 @@ func getData(url string) (*[]byte, error) {
 		return nil, err
 	}
 	if res.StatusCode != 200 {
-		return nil, fmt.Errorf("Remote server %s is junk!: %s: %s", url, res.Status, string(data))
+		return nil, fmt.Errorf("Remote server %s is junk!: %s: %s", u, res.Status, string(data))
 	}
 	return &data, nil
 }
 
-func (cfg *config) analyze(w http.ResponseWriter, r *http.Request) {
-	log.Print(r.Proto, "(", r.Method, "): ", r.URL)
+func genericHandler(w http.ResponseWriter, r *http.Request, prefix, collect string) *[]byte {
+	log.Print(r.Proto, "(", r.Method, "): ", r.URL.Path)
 	if r.Method == "GET" {
 		uuid := r.URL.Path
-		meta, err := getMeta(cfg.collect + "/snapshots/" + strings.TrimPrefix(uuid, "/stacks/"))
+		q := r.URL.Query()
+		start := q.Get("start")
+		end := q.Get("end")
+
+		meta, err := getMeta(collect + "/snapshots/" + strings.TrimPrefix(uuid, prefix))
 		if err != nil {
-			http.Error(w, fmt.Sprintf("no such snapshot record: %+v", err), 404)
-			return
+			http.Error(w, fmt.Sprintf("no such snapshot record: %+v (%+v)", err, meta), 404)
+			return nil
 		}
-		data, err := getData(meta.FlamescopeLink)
+		data, err := getData(meta.FlamescopeLink, start, end)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to retrieve Flamegraph data: %+v", err), 404)
-			return
+			http.Error(w, fmt.Sprintf("failed to retrieve Flamegraph data: %+v (%+v)", err, meta), 404)
+			return nil
 		}
-		stack, err := stack.Filter(*data, 3)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to process Flamegraph data of %+v: %+v", meta, err), 500)
-			return
-		}
-		w.Write(stack)
+		return data
 	}
+	return nil
+}
+
+func (cfg *config) analyze(w http.ResponseWriter, r *http.Request) {
+	data := genericHandler(w, r, "/stacks/", cfg.collect)
+	if data == nil {
+		return
+	}
+
+	stack, err := stack.Filter(*data, 3)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to process Flamegraph data: %+v", err), 500)
+		return
+	}
+	w.Write(stack)
 }
 
 func (cfg *config) report(w http.ResponseWriter, r *http.Request) {
-	log.Print(r.Proto, "(", r.Method, "): ", r.URL)
-	if r.Method == "GET" {
-		uuid := r.URL.Path
-		meta, err := getMeta(cfg.collect + "/snapshots/" + strings.TrimPrefix(uuid, "/stacks/"))
-		if err != nil {
-			http.Error(w, fmt.Sprintf("no such snapshot record: %+v", err), 404)
-			return
-		}
-		data, err := getData(meta.FlamescopeLink)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to retrieve Flamegraph data: %+v", err), 404)
-			return
-		}
-		stack, err := stack.GenReport(*data, 3, cfg.searchAPI)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to process Flamegraph data: %+v", err), 500)
-			return
-		}
-		w.Write(stack)
+	data := genericHandler(w, r, "/reports/", cfg.collect)
+	if data == nil {
+		return
 	}
+
+	stack, err := stack.GenReport(*data, 3, cfg.searchAPI)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to process Flamegraph data: %+v", err), 500)
+		return
+	}
+	w.Write(stack)
 }
 
 func serve(at, collect string, api codesearch.Search) {
