@@ -1,11 +1,10 @@
-package server
+package main
 
 import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/util"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
 	"log"
@@ -16,7 +15,7 @@ import (
 )
 
 type HandlerClosure struct {
-	Ch chan *util.ScannerRequest
+	Ch chan *ScannerRequest
 	Db *sql.DB
 }
 
@@ -44,7 +43,7 @@ func deserializeEnvironmentUpdate(req *http.Request) (*environ.Environ, error) {
 
 }
 
-func update(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest) {
+func update(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *ScannerRequest) {
 	env, err := deserializeEnvironmentUpdate(req)
 	if err != nil {
 		res.WriteHeader(http.StatusInternalServerError)
@@ -70,7 +69,7 @@ func update(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *u
 	if len(prev) == 0 {
 		environ.Add(db, env)
 		res.WriteHeader(http.StatusOK)
-		sreq := util.ScannerRequest{util.SCAN, &env.Name, nil}
+		sreq := ScannerRequest{SCAN, &env.Name, nil}
 		subscribe(sreq, res, req, ch)
 		return
 	}
@@ -80,16 +79,16 @@ func update(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *u
 
 	/* Handle state change */
 	if env.Observe != prev[0].Observe {
-		code := util.SCAN
+		code := SCAN
 		if !env.Observe {
-			code = util.DEL
+			code = DEL
 		}
-		sreq := util.ScannerRequest{code, &env.Name, nil}
+		sreq := ScannerRequest{code, &env.Name, nil}
 		subscribe(sreq, res, req, ch)
 	}
 }
 
-func add(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest) (*string, error) {
+func add(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *ScannerRequest) (*string, error) {
 	env, err := deserializeEnvironmentUpdate(req)
 	if err != nil {
 		res.WriteHeader(http.StatusInternalServerError)
@@ -103,7 +102,7 @@ func add(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *util
 		res.WriteHeader(http.StatusOK)
 		/* Send request to scan the target if it is marked to "observe" */
 		if env.Observe {
-			sreq := util.ScannerRequest{util.SCAN, &env.Name, nil}
+			sreq := ScannerRequest{SCAN, &env.Name, nil}
 			subscribe(sreq, res, req, ch)
 		}
 	} else {
@@ -115,7 +114,7 @@ func add(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *util
 	return &env.Name, nil
 }
 
-func subscribe(sreq util.ScannerRequest, res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest) error {
+func subscribe(sreq ScannerRequest, res http.ResponseWriter, req *http.Request, ch chan<- *ScannerRequest) error {
 	t := time.NewTimer(20 * time.Second)
 
 	select {
@@ -129,13 +128,13 @@ func subscribe(sreq util.ScannerRequest, res http.ResponseWriter, req *http.Requ
 	}
 }
 
-func get(res http.ResponseWriter, req *http.Request, ch chan<- *util.ScannerRequest, env *string) error {
+func get(res http.ResponseWriter, req *http.Request, ch chan<- *ScannerRequest, env *string) error {
 	/* Prepare anew channel to pull out the result */
 	/* We make a channel instead of using bi-directional shared channel because we have to have a co-relation between
 	   request and the result. */
 	resc := make(chan *detect.Subscription, 16)
 	// Expect it to be closed by remote, so I won't defer close(resc)
-	sreq := util.ScannerRequest{util.DESC, env, resc}
+	sreq := ScannerRequest{DESC, env, resc}
 
 	t := time.NewTimer(20 * time.Second)
 

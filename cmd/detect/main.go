@@ -9,9 +9,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
-
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/server"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/util"
 )
 
 func establishDBConn(dn string) *sql.DB {
@@ -34,10 +31,10 @@ func main() {
 	db := establishDBConn(*dbconf)
 	t := true
 	es := environ.ListConfig(db, nil, &t)
-	x := server.HandlerClosure{make(chan *util.ScannerRequest), db}
-	go util.Exchange(x.Ch)
+	x := HandlerClosure{make(chan *ScannerRequest), db}
+	go Exchange(x.Ch)
 	for _, e := range es {
-		sreq := util.ScannerRequest{util.SCAN, &e.Name, nil}
+		sreq := ScannerRequest{SCAN, &e.Name, nil}
 		x.Ch <- &sreq
 	}
 
