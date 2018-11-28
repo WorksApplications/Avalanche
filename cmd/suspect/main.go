@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+    "time"
 	"text/template"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/codesearch"
@@ -112,16 +113,20 @@ func (cfg *config) analyze(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cfg *config) report(w http.ResponseWriter, r *http.Request) {
+    t := time.Now()
 	data := genericHandler(w, r, "/reports/", cfg.collect)
 	if data == nil {
 		return
 	}
+    log.Print("report: get data", time.Since(t))
+    t = time.Now()
 
 	stack, err := stack.GenReport(*data, 3, cfg.searchAPI)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to process Flamegraph data: %+v", err), 500)
 		return
 	}
+    log.Print("report: gen report", time.Since(t))
 	w.Write(stack)
 }
 
@@ -133,7 +138,7 @@ func serve(at, collect string, api codesearch.Search) {
     close(api.RunReq)
 }
 
-func toSearch(apiurl, apipost, apitype *string) codesearch.Search {
+func toSearch(apiurl, apipost, apitype *string, nsw int) codesearch.Search {
 	var urltempl *template.Template
 	var datatempl *template.Template
 	var engine codesearch.EngineType
@@ -166,7 +171,7 @@ func toSearch(apiurl, apipost, apitype *string) codesearch.Search {
 	ch := make(chan codesearch.Request, 512)
     except := make([]string, 0)
     s := codesearch.Search{urltempl, datatempl, engine, ch, except}
-    for i := 0; i < 4; i ++ {
+    for i := 0; i < nsw; i ++ {
         go s.Runner(fmt.Sprintf("s%d", i))
     }
     return s
@@ -176,6 +181,7 @@ func main() {
 	log.SetPrefix("suspect:\t")
 	log.SetFlags(log.Lshortfile | log.Ltime | log.Ldate)
 
+	nsw := flag.Int("nSearchWorker", 1, "number of workers for searching")
 	sfn := flag.String("src", "test/stack", "file to read")
 	dfn := flag.String("dst", "test/filtered", "file to write")
 	cli := flag.Bool("cli", false, "run as cli(don't serve)")
@@ -189,7 +195,7 @@ func main() {
 	log.Println(args)
 
 	if !*cli {
-		serve(*at, *collect, toSearch(apiurl, apipost, apitype))
+		serve(*at, *collect, toSearch(apiurl, apipost, apitype, *nsw))
 	} else {
 		data, err := ioutil.ReadFile(*sfn)
 		if err != nil {
