@@ -75,23 +75,24 @@ func GenReport(input []byte, nLoop int, searchAPI codesearch.Search) ([]byte, er
 }
 
 func tokenize(name, label string) []string {
+	var t []string
 	switch label {
 	case "jit":
 		/* "This is non-authentic Java wisdom", a Duke said,
 		 * Assume the last part of the FQDN is the portion with full of information. */
-		t := strings.Split(name, "/")
-		for i := len(t)/2 - 1; i >= 0; i-- {
-			opp := len(t) - 1 - i
-			t[i], t[opp] = t[opp], t[i]
-		}
-		return append(strings.Split(t[0], ";::"), t[1:]...)
+		t = strings.Split(name, "/")
 	case "user":
-		return strings.Split(name, "_")
+		t = strings.Split(name, "_")
 	case "kernel":
-		return strings.Split(name, "_")
+		t = strings.Split(name, "_")
 	default:
-		return strings.Split(name, ".")
+		t = strings.Split(name, ".")
 	}
+	for i := len(t)/2 - 1; i >= 0; i-- {
+		opp := len(t) - 1 - i
+		t[i], t[opp] = t[opp], t[i]
+	}
+	return append(strings.Split(t[0], ";::"), t[1:]...)
 }
 
 func (s *Stack) toReport(api codesearch.Search, rootVal float64, searchDepth int) Report {
@@ -99,13 +100,13 @@ func (s *Stack) toReport(api codesearch.Search, rootVal float64, searchDepth int
 	var res codesearch.Result
 	eng := api.DefEngine
 	switch s.Name {
-	case "[[unknown]]":
+	case "[unknown]":
 		fallthrough
-	case "[Interpreter]":
+	case "Interpreter":
 		fallthrough
-	case "[call_stub]":
+	case "call_stub":
 		fallthrough
-	case "[SafepointBlob]":
+	case "SafepointBlob":
 		eng = codesearch.Undefined
 	default:
 		if searchDepth < 0 {
@@ -150,6 +151,7 @@ func (s *Stack) toReport(api codesearch.Search, rootVal float64, searchDepth int
 		Total:    float64(s.Value) / rootVal,
 		Imm:      float64(s.Value-v) / rootVal,
 		Children: cs,
+		Label:    s.Label,
 	}
 	return node
 }
