@@ -94,31 +94,10 @@ func tokenize(name, label string) []string {
 	}
 }
 
-func assignCode(name, label string, searchAPI codesearch.Search) *codesearch.Result {
-	t := tokenize(name, label)
-	t = t[0:1]
-	/* Example of searchAPI */
-	/* http://hound.lan.tohaheavyindustrials.com/search?files=&repos=&i=nope&q={} */
-	res, err := searchAPI.Run(t)
-	if err != nil {
-		log.Fatal("search runner has failed", err)
-	}
-	if res == nil {
-		res, _ = codesearch.Search{Type: codesearch.Undefined}.Run(t)
-		return res
-	}
-	return res
-}
-
-func (s *Stack) toReport(searchAPI codesearch.Search, rootVal float64, searchDepth int) Report {
+func (s *Stack) toReport(api codesearch.Search, rootVal float64, searchDepth int) Report {
 	v := 0
-	var res *codesearch.Result
-	cs := make([]Report, len(s.Children))
-	for i, c := range s.Children {
-		cs[i] = c.toReport(searchAPI, rootVal, searchDepth-1)
-		v += c.Value
-	}
-	api := searchAPI
+	var res codesearch.Result
+    eng := api.DefEngine
 	switch s.Name {
 	case "[[unknown]]":
 		fallthrough
@@ -127,27 +106,42 @@ func (s *Stack) toReport(searchAPI codesearch.Search, rootVal float64, searchDep
 	case "[call_stub]":
 		fallthrough
 	case "[SafepointBlob]":
-		api.Type = codesearch.Undefined
+		eng = codesearch.Undefined
 	default:
 		if searchDepth < 0 {
-			api.Type = codesearch.Undefined
+			eng = codesearch.Undefined
 		}
 	}
 	if (float64(s.Value) / rootVal) < 0.1 {
-		api.Type = codesearch.Undefined
+		eng = codesearch.Undefined
 	}
 	switch s.Label {
 	case "jit":
 		if t := strings.Trim(s.Name, "[]"); fmt.Sprintf("[%s]", t) == s.Name {
-			api.Type = codesearch.Undefined
+			eng = codesearch.Undefined
 		}
 	default:
-		api.Type = codesearch.Undefined
+		eng = codesearch.Undefined
 	}
-	res = assignCode(s.Name, s.Label, api)
-	if res == nil {
-		log.Fatal("res is nil", api, s.Name)
+	//res = assignCode(s.Name, s.Label, api)
+	t := tokenize(s.Name, s.Label)
+	t = t[0:1]
+	/* Example of searchAPI */
+	/* http://hound.lan.tohaheavyindustrials.com/search?files=&repos=&i=nope&q={} */
+    ch := make(chan codesearch.Result, 1)
+
+    /* search request. The result will be received after spawning children's reporting. */
+	api.RunReq <- codesearch.Request{t, eng, ch}
+
+	cs := make([]Report, len(s.Children))
+	for i, c := range s.Children {
+		cs[i] = c.toReport(api, rootVal, searchDepth-1)
+		v += c.Value
 	}
+    res = <- ch
+
+    close(ch)
+
 	node := Report{
 		Name:     s.Name,
 		RefUrl:   res.Ref,

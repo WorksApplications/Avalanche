@@ -2,6 +2,8 @@ package codesearch
 
 import (
 	"text/template"
+    "fmt"
+    "log"
 )
 
 type EngineType int
@@ -14,11 +16,18 @@ const (
 	Hound
 )
 
+type Request struct {
+    Keywords []string
+    Engine   EngineType
+    ResCh    chan Result
+}
+
 type Search struct {
-	Url   *template.Template
-	Post  *template.Template
-	Type  EngineType
-	Count chan []string
+	Url       *template.Template
+	Post      *template.Template
+	DefEngine EngineType // Default Search engine
+	RunReq    chan Request // a channel to pass request to request execeutors which are created outside of package
+    Except    []string // keywords not to be searched
 }
 
 type Code struct {
@@ -31,6 +40,7 @@ type Result struct {
 	Code []Code
 	Ref  string
 	Line int
+    Err  error
 }
 
 type searchEngine interface {
@@ -50,14 +60,35 @@ func (s dummy) search(api Search, token []string) (*Result, error) {
 	return &r, nil
 }
 
-func (api Search) Run(token []string) (*Result, error) {
+func (api Search) Runner(name string) {
+    for r := range api.RunReq {
+        res, err := api.run(r.Keywords, r.Engine)
+
+        if err != nil {
+            /* TODO: check remote server status */
+            log.Print("[search runner]", name, err)
+            res.Err = err
+        }
+        if res == nil {
+            // No hit
+            res = &Result {
+                Code: make([]Code, 0),
+                Ref: "",
+                Line: 0,
+                Err: fmt.Errorf("No result found"),
+            }
+        }
+        r.ResCh <- *res
+    }
+}
+
+func (api Search) run(token []string, e EngineType) (*Result, error) {
 	var s searchEngine
-	switch api.Type {
+	switch e {
 	default:
 		fallthrough
 	case InternalSearch:
 		s = internal{}
-		api.Count <- token
 	case Github:
 		s = github{}
 	case Undefined:

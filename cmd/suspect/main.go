@@ -130,6 +130,7 @@ func serve(at, collect string, api codesearch.Search) {
 	http.HandleFunc("/stacks/", cfg.analyze)
 	http.HandleFunc("/reports/", cfg.report)
 	log.Fatal(http.ListenAndServe(at, nil))
+    close(api.RunReq)
 }
 
 func toSearch(apiurl, apipost, apitype *string) codesearch.Search {
@@ -161,17 +162,14 @@ func toSearch(apiurl, apipost, apitype *string) codesearch.Search {
 	default:
 		log.Fatal("No API kind", *apitype)
 	}
-	ch := make(chan []string, 1)
-	go incrementLog(ch)
-	return codesearch.Search{urltempl, datatempl, engine, ch}
-}
 
-func incrementLog(c chan []string) {
-	count := 0
-	for i := range c {
-		count++
-		log.Print(count, i)
-	}
+	ch := make(chan codesearch.Request, 512)
+    except := make([]string, 0)
+    s := codesearch.Search{urltempl, datatempl, engine, ch, except}
+    for i := 0; i < 4; i ++ {
+        go s.Runner(fmt.Sprintf("s%d", i))
+    }
+    return s
 }
 
 func main() {
