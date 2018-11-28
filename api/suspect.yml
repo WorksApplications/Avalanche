@@ -33,7 +33,7 @@ definitions:
       total_ratio:
         type: number
         format: float
-      immidiate_ratio:
+      immediate_ratio:
         type: number
         format: float
       label:

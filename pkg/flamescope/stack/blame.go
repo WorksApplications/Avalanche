@@ -14,9 +14,9 @@ type Report struct {
 	Name   string  `json:"name"`
 	RefUrl string  `json:"search_url"`
 	Line   int     `json:"line_start_at"`
-	Total  float64 `json:"total_ratio"`
 	Label  string  `json:"label"`
-	Imm    float64 `json:"immidiate_ratio"`
+	Total  float64 `json:"total_ratio"`
+	Imm    float64 `json:"immediate_ratio"`
 
 	Code []codesearch.Code `json:"code"`
 
@@ -154,7 +154,7 @@ func (s *Stack) toReport(searchAPI codesearch.Search, rootVal float64, searchDep
 		Code:     res.Code,
 		Line:     res.Line,
 		Total:    float64(s.Value) / rootVal,
-		Imm:      float64(v) / rootVal,
+		Imm:      float64(s.Value-v) / rootVal,
 		Children: cs,
 	}
 	return node
