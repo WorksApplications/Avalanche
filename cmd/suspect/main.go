@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-    "time"
 	"text/template"
+	"time"
 
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/codesearch"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/flamescope/stack"
@@ -113,20 +113,20 @@ func (cfg *config) analyze(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cfg *config) report(w http.ResponseWriter, r *http.Request) {
-    t := time.Now()
+	t := time.Now()
 	data := genericHandler(w, r, "/reports/", cfg.collect)
 	if data == nil {
 		return
 	}
-    log.Print("report: get data", time.Since(t))
-    t = time.Now()
+	log.Print("report: get data", time.Since(t))
+	t = time.Now()
 
 	stack, err := stack.GenReport(*data, 3, cfg.searchAPI)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to process Flamegraph data: %+v", err), 500)
 		return
 	}
-    log.Print("report: gen report", time.Since(t))
+	log.Print("report: gen report", time.Since(t))
 	w.Write(stack)
 }
 
@@ -135,7 +135,7 @@ func serve(at, collect string, api codesearch.Search) {
 	http.HandleFunc("/stacks/", cfg.analyze)
 	http.HandleFunc("/reports/", cfg.report)
 	log.Fatal(http.ListenAndServe(at, nil))
-    close(api.RunReq)
+	close(api.RunReq)
 }
 
 func toSearch(apiurl, apipost, apitype *string, nsw int) codesearch.Search {
@@ -169,12 +169,12 @@ func toSearch(apiurl, apipost, apitype *string, nsw int) codesearch.Search {
 	}
 
 	ch := make(chan codesearch.Request, 512)
-    except := make([]string, 0)
-    s := codesearch.Search{urltempl, datatempl, engine, ch, except}
-    for i := 0; i < nsw; i ++ {
-        go s.Runner(fmt.Sprintf("s%d", i))
-    }
-    return s
+	except := make([]string, 0)
+	s := codesearch.Search{urltempl, datatempl, engine, ch, except}
+	for i := 0; i < nsw; i++ {
+		go s.Runner(fmt.Sprintf("s%d", i))
+	}
+	return s
 }
 
 func main() {
