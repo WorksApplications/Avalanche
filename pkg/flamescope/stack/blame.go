@@ -63,8 +63,8 @@ func GenReport(input []byte, nLoop int, searchAPI codesearch.Search) ([]byte, er
 		m, _ = newNameVec(tree)
 		tree.process(nil, &m)
 	}
-	tree = getDominantNode(tree, 0.6, 100)
-	report := tree.toReport(searchAPI, float64(tree.Value), 3)
+	tree = getDominantNode(tree, 0.7, 100)
+	report := tree.toReport(searchAPI, float64(tree.Value), 4)
 	b, err := json.Marshal(report)
 	if err != nil {
 		log.Print("[stack] Marshal error: ", err)
