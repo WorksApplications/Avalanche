@@ -4,7 +4,7 @@ import * as React from "react";
 import { action } from "@storybook/addon-actions";
 import { select, text, withKnobs } from "@storybook/addon-knobs";
 import { storiesOf } from "@storybook/react";
-import { HeatMapState } from "../../store";
+import { DataState } from "../../store";
 import SnapshotList from "./SnapshotList";
 
 const commonWrapStyle: React.CSSProperties = {
@@ -20,7 +20,7 @@ const parabolaData = Array.from(
 );
 const sawData = Array.from(new Array(N + 1), (v, i) => (i % 500) / 10);
 
-const statusSelection: { [key: string]: HeatMapState } = {
+const statusSelection: { [key: string]: DataState } = {
   "Empty (initial)": "empty",
   Loading: "loading",
   Loaded: "loaded",
@@ -38,7 +38,16 @@ storiesOf("SnapshotList", module)
     </div>
   ))
   .add("1 snapshots", () => {
-    const status = select("Status", statusSelection, "loading" as HeatMapState);
+    const heatMapStatus = select(
+      "HeatMap Status",
+      statusSelection,
+      "loading" as DataState
+    );
+    const perfCallTreeStatus = select(
+      "PerfCallTree Status",
+      statusSelection,
+      "loading" as DataState
+    );
     return (
       <div style={commonWrapStyle}>
         <SnapshotList
@@ -50,7 +59,7 @@ storiesOf("SnapshotList", module)
               podName: "ess-765c6ccfcd-9hrsv",
               link: "#",
               heatMap:
-                status === "loaded"
+                heatMapStatus === "loaded"
                   ? {
                       maxValueOfData: 50,
                       maxValues: sawData,
@@ -62,8 +71,9 @@ storiesOf("SnapshotList", module)
               getHeatMap: action(
                 "getHeatMap of d7eec7c1-daf5-4198-9503-6957aea0bf90"
               ),
-              heatMapStatus: status,
+              heatMapStatus,
               heatMapId: "d7eec7c1-daf5-4198-9503-6957aea0bf90",
+              perfCallTreeStatus,
               onRangeSelect: action("Selected")
             }
           ]}
@@ -72,21 +82,37 @@ storiesOf("SnapshotList", module)
     );
   })
   .add("3+ snapshots", () => {
-    const status1 = select(
-      "Status1",
+    const heatMapStatus1 = select(
+      "HeatMap Status[1]",
       statusSelection,
-      "loading" as HeatMapState
+      "loading" as DataState
     );
-    const status2 = select(
-      "Status2",
+    const heatMapStatus2 = select(
+      "HeatMap Status[2]",
       statusSelection,
-      "loading" as HeatMapState
+      "loading" as DataState
     );
-    const status3 = select(
-      "Status3",
+    const heatMapStatus3 = select(
+      "HeatMap Status[3]",
       statusSelection,
-      "loading" as HeatMapState
+      "loading" as DataState
     );
+    const perfCallTreeStatus1 = select(
+      "PerfCallTree Status[1]",
+      statusSelection,
+      "loading" as DataState
+    );
+    const perfCallTreeStatus2 = select(
+      "PerfCallTree Status[2]",
+      statusSelection,
+      "loading" as DataState
+    );
+    const perfCallTreeStatus3 = select(
+      "PerfCallTree Status[3]",
+      statusSelection,
+      "loading" as DataState
+    );
+
     return (
       <div style={commonWrapStyle}>
         <SnapshotList
@@ -98,7 +124,7 @@ storiesOf("SnapshotList", module)
               podName: "ess-765c6ccfcd-9hrsv",
               link: "#",
               heatMap:
-                status1 === "loaded"
+                heatMapStatus1 === "loaded"
                   ? {
                       maxValueOfData: (N * N) / 4,
                       maxValues: parabolaData,
@@ -110,8 +136,9 @@ storiesOf("SnapshotList", module)
               getHeatMap: action(
                 "getHeatMap of d7eec7c1-daf5-4198-9503-6957aea0bf90"
               ),
-              heatMapStatus: status1,
+              heatMapStatus: heatMapStatus1,
               heatMapId: "d7eec7c1-daf5-4198-9503-6957aea0bf90",
+              perfCallTreeStatus: perfCallTreeStatus1,
               onRangeSelect: action("Selected")
             },
             {
@@ -121,7 +148,7 @@ storiesOf("SnapshotList", module)
               podName: "ess-765c6ccfcd-9hrsv",
               link: "#",
               heatMap:
-                status2 === "loaded"
+                heatMapStatus2 === "loaded"
                   ? {
                       maxValueOfData: 50,
                       maxValues: sawData,
@@ -133,8 +160,9 @@ storiesOf("SnapshotList", module)
               getHeatMap: action(
                 "getHeatMap of e7eec7c1-daf5-4198-9503-6957aea0bf90"
               ),
-              heatMapStatus: status2,
+              heatMapStatus: heatMapStatus2,
               heatMapId: "e7eec7c1-daf5-4198-9503-6957aea0bf90",
+              perfCallTreeStatus: perfCallTreeStatus2,
               onRangeSelect: action("Selected")
             },
             {
@@ -144,7 +172,7 @@ storiesOf("SnapshotList", module)
               podName: "ess-765c6ccfcd-9hrsv",
               link: "#",
               heatMap:
-                status3 === "loaded"
+                heatMapStatus3 === "loaded"
                   ? {
                       maxValueOfData: 50,
                       maxValues: sawData,
@@ -156,8 +184,9 @@ storiesOf("SnapshotList", module)
               getHeatMap: action(
                 "getHeatMap of f7eec7c1-daf5-4198-9503-6957aea0bf90"
               ),
-              heatMapStatus: status3,
+              heatMapStatus: heatMapStatus3,
               heatMapId: "f7eec7c1-daf5-4198-9503-6957aea0bf90",
+              perfCallTreeStatus: perfCallTreeStatus3,
               onRangeSelect: action("Selected")
             }
           ]}

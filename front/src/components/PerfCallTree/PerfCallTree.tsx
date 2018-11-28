@@ -12,7 +12,7 @@ export interface IProperty {
   treeMap: Map<string, ITreeElement>;
   targetId?: string;
 
-  onTargetChanged(targetId: string): void;
+  onTargetChanged?(targetId: string): void;
 }
 
 const initialState = { targetId: null as string | null };
@@ -89,7 +89,9 @@ class PerfCallTree extends React.Component<IProperty, State> {
 
     if (this.state.targetId !== id) {
       this.setState({ targetId: id! });
-      this.props.onTargetChanged(id!);
+      if (this.props.onTargetChanged) {
+        this.props.onTargetChanged(id!);
+      }
     }
   };
 }
