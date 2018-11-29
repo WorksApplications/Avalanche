@@ -80,8 +80,8 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
 
   public render() {
     return (
-      <tbody onClick={this.onRowClick} data-testid="snapshot">
-        <tr>
+      <tbody data-testid="snapshot">
+        <tr onClick={this.onInfoRowClick}>
           <td>{this.props.uuid}</td>
           <td>{this.props.podName}</td>
           <td>{this.props.environment}</td>
@@ -176,7 +176,7 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
     }
   }
 
-  private onRowClick = () => {
+  private onInfoRowClick = () => {
     const willGraphOpen = !this.state.isGraphOpen;
     if (
       this.props.heatMapStatus === "empty" &&

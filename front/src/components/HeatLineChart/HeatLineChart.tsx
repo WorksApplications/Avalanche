@@ -142,7 +142,6 @@ class HeatLineChart extends React.Component<IProperty, State> {
           onMouseUp={this.onGraphMouseUp}
           onMouseMove={this.onGraphMove}
           onContextMenu={this.onGraphContextMenu}
-          onClick={this.onGraphClick}
         >
           <defs>
             {this.renderChartDef()}
@@ -585,10 +584,6 @@ class HeatLineChart extends React.Component<IProperty, State> {
         }); // does not put point
       }
     }
-  };
-
-  private onGraphClick = (e: React.MouseEvent<SVGElement>) => {
-    e.stopPropagation(); // let not close
   };
 
   private onMouseLeave = () => {
