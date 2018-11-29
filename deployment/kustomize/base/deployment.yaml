@@ -158,4 +158,7 @@ spec:
         image: /resource_optimization/suspect
         ports:
         - containerPort: 8080
+        command:
+          - /suspect
+          - -nSearchWorker=8
         imagePullPolicy: Always
