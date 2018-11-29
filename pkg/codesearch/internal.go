@@ -43,23 +43,27 @@ type searchResult struct {
 }
 */
 
-func getRelevantResult(i *internalResult) int {
+func getRelevantResult(i *internalResult) (int, bool) {
+	/* No suitable match found */
+	if len(i.Results) == 0 {
+		return 0, false
+	}
 	/* XXX */
-	return 0
+	return 0, true
 }
 
 func (i *internalResult) toResult() *Result {
-	p := getRelevantResult(i)
-	if len(i.Results) == 0 {
-		return nil
-	}
+	p, ok := getRelevantResult(i)
 
 	c := make([]Code, 1)
-	c[0].Snip = i.Results[p].Snippet.Code
 	r := Result{
-		Code: c,
-		Ref:  i.Results[p].FilePaths[0].GitLink,
-		Line: i.Results[p].Snippet.Line,
+		Code:  c,
+		Found: ok,
+	}
+	if ok {
+		r.Code[0].Snip = i.Results[p].Snippet.Code
+		r.Ref = i.Results[p].FilePaths[0].GitLink
+		r.Line = i.Results[p].Snippet.Line
 	}
 	return &r
 }

@@ -2,7 +2,9 @@ package codesearch
 
 import (
 	"fmt"
+	"github.com/patrickmn/go-cache"
 	"log"
+	"strings"
 	"text/template"
 	"time"
 )
@@ -15,6 +17,7 @@ const (
 	Github
 	Gitlab
 	Hound
+	GoCache
 )
 
 type Request struct {
@@ -29,6 +32,7 @@ type Search struct {
 	DefEngine EngineType   // Default Search engine
 	RunReq    chan Request // a channel to pass request to request execeutors which are created outside of package
 	Except    []string     // keywords not to be searched
+	Cache     *cache.Cache
 }
 
 type Code struct {
@@ -38,15 +42,17 @@ type Code struct {
 }
 
 type Result struct {
-	Code []Code
-	Ref  string
-	Line int
-	Err  error
+	Code  []Code
+	Ref   string
+	Line  int
+	Found bool
+	Err   error
 }
 
 type searchEngine interface {
 	//    isMatchFeature([]byte) bool
 	//    getCode([]byte) []Code
+	// getcached...
 	search(Search, []string) (*Result, error)
 }
 
@@ -61,6 +67,35 @@ func (s dummy) search(api Search, token []string) (*Result, error) {
 	return &r, nil
 }
 
+type fillingCache struct {
+	cache  cache.Cache
+	filler EngineType
+}
+
+func (s fillingCache) search(api Search, token []string) (*Result, error) {
+	q := strings.Join(token, "+")
+	if v, found := s.cache.Get(q); found {
+		//log.Print("[cache] hit: k=", q)
+		if r, ok := v.(Result); ok {
+			return &r, nil
+		} else {
+			return nil, fmt.Errorf("undecodable cache was hit: k=%s", q)
+		}
+	} else {
+		r, err := api.run(token, s.filler, Undefined)
+		if err != nil {
+			return nil, err
+		}
+		if r == nil {
+			log.Print("[search bug] Result must not be nil unless with err", token)
+			return nil, nil
+		}
+		//log.Print("[cache] set: k=", q, r)
+		s.cache.Set(q, *r, cache.DefaultExpiration)
+		return r, nil
+	}
+}
+
 func isIn(except, words []string) bool {
 	for _, e := range except {
 		for _, w := range words {
@@ -73,7 +108,10 @@ func isIn(except, words []string) bool {
 }
 
 func (api Search) Runner(name string) {
+	c := 0
 	for r := range api.RunReq {
+		var err error
+		var res *Result
 		if isIn(api.Except, r.Keywords) {
 			r.ResCh <- Result{
 				Code: make([]Code, 0),
@@ -84,7 +122,11 @@ func (api Search) Runner(name string) {
 			continue
 		}
 		t := time.Now()
-		res, err := api.run(r.Keywords, r.Engine)
+		if api.Cache != nil {
+			res, err = api.run(r.Keywords, GoCache, r.Engine)
+		} else {
+			res, err = api.run(r.Keywords, r.Engine, Undefined)
+		}
 
 		if err != nil {
 			/* TODO: check remote server status */
@@ -102,12 +144,13 @@ func (api Search) Runner(name string) {
 		}
 		r.ResCh <- *res
 		if r.Engine != Undefined {
-			log.Printf("[search runner %s] Elapsed %v", name, time.Since(t))
+			c++
+			log.Printf("[search runner %s:%d] Elapsed %v", name, c, time.Since(t))
 		}
 	}
 }
 
-func (api Search) run(token []string, e EngineType) (*Result, error) {
+func (api Search) run(token []string, e, fe EngineType) (*Result, error) {
 	var s searchEngine
 	switch e {
 	default:
@@ -118,6 +161,8 @@ func (api Search) run(token []string, e EngineType) (*Result, error) {
 		s = github{}
 	case Undefined:
 		s = dummy{}
+	case GoCache:
+		s = fillingCache{*api.Cache, fe}
 	}
 	return s.search(api, token)
 }

@@ -12,6 +12,8 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/patrickmn/go-cache"
+
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/codesearch"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/flamescope/stack"
 
@@ -169,7 +171,7 @@ func toSearch(apiurl, apipost, apitype, except *string, nsw int) codesearch.Sear
 	}
 
 	ch := make(chan codesearch.Request, 512)
-	s := codesearch.Search{urltempl, datatempl, engine, ch, strings.Split(*except, ",")}
+	s := codesearch.Search{urltempl, datatempl, engine, ch, strings.Split(*except, ","), cache.New(8*time.Hour, 1*time.Hour)}
 	for i := 0; i < nsw; i++ {
 		go s.Runner(fmt.Sprintf("s%d", i))
 	}
