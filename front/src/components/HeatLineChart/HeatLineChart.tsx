@@ -397,24 +397,20 @@ class HeatLineChart extends React.Component<IProperty, State> {
 
   private renderRangeLengthTooltip = () => {
     if (
-      this.state.rangeStart === null ||
-      this.state.rangeEnd === null ||
+      ((this.state.rangeStart === null || this.state.rangeEnd === null) &&
+        !this.state.previous) ||
       !this.svgRef.current
     ) {
       return;
     }
 
-    // const [normalizedRangeStart, normalizedRangeEnd] =
-    //   this.state.rangeStart !== null && this.state.rangeEnd !== null
-    //     ? sort2Item(this.state.rangeStart, this.state.rangeEnd)
-    //     : sort2Item(
-    //         this.state.previous!.rangeStart,
-    //         this.state.previous!.rangeEnd
-    //       );
-    const [normalizedRangeStart, normalizedRangeEnd] = sort2Item(
-      this.state.rangeStart,
-      this.state.rangeEnd
-    );
+    const [normalizedRangeStart, normalizedRangeEnd] =
+      this.state.rangeStart !== null && this.state.rangeEnd !== null
+        ? sort2Item(this.state.rangeStart, this.state.rangeEnd)
+        : sort2Item(
+            this.state.previous!.rangeStart,
+            this.state.previous!.rangeEnd
+          );
 
     const point1 =
       normalizedRangeStart * (widthInSvg - paddingInSvg * 2) + paddingInSvg;
