@@ -138,7 +138,7 @@ func serve(at, collect string, api codesearch.Search) {
 	close(api.RunReq)
 }
 
-func toSearch(apiurl, apipost, apitype *string, nsw int) codesearch.Search {
+func toSearch(apiurl, apipost, apitype, except *string, nsw int) codesearch.Search {
 	var urltempl *template.Template
 	var datatempl *template.Template
 	var engine codesearch.EngineType
@@ -169,8 +169,7 @@ func toSearch(apiurl, apipost, apitype *string, nsw int) codesearch.Search {
 	}
 
 	ch := make(chan codesearch.Request, 512)
-	except := make([]string, 0)
-	s := codesearch.Search{urltempl, datatempl, engine, ch, except}
+	s := codesearch.Search{urltempl, datatempl, engine, ch, strings.Split(*except, ",")}
 	for i := 0; i < nsw; i++ {
 		go s.Runner(fmt.Sprintf("s%d", i))
 	}
@@ -185,6 +184,7 @@ func main() {
 	sfn := flag.String("src", "test/stack", "file to read")
 	dfn := flag.String("dst", "test/filtered", "file to write")
 	cli := flag.Bool("cli", false, "run as cli(don't serve)")
+	except := flag.String("except", "sun,tomcat", "Keywords not for search with your repository(exact match with a token(eg: each part of FQDN for Java))")
 	apiurl := flag.String("searchUrl", "https://github.com/search/code?q={{.}}", "source code search API")
 	apipost := flag.String("searchPost", "", "The data to send to the source code search API if it requires \"POST\" (empty indicates \"GET\").")
 	apitype := flag.String("searchType", "github", "type of the search engine. \"github\", \"gitlab\", \"hound\", \"internal-use\"")
@@ -195,7 +195,7 @@ func main() {
 	log.Println(args)
 
 	if !*cli {
-		serve(*at, *collect, toSearch(apiurl, apipost, apitype, *nsw))
+		serve(*at, *collect, toSearch(apiurl, apipost, apitype, except, *nsw))
 	} else {
 		data, err := ioutil.ReadFile(*sfn)
 		if err != nil {

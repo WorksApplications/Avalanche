@@ -61,8 +61,28 @@ func (s dummy) search(api Search, token []string) (*Result, error) {
 	return &r, nil
 }
 
+func isIn(except, words []string) bool {
+	for _, e := range except {
+		for _, w := range words {
+			if e == w {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func (api Search) Runner(name string) {
 	for r := range api.RunReq {
+		if isIn(api.Except, r.Keywords) {
+			r.ResCh <- Result{
+				Code: make([]Code, 0),
+				Ref:  "",
+				Line: 0,
+				Err:  fmt.Errorf("Skipped"),
+			}
+			continue
+		}
 		t := time.Now()
 		res, err := api.run(r.Keywords, r.Engine)
 
