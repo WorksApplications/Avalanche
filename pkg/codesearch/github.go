@@ -10,7 +10,7 @@ import (
 /* For reference. Not gonna tested soon... */
 type github struct{}
 
-func (s github) search(api Search, token []string) (*Result, error) {
+func (s github) search(api Search, token, hints []string) (*Result, error) {
 	var u bytes.Buffer
 	//var body []byte
 	/* serialize tokens */

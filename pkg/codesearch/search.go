@@ -22,6 +22,7 @@ const (
 
 type Request struct {
 	Keywords []string
+	Hints    []string
 	Engine   EngineType
 	ResCh    chan Result
 }
@@ -53,12 +54,12 @@ type searchEngine interface {
 	//    isMatchFeature([]byte) bool
 	//    getCode([]byte) []Code
 	// getcached...
-	search(Search, []string) (*Result, error)
+	search(Search, []string, []string) (*Result, error)
 }
 
 type dummy struct{}
 
-func (s dummy) search(api Search, token []string) (*Result, error) {
+func (s dummy) search(api Search, token, hints []string) (*Result, error) {
 	r := Result{
 		Code: make([]Code, 0),
 		Ref:  "",
@@ -72,7 +73,7 @@ type fillingCache struct {
 	filler EngineType
 }
 
-func (s fillingCache) search(api Search, token []string) (*Result, error) {
+func (s fillingCache) search(api Search, token, hints []string) (*Result, error) {
 	q := strings.Join(token, "+")
 	if v, found := s.cache.Get(q); found {
 		//log.Print("[cache] hit: k=", q)
@@ -82,7 +83,7 @@ func (s fillingCache) search(api Search, token []string) (*Result, error) {
 			return nil, fmt.Errorf("undecodable cache was hit: k=%s", q)
 		}
 	} else {
-		r, err := api.run(token, s.filler, Undefined)
+		r, err := api.run(token, hints, s.filler, Undefined)
 		if err != nil {
 			return nil, err
 		}
@@ -123,9 +124,9 @@ func (api Search) Runner(name string) {
 		}
 		t := time.Now()
 		if api.Cache != nil {
-			res, err = api.run(r.Keywords, GoCache, r.Engine)
+			res, err = api.run(r.Keywords, r.Hints, GoCache, r.Engine)
 		} else {
-			res, err = api.run(r.Keywords, r.Engine, Undefined)
+			res, err = api.run(r.Keywords, r.Hints, r.Engine, Undefined)
 		}
 
 		if err != nil {
@@ -150,7 +151,7 @@ func (api Search) Runner(name string) {
 	}
 }
 
-func (api Search) run(token []string, e, fe EngineType) (*Result, error) {
+func (api Search) run(token, hints []string, e, fe EngineType) (*Result, error) {
 	var s searchEngine
 	switch e {
 	default:
@@ -164,5 +165,5 @@ func (api Search) run(token []string, e, fe EngineType) (*Result, error) {
 	case GoCache:
 		s = fillingCache{*api.Cache, fe}
 	}
-	return s.search(api, token)
+	return s.search(api, token, hints)
 }

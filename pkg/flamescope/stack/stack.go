@@ -238,7 +238,6 @@ SEARCH:
 	src.Children = orphan
 
 	cur := [2]*Stack{dst, src}
-	log.Print(divestedVal)
 	for cur[0] != cur[1] {
 		cur[0].Value += divestedVal
 		cur[1].Value -= divestedVal

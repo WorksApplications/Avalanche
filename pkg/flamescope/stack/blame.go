@@ -126,13 +126,12 @@ func (s *Stack) toReport(api codesearch.Search, rootVal float64, searchDepth int
 	}
 	//res = assignCode(s.Name, s.Label, api)
 	t := tokenize(s.Name, s.Label)
-	t = t[0:1]
 	/* Example of searchAPI */
 	/* http://hound.lan.tohaheavyindustrials.com/search?files=&repos=&i=nope&q={} */
 	ch := make(chan codesearch.Result, 1)
 
 	/* search request. The result will be received after spawning children's reporting. */
-	api.RunReq <- codesearch.Request{t, eng, ch}
+	api.RunReq <- codesearch.Request{t[0:1], t[1:], eng, ch}
 
 	cs := make([]Report, len(s.Children))
 	for i, c := range s.Children {

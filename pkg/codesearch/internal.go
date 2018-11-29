@@ -17,8 +17,9 @@ type internalResult struct {
 	Hits    int `json:"hits"`
 	Results []struct {
 		FilePaths []struct {
-			Project string `json:"project"`
-			GitLink string `json:"git_link"`
+			Project  string `json:"project"`
+			FilePath string `json:"file_path"`
+			GitLink  string `json:"git_link"`
 		} `json:"filePaths"`
 		Snippet struct {
 			Code string `json:"code"`
@@ -29,31 +30,38 @@ type internalResult struct {
 	Requrl string `json:"-"`
 }
 
-/*
-type Code struct {
-	Snip      string `json:"snippet"`
-	Link      string `json:"link"`
-	Highlight bool   `json:"highlight"`
-}
-
-type searchResult struct {
-	Code []Code
-	Ref  string
-	Line int
-}
-*/
-
-func getRelevantResult(i *internalResult) (int, bool) {
+func getRelevantResult(i *internalResult, hints []string) (int, bool) {
 	/* No suitable match found */
 	if len(i.Results) == 0 {
 		return 0, false
 	}
+
+	max_score := 0
+	ret := 0
+	for i, r := range i.Results {
+		score := 0
+		for _, p := range r.FilePaths {
+			/* For the most cases, the length of r.FilePaths is one (merely, two or three) */
+			ts := strings.Split(p.FilePath, "/.")
+			for _, t := range ts {
+				for _, h := range hints {
+					if t == h {
+						score++
+					}
+				}
+			}
+		}
+		if max_score < score {
+			ret = i
+			max_score = score
+		}
+	}
 	/* XXX */
-	return 0, true
+	return ret, true
 }
 
-func (i *internalResult) toResult() *Result {
-	p, ok := getRelevantResult(i)
+func (i *internalResult) toResult(token []string) *Result {
+	p, ok := getRelevantResult(i, token)
 
 	c := make([]Code, 1)
 	r := Result{
@@ -68,7 +76,7 @@ func (i *internalResult) toResult() *Result {
 	return &r
 }
 
-func (s internal) search(api Search, token []string) (*Result, error) {
+func (s internal) search(api Search, token, hints []string) (*Result, error) {
 	var u bytes.Buffer
 	var d bytes.Buffer
 	var r internalResult
@@ -96,5 +104,5 @@ func (s internal) search(api Search, token []string) (*Result, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse search result: %+v (%s)", err, u.String())
 	}
-	return r.toResult(), nil
+	return r.toResult(hints), nil
 }

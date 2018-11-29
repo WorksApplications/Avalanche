@@ -11,12 +11,12 @@ func TestRunner(t *testing.T) {
 	except := make([]string, 0)
 	url, _ := template.New("url").Parse("")
 	data, _ := template.New("data").Parse("")
-	s := Search{url, data, Undefined, ch, except}
+	s := Search{url, data, Undefined, ch, except, nil}
 	go s.Runner("test-1")
 
 	token := make([]string, 0)
 	rc := make(chan Result)
-	s.RunReq <- Request{token, Undefined, rc}
+	s.RunReq <- Request{token, token, Undefined, rc}
 
 	timer := time.NewTimer(1 * time.Second)
 
