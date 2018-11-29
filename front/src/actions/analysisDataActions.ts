@@ -61,12 +61,16 @@ function snapshotInfoConvert(snapshot: Snapshot): ISnapshotInfo {
 
 export interface IPerfCallTree {
   name: string;
+  totalRatio: number;
+  immediateRatio: number;
   children: IPerfCallTree[];
 }
 
 function perfCallTreeConvert(report: Report): IPerfCallTree {
   return {
     name: report.name!,
+    totalRatio: report.total_ratio!,
+    immediateRatio: report.immidiate_ratio!,
     children: report.children ? report.children.map(perfCallTreeConvert) : []
   };
 }

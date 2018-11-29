@@ -24,13 +24,15 @@ export interface IHeatMapInfo {
 }
 
 export interface IPerfCallTreeElementData {
-  id: string;
-  parentId?: string;
+  id: number;
+  parentId?: number;
   label: string;
-  childIds: string[];
+  childIds: number[];
+  immediateRatio: number;
+  totalRatio: number;
 }
 
-export type IPerfCallTreeData = Map<string, IPerfCallTreeElementData>;
+export type IPerfCallTreeData = IPerfCallTreeElementData[];
 
 export interface IPerfCallTreeInfo {
   data?: IPerfCallTreeData;

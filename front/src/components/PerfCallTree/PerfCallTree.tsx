@@ -2,20 +2,22 @@ import * as React from "react";
 import styles from "./PerfCallTree.scss";
 
 export interface ITreeElement {
-  parentId?: string;
-  childIds: string[];
+  parentId?: number;
+  childIds: number[];
   label: string;
-  id: string;
+  totalRatio: number;
+  immediateRatio: number;
+  id: number;
 }
 
 export interface IProperty {
-  treeMap: Map<string, ITreeElement>;
-  targetId?: string;
+  treeMap: ITreeElement[];
+  targetId?: number;
 
-  onTargetChanged?(targetId: string): void;
+  onTargetChanged?(targetId: number): void;
 }
 
-const initialState = { targetId: null as string | null };
+const initialState = { targetId: null as number | null };
 type State = Readonly<typeof initialState>;
 
 class PerfCallTree extends React.Component<IProperty, State> {
@@ -37,14 +39,12 @@ class PerfCallTree extends React.Component<IProperty, State> {
 
   public render() {
     let elementToShowAsRoot =
-      this.state.targetId && this.props.treeMap.get(this.state.targetId);
+      this.state.targetId !== null && this.props.treeMap[this.state.targetId];
     if (
       elementToShowAsRoot &&
       typeof elementToShowAsRoot.parentId !== "undefined"
     ) {
-      elementToShowAsRoot = this.props.treeMap.get(
-        elementToShowAsRoot.parentId
-      );
+      elementToShowAsRoot = this.props.treeMap[elementToShowAsRoot.parentId];
     }
 
     return (
@@ -58,19 +58,22 @@ class PerfCallTree extends React.Component<IProperty, State> {
     return (
       <div className={styles.element}>
         <div
-          className={styles.label}
+          className={[
+            styles.label,
+            element.id === this.state.targetId ? styles.targetLabel : undefined
+          ].join(" ")}
           onClick={this.onElementClick}
           data-elementid={element.id}
         >
           {element.label}
-          {element.id === this.state.targetId && "!"}
         </div>
         <ul className={styles.childList}>
           {remainsDepth > 1 &&
             element.childIds.map(c => {
-              const ce = this.props.treeMap.get(c);
+              const ce = this.props.treeMap[c];
               return (
-                ce && (
+                ce &&
+                element.totalRatio * 0.1 < ce.totalRatio && ( // only shows 10%
                   <li className={styles.child} key={ce.id}>
                     {this.renderTreeElement(ce, remainsDepth - 1)}
                   </li>
@@ -85,7 +88,7 @@ class PerfCallTree extends React.Component<IProperty, State> {
   private onElementClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
 
-    const id = e.currentTarget.dataset.elementid;
+    const id = parseInt(e.currentTarget.dataset.elementid!, 10);
 
     if (this.state.targetId !== id) {
       this.setState({ targetId: id! });

@@ -1,7 +1,8 @@
 @import "../../common";
 
 .wrap {
-  font-size: $font-size-normal;
+  font-size: $font-size-smaller;
+  min-height: $base-space * 15;
 }
 
 .element {
@@ -11,7 +12,14 @@
 .label {
   display: inline-block;
   padding: $base-space / 2;
-  border: 1px solid black;
+  border: 1px solid $border-color-light;
+  background-color: $bg-color-white;
+  box-shadow: $layer-shadow-1;
+  white-space: nowrap;
+}
+
+.targetLabel {
+  border-color: $color-primary;
 }
 
 .childList {
@@ -25,6 +33,6 @@
   display: block;
 
   & > .element {
-    padding-top: $base-space;
+    padding-top: $base-space * 1.5;
   }
 }

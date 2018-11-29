@@ -11,60 +11,94 @@ const commonWrapStyle: React.CSSProperties = {
   backgroundColor: "white"
 };
 
-function generateBinaryTree(
-  depth: number,
-  rootLabel: string
-): Map<string, ITreeElement> {
-  const map = new Map<string, ITreeElement>();
+function generateBinaryTree(depth: number, rootLabel: string): ITreeElement[] {
+  const array: ITreeElement[] = [];
+  let counter = 0;
   function generateBinaryTree_(
     depthInternal: number,
     label: string,
-    parentId?: string
-  ): void {
-    const id = label;
-    const body: ITreeElement = { id, parentId, label, childIds: [] };
-    map.set(label, body);
+    parentId?: number
+  ): number {
+    const id = counter;
+    const body: ITreeElement = {
+      id,
+      parentId,
+      label,
+      childIds: [],
+      immediateRatio: Math.pow(1 / 2, depth - depthInternal),
+      totalRatio: Math.pow(1 / 2, depth - depthInternal - 1)
+    };
+    array.push(body);
+    counter++;
     if (depthInternal > 0) {
-      generateBinaryTree_(depthInternal - 1, label + "-l", id);
-      generateBinaryTree_(depthInternal - 1, label + "-r", id);
-      body.childIds.push(label + "-l", label + "-r");
+      const leftId = generateBinaryTree_(
+        depthInternal - 1,
+        label + "/left",
+        id
+      );
+      const rightId = generateBinaryTree_(
+        depthInternal - 1,
+        label + "/right",
+        id
+      );
+      body.childIds.push(leftId, rightId);
     }
+    return id;
   }
 
   generateBinaryTree_(depth - 1, rootLabel, undefined);
-  return map;
+  return array;
 }
 
-function generateTernaryTree(
-  depth: number,
-  rootLabel: string
-): Map<string, ITreeElement> {
-  const map = new Map<string, ITreeElement>();
+function generateTernaryTree(depth: number, rootLabel: string): ITreeElement[] {
+  const array: ITreeElement[] = [];
+  let counter = 0;
   function generateTernaryTree_(
     depthInternal: number,
     label: string,
-    parentId?: string
-  ): void {
-    const id = label;
-    const body: ITreeElement = { id, parentId, label, childIds: [] };
-    map.set(label, body);
-    if (depthInternal > 1) {
-      generateTernaryTree_(depthInternal - 1, label + "-l", id);
-      generateTernaryTree_(depthInternal - 1, label + "-m", id);
-      generateTernaryTree_(depthInternal - 1, label + "-r", id);
-      body.childIds.push(label + "-l", label + "-m", label + "-r");
+    parentId?: number
+  ): number {
+    const id = counter;
+    const body: ITreeElement = {
+      id,
+      parentId,
+      label,
+      childIds: [],
+      immediateRatio: Math.pow(1 / 3, depth - depthInternal),
+      totalRatio: Math.pow(1 / 3, depth - depthInternal - 1)
+    };
+    array.push(body);
+    counter++;
+    if (depthInternal > 0) {
+      const leftId = generateTernaryTree_(
+        depthInternal - 1,
+        label + "/left",
+        id
+      );
+      const middleId = generateTernaryTree_(
+        depthInternal - 1,
+        label + "/middle",
+        id
+      );
+      const rightId = generateTernaryTree_(
+        depthInternal - 1,
+        label + "/right",
+        id
+      );
+      body.childIds.push(leftId, middleId, rightId);
     }
+    return id;
   }
 
   generateTernaryTree_(depth - 1, rootLabel, undefined);
-  return map;
+  return array;
 }
 
 storiesOf("PerfCallTree", module)
   .add("Empty", () => (
     <div style={commonWrapStyle}>
       <PerfCallTree
-        treeMap={new Map<string, ITreeElement>()}
+        treeMap={[]}
         onTargetChanged={action("Target is changed")}
       />
     </div>
@@ -72,8 +106,8 @@ storiesOf("PerfCallTree", module)
   .add("Binary tree", () => (
     <div style={commonWrapStyle}>
       <PerfCallTree
-        treeMap={generateBinaryTree(5, "e")}
-        targetId={"e"}
+        treeMap={generateBinaryTree(7, "Lcom/example/avalanche")}
+        targetId={0}
         onTargetChanged={action("Target is changed")}
       />
     </div>
@@ -81,8 +115,8 @@ storiesOf("PerfCallTree", module)
   .add("Ternary tree", () => (
     <div style={commonWrapStyle}>
       <PerfCallTree
-        treeMap={generateTernaryTree(5, "e")}
-        targetId={"e"}
+        treeMap={generateTernaryTree(7, "Lcom/example/avalanche")}
+        targetId={0}
         onTargetChanged={action("Target is changed")}
       />
     </div>

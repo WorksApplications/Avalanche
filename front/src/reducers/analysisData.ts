@@ -74,17 +74,19 @@ export function convertHeatMap(
 }
 
 export function convertPerfCallTree(tree: IPerfCallTree): IPerfCallTreeData {
-  const map: IPerfCallTreeData = new Map();
+  const array: IPerfCallTreeData = [];
   let counter = 0;
-  function convert_(node: IPerfCallTree, parentId?: string): string {
-    const id = counter.toString();
+  function convert_(node: IPerfCallTree, parentId?: number): number {
+    const id = counter;
     const body: IPerfCallTreeElementData = {
       id,
       parentId,
       label: node.name,
+      immediateRatio: node.immediateRatio,
+      totalRatio: node.totalRatio,
       childIds: []
     };
-    map.set(id, body);
+    array.push(body);
     counter++;
     for (const t of node.children) {
       const childId = convert_(t, id);
@@ -94,7 +96,7 @@ export function convertPerfCallTree(tree: IPerfCallTree): IPerfCallTreeData {
   }
 
   convert_(tree);
-  return map;
+  return array;
 }
 
 function paramExists<K extends string>(
