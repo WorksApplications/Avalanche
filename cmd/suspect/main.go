@@ -201,7 +201,7 @@ func main() {
 	apitype := flag.String("searchType", "github", "type of the search engine. \"github\", \"gitlab\", \"hound\", \"internal-use\"")
 	maxdepth := flag.Int("searchMaxDepth", 4, "Search worker constraint: The max depth from the closed-up node to be searched")
 	minratio := flag.Float64("searchMinRatio", 0.1, "Search worker constraint: The minimum number of ratio to be searched")
-	http := flag.String("http", "localhost:8080", "host:port")
+	http := flag.String("http", ":8080", "host:port")
 	collect := flag.String("collect", "http://collect:8080", "location for collect")
 	flag.Parse()
 	args := flag.Args()
