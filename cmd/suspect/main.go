@@ -195,21 +195,20 @@ func main() {
 	sfn := flag.String("src", "test/stack", "file to read")
 	dfn := flag.String("dst", "test/filtered", "file to write")
 	cli := flag.Bool("cli", false, "run as cli(don't serve)")
-	port := flag.Int("port", 8080, "Port for this server")
 	except := flag.String("except", "sun,tomcat", "Keywords not for search with your repository(exact match with a token(eg: each part of FQDN for Java))")
 	apiurl := flag.String("searchUrl", "https://github.com/search/code?q={{.}}", "source code search API")
 	apipost := flag.String("searchPost", "", "The data to send to the source code search API if it requires \"POST\" (empty indicates \"GET\").")
 	apitype := flag.String("searchType", "github", "type of the search engine. \"github\", \"gitlab\", \"hound\", \"internal-use\"")
 	maxdepth := flag.Int("searchMaxDepth", 4, "Search worker constraint: The max depth from the closed-up node to be searched")
 	minratio := flag.Float64("searchMinRatio", 0.1, "Search worker constraint: The minimum number of ratio to be searched")
-	at := flag.String("http", "localhost:8080", "host:port")
+	http := flag.String("http", "localhost:8080", "host:port")
 	collect := flag.String("collect", "http://collect:8080", "location for collect")
 	flag.Parse()
 	args := flag.Args()
 	log.Println(args)
 
 	if !*cli {
-		serve(*at, *collect, toSearch(apiurl, apipost, apitype, except, *nsw, *maxdepth, *minratio))
+		serve(*http, *collect, toSearch(apiurl, apipost, apitype, except, *nsw, *maxdepth, *minratio))
 	} else {
 		data, err := ioutil.ReadFile(*sfn)
 		if err != nil {
