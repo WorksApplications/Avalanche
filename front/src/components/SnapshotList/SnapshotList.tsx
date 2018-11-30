@@ -43,7 +43,8 @@ export interface IItemProperty {
 
 const initialItemState = {
   isGraphOpen: null as boolean | null,
-  isTreeOpen: false
+  isTreeOpen: false,
+  previousRange: null as { start: number; end: number } | null
 };
 
 type ItemState = Readonly<typeof initialItemState>;
@@ -128,6 +129,7 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
                 <HeatLineChart
                   {...this.props.heatMap}
                   hash={this.props.uuid}
+                  previousRange={this.state.previousRange || undefined}
                   onRangeSelect={this.onRangeSelectWrap}
                 />
               </div>
@@ -189,6 +191,7 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
   };
 
   private onRangeSelectWrap = (start: number, end: number) => {
+    this.setState({ previousRange: { start, end } });
     this.props.onRangeSelect(this.props.uuid, this.props.heatMapId, start, end);
     this.setState({ isTreeOpen: true });
   };
