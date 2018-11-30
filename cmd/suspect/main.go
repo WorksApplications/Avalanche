@@ -195,6 +195,7 @@ func main() {
 	sfn := flag.String("src", "test/stack", "file to read")
 	dfn := flag.String("dst", "test/filtered", "file to write")
 	cli := flag.Bool("cli", false, "run as cli(don't serve)")
+	port := flag.Int("port", 8080, "Port for this server")
 	except := flag.String("except", "sun,tomcat", "Keywords not for search with your repository(exact match with a token(eg: each part of FQDN for Java))")
 	apiurl := flag.String("searchUrl", "https://github.com/search/code?q={{.}}", "source code search API")
 	apipost := flag.String("searchPost", "", "The data to send to the source code search API if it requires \"POST\" (empty indicates \"GET\").")
