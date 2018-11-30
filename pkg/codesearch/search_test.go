@@ -11,7 +11,7 @@ func TestRunner(t *testing.T) {
 	except := make([]string, 0)
 	url, _ := template.New("url").Parse("")
 	data, _ := template.New("data").Parse("")
-	s := Search{url, data, Undefined, ch, except, nil}
+	s := Search{url, data, Undefined, ch, except, nil, 0.1, 4}
 	go s.Runner("test-1")
 
 	token := make([]string, 0)
