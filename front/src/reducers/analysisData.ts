@@ -7,7 +7,9 @@ import {
   getEnvironmentsOfAppOperation,
   getHeatMapOperation,
   getLatestSnapshotsOperation,
+  getPerfCallTreeOperation,
   getRunningPodsOperation,
+  IPerfCallTree,
   postSnapshotOperation
 } from "../actions";
 import { IHeatMap } from "../clients/heatMapClient";
@@ -15,6 +17,9 @@ import {
   IAnalysisDataState,
   IHeatMapData,
   IHeatMapInfo,
+  IPerfCallTreeData,
+  IPerfCallTreeElementData,
+  IPerfCallTreeInfo,
   IPodInfo,
   ISnapshotInfo
 } from "../store";
@@ -28,7 +33,8 @@ const INIT: IAnalysisDataState = {
   selectedPod: null,
   pods: [],
   snapshots: [],
-  heatMaps: new Map<string, IHeatMapInfo>()
+  heatMaps: new Map<string, IHeatMapInfo>(),
+  perfCallTrees: new Map<string, IPerfCallTreeInfo>()
 };
 
 export function convertHeatMap(
@@ -65,6 +71,38 @@ export function convertHeatMap(
     numColumns: heatMap.numColumns,
     numRows: heatMap.numRows
   };
+}
+
+export function convertPerfCallTree(tree: IPerfCallTree): IPerfCallTreeData {
+  const array: IPerfCallTreeData = [];
+  let counter = 0;
+
+  function convert_(
+    node: IPerfCallTree,
+    parentTotalRatio: number,
+    parentId?: number
+  ): number {
+    const id = counter;
+    const body: IPerfCallTreeElementData = {
+      id,
+      parentId,
+      label: node.name,
+      relativeRatio: node.totalRatio / parentTotalRatio,
+      immediateRatio: node.immediateRatio,
+      totalRatio: node.totalRatio,
+      childIds: []
+    };
+    array.push(body);
+    counter++;
+    for (const t of node.children) {
+      const childId = convert_(t, node.totalRatio, id);
+      body.childIds.push(childId);
+    }
+    return id;
+  }
+
+  convert_(tree, 1.0);
+  return array;
 }
 
 function paramExists<K extends string>(
@@ -235,6 +273,31 @@ export function analysisData(
       ...state,
       heatMaps: newMaps
     };
+  }
+
+  if (isType(action, getPerfCallTreeOperation.async.started)) {
+    const key = action.payload.snapshotId;
+
+    const newTrees = new Map(state.perfCallTrees);
+    newTrees.set(key, { status: "loading" }); // purge previous data
+    return { ...state, perfCallTrees: newTrees };
+  }
+  if (isType(action, getPerfCallTreeOperation.async.done)) {
+    const perfCallTree = action.payload.result.tree;
+
+    const key = action.payload.params.snapshotId;
+    const newTrees = new Map(state.perfCallTrees);
+    newTrees.set(key, {
+      status: "loaded",
+      data: convertPerfCallTree(perfCallTree)
+    });
+    return { ...state, perfCallTrees: newTrees };
+  }
+  if (isType(action, getPerfCallTreeOperation.async.failed)) {
+    const key = action.payload.params.snapshotId;
+    const newTrees = new Map(state.perfCallTrees);
+    newTrees.set(key, { status: "failed" });
+    return { ...state, perfCallTrees: newTrees };
   }
 
   return state;

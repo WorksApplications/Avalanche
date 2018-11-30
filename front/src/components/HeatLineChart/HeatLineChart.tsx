@@ -9,6 +9,7 @@ interface IProperty {
   numColumns: number;
   numRows: number;
   hash: string;
+  previousRange?: { start: number; end: number };
 
   onRangeSelect(start: number, end: number): void;
 }
@@ -76,6 +77,10 @@ function normalizeClampInSvg(x: number, width: number) {
   return val < 0 ? 0 : 1 < val ? 1 : val;
 }
 
+function sort2Item(left: number, right: number) {
+  return left < right ? [left, right] : [right, left];
+}
+
 // currently, colored with relative value
 class HeatLineChart extends React.Component<IProperty, State> {
   public readonly state: State = initialState;
@@ -122,6 +127,7 @@ class HeatLineChart extends React.Component<IProperty, State> {
 
   public componentDidMount() {
     document.addEventListener("click", this.onClickOutside, true);
+    this.forceUpdate(); // this is hack. try render after svgRef is set :(
   }
 
   public componentWillUnmount() {
@@ -142,14 +148,13 @@ class HeatLineChart extends React.Component<IProperty, State> {
           onMouseUp={this.onGraphMouseUp}
           onMouseMove={this.onGraphMove}
           onContextMenu={this.onGraphContextMenu}
-          onClick={this.onGraphClick}
         >
           <defs>
             {this.renderChartDef()}
             {this.renderSpikeDef()}
           </defs>
           {this.renderChartBody()}
-          {this.renderSelectingRange()}
+          {this.renderSelectingRangeAndIndicator()}
           {this.renderSpikeBodies()}
         </svg>
         {this.renderSpikeTooltip()}
@@ -229,13 +234,16 @@ class HeatLineChart extends React.Component<IProperty, State> {
     );
   }
 
-  private renderSelectingRange() {
-    if (!this.state.rangeSelectionTooltip) {
+  private renderSelectingRangeAndIndicator() {
+    if (!this.state.rangeSelectionTooltip && !this.props.previousRange) {
       // empty group
       return <g />;
     }
 
-    if (this.state.rangeStart === null || this.state.rangeEnd === null) {
+    if (
+      this.state.rangeSelectionTooltip &&
+      (this.state.rangeStart === null || this.state.rangeEnd === null)
+    ) {
       // in SVG coordinate
       const beginX =
         this.state.rangeSelectionTooltip.normalizedPositionX *
@@ -253,39 +261,48 @@ class HeatLineChart extends React.Component<IProperty, State> {
               strokeWidth={strokeWidthInSvg * 0.8}
             />
           )}
+          {this.props.previousRange &&
+            this.renderSelectingRange(
+              this.props.previousRange.start,
+              this.props.previousRange.end
+            )}
         </g>
       );
     }
 
-    let normalizedRangeStart;
-    let normalizedRangeEnd;
-    if (this.state.rangeStart < this.state.rangeEnd) {
-      normalizedRangeStart = this.state.rangeStart;
-      normalizedRangeEnd = this.state.rangeEnd;
-    } else {
-      normalizedRangeStart = this.state.rangeEnd;
-      normalizedRangeEnd = this.state.rangeStart;
-    }
-    const point1 =
-      normalizedRangeStart * (widthInSvg - paddingInSvg * 2) + paddingInSvg;
-    const point2 =
-      normalizedRangeEnd * (widthInSvg - paddingInSvg * 2) + paddingInSvg;
+    const start =
+      this.state.rangeStart !== null
+        ? this.state.rangeStart
+        : this.props.previousRange!.start;
+    const end =
+      this.state.rangeEnd !== null
+        ? this.state.rangeEnd
+        : this.props.previousRange!.end;
 
-    // range in SVG coordinate
-    const range = { x: point1, width: point2 - point1 };
+    return <g>{this.renderSelectingRange(start, end)}</g>;
+  }
+
+  // noinspection JSMethodCanBeStatic
+  private renderSelectingRange(rangeStart: number, rangeEnd: number) {
+    const [normalizedRangeStart, normalizedRangeEnd] = sort2Item(
+      rangeStart,
+      rangeEnd
+    );
+    const left =
+      normalizedRangeStart * (widthInSvg - paddingInSvg * 2) + paddingInSvg;
+    const right =
+      normalizedRangeEnd * (widthInSvg - paddingInSvg * 2) + paddingInSvg;
 
     // colored rectangle during selecting
     return (
-      <g>
-        <rect
-          height={heightInSvg}
-          fill="#dc1f5f40" /* hsl(340, 75, 50) + a */
-          stroke="#b2194c" /* hsl(340, 75, 50) */
-          strokeWidth={strokeWidthInSvg * 0.8}
-          x={range.x}
-          width={range.width}
-        />
-      </g>
+      <rect
+        height={heightInSvg}
+        fill="#dc1f5f40" /* hsl(340, 75, 50) + a */
+        stroke="#b2194c" /* hsl(340, 75, 50) */
+        strokeWidth={strokeWidthInSvg * 0.8}
+        x={left}
+        width={right - left}
+      />
     );
   }
 
@@ -389,22 +406,20 @@ class HeatLineChart extends React.Component<IProperty, State> {
 
   private renderRangeLengthTooltip = () => {
     if (
-      this.state.rangeStart === null ||
-      this.state.rangeEnd === null ||
+      ((this.state.rangeStart === null || this.state.rangeEnd === null) &&
+        !this.props.previousRange) ||
       !this.svgRef.current
     ) {
       return;
     }
 
-    let normalizedRangeStart;
-    let normalizedRangeEnd;
-    if (this.state.rangeStart < this.state.rangeEnd) {
-      normalizedRangeStart = this.state.rangeStart;
-      normalizedRangeEnd = this.state.rangeEnd;
-    } else {
-      normalizedRangeStart = this.state.rangeEnd;
-      normalizedRangeEnd = this.state.rangeStart;
-    }
+    const [normalizedRangeStart, normalizedRangeEnd] =
+      this.state.rangeStart !== null && this.state.rangeEnd !== null
+        ? sort2Item(this.state.rangeStart, this.state.rangeEnd)
+        : sort2Item(
+            this.props.previousRange!.start,
+            this.props.previousRange!.end
+          );
 
     const point1 =
       normalizedRangeStart * (widthInSvg - paddingInSvg * 2) + paddingInSvg;
@@ -520,24 +535,12 @@ class HeatLineChart extends React.Component<IProperty, State> {
       const rangeEnd = normalizeClampInSvg(e.nativeEvent.offsetX, svgWidth);
 
       // finish selecting range
-      let startPoint;
-      let endPoint;
-      if (this.state.rangeStart < rangeEnd) {
-        startPoint = this.state.rangeStart;
-        endPoint = rangeEnd;
-      } else {
-        startPoint = rangeEnd;
-        endPoint = this.state.rangeStart;
-      }
+      const [startPoint, endPoint] = sort2Item(this.state.rangeStart, rangeEnd);
 
       // fire event with normalized coordinate
       this.props.onRangeSelect(startPoint, endPoint);
 
-      this.setState({
-        isSelecting: false,
-        rangeStart: null,
-        rangeEnd: null
-      });
+      this.setState({ isSelecting: false, rangeStart: null, rangeEnd: null });
     }
   };
 
@@ -585,10 +588,6 @@ class HeatLineChart extends React.Component<IProperty, State> {
         }); // does not put point
       }
     }
-  };
-
-  private onGraphClick = (e: React.MouseEvent<SVGElement>) => {
-    e.stopPropagation(); // let not close
   };
 
   private onMouseLeave = () => {

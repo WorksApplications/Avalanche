@@ -29,10 +29,12 @@ generated_files/stub: api/collect.yml
 	touch generated_files/stub
 
 swagger-client-gen:
-	java -jar ./swagger-codegen-cli.jar generate -i ./api/collect.yml -l typescript-fetch -o ./front/src/generated/collect
+	java -jar ./swagger-codegen-cli.jar generate -i ./api/collect.yml -l typescript-fetch -o ./front/src/generated/collect -D modelPropertyNaming=original
+	java -jar ./swagger-codegen-cli.jar generate -i ./api/suspect.yml -l typescript-fetch -o ./front/src/generated/suspect -D modelPropertyNaming=original
 
 swagger-mock-gen:
 	java -jar ./swagger-codegen-cli.jar generate -i ./api/collect.yml -l nodejs-server -o ./front/mock/collect
+	java -jar ./swagger-codegen-cli.jar generate -i ./api/suspect.yml -l nodejs-server -o ./front/mock/suspect
 
 front/public/app.js:
 	cd front && yarn build

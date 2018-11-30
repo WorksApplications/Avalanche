@@ -16,11 +16,28 @@ export interface IHeatMapData {
   numRows: number;
 }
 
-export type HeatMapState = "empty" | "loading" | "loaded" | "failed";
+export type DataState = "empty" | "loading" | "loaded" | "failed";
 
 export interface IHeatMapInfo {
   data?: IHeatMapData;
-  status: HeatMapState;
+  status: DataState;
+}
+
+export interface IPerfCallTreeElementData {
+  id: number;
+  parentId?: number;
+  label: string;
+  childIds: number[];
+  relativeRatio: number;
+  immediateRatio: number;
+  totalRatio: number;
+}
+
+export type IPerfCallTreeData = IPerfCallTreeElementData[];
+
+export interface IPerfCallTreeInfo {
+  data?: IPerfCallTreeData;
+  status: DataState;
 }
 
 export interface ISnapshotInfo {
@@ -76,6 +93,7 @@ export interface IAnalysisDataState {
   readonly pods: IPodInfo[];
   readonly snapshots: ISnapshotInfo[];
   readonly heatMaps: Map<string, IHeatMapInfo>;
+  readonly perfCallTrees: Map<string, IPerfCallTreeInfo>;
 }
 
 export interface IToastNotificationState {

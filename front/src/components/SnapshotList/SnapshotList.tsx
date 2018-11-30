@@ -1,5 +1,6 @@
 // tslint:disable:max-classes-per-file
 import * as React from "react";
+import { IPerfCallTreeData } from "../../store";
 import { HeatLineChartProperty } from "../HeatLineChart";
 import Link from "../Link";
 import Spinner from "../Spinner";
@@ -7,6 +8,10 @@ import styles from "./SnapshotList.scss";
 
 const HeatLineChart = React.lazy(() =>
   import(/* webpackChunkName: "heat-line-chart" */ "../HeatLineChart")
+);
+
+const PerfCallTree = React.lazy(() =>
+  import(/* webpackChunkName: "perf-call-tree" */ "../PerfCallTree")
 );
 
 type HeatMapData = HeatLineChartProperty & {
@@ -23,14 +28,23 @@ export interface IItemProperty {
   heatMap?: HeatMapData;
   heatMapId: string;
   heatMapStatus: "empty" | "loading" | "loaded" | "failed";
+  perfCallTree?: IPerfCallTreeData;
+  perfCallTreeStatus: "empty" | "loading" | "loaded" | "failed";
   openByDefault?: boolean;
 
   getHeatMap(snapshotId: string, heatMapId: string): void;
-  onRangeSelect(heatMapId: string, start: number, end: number): void;
+  onRangeSelect(
+    snapshotId: string,
+    heatMapId: string,
+    start: number,
+    end: number
+  ): void;
 }
 
 const initialItemState = {
-  isGraphOpen: null as boolean | null
+  isGraphOpen: null as boolean | null,
+  isTreeOpen: false,
+  previousRange: null as { start: number; end: number } | null
 };
 
 type ItemState = Readonly<typeof initialItemState>;
@@ -67,8 +81,8 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
 
   public render() {
     return (
-      <tbody onClick={this.onRowClick} data-testid="snapshot">
-        <tr>
+      <tbody data-testid="snapshot">
+        <tr onClick={this.onInfoRowClick}>
           <td>{this.props.uuid}</td>
           <td>{this.props.podName}</td>
           <td>{this.props.environment}</td>
@@ -88,15 +102,20 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
         {this.state.isGraphOpen && (
           <tr>
             <td colSpan={6} className={styles.graphArea}>
-              {this.renderBody()}
+              {this.renderGraphBody()}
             </td>
+          </tr>
+        )}
+        {this.state.isGraphOpen && this.state.isTreeOpen && (
+          <tr>
+            <td colSpan={6}>{this.renderTreeBody()}</td>
           </tr>
         )}
       </tbody>
     );
   }
 
-  private renderBody() {
+  private renderGraphBody() {
     switch (this.props.heatMapStatus) {
       case "empty":
         return <div />;
@@ -110,6 +129,7 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
                 <HeatLineChart
                   {...this.props.heatMap}
                   hash={this.props.uuid}
+                  previousRange={this.state.previousRange || undefined}
                   onRangeSelect={this.onRangeSelectWrap}
                 />
               </div>
@@ -127,7 +147,38 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
     }
   }
 
-  private onRowClick = () => {
+  private renderTreeBody() {
+    switch (this.props.perfCallTreeStatus) {
+      case "empty":
+        return <div />;
+      case "loading":
+        return spinner;
+      case "loaded":
+        if (this.props.perfCallTree) {
+          const targetId = this.props.perfCallTree.keys().next().value; // root element first
+          return (
+            <React.Suspense fallback={spinner}>
+              <div>
+                <PerfCallTree
+                  treeMap={this.props.perfCallTree}
+                  targetId={targetId}
+                />
+              </div>
+            </React.Suspense>
+          );
+        }
+      // fallthrough if tree === null && status === "loaded
+      // noinspection FallThroughInSwitchStatementJS
+      case "failed":
+        return (
+          <div className={styles.errorMessage}>
+            <span>Failed to load</span>
+          </div>
+        );
+    }
+  }
+
+  private onInfoRowClick = () => {
     const willGraphOpen = !this.state.isGraphOpen;
     if (
       this.props.heatMapStatus === "empty" &&
@@ -140,7 +191,9 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
   };
 
   private onRangeSelectWrap = (start: number, end: number) => {
-    this.props.onRangeSelect(this.props.heatMapId, start, end);
+    this.setState({ previousRange: { start, end } });
+    this.props.onRangeSelect(this.props.uuid, this.props.heatMapId, start, end);
+    this.setState({ isTreeOpen: true });
   };
 }
 

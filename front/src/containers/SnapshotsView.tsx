@@ -8,12 +8,12 @@ import {
   getEnvironmentsOfAppOperation,
   getHeatMapOperation,
   getLatestSnapshotsOperation,
+  getPerfCallTreeOperation,
   toastr
 } from "../actions";
 import AppSelector from "../components/AppSelector";
 import SnapshotFilter from "../components/SnapshotFilter";
 import SnapshotList, { ISnapshotData } from "../components/SnapshotList";
-import { FLAMESCOPE_API_BASE } from "../constants";
 import { operationsToActionCreators } from "../helpers";
 import { IApplicationState, ISnapshotInfo } from "../store";
 import styles from "./SnapshotsView.scss";
@@ -65,7 +65,8 @@ const mapStateToProps = (state: IApplicationState) => ({
   filteringPod: state.analysisData.selectedPod,
   pods: state.analysisData.pods,
   snapshots: sortedSnapshots(state.analysisData.snapshots),
-  heatMaps: state.analysisData.heatMaps
+  heatMaps: state.analysisData.heatMaps,
+  perfCallTrees: state.analysisData.perfCallTrees
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) =>
@@ -77,7 +78,8 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
         getAppsOperation,
         getEnvironmentsOfAppOperation,
         getLatestSnapshotsOperation,
-        getHeatMapOperation
+        getHeatMapOperation,
+        getPerfCallTreeOperation
       })
     },
     dispatch
@@ -141,6 +143,7 @@ export class SnapshotsView extends React.Component<Props> {
     if (this.props.snapshots.length > 0) {
       showingSnapshots = this.props.snapshots.map(x => {
         const heatMap = this.props.heatMaps.get(x.heatMapId);
+        const perfCallTree = this.props.perfCallTrees.get(x.uuid);
         return {
           uuid: x.uuid,
           environment: x.environment || "Unknown",
@@ -151,7 +154,9 @@ export class SnapshotsView extends React.Component<Props> {
           heatMapId: x.heatMapId,
           heatMapStatus: heatMap ? heatMap.status : "empty",
           onRangeSelect: this.onRangeSelectWrap,
-          getHeatMap: this.getHeatMapWrap
+          getHeatMap: this.getHeatMapWrap,
+          perfCallTree: perfCallTree && perfCallTree.data,
+          perfCallTreeStatus: perfCallTree ? perfCallTree.status : "empty"
         };
       });
       if (this.props.filteringEnvironment) {
@@ -213,6 +218,7 @@ export class SnapshotsView extends React.Component<Props> {
   }
 
   private onRangeSelectWrap = (
+    snapshotId: string,
     heatMapId: string,
     normalizedStart: number,
     normalizedEnd: number
@@ -222,14 +228,21 @@ export class SnapshotsView extends React.Component<Props> {
       const start = normalizedStart * heatMap.data.numColumns;
       const startColumn = Math.floor(start);
       const startRow = Math.floor((start - startColumn) * heatMap.data.numRows);
+      const startPosition = startColumn + 0.01 * startRow;
 
       const end = normalizedEnd * heatMap.data.numColumns;
       const endColumn = Math.floor(end);
       const endRow = Math.floor((end - endColumn) * heatMap.data.numRows);
+      const endPosition = endColumn + 0.01 * endRow;
 
-      window.open(
-        `${FLAMESCOPE_API_BASE}/#/heatmap/${heatMapId}/flamegraph/${startColumn}.${startRow}/${endColumn}.${endRow}/`
-      );
+      this.props
+        .getPerfCallTreeOperation({ snapshotId, startPosition, endPosition })
+        .catch(() => {
+          this.props.toastr(
+            `Failed to get perf call tree of ${heatMapId} in [${startPosition}, ${endPosition}].`,
+            "error"
+          );
+        });
     }
   };
 
