@@ -18,40 +18,36 @@
 }
 
 .element {
+  position: relative;
   display: flex;
   justify-content: center;
 }
 
 .label {
-  position: relative;
-  display: inline-flex;
+  display: inline-block;
   height: $base-space * 4;
   padding: $base-space / 2;
-  justify-content: center;
-  align-items: center;
   border: 1px solid $border-color-light;
   background-color: $bg-color-white;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  overflow: hidden;
   box-sizing: border-box;
   transition: box-shadow 0.2s ease;
   box-shadow: $layer-shadow-1;
   border-radius: $border-radius;
   letter-spacing: -0.2px;
+  line-height: $base-space * 3;
 
   &:hover {
     box-shadow: $layer-shadow-2;
 
-    .tooltip {
+    & + .tooltip {
       visibility: visible;
       opacity: 1;
       transition: opacity 0.2s ease-out 0.2s, visibility 0.3s linear 0.2s;
     }
   }
-}
-
-.hiddenLabel {
-  width: $base-space * 6;
-  padding: $base-space/2 0;
 }
 
 .tooltip {
@@ -70,6 +66,7 @@
   transition: opacity 0.2s ease-out, visibility 0.3s linear;
   user-select: none;
   pointer-events: none;
+  z-index: 120;
 }
 
 .targetLabel {
@@ -81,7 +78,7 @@
   // really small
   grid-template-columns: repeat(auto-fit, minmax($base-space * 2, 1fr));
   column-gap: $base-space;
-  margin: 0 $base-space / 2;
+  margin: 0;
   padding: 0;
   width: 100%;
 }
@@ -93,6 +90,7 @@
 
 .center {
   flex: 1;
+  margin: 0 $base-space;
 }
 
 .child {

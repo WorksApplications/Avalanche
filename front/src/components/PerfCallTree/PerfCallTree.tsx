@@ -17,7 +17,7 @@ export interface IProperty {
   onTargetChanged?(targetId: number): void;
 }
 
-type RenderingLabelLevel = "normal" | "classOnly" | "hiddenByDefault";
+type RenderingLabelLevel = "normal" | "classOnly";
 
 const initialState = { targetId: null as number | null };
 type State = Readonly<typeof initialState>;
@@ -74,16 +74,16 @@ class PerfCallTree extends React.Component<IProperty, State> {
         </li>
         <li>
           <div className={styles.left}>
-            {this.renderElementArray(leftElements, true)}
+            {this.renderElementArray(leftElements)}
           </div>
           <div className={styles.center}>
             {this.renderElement(targetElement, "normal")}
           </div>
           <div className={styles.right}>
-            {this.renderElementArray(rightElements, true)}
+            {this.renderElementArray(rightElements)}
           </div>
         </li>
-        <li>{this.renderElementArray(childElements, false)}</li>
+        <li>{this.renderElementArray(childElements)}</li>
       </ul>
     );
   }
@@ -92,9 +92,7 @@ class PerfCallTree extends React.Component<IProperty, State> {
     const tokens = element.label.split("/");
 
     const label =
-      level === "hiddenByDefault"
-        ? `${tokens[tokens.length - 1].substr(0, 5)}..`
-        : level === "classOnly"
+      level === "classOnly"
         ? tokens[tokens.length - 1]
         : tokens.length > 3
         ? `${tokens[0]}/${tokens[1]}/... ${tokens[tokens.length - 1]}`
@@ -106,29 +104,24 @@ class PerfCallTree extends React.Component<IProperty, State> {
         <div
           className={[
             styles.label,
-            element.id === this.state.targetId ? styles.targetLabel : undefined,
-            level === "hiddenByDefault" ? styles.hiddenLabel : undefined
+            element.id === this.state.targetId ? styles.targetLabel : undefined
           ].join(" ")}
           onClick={this.onElementClick}
           data-elementid={element.id}
         >
           {label}
-          <span className={styles.tooltip}>{labelFull}</span>
         </div>
+        <span className={styles.tooltip}>{labelFull}</span>
       </div>
     );
   }
 
-  private renderElementArray(elements: ITreeElement[], isHalfLength: boolean) {
-    const level: RenderingLabelLevel =
-      (isHalfLength && elements.length >= 3) || elements.length >= 5
-        ? "hiddenByDefault"
-        : "classOnly";
+  private renderElementArray(elements: ITreeElement[]) {
     return (
       <ul className={styles.childList}>
         {elements.map(e => (
           <li key={e.id} className={styles.child}>
-            {this.renderElement(e, level)}
+            {this.renderElement(e, "classOnly")}
           </li>
         ))}
       </ul>
