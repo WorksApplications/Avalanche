@@ -9,4 +9,6 @@ imageTags:
     newTag: $GIT_HASH
   - name: /resource_optimization/static
     newTag: $GIT_HASH
+  - name: /resource_optimization/suspect
+    newTag: $GIT_HASH
 
