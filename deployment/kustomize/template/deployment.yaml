@@ -31,3 +31,20 @@ spec:
           - -persistent=/persistent
           - -volatile=/persistent/volatile
           - -flamescope=http://flamescope.internal.worksap.com/#/heatmap/
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: suspect
+spec:
+  template:
+    spec:
+      containers:
+      - name: suspect
+        command:
+          - /suspect
+          - -port=8080
+          - -searchUrl="$INTERNAL_SEARCH_SERVER"
+          - -searchPost="$INTERNAL_SEARCH_POST"
+          - -searchType='internal-use'

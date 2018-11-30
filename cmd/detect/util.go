@@ -1,10 +1,9 @@
-package util
+package main
 
 import (
 	"log"
 	"time"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/detect/parser"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
 )
 
@@ -30,7 +29,7 @@ func dispatch(ic <-chan *detect.Subscription, oc chan<- *detect.Subscription) {
 	for s := range ic {
 		go func(s *detect.Subscription) {
 			log.Printf("[Dispatched worker] Start scan for %s", s.Env)
-			apps, err := parser.Scan(s.Env)
+			apps, err := Scan(s.Env)
 			if err != nil {
 				log.Printf("Error in the scan for %s", err)
 			}

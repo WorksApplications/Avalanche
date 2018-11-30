@@ -1,4 +1,4 @@
-package serverCtx
+package main
 
 import (
 	"encoding/json"

@@ -9,8 +9,6 @@ import (
 	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/restapi/operations"
 	loads "github.com/go-openapi/loads"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/cmd/collect/serverCtx"
-
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -57,7 +55,7 @@ func main() {
 	defer server.Shutdown()
 
 	db := establishDBConn(*dbconf)
-	ctx := serverCtx.ServerCtx{
+	ctx := ServerCtx{
 		Db:         db,
 		Detect:     *detect,
 		Enroll:     *enroll,

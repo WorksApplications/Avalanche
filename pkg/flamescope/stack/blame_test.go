@@ -22,3 +22,30 @@ func TestGetDominantNode(t *testing.T) {
 		t.Fatal()
 	}
 }
+
+func TestTokenize(t *testing.T) {
+	kafka := "Lorg/apache/kafka/common/metrics/MetricConfig;::quota"
+	spring := "Lorg/springframework/aop/framework/ReflectiveMethodInvocation;::proceed"
+	text := "Ljava/text/SimpleDateFormat;::format"
+	vdso := "__vdso_gettimeofday"
+	user := "_ZN2os14javaTimeMillisEv"
+	ss := []struct {
+		name   string
+		label  string
+		expect string
+	}{
+		{"[unknown]", "jit", "[unknown]"}, {kafka, "jit", "MetricConfig"},
+		{"Interpreter", "jit", "Interpreter"}, {spring, "jit", "ReflectiveMethodInvocation"},
+		{vdso, "kernel", "gettimeofday"}, {text, "jit", "SimpleDateFormat"},
+		{user, "user", ""},
+	}
+	for _, s := range ss {
+		ts := tokenize(s.name, s.label)
+		if s.expect == "" {
+			continue
+		}
+		if s.expect != ts[0] {
+			t.Fatal(s, ts)
+		}
+	}
+}

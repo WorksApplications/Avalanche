@@ -13,13 +13,16 @@ front: front/public/app.js
 collect: collect-img
 
 bin/enroll: $(shell find cmd/enroll -name *.go) $(PKG)
-	CGO_ENABLED=0 go build -o bin/enroll cmd/enroll/app.go
+	CGO_ENABLED=0 go build -o bin/enroll cmd/enroll/*.go
 
 bin/suspect: $(shell find cmd/suspect -name *.go) $(PKG)
-	CGO_ENABLED=0 go build -o bin/suspect cmd/suspect/main.go
+	CGO_ENABLED=0 go build -o bin/suspect cmd/suspect/*.go
 
 bin/collect: $(shell find cmd/collect -name *.go) $(PKG) generated_files/stub
-	CGO_ENABLED=0 go build -o bin/collect cmd/collect/server.go
+	CGO_ENABLED=0 go build -o bin/collect cmd/collect/*.go
+
+bin/detect: $(shell find cmd/detect -name *.go) $(PKG)
+	CGO_ENABLED=0 go build -o bin/detect cmd/detect/*.go
 
 #bin/status: $(shell find cmd/status -name *.go) $(PKG) generated_files/stub
 #	CGO_ENABLED=0 go build -o bin/status cmd/status/status.go
@@ -45,9 +48,6 @@ make_stub:
 
 clean:
 	\rm -r front/public/; rm -r bin/; rm -r generated_files/cmd; rm -r generated_files/models; rm -r generated_files/restapi; rm generated_files/stub
-
-bin/detect: $(shell find cmd/detect -name *.go) $(PKG)
-	CGO_ENABLED=0 go build -o bin/detect cmd/detect/app.go
 
 fmt:	
 	go fmt ./cmd/...
