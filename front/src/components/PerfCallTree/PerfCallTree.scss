@@ -29,6 +29,7 @@
   padding: $base-space / 2;
   border: 1px solid $border-color-light;
   background-color: $bg-color-white;
+  color: $text-color-light;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -48,6 +49,11 @@
       transition: opacity 0.2s ease-out 0.2s, visibility 0.3s linear 0.2s;
     }
   }
+}
+
+.important {
+  border-color: $border-color-normal;
+  color: $text-color-normal;
 }
 
 .tooltip {

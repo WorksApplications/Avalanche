@@ -105,7 +105,8 @@ class PerfCallTree extends React.Component<IProperty, State> {
         <div
           className={[
             styles.label,
-            element.id === this.state.targetId ? styles.targetLabel : undefined
+            element.id === this.state.targetId ? styles.targetLabel : undefined,
+            element.relativeRatio > 0.6 ? styles.important : undefined
           ].join(" ")}
           onClick={this.onElementClick}
           data-elementid={element.id}
