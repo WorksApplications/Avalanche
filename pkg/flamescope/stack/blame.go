@@ -64,7 +64,7 @@ func GenReport(input []byte, nLoop int, searchAPI codesearch.Search) ([]byte, er
 		tree.process(nil, &m)
 	}
 	tree = getDominantNode(tree, 0.7, 100)
-	report := tree.toReport(searchAPI, float64(tree.Value), 4)
+	report := tree.toReport(searchAPI, float64(tree.Value), searchAPI.MaxDepth)
 	b, err := json.Marshal(report)
 	if err != nil {
 		log.Print("[stack] Marshal error: ", err)
@@ -95,7 +95,7 @@ func tokenize(name, label string) []string {
 	return append(strings.Split(t[0], ";::"), t[1:]...)
 }
 
-func (s *Stack) toReport(api codesearch.Search, rootVal float64, searchDepth int) Report {
+func (s *Stack) toReport(api codesearch.Search, rootVal float64, depth int) Report {
 	v := 0
 	var res codesearch.Result
 	eng := api.DefEngine
@@ -109,11 +109,11 @@ func (s *Stack) toReport(api codesearch.Search, rootVal float64, searchDepth int
 	case "SafepointBlob":
 		eng = codesearch.Undefined
 	default:
-		if searchDepth < 0 {
+		if depth < 0 {
 			eng = codesearch.Undefined
 		}
 	}
-	if (float64(s.Value) / rootVal) < 0.1 {
+	if (float64(s.Value) / rootVal) < api.MinRatio {
 		eng = codesearch.Undefined
 	}
 	switch s.Label {
@@ -124,10 +124,12 @@ func (s *Stack) toReport(api codesearch.Search, rootVal float64, searchDepth int
 	default:
 		eng = codesearch.Undefined
 	}
-	//res = assignCode(s.Name, s.Label, api)
+	/* parse the name depending on the label context */
 	t := tokenize(s.Name, s.Label)
 	/* Example of searchAPI */
 	/* http://hound.lan.tohaheavyindustrials.com/search?files=&repos=&i=nope&q={} */
+	/* Brand new channel with cap=1. The search-runner can handle another request before this function receives from it,
+	 * which prevent from dead-lock */
 	ch := make(chan codesearch.Result, 1)
 
 	/* search request. The result will be received after spawning children's reporting. */
@@ -135,7 +137,7 @@ func (s *Stack) toReport(api codesearch.Search, rootVal float64, searchDepth int
 
 	cs := make([]Report, len(s.Children))
 	for i, c := range s.Children {
-		cs[i] = c.toReport(api, rootVal, searchDepth-1)
+		cs[i] = c.toReport(api, rootVal, depth-1)
 		v += c.Value
 	}
 	res = <-ch

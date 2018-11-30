@@ -34,6 +34,8 @@ type Search struct {
 	RunReq    chan Request // a channel to pass request to request execeutors which are created outside of package
 	Except    []string     // keywords not to be searched
 	Cache     *cache.Cache
+	MinRatio  float64
+	MaxDepth  int
 }
 
 type Code struct {

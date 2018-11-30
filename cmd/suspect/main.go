@@ -140,7 +140,7 @@ func serve(at, collect string, api codesearch.Search) {
 	close(api.RunReq)
 }
 
-func toSearch(apiurl, apipost, apitype, except *string, nsw int) codesearch.Search {
+func toSearch(apiurl, apipost, apitype, except *string, nsw, maxdepth int, minratio float64) codesearch.Search {
 	var urltempl *template.Template
 	var datatempl *template.Template
 	var engine codesearch.EngineType
@@ -170,8 +170,17 @@ func toSearch(apiurl, apipost, apitype, except *string, nsw int) codesearch.Sear
 		log.Fatal("No API kind", *apitype)
 	}
 
-	ch := make(chan codesearch.Request, 512)
-	s := codesearch.Search{urltempl, datatempl, engine, ch, strings.Split(*except, ","), cache.New(8*time.Hour, 1*time.Hour)}
+	ch := make(chan codesearch.Request, nsw)
+	s := codesearch.Search{
+		Url:       urltempl,
+		Post:      datatempl,
+		DefEngine: engine,
+		RunReq:    ch,
+		Except:    strings.Split(*except, ","),
+		Cache:     cache.New(8*time.Hour, 1*time.Hour),
+		MinRatio:  minratio,
+		MaxDepth:  maxdepth,
+	}
 	for i := 0; i < nsw; i++ {
 		go s.Runner(fmt.Sprintf("s%d", i))
 	}
@@ -190,6 +199,8 @@ func main() {
 	apiurl := flag.String("searchUrl", "https://github.com/search/code?q={{.}}", "source code search API")
 	apipost := flag.String("searchPost", "", "The data to send to the source code search API if it requires \"POST\" (empty indicates \"GET\").")
 	apitype := flag.String("searchType", "github", "type of the search engine. \"github\", \"gitlab\", \"hound\", \"internal-use\"")
+	maxdepth := flag.Int("searchMaxDepth", 4, "Search worker constraint: The max depth from the closed-up node to be searched")
+	minratio := flag.Float64("searchMinRatio", 0.1, "Search worker constraint: The minimum number of ratio to be searched")
 	at := flag.String("http", "localhost:8080", "host:port")
 	collect := flag.String("collect", "http://collect:8080", "location for collect")
 	flag.Parse()
@@ -197,7 +208,7 @@ func main() {
 	log.Println(args)
 
 	if !*cli {
-		serve(*at, *collect, toSearch(apiurl, apipost, apitype, except, *nsw))
+		serve(*at, *collect, toSearch(apiurl, apipost, apitype, except, *nsw, *maxdepth, *minratio))
 	} else {
 		data, err := ioutil.ReadFile(*sfn)
 		if err != nil {
