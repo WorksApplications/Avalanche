@@ -201,14 +201,14 @@ func main() {
 	apitype := flag.String("searchType", "github", "type of the search engine. \"github\", \"gitlab\", \"hound\", \"internal-use\"")
 	maxdepth := flag.Int("searchMaxDepth", 4, "Search worker constraint: The max depth from the closed-up node to be searched")
 	minratio := flag.Float64("searchMinRatio", 0.1, "Search worker constraint: The minimum number of ratio to be searched")
-	at := flag.String("http", "localhost:8080", "host:port")
+	http := flag.String("http", "localhost:8080", "host:port")
 	collect := flag.String("collect", "http://collect:8080", "location for collect")
 	flag.Parse()
 	args := flag.Args()
 	log.Println(args)
 
 	if !*cli {
-		serve(*at, *collect, toSearch(apiurl, apipost, apitype, except, *nsw, *maxdepth, *minratio))
+		serve(*http, *collect, toSearch(apiurl, apipost, apitype, except, *nsw, *maxdepth, *minratio))
 	} else {
 		data, err := ioutil.ReadFile(*sfn)
 		if err != nil {

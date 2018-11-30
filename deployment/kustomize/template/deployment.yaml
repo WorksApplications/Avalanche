@@ -44,7 +44,6 @@ spec:
       - name: suspect
         command:
           - /suspect
-          - -port=8080
           - -searchUrl="$INTERNAL_SEARCH_SERVER"
           - -searchPost="$INTERNAL_SEARCH_POST"
           - -searchType='internal-use'
