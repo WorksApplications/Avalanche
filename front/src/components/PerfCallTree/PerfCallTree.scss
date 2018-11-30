@@ -59,7 +59,7 @@
   left: 50%;
   padding: $base-space / 2;
   margin-bottom: $base-space / 2;
-  background-color: rgba($text-color-normal, 0.7);
+  background-color: rgba($text-color-normal, 0.75);
   color: $text-color-white;
   border-radius: $border-radius;
   transform: translateX(-50%);
@@ -67,6 +67,8 @@
   user-select: none;
   pointer-events: none;
   z-index: 120;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .targetLabel {

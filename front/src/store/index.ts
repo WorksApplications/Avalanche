@@ -28,6 +28,7 @@ export interface IPerfCallTreeElementData {
   parentId?: number;
   label: string;
   childIds: number[];
+  relativeRatio: number;
   immediateRatio: number;
   totalRatio: number;
 }

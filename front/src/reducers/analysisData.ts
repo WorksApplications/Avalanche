@@ -76,12 +76,18 @@ export function convertHeatMap(
 export function convertPerfCallTree(tree: IPerfCallTree): IPerfCallTreeData {
   const array: IPerfCallTreeData = [];
   let counter = 0;
-  function convert_(node: IPerfCallTree, parentId?: number): number {
+
+  function convert_(
+    node: IPerfCallTree,
+    parentTotalRatio: number,
+    parentId?: number
+  ): number {
     const id = counter;
     const body: IPerfCallTreeElementData = {
       id,
       parentId,
       label: node.name,
+      relativeRatio: node.totalRatio / parentTotalRatio,
       immediateRatio: node.immediateRatio,
       totalRatio: node.totalRatio,
       childIds: []
@@ -89,13 +95,13 @@ export function convertPerfCallTree(tree: IPerfCallTree): IPerfCallTreeData {
     array.push(body);
     counter++;
     for (const t of node.children) {
-      const childId = convert_(t, id);
+      const childId = convert_(t, node.totalRatio, id);
       body.childIds.push(childId);
     }
     return id;
   }
 
-  convert_(tree);
+  convert_(tree, 1.0);
   return array;
 }
 

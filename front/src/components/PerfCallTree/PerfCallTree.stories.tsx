@@ -25,6 +25,7 @@ function generateBinaryTree(depth: number, rootLabel: string): ITreeElement[] {
       parentId,
       label,
       childIds: [],
+      relativeRatio: 1 / 2,
       immediateRatio: Math.pow(1 / 2, depth - depthInternal),
       totalRatio: Math.pow(1 / 2, depth - depthInternal - 1)
     };
@@ -64,6 +65,7 @@ function generateTernaryTree(depth: number, rootLabel: string): ITreeElement[] {
       parentId,
       label,
       childIds: [],
+      relativeRatio: 1 / 3,
       immediateRatio: Math.pow(1 / 3, depth - depthInternal),
       totalRatio: Math.pow(1 / 3, depth - depthInternal - 1)
     };

@@ -7,6 +7,7 @@ export interface ITreeElement {
   label: string;
   totalRatio: number;
   immediateRatio: number;
+  relativeRatio: number;
   id: number;
 }
 
@@ -111,7 +112,12 @@ class PerfCallTree extends React.Component<IProperty, State> {
         >
           {label}
         </div>
-        <span className={styles.tooltip}>{labelFull}</span>
+        <span className={styles.tooltip}>
+          {labelFull}
+          <br />
+          Consume {(element.relativeRatio * 100).toFixed(2)}% (
+          {(element.totalRatio * 100).toFixed(2)}% in this range)
+        </span>
       </div>
     );
   }
