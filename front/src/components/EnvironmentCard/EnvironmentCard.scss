@@ -41,30 +41,17 @@
   padding: $base-space;
   margin-bottom: -$base-space;
   margin-right: -$base-space * 2;
-
-  &:hover .editToolbar {
-    visibility: visible;
-    opacity: 1;
-    transition: opacity 0.2s ease-in;
-  }
 }
 
-.editToolbar {
-  visibility: hidden;
-  display: inline-block;
-  position: absolute;
-  right: -50%;
-  bottom: 1.5em;
-  margin-bottom: $base-space * 1.5;
-  white-space: nowrap;
-  font-weight: normal;
-  border-radius: $border-radius;
-  background-color: rgba($text-color-normal, 0.5);
-  padding: $base-space;
-  color: $text-color-white;
-  transition: opacity 0.2s ease-out, visibility 0.3s linear;
-  opacity: 0;
-  font-size: $font-size-smaller;
+.editTooltip {
+  @include normal-tooltip();
+
+  font-weight: normal !important;
+  padding: $base-space !important;
+
+  &:global(.place-top) {
+    margin-top: (-2px -$base-space) !important; // due to flat button
+  }
 }
 
 .editLabel {
