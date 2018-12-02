@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as ReactTooltip from "react-tooltip";
 import styles from "./PerfCallTree.scss";
 
 export interface ITreeElement {
@@ -110,15 +111,23 @@ class PerfCallTree extends React.Component<IProperty, State> {
           ].join(" ")}
           onClick={this.onElementClick}
           data-elementid={element.id}
+          data-tip={true}
+          data-for={`g${element.id}`}
         >
           {label}
         </div>
-        <span className={styles.tooltip}>
+        <ReactTooltip
+          id={`g${element.id}`}
+          effect="solid"
+          place="top"
+          aria-haspopup="true"
+          className={styles.tooltip}
+        >
           {labelFull}
           <br />
           Consume {(element.relativeRatio * 100).toFixed(2)}% (
           {(element.totalRatio * 100).toFixed(2)}% in this range)
-        </span>
+        </ReactTooltip>
       </div>
     );
   }
