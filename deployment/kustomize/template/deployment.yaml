@@ -47,3 +47,4 @@ spec:
           - -searchUrl=$INTERNAL_SEARCH_SERVER
           - -searchPost=$INTERNAL_SEARCH_POST
           - -searchType=internal-use
+          - -nSearchWorker=8

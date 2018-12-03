@@ -15,13 +15,13 @@ import (
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/layout"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/pod"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/log-scanner"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 func (s *ServerCtx) pull() error {
-	log.Printf("start to pull pods' information from %s", s.Detect+"/subscriptions")
-	r, err := http.Get(s.Detect + "/subscriptions")
+	log.Printf("start to pull pods' information from %s", s.Detect+"/logs")
+	r, err := http.Get(s.Detect + "/logs")
 	if err != nil {
 		log.Println("Poll failed with ", err)
 		return err
@@ -33,7 +33,7 @@ func (s *ServerCtx) pull() error {
 	}
 	defer r.Body.Close()
 
-	var p []detect.Subscription
+	var p []scanner.Subscription
 	err = json.Unmarshal(d, &p)
 	if err != nil {
 		log.Println("Unmarshal failed!", err)
@@ -53,7 +53,7 @@ func (s *ServerCtx) pull() error {
 	return nil
 }
 
-func recursiveInsert(db *sql.DB, p *detect.Subscription) []int64 {
+func recursiveInsert(db *sql.DB, p *scanner.Subscription) []int64 {
 	found := make([]int64, 0, 2)
 	/* Maybe resoleved: XXX It doesn't update existing environ/pod! It is a bug XXX */
 	/* XXX insert detect's lastseen for the update XXX */

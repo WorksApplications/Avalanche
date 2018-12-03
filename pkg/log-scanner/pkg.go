@@ -1,15 +1,17 @@
-package detect
+package scanner
 
 import (
 	"time"
 )
 
+/*
 type ScanInfo struct {
 	Date     time.Time       `json:"start_time"`
 	Duration time.Duration   `json:"scan_duration"`
 	Period   time.Duration   `json:"period"`
 	Subs     []*Subscription `json:"environments"`
 }
+*/
 
 type Subscription struct {
 	Env     string `json:"environment"`
@@ -30,4 +32,8 @@ type Pod struct {
 	LastUpdate *time.Time `json:"last_update"`
 	//node string
 	//namespace string
+}
+
+type Scanner interface {
+	Scan(env string) ([]App, error)
 }

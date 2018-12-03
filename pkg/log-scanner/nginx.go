@@ -1,4 +1,4 @@
-package main
+package scanner
 
 import (
 	"log"
@@ -6,11 +6,12 @@ import (
 	"strings"
 	"time"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
 	"golang.org/x/net/html"
 )
 
-var server string = "http://mischo.internal.worksap.com/"
+type Nginx struct {
+	Server string
+}
 
 func findNode(z *html.Tokenizer) []string {
 	var ns []string
@@ -91,11 +92,11 @@ func followLink(sites []string) ([]string, error) {
 	return ret, nil
 }
 
-func toPods(ls []string, applink string) []detect.Pod {
-	pods := make([]detect.Pod, len(ls))
+func toPods(ls []string, applink string) []Pod {
+	pods := make([]Pod, len(ls))
 	t := time.Now()
 	for i, l := range ls {
-		pods[i] = detect.Pod{strings.TrimRight(l, "/"), applink + l, false, &t}
+		pods[i] = Pod{strings.TrimRight(l, "/"), applink + l, false, &t}
 	}
 	return pods
 }
@@ -119,9 +120,9 @@ func isNotFound(resp *http.Response) bool {
 	}
 }
 
-func Scan(env string) ([]detect.App, error) {
-	log.Print("[Scan] " + env)
-	resp, err := http.Get(server + env + "/log")
+func (s Nginx) Scan(dir string) ([]App, error) {
+	log.Print("[Scan] " + dir)
+	resp, err := http.Get(s.Server + dir + "/log")
 	requested := 1
 	defer func() { log.Printf("total request: %d", requested) }()
 	if err != nil {
@@ -131,13 +132,13 @@ func Scan(env string) ([]detect.App, error) {
 	/* Read mischo/environment */
 	defer resp.Body.Close()
 	z := html.NewTokenizer(resp.Body)
-	ns := suffix(prefix(findNode(z), server+env+"/log/"), "msa/")
+	ns := suffix(prefix(findNode(z), s.Server+dir+"/log/"), "msa/")
 
 	/* Here it generates links like /acdev/log/kubernetes-10.207.5.30/msa/acdev/ */
 	logd, err := followLink(ns)
 	requested += len(logd)
 	if err != nil {
-		log.Print(env + "is not mounted")
+		log.Print(dir + "is not mounted")
 		return nil, err
 	}
 
@@ -145,11 +146,11 @@ func Scan(env string) ([]detect.App, error) {
 	log2, err := followLink(logd)
 	requested += len(log2)
 	if err != nil {
-		log.Print(env + "is closed")
+		log.Print(dir + "is closed")
 		return nil, err
 	}
 
-	mapps := make(map[string][]detect.Pod)
+	mapps := make(map[string][]Pod)
 	for _, l := range log2 {
 		ap, _ := findLink(l)
 		for _, name := range ap {
@@ -164,14 +165,14 @@ func Scan(env string) ([]detect.App, error) {
 	}
 
 	/* Check those pods are perf-enabled */
-	apps := make([]detect.App, 0)
+	apps := make([]App, 0)
 	for name, pods := range mapps {
 		if strings.HasPrefix(name, "batch") {
 			continue
 		}
 		name = strings.TrimRight(name, "/")
 
-		npds := make([]detect.Pod, 0)
+		npds := make([]Pod, 0)
 		for _, pod := range pods {
 			requested += 1
 			con, err := http.Get(pod.Link + "perf-record/")
@@ -185,7 +186,7 @@ func Scan(env string) ([]detect.App, error) {
 			}
 		}
 
-		apps = append(apps, detect.App{name, npds, time.Now()})
+		apps = append(apps, App{name, npds, time.Now()})
 	}
 
 	return apps, nil
