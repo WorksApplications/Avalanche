@@ -34,7 +34,7 @@ type cfg struct {
 	ch      chan *ScannerRequest
 	db      *sql.DB
 	scanner scanner.Scanner
-    ready   chan struct{}
+	ready   chan struct{}
 }
 
 func dispatch(ic <-chan *scanner.Subscription, oc chan<- *scanner.Subscription, sc scanner.Scanner) {
@@ -59,8 +59,8 @@ func (c *cfg) exchange() {
 	t := time.Tick(5 * time.Minute)
 	m := make(map[string]*scanner.Subscription)
 	empty := make([]scanner.App, 0)
-    // isc: where a subscription goes to represent a scan request
-    // osc: where the subscription with its result comes
+	// isc: where a subscription goes to represent a scan request
+	// osc: where the subscription with its result comes
 	isc := make(chan *scanner.Subscription, 64) // XXX: May have to be extended
 	osc := make(chan *scanner.Subscription, 64) // XXX: May have to be extended
 	go dispatch(isc, osc, c.scanner)
@@ -125,8 +125,9 @@ func main() {
 	log.SetPrefix("detect:\t")
 	log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime)
 	dbconf := flag.String("db", "example:example@localhost?parseTime=True", "DB address")
-    logdir := flag.String("logLocation", "http://akashic.example.com/logs", "URL for log storage location")
-    logtyp := flag.String("logType", "nginx", "log storage type: (will be implemented for nginx, s3, disk)")
+	logdir := flag.String("logLocation", "http://akashic.example.com/logs", "URL for log storage location")
+	logtype := flag.String("logType", "nginx", "log storage type: nginx, disk (will be implemented for s3, disk)")
+    logname := flag.String("logName", "perf-record", "Name of the performance log to look for")
 
 	flag.Parse()
 	args := flag.Args()
@@ -137,13 +138,15 @@ func main() {
 		log.Fatalln("Error on db", err)
 	}
 
-    var s scanner.Scanner
-    switch *logtyp {
-    default:
-        fallthrough
-    case "nginx":
-        s = scanner.Nginx{*logdir}
-    }
+	var s scanner.Scanner
+	switch *logtype {
+	default:
+		fallthrough
+	case "nginx":
+		s = scanner.Nginx{*logdir, *logname}
+    case "disk":
+		s = scanner.Disk{*logdir, *logname}
+	}
 
 	t := true
 	es := environ.ListConfig(db, nil, &t)
@@ -156,7 +159,26 @@ func main() {
 		x.ch <- &sreq
 	}
 
-    http.HandleFunc("/healthz", x.ready)
+    /* try to get all environments to see if all of them are scanned */
+	for {
+		c := make(chan *scanner.Subscription)
+		req := ScannerRequest{DESC, nil, c}
+		x.ch <- &req
+		i := 0
+		for range c {
+			i++
+			if i == len(es) {
+				log.Print("All initial targets are scanned. Let's start serving...")
+				goto SERVE
+			}
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+SERVE:
+
+	http.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
+        w.WriteHeader(200)
+    })
 	http.HandleFunc("/logs/", x.partialGet)
 	http.HandleFunc("/logs", x.dump)
 	http.HandleFunc("/config/environments", x.ConfigEnv)

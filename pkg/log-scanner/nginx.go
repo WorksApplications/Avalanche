@@ -10,7 +10,8 @@ import (
 )
 
 type Nginx struct {
-	Server string
+	Server  string
+    LogName string
 }
 
 func findNode(z *html.Tokenizer) []string {
@@ -120,6 +121,12 @@ func isNotFound(resp *http.Response) bool {
 	}
 }
 
+/* Currently, the implementation is very relying on the structure of our internal staging evironments.
+ * The structure is such:
+ * http://<log-proxy>/<environment-name>/log/<hostname-of-node>/msa/<environment-code>/<stage>/
+
+ * The implementation is not needed to follow this structure, but it is left as-is for now.
+ */
 func (s Nginx) Scan(dir string) ([]App, error) {
 	log.Print("[Scan] " + dir)
 	resp, err := http.Get(s.Server + dir + "/log")
