@@ -33,25 +33,9 @@
 }
 
 .tooltip {
-  visibility: hidden;
-  display: inline-block;
-  position: absolute;
-  right: $base-space * 7;
-  top: -$base-space * 0.5;
-  height: $base-space * 2;
-  font-weight: normal;
-  font-size: $font-size-normal;
-  white-space: nowrap;
-  border-radius: $border-radius;
-  opacity: 0;
-  background-color: rgba($text-color-normal, 0.5);
-  padding: $base-space;
-  color: $text-color-white;
-  transition: opacity 0.2s ease-out, visibility 0.3s linear;
+  @include normal-tooltip(false);
 
-  .wrap:hover & {
-    visibility: visible;
-    opacity: 1;
-    transition: opacity 0.2s ease-in;
-  }
+  padding: $base-space !important;
+  margin-left: -$base-space !important;
+  font-size: $font-size-normal !important;
 }

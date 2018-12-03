@@ -35,7 +35,7 @@ $pods-view-width: 22vw;
   }
 }
 
-@mixin normal-tooltip {
+@mixin normal-tooltip($hasArrow: true) {
   $tooltip-bg-color: rgba($text-color-normal, 0.75);
 
   visibility: hidden !important;
@@ -74,6 +74,12 @@ $pods-view-width: 22vw;
     &:after {
       border-left: $base-space solid $tooltip-bg-color !important;
       right: -$base-space !important;
+    }
+  }
+
+  @if not $hasArrow {
+    &:after {
+      display: none;
     }
   }
 }
