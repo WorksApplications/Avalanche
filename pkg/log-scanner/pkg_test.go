@@ -1,7 +1,10 @@
 package scanner
 
 import (
+	"encoding/json"
+	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -141,4 +144,142 @@ func TestMatch(t *testing.T) {
 		}
 		dict = v
 	}
+}
+
+type testPath struct {
+	Path     string
+	Children []testPath
+}
+
+func lister(p *testPath, dir []string) *testPath {
+	if len(dir) == 0 {
+		return p
+	} else if len(dir) == 1 {
+		if p.Path == dir[0] {
+			return p
+		} else {
+			return nil
+		}
+	} else {
+		for i := range p.Children {
+			if p.Children[i].Path != dir[1] {
+				continue
+			}
+			r := lister(&p.Children[i], dir[1:])
+			if r != nil {
+				return r
+			}
+		}
+		return nil
+	}
+	return nil
+}
+
+func (s testPath) list(path string) []string {
+	dir := strings.Split(path, "/")
+	t := lister(&s, dir)
+	p := t.Children
+	r := make([]string, len(p))
+	for i := range p {
+		r[i] = p[i].Path
+	}
+	return r
+}
+
+func (root *testPath) add(rawpath string) {
+	path := strings.Split(rawpath, "/")
+	dir := path[0 : len(path)-1]
+	p := lister(root, dir)
+	if p == nil {
+		fmt.Print("add pseudo path failed:\n", root, rawpath, dir)
+	}
+	for _, n := range p.Children {
+		if n.Path == path[len(path)-1] {
+			return
+		}
+	}
+	p.Children = append(p.Children, testPath{path[len(path)-1], []testPath{}})
+}
+
+func (root *testPath) addRec(rawpath string) {
+	path := strings.Split(rawpath, "/")
+	made := path[0] + "/"
+	for i := 1; i < len(path); i++ {
+		made = made + path[i]
+		fmt.Println("add:", made)
+		root.add(made)
+		made = made + "/"
+	}
+}
+
+func TestScan(t *testing.T) {
+	path := "logs/node-$any/var/log/$any/$app/$pod/perf-log"
+	root := testPath{"server", []testPath{}}
+	root.addRec("server/logs/node-stg/var/log/lisa/recommender/recommender-5c13933a90/perf-log")
+	root.addRec("server/logs/node-stg/var/log/lisa/recommender/recommender-3ce31309f2/perf-log")
+	root.addRec("server/logs/node-evl/var/log/gaspard/map/map-fe9910b219/perf-log")
+	root.addRec("server/logs/node-evl/var/log/gaspard/map/map-7c780097c9/perf-log")
+	root.addRec("server/logs/node-stg/var/log/lisa/map/map-c0ae432a90/perf-log")
+
+	expected := []App{
+		App{
+			Name: "recommender",
+			Pods: []Pod{
+				Pod{
+					Name:       "recommender-5c13933a90",
+					Link:       "server/logs/node-stg/var/log/lisa/recommender/recommender-5c13933a90/perf-log",
+					Profiling:  true,
+					LastUpdate: nil,
+				},
+				Pod{
+					Name:       "recommender-3ce31309f2",
+					Link:       "server/logs/node-stg/var/log/lisa/recommender/recommender-3ce31309f2/perf-log",
+					Profiling:  true,
+					LastUpdate: nil,
+				},
+			},
+		},
+		App{
+			Name: "map",
+			Pods: []Pod{
+				Pod{
+					Name:       "map-c0ae432a90",
+					Link:       "server/logs/node-stg/var/log/lisa/map/map-c0ae432a90/perf-log",
+					Profiling:  true,
+					LastUpdate: nil,
+				},
+				Pod{
+					Name:       "map-fe9910b219",
+					Link:       "server/logs/node-evl/var/log/gaspard/map/map-fe9910b219/perf-log",
+					Profiling:  true,
+					LastUpdate: nil,
+				},
+				Pod{
+					Name:       "map-7c780097c9",
+					Link:       "server/logs/node-evl/var/log/gaspard/map/map-7c780097c9/perf-log",
+					Profiling:  true,
+					LastUpdate: nil,
+				},
+			},
+		},
+	}
+
+	json, err := json.MarshalIndent(root, "", " ")
+	fmt.Println(string(json))
+	fmt.Println(root.list("server"))
+	fmt.Println(root.list("server/logs/node-stg/var/log/lisa/recommender"))
+
+	apps, err := Scan("server", path, root)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(apps, expected) {
+		t.Log(apps[0])
+		t.Log(expected[0])
+		t.Log()
+		t.Log(apps[1])
+		t.Fatal(expected[1])
+	}
+
 }

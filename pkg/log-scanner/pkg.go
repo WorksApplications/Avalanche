@@ -40,7 +40,7 @@ type Scanner interface {
 }
 
 type Driver interface {
-	List(target string) []string
+	list(target string) []string
 }
 
 type matchToken struct {
@@ -85,7 +85,7 @@ func toMatch(t string, varname []string) matchToken {
 func tokenize(template string) []matchToken {
 	t := strings.Split(template, "/")
 	r := make([]matchToken, len(t))
-	keys := []string{"env", "app", "pod", "any"}
+	keys := []string{"node", "env", "app", "pod", "any"}
 	for i, u := range t {
 		r[i] = toMatch(u, keys)
 	}
@@ -96,7 +96,7 @@ type scanCur struct {
 	// Found keywords
 	found map[string]string
 	// Current path cursor
-	curr string
+	path string
 	// Rest of matchTokens
 	matcher []matchToken
 }
@@ -126,4 +126,72 @@ func match(m matchToken, cand string, dict map[string]string) (map[string]string
 		return dict, false, err
 	}
 	return dict, false, err
+}
+
+func run(s scanCur, driver Driver) []scanCur {
+	if len(s.matcher) == 0 {
+		return []scanCur{s}
+	}
+	/* get all children */
+	list := driver.list(s.path)
+	next := make([]scanCur, 0, len(list))
+	/* let's see if those children mathes the next token */
+	for _, path := range list {
+		f, g, err := match(s.matcher[0], path, s.found)
+		if err != nil {
+			return []scanCur{}
+		}
+		if g {
+			s := scanCur{
+				found:   f,
+				path:    s.path + "/" + path,
+				matcher: s.matcher[1:],
+			}
+			next = append(next, s)
+		}
+	}
+	r := make([]scanCur, 0)
+	for i := range next {
+		r = append(r, run(next[i], driver)...)
+	}
+	return r
+}
+
+func toApp(s []scanCur) []App {
+	// key is appname
+	pods := make(map[string][]Pod)
+	for _, c := range s {
+		pod := Pod{
+			Name:      c.found["pod"],
+			Link:      c.path,
+			Profiling: true,
+		}
+		appname := c.found["app"]
+		p, prs := pods[appname]
+		if !prs {
+			pods[appname] = make([]Pod, 1)
+			pods[appname][0] = pod
+		} else {
+			pods[appname] = append(p, pod)
+		}
+	}
+	apps := make([]App, 0, len(pods))
+	for k, p := range pods {
+		apps = append(apps, App{
+			Name: k,
+			Pods: p,
+		})
+	}
+	return apps
+}
+
+func Scan(root, path string, driver Driver) ([]App, error) {
+	tokens := tokenize(path)
+	cur := scanCur{
+		found:   map[string]string{},
+		path:    root,
+		matcher: tokens,
+	}
+	r := run(cur, driver)
+	return toApp(r), nil
 }
