@@ -127,7 +127,7 @@ func main() {
 	dbconf := flag.String("db", "example:example@localhost?parseTime=True", "DB address")
 	logdir := flag.String("logLocation", "http://akashic.example.com/logs", "URL for log storage location")
 	logtype := flag.String("logType", "nginx", "log storage type: nginx, disk (will be implemented for s3, disk)")
-    logname := flag.String("logName", "perf-record", "Name of the performance log to look for")
+	logname := flag.String("logName", "perf-record", "Name of the performance log to look for")
 
 	flag.Parse()
 	args := flag.Args()
@@ -144,7 +144,7 @@ func main() {
 		fallthrough
 	case "nginx":
 		s = scanner.Nginx{*logdir, *logname}
-    case "disk":
+	case "disk":
 		s = scanner.Disk{*logdir, *logname}
 	}
 
@@ -159,7 +159,7 @@ func main() {
 		x.ch <- &sreq
 	}
 
-    /* try to get all environments to see if all of them are scanned */
+	/* try to get all environments to see if all of them are scanned */
 	for {
 		c := make(chan *scanner.Subscription)
 		req := ScannerRequest{DESC, nil, c}
@@ -177,8 +177,8 @@ func main() {
 SERVE:
 
 	http.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
-        w.WriteHeader(200)
-    })
+		w.WriteHeader(200)
+	})
 	http.HandleFunc("/logs/", x.partialGet)
 	http.HandleFunc("/logs", x.dump)
 	http.HandleFunc("/config/environments", x.ConfigEnv)

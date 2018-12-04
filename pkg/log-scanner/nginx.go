@@ -11,10 +11,10 @@ import (
 
 type Nginx struct {
 	Server  string
-    LogName string
+	LogName string
 }
 
-func findNode(z *html.Tokenizer) []string {
+func findNode(z *html.Tokenizer, prefix string) []string {
 	var ns []string
 	for {
 		tt := z.Next()
@@ -25,7 +25,7 @@ func findNode(z *html.Tokenizer) []string {
 			t := z.Token()
 			if t.Data == "a" {
 				for _, attr := range t.Attr {
-					if strings.HasPrefix(attr.Val, "kubernetes") {
+					if strings.HasPrefix(attr.Val, prefix) {
 						ns = append(ns, attr.Val)
 						log.Print("\t[Found] " + attr.Val)
 						continue
@@ -139,7 +139,7 @@ func (s Nginx) Scan(dir string) ([]App, error) {
 	/* Read mischo/environment */
 	defer resp.Body.Close()
 	z := html.NewTokenizer(resp.Body)
-	ns := suffix(prefix(findNode(z), s.Server+dir+"/log/"), "msa/")
+	ns := suffix(prefix(findNode(z, "kubernetes"), s.Server+dir+"/log/"), "msa/")
 
 	/* Here it generates links like /acdev/log/kubernetes-10.207.5.30/msa/acdev/ */
 	logd, err := followLink(ns)
