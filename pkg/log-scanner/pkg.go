@@ -186,8 +186,8 @@ func toApp(s []scanCur) []App {
 	return apps
 }
 
-func Scan(root, path string, driver *Driver) ([]App, int, time.Duration) {
-	request := -1 * (*driver).nReq()
+func Scan(root, path string, driver Driver) ([]App, int, time.Duration) {
+	request := -1 * driver.nReq()
 	before := time.Now()
 	tokens := tokenize(path)
 	cur := scanCur{
@@ -195,8 +195,8 @@ func Scan(root, path string, driver *Driver) ([]App, int, time.Duration) {
 		path:    root,
 		matcher: tokens,
 	}
-	r := run(cur, *driver)
-	request += (*driver).nReq()
+	r := run(cur, driver)
+	request += driver.nReq()
 	dur := time.Now().Sub(before)
 	return toApp(r), request, dur
 }

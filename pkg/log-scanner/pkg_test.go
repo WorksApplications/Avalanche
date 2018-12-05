@@ -175,15 +175,19 @@ func lister(p *testPath, dir []string) *testPath {
 	return nil
 }
 
-func (s testPath) list(path string) []string {
+func (s *testPath) list(path string) []string {
 	dir := strings.Split(path, "/")
-	t := lister(&s, dir)
+	t := lister(s, dir)
 	p := t.Children
 	r := make([]string, len(p))
 	for i := range p {
 		r[i] = p[i].Path
 	}
 	return r
+}
+
+func (root *testPath) nReq() int {
+	return 0
 }
 
 func (root *testPath) add(rawpath string) {
@@ -269,7 +273,7 @@ func TestScan(t *testing.T) {
 	fmt.Println(root.list("server"))
 	fmt.Println(root.list("server/logs/node-stg/var/log/lisa/recommender"))
 
-	apps, err := Scan("server", path, root)
+	apps, _, _ := Scan("server", path, &root)
 	if err != nil {
 		t.Fatal(err)
 	}

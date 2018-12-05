@@ -36,6 +36,7 @@ type cfg struct {
 	scanner   scanner.Driver
 	ready     chan struct{}
 	pathtempl string
+	period    int
 }
 
 func dispatch(ic <-chan *scanner.Subscription, oc chan<- *scanner.Subscription, sc scanner.Driver, pathtempl string) {
@@ -43,7 +44,7 @@ func dispatch(ic <-chan *scanner.Subscription, oc chan<- *scanner.Subscription, 
 	for s := range ic {
 		go func(s *scanner.Subscription) {
 			log.Printf("[Dispatched worker] Start scan for %s", s.Env)
-			apps, req, dur := scanner.Scan(s.Env, pathtempl, &sc)
+			apps, req, dur := scanner.Scan(s.Env, pathtempl, sc)
 			found := 0
 			for _, a := range apps {
 				found += len(a.Pods)
@@ -58,7 +59,7 @@ func dispatch(ic <-chan *scanner.Subscription, oc chan<- *scanner.Subscription, 
 }
 
 func (c *cfg) exchange() {
-	t := time.Tick(5 * time.Minute)
+	t := time.Tick(time.Duration(c.period) * time.Second)
 	m := make(map[string]*scanner.Subscription)
 	empty := make([]scanner.App, 0)
 	// isc: where a subscription goes to represent a scan request
@@ -127,13 +128,14 @@ func main() {
 	log.SetPrefix("detect:\t")
 	log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime)
 	templhelp := "Template path for perf-log search.\n variables:\n\t$any: matches any\n" +
-		"\t$env: mathes any string and returned as name of environment" +
-		"\t$app: mathes any string and returned as name of application" +
-		"\t$pod: mathes any string and returned as name of pod"
+		"\t$env: mathes any string and returned as name of environment\n" +
+		"\t$app: mathes any string and returned as name of application\n" +
+		"\t$pod: mathes any string and returned as name of pod\n"
 	dbconf := flag.String("db", "example:example@localhost?parseTime=True", "DB address")
 	logdir := flag.String("logLocation", "http://akashic.example.com/logs", "URL for log storage location")
 	logtype := flag.String("logType", "nginx", "log storage type: nginx, disk (will be implemented for s3, disk)")
 	logtempl := flag.String("logTempl", "log/ap-$any/stg-$env/$app/var/log/$pod/perf-log", templhelp)
+	scanperi := flag.Int("scanPeriod", 300, "Period between an invocation for bulk scan and another (in second)")
 	flag.Parse()
 	args := flag.Args()
 	log.Println(args)
@@ -155,7 +157,7 @@ func main() {
 
 	t := true
 	es := environ.ListConfig(db, nil, &t)
-	x := cfg{make(chan *ScannerRequest), db, s, make(chan struct{}), *logtempl}
+	x := cfg{make(chan *ScannerRequest), db, s, make(chan struct{}), *logtempl, *scanperi}
 	go x.exchange()
 
 	/* initial registration for scan */
