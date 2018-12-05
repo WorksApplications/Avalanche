@@ -10,6 +10,7 @@ spec:
         command:
           - /detect
           - -db=$DB_CRED_USER:$DB_CRED_PASS@tcp(mariadb)/collekt?parseTime=True
+          - -logTempl=$INTERNAL_LOG_TEMPL
 ---
 
 apiVersion: apps/v1
@@ -48,4 +49,3 @@ spec:
           - -searchPost=$INTERNAL_SEARCH_POST
           - -searchType=internal-use
           - -nSearchWorker=8
-          - -logTempl=$INTERNAL_LOG_TEMPL
