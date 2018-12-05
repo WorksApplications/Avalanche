@@ -44,6 +44,8 @@ spec:
       - name: suspect
         command:
           - /suspect
-          - -searchUrl="$INTERNAL_SEARCH_SERVER"
-          - -searchPost="$INTERNAL_SEARCH_POST"
-          - -searchType='internal-use'
+          - -searchUrl=$INTERNAL_SEARCH_SERVER
+          - -searchPost=$INTERNAL_SEARCH_POST
+          - -searchType=internal-use
+          - -nSearchWorker=8
+          - -logTempl=$INTERNAL_LOG_TEMPL

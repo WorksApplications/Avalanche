@@ -5,19 +5,13 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/detect"
 	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
+	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/log-scanner"
 	"log"
-	"math/rand"
 	"net/http"
 	"strings"
 	"time"
 )
-
-type HandlerClosure struct {
-	Ch chan *ScannerRequest
-	Db *sql.DB
-}
 
 func deserializeEnvironmentUpdate(req *http.Request) (*environ.Environ, error) {
 	buf := new(bytes.Buffer)
@@ -40,7 +34,6 @@ func deserializeEnvironmentUpdate(req *http.Request) (*environ.Environ, error) {
 	}
 
 	return &env, nil
-
 }
 
 func update(db *sql.DB, res http.ResponseWriter, req *http.Request, ch chan<- *ScannerRequest) {
@@ -121,7 +114,7 @@ func subscribe(sreq ScannerRequest, res http.ResponseWriter, req *http.Request, 
 	case <-t.C:
 		/* Couldn't write the request within a period(maybe Exchange() is gone). Inform this failure to him */
 		res.WriteHeader(http.StatusRequestTimeout)
-		return fmt.Errorf("Time flies: scan request failed; maybe stuck the scanner?: Magic: %x", rand.Int31())
+		return fmt.Errorf("Time flies: scan request failed; maybe stuck the scanner?")
 	case ch <- &sreq:
 		res.WriteHeader(http.StatusOK)
 		return nil
@@ -132,7 +125,7 @@ func get(res http.ResponseWriter, req *http.Request, ch chan<- *ScannerRequest, 
 	/* Prepare anew channel to pull out the result */
 	/* We make a channel instead of using bi-directional shared channel because we have to have a co-relation between
 	   request and the result. */
-	resc := make(chan *detect.Subscription, 16)
+	resc := make(chan *scanner.Subscription, 16)
 	// Expect it to be closed by remote, so I won't defer close(resc)
 	sreq := ScannerRequest{DESC, env, resc}
 
@@ -146,7 +139,7 @@ func get(res http.ResponseWriter, req *http.Request, ch chan<- *ScannerRequest, 
 		return fmt.Errorf("Time flies: scan request failed; maybe stuck the scanner?")
 	case ch <- &sreq:
 		/* Request is written. Wait for all the answer */
-		subs := make([]*detect.Subscription, 0)
+		subs := make([]*scanner.Subscription, 0)
 		for sub := range resc {
 			subs = append(subs, sub)
 		}
@@ -160,46 +153,41 @@ func get(res http.ResponseWriter, req *http.Request, ch chan<- *ScannerRequest, 
 	}
 }
 
-func (s HandlerClosure) SubRunner(res http.ResponseWriter, req *http.Request) {
+func (s cfg) partialGet(res http.ResponseWriter, req *http.Request) {
 	/* Has trailing slash or sub-location */
 	switch req.Method {
 	case "GET":
-		env := strings.TrimPrefix(req.URL.Path, "/subscriptions/")
-		if env == "" {
-			log.Printf("S: OBSOLETE: %s %s", req.Method, req.URL.Path)
-			s.Runner(res, req)
-		} else {
-			log.Printf("S: %s %s", req.Method, req.URL.Path)
-			get(res, req, s.Ch, &env)
-		}
+		env := strings.TrimPrefix(req.URL.Path, "/logs/")
+		log.Printf("S: %s %s", req.Method, req.URL.Path)
+		get(res, req, s.ch, &env)
 	}
 }
 
-func (s HandlerClosure) Runner(res http.ResponseWriter, req *http.Request) {
+func (s cfg) dump(res http.ResponseWriter, req *http.Request) {
 	log.Printf("R: %s %s", req.Method, req.URL.Path)
 	switch req.Method {
 	case "GET":
-		err := get(res, req, s.Ch, nil /* indicates "gimme-all" */)
+		err := get(res, req, s.ch, nil /* indicates "gimme-all" */)
 		if err != nil {
 			panic(err)
 		}
 	}
 }
 
-func (s HandlerClosure) ConfigEnv(res http.ResponseWriter, req *http.Request) {
+func (s cfg) ConfigEnv(res http.ResponseWriter, req *http.Request) {
 	log.Printf("C: %s %s", req.Method, req.URL.Path)
 	var name *string
 	var err error
 	switch req.Method {
 	case "POST":
-		name, err = add(s.Db, res, req, s.Ch)
+		name, err = add(s.db, res, req, s.ch)
 		if err != nil {
 			return
 		}
 		fallthrough
 	case "GET":
 		/* XXX Feature join unregistered environments that appear in mischo log */
-		envs := environ.ListConfig(s.Db, name, nil)
+		envs := environ.ListConfig(s.db, name, nil)
 		reply, e := json.Marshal(envs)
 		if e != nil {
 			res.WriteHeader(http.StatusInternalServerError)
@@ -209,15 +197,15 @@ func (s HandlerClosure) ConfigEnv(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s HandlerClosure) ConfigEnvSub(res http.ResponseWriter, req *http.Request) {
+func (s cfg) ConfigEnvSub(res http.ResponseWriter, req *http.Request) {
 	log.Printf("Q: %s %s", req.Method, req.URL.Path)
 	switch req.Method {
 	case "PUT":
-		update(s.Db, res, req, s.Ch)
+		update(s.db, res, req, s.ch)
 		fallthrough
 	case "GET":
 		env := strings.TrimPrefix(req.URL.Path, "/config/environments/")
-		envs := environ.ListConfig(s.Db, &env, nil)
+		envs := environ.ListConfig(s.db, &env, nil)
 		reply, e := json.Marshal(envs)
 		if e != nil {
 			res.WriteHeader(http.StatusInternalServerError)
