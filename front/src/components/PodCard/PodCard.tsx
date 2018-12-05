@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as ReactTooltip from "react-tooltip";
 import Spinner from "../Spinner";
 import styles from "./PodCard.scss";
 
@@ -48,14 +49,22 @@ export class PodCard extends React.Component<IProperty, State> {
             </div>
           ) : (
             <button className={styles.saveButton} data-testid="save-button">
-              <span className={styles.saveTooltip}>Save snapshot</span>
               <span
                 className={styles.saveLabel}
                 onClick={this.onSave}
                 data-testid="save-button-body"
+                data-tip="Save snapshot"
+                data-for={`save-snapshot-${this.props.name}`}
               >
                 Save
               </span>
+              <ReactTooltip
+                id={`save-snapshot-${this.props.name}`}
+                effect="solid"
+                place="left"
+                aria-haspopup="true"
+                className={styles.saveTooltip}
+              />
             </button>
           )}
         </div>
@@ -100,13 +109,21 @@ export class PodCard extends React.Component<IProperty, State> {
                         className={styles.snapshot}
                         data-testid="snapshot"
                       >
-                        <span className={styles.snapshotHash}>
-                          <span className={styles.snapshotHashPopover}>
-                            {s.uuid}
-                          </span>
+                        <span
+                          className={styles.snapshotHash}
+                          data-tip={s.uuid}
+                          data-for={`pod-snapshot-${s.uuid}`}
+                        >
                           {s.uuid.substr(0, 20)}
                           ...
                         </span>
+                        <ReactTooltip
+                          id={`pod-snapshot-${s.uuid}`}
+                          effect="solid"
+                          place="top"
+                          aria-haspopup="true"
+                          className={styles.snapshotHashTooltip}
+                        />
                         <span
                           className={styles.snapshotDate}
                           data-testid="snapshot-date"

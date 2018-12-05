@@ -1,0 +1,41 @@
+@import "../../common";
+
+.wrap {
+  font-size: $font-size-smaller;
+  min-height: $base-space * 15;
+  margin: 0;
+  padding: 0;
+}
+
+.popover {
+  :global(.Popover-tip) {
+    height: 10px;
+  }
+  :global(.Popover-tipShape) {
+    fill: $bg-color-white;
+    //box-shadow: $layer-shadow-3;
+    filter: url(#dropshadow);
+  }
+
+  :global(.Popover-body) {
+    background-color: $bg-color-white;
+    box-shadow: $layer-shadow-3;
+  }
+}
+
+.popoverContent {
+  padding: $base-space;
+}
+
+.popoverHeader {
+  margin: 0;
+  font-size: $font-size-larger;
+}
+
+.seeCode {
+  @include link-style-blue();
+
+  margin-top: $base-space;
+  background: $bg-color-white;
+  border: none;
+}

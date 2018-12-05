@@ -68,20 +68,14 @@
 }
 
 .saveTooltip {
-  visibility: hidden;
-  display: inline-block;
-  position: absolute;
-  right: -1em;
-  bottom: 1.5em;
-  margin-bottom: $base-space;
-  white-space: nowrap;
-  font-weight: normal;
-  border-radius: $border-radius;
-  background-color: rgba($text-color-normal, 0.5);
-  padding: $base-space;
-  color: $text-color-white;
-  transition: opacity 0.2s ease-out, visibility 0.3s linear;
-  opacity: 0;
+  @include normal-tooltip();
+
+  font-weight: normal !important;
+  padding: $base-space !important;
+
+  &:global(.place-left) {
+    margin-left: (4px - $base-space) !important; // due to flat button
+  }
 }
 
 .saveButton {
@@ -111,11 +105,6 @@
 
   &:not(.disabled) {
     @include link-style-blue;
-    &:hover .saveTooltip {
-      visibility: visible;
-      opacity: 1;
-      transition: opacity 0.2s ease-in;
-    }
   }
 }
 
@@ -163,26 +152,8 @@
   margin-right: auto;
 }
 
-.snapshotHashPopover {
-  visibility: hidden;
-  display: inline-block;
-  position: absolute;
-  left: -$base-space * 4;
-  bottom: 120%;
-  white-space: nowrap;
-  font-weight: normal;
-  border-radius: $border-radius;
-  background-color: rgba($text-color-normal, 0.5);
-  padding: $base-space;
-  color: $text-color-white;
-  transition: opacity 0.2s ease-out, visibility 0.3s linear;
-  opacity: 0;
-
-  .snapshotHash:hover & {
-    visibility: visible;
-    opacity: 1;
-    transition: opacity 0.2s ease-in;
-  }
+.snapshotHashTooltip {
+  @include normal-tooltip();
 }
 
 .snapshotDate {

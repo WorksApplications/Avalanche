@@ -1,19 +1,25 @@
 import actionCreatorFactory from "typescript-fsa";
 import { asyncFactory } from "typescript-fsa-redux-thunk";
 import heatMapClient, { IHeatMap } from "../clients/heatMapClient";
-import { COLLECT_API_BASE } from "../constants";
+import { COLLECT_API_BASE, SUSPECT_API_BASE } from "../constants";
 import {
   DefaultApiFactory as collectApiFactory,
   Environment,
   Pod,
   Snapshot
 } from "../generated/collect/api";
+import {
+  DefaultApiFactory as suspectApiFactory,
+  Report
+} from "../generated/suspect/api";
 import { IEnvironmentInfo, IPodInfo, ISnapshotInfo } from "../store";
 
 const actionCreator = actionCreatorFactory();
 const asyncActionCreator = asyncFactory(actionCreator);
 
 const collectClient = collectApiFactory({}, undefined, COLLECT_API_BASE);
+
+const suspectClient = suspectApiFactory({}, undefined, SUSPECT_API_BASE);
 
 function environmentInfoConvert(env: Environment): IEnvironmentInfo {
   return {
@@ -50,6 +56,22 @@ function snapshotInfoConvert(snapshot: Snapshot): ISnapshotInfo {
     createdAt: created,
     link: snapshot.flamescopeLink!,
     heatMapId
+  };
+}
+
+export interface IPerfCallTree {
+  name: string;
+  totalRatio: number;
+  immediateRatio: number;
+  children: IPerfCallTree[];
+}
+
+function perfCallTreeConvert(report: Report): IPerfCallTree {
+  return {
+    name: report.name!,
+    totalRatio: report.total_ratio!,
+    immediateRatio: report.immidiate_ratio!,
+    children: report.children ? report.children.map(perfCallTreeConvert) : []
   };
 }
 
@@ -118,4 +140,15 @@ export const getHeatMapOperation = asyncActionCreator<
   heatMapClient(heatMapId).then(result => {
     return { heatMap: result };
   })
+);
+
+export const getPerfCallTreeOperation = asyncActionCreator<
+  { snapshotId: string; startPosition: number; endPosition: number },
+  { tree: IPerfCallTree }
+>("GET_PERF_CALL_TREE", ({ snapshotId, startPosition, endPosition }) =>
+  suspectClient
+    .reportsUuidGet(snapshotId, startPosition, endPosition)
+    .then(result => {
+      return { tree: perfCallTreeConvert(result) };
+    })
 );

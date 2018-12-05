@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as ReactTooltip from "react-tooltip";
 import styles from "./EnvironmentCard.scss";
 
 export interface IProperty {
@@ -47,8 +48,20 @@ export class EnvironmentCard extends React.Component<IProperty> {
           role="button"
           data-testid="edit-button"
         >
-          <span className={styles.editToolbar}>Edit this environment</span>
-          <span className={styles.editLabel}>Edit</span>
+          <span
+            className={styles.editLabel}
+            data-tip="Edit this environment"
+            data-for={`env-${this.props.name}`}
+          >
+            Edit
+          </span>
+          <ReactTooltip
+            id={`env-${this.props.name}`}
+            effect="solid"
+            place="top"
+            aria-haspopup="true"
+            className={styles.editTooltip}
+          />
         </button>
       </div>
     );
