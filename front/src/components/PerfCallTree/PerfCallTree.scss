@@ -5,81 +5,37 @@
   min-height: $base-space * 15;
   margin: 0;
   padding: 0;
+}
 
-  & > li {
-    display: flex;
-    height: $base-space * 4;
-    justify-content: center;
+.popover {
+  :global(.Popover-tip) {
+    height: 10px;
+  }
+  :global(.Popover-tipShape) {
+    fill: $bg-color-white;
+    //box-shadow: $layer-shadow-3;
+    filter: url(#dropshadow);
+  }
 
-    &:not(:first-child) {
-      padding-top: $base-space;
-    }
+  :global(.Popover-body) {
+    background-color: $bg-color-white;
+    box-shadow: $layer-shadow-3;
   }
 }
 
-.element {
-  position: relative;
-  display: flex;
-  justify-content: center;
+.popoverContent {
+  padding: $base-space;
 }
 
-.label {
-  display: inline-block;
-  height: $base-space * 4;
-  padding: $base-space / 2;
-  border: 1px solid $border-color-light;
-  background-color: $bg-color-white;
-  color: $text-color-light;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-  box-sizing: border-box;
-  transition: box-shadow 0.2s ease;
-  box-shadow: $layer-shadow-1;
-  border-radius: $border-radius;
-  letter-spacing: -0.2px;
-  line-height: $base-space * 3;
-
-  &:hover {
-    box-shadow: $layer-shadow-2;
-  }
-}
-
-.important {
-  border-color: $border-color-normal;
-  color: $text-color-normal;
-}
-
-.tooltip {
-  @include normal-tooltip();
-
-  text-align: center !important;
-}
-
-.targetLabel {
-  border-color: $color-primary;
-}
-
-.childList {
-  display: grid;
-  // really small
-  grid-template-columns: repeat(auto-fit, minmax($base-space * 2, 1fr));
-  column-gap: $base-space;
+.popoverHeader {
   margin: 0;
-  padding: 0;
-  width: 100%;
+  font-size: $font-size-larger;
 }
 
-.left,
-.right {
-  flex: 2;
-}
+.seeCode {
+  @include link-style-blue();
 
-.center {
-  flex: 1;
-  margin: 0 $base-space;
-}
-
-.child {
-  display: block;
+  margin-top: $base-space;
+  background: $bg-color-white;
+  border: none;
 }

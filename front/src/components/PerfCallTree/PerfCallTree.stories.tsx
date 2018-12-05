@@ -1,13 +1,13 @@
 // tslint:disable:no-implicit-dependencies no-submodule-imports
 import * as React from "react";
 
-import { action } from "@storybook/addon-actions";
 import { storiesOf } from "@storybook/react";
 import PerfCallTree, { ITreeElement } from "./PerfCallTree";
 
 const commonWrapStyle: React.CSSProperties = {
   width: "1400px",
   padding: "8px",
+  marginTop: "200px",
   backgroundColor: "white"
 };
 
@@ -34,12 +34,12 @@ function generateBinaryTree(depth: number, rootLabel: string): ITreeElement[] {
     if (depthInternal > 0) {
       const leftId = generateBinaryTree_(
         depthInternal - 1,
-        label + "/left",
+        label + `/left${depthInternal - 1}`,
         id
       );
       const rightId = generateBinaryTree_(
         depthInternal - 1,
-        label + "/right",
+        label + `/right${depthInternal - 1}`,
         id
       );
       body.childIds.push(leftId, rightId);
@@ -74,17 +74,17 @@ function generateTernaryTree(depth: number, rootLabel: string): ITreeElement[] {
     if (depthInternal > 0) {
       const leftId = generateTernaryTree_(
         depthInternal - 1,
-        label + "/left",
+        label + `/left${depthInternal - 1}`,
         id
       );
       const middleId = generateTernaryTree_(
         depthInternal - 1,
-        label + "/middle",
+        label + `/middle${depthInternal - 1}`,
         id
       );
       const rightId = generateTernaryTree_(
         depthInternal - 1,
-        label + "/right",
+        label + `/right${depthInternal - 1}`,
         id
       );
       body.childIds.push(leftId, middleId, rightId);
@@ -99,10 +99,7 @@ function generateTernaryTree(depth: number, rootLabel: string): ITreeElement[] {
 storiesOf("PerfCallTree", module)
   .add("Empty", () => (
     <div style={commonWrapStyle}>
-      <PerfCallTree
-        treeMap={[]}
-        onTargetChanged={action("Target is changed")}
-      />
+      <PerfCallTree treeMap={[]} />
     </div>
   ))
   .add("Binary tree", () => (
@@ -110,7 +107,6 @@ storiesOf("PerfCallTree", module)
       <PerfCallTree
         treeMap={generateBinaryTree(7, "Lcom/example/avalanche")}
         targetId={0}
-        onTargetChanged={action("Target is changed")}
       />
     </div>
   ))
@@ -119,7 +115,6 @@ storiesOf("PerfCallTree", module)
       <PerfCallTree
         treeMap={generateTernaryTree(7, "Lcom/example/avalanche")}
         targetId={0}
-        onTargetChanged={action("Target is changed")}
       />
     </div>
   ));
