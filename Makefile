@@ -7,7 +7,7 @@ default: all
 
 all: front backend
 
-backend: bin/detect bin/collect bin/enroll bin/suspect
+backend: bin/scanner bin/collect bin/enroll bin/blame
 front: front/public/app.js
 
 collect: collect-img
@@ -15,17 +15,14 @@ collect: collect-img
 bin/enroll: $(shell find cmd/enroll -name *.go) $(PKG)
 	CGO_ENABLED=0 go build -o bin/enroll cmd/enroll/*.go
 
-bin/suspect: $(shell find cmd/suspect -name *.go) $(PKG)
-	CGO_ENABLED=0 go build -o bin/suspect cmd/suspect/*.go
+bin/blame: $(shell find cmd/blame -name *.go) $(PKG)
+	CGO_ENABLED=0 go build -o bin/blame cmd/blame/*.go
 
 bin/collect: $(shell find cmd/collect -name *.go) $(PKG) generated_files/stub
 	CGO_ENABLED=0 go build -o bin/collect cmd/collect/*.go
 
-bin/detect: $(shell find cmd/detect -name *.go) $(PKG)
-	CGO_ENABLED=0 go build -o bin/detect cmd/detect/*.go
-
-#bin/status: $(shell find cmd/status -name *.go) $(PKG) generated_files/stub
-#	CGO_ENABLED=0 go build -o bin/status cmd/status/status.go
+bin/scanner: $(shell find cmd/scanner -name *.go) $(PKG)
+	CGO_ENABLED=0 go build -o bin/scanner cmd/scanner/*.go
 
 swagger:
 	swagger generate server -f api/collect.yml -t generated_files -A collect
@@ -36,11 +33,11 @@ generated_files/stub: api/collect.yml
 
 swagger-client-gen:
 	java -jar ./swagger-codegen-cli.jar generate -i ./api/collect.yml -l typescript-fetch -o ./front/src/generated/collect -D modelPropertyNaming=original
-	java -jar ./swagger-codegen-cli.jar generate -i ./api/suspect.yml -l typescript-fetch -o ./front/src/generated/suspect -D modelPropertyNaming=original
+	java -jar ./swagger-codegen-cli.jar generate -i ./api/blame.yml -l typescript-fetch -o ./front/src/generated/blame -D modelPropertyNaming=original
 
 swagger-mock-gen:
 	java -jar ./swagger-codegen-cli.jar generate -i ./api/collect.yml -l nodejs-server -o ./front/mock/collect
-	java -jar ./swagger-codegen-cli.jar generate -i ./api/suspect.yml -l nodejs-server -o ./front/mock/suspect
+	java -jar ./swagger-codegen-cli.jar generate -i ./api/blame.yml -l nodejs-server -o ./front/mock/suspect
 
 front/public/app.js:
 	cd front && yarn build
