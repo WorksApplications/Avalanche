@@ -139,7 +139,7 @@ func run(s scanCur, driver Driver) []scanCur {
 	for _, path := range list {
 		f, g, err := match(s.matcher[0], path, s.found)
 		if err != nil {
-			return []scanCur{}
+			continue
 		}
 		if g {
 			s := scanCur{

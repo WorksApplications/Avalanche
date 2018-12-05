@@ -33,20 +33,20 @@ type ScannerRequest struct {
 type cfg struct {
 	ch      chan *ScannerRequest
 	db      *sql.DB
-	scanner scanner.Scanner
+	scanner scanner.Driver
 	ready   chan struct{}
 }
 
-func dispatch(ic <-chan *scanner.Subscription, oc chan<- *scanner.Subscription, sc scanner.Scanner) {
+func dispatch(ic <-chan *scanner.Subscription, oc chan<- *scanner.Subscription, sc scanner.Driver) {
 	log.Printf("[Dispatched worker] Enter")
 	for s := range ic {
 		go func(s *scanner.Subscription) {
 			log.Printf("[Dispatched worker] Start scan for %s", s.Env)
-			apps, err := sc.Scan(s.Env)
+			apps, err := scanner.Scan(s.Env, "log/kubernetes-$node/msa/$any/$any/$app/$pod/perf-record", sc)
 			if err != nil {
 				log.Printf("Error in the scan for %s", err)
 			}
-			log.Printf("[Dispatched worker] Scan for %s ended.", s.Env)
+			log.Printf("[Dispatched worker] Scan for %s ended: %+v", s.Env, apps)
 			s.Apps = apps
 			s.OnGoing = false
 			oc <- s
@@ -138,7 +138,7 @@ func main() {
 		log.Fatalln("Error on db", err)
 	}
 
-	var s scanner.Scanner
+	var s scanner.Driver
 	switch *logtype {
 	default:
 		fallthrough

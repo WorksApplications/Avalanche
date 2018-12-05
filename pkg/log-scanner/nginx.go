@@ -45,24 +45,24 @@ func findLink(site string) ([]string, error) {
 	defer resp.Body.Close()
 	z := html.NewTokenizer(resp.Body)
 
-	var lxs []string
+	var links []string
 	for {
 		tt := z.Next()
 		switch {
 		case tt == html.ErrorToken:
-			return lxs, nil
+			return links, nil
 		case tt == html.StartTagToken:
 			t := z.Token()
 			if t.Data == "a" {
 				for _, attr := range t.Attr {
 					if attr.Key == "href" && attr.Val != "../" {
-						lxs = append(lxs, attr.Val)
+						links = append(links, attr.Val)
 					}
 				}
 			}
 		}
 	}
-	return lxs, nil
+	return links, nil
 }
 
 func prefix(xs []string, prefix string) []string {
@@ -121,6 +121,18 @@ func isNotFound(resp *http.Response) bool {
 	}
 }
 
+func (s Nginx) list(dir string) []string {
+	links, err := findLink(s.Server + "/" + dir)
+	if err != nil {
+		log.Print(s.Server+"/"+dir, links, err)
+		return []string{}
+	}
+	for i := range links {
+		links[i] = strings.TrimRight(links[i], "/")
+	}
+	return links
+}
+
 /* Currently, the implementation is very relying on the structure of our internal staging evironments.
  * The structure is such:
  * http://<log-proxy>/<environment-name>/log/<hostname-of-node>/msa/<environment-code>/<stage>/
@@ -129,7 +141,7 @@ func isNotFound(resp *http.Response) bool {
  */
 func (s Nginx) Scan(dir string) ([]App, error) {
 	log.Print("[Scan] " + dir)
-	resp, err := http.Get(s.Server + dir + "/log")
+	resp, err := http.Get(s.Server + "/" + dir + "/log")
 	requested := 1
 	defer func() { log.Printf("total request: %d", requested) }()
 	if err != nil {

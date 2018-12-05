@@ -19,3 +19,13 @@ func (s Disk) Scan(dir string) ([]App, error) {
 	}
 	return make([]App, 0), nil
 }
+
+func (s Disk) list(dir string) []string {
+	log.Print("[Scan] " + dir)
+	sub, _ := ioutil.ReadDir(s.RootDir + dir)
+	ret := make([]string, len(sub))
+	for i, s := range sub {
+		ret[i] = s.Name()
+	}
+	return ret
+}
