@@ -48,3 +48,4 @@ spec:
           - -searchPost=$INTERNAL_SEARCH_POST
           - -searchType=internal-use
           - -nSearchWorker=8
+          - -logTempl=$INTERNAL_LOG_TEMPL

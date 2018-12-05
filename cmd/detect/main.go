@@ -31,22 +31,24 @@ type ScannerRequest struct {
 }
 
 type cfg struct {
-	ch      chan *ScannerRequest
-	db      *sql.DB
-	scanner scanner.Driver
-	ready   chan struct{}
+	ch        chan *ScannerRequest
+	db        *sql.DB
+	scanner   scanner.Driver
+	ready     chan struct{}
+	pathtempl string
 }
 
-func dispatch(ic <-chan *scanner.Subscription, oc chan<- *scanner.Subscription, sc scanner.Driver) {
+func dispatch(ic <-chan *scanner.Subscription, oc chan<- *scanner.Subscription, sc scanner.Driver, pathtempl string) {
 	log.Printf("[Dispatched worker] Enter")
 	for s := range ic {
 		go func(s *scanner.Subscription) {
 			log.Printf("[Dispatched worker] Start scan for %s", s.Env)
-			apps, err := scanner.Scan(s.Env, "log/kubernetes-$node/msa/$any/$any/$app/$pod/perf-record", sc)
-			if err != nil {
-				log.Printf("Error in the scan for %s", err)
+			apps, req, dur := scanner.Scan(s.Env, pathtempl, &sc)
+			found := 0
+			for _, a := range apps {
+				found += len(a.Pods)
 			}
-			log.Printf("[Dispatched worker] Scan for %s ended: %+v", s.Env, apps)
+			log.Printf("[Dispatched worker] Scan for %s end: found %d by %d requests sent in %s", s.Env, found, req, dur)
 			s.Apps = apps
 			s.OnGoing = false
 			oc <- s
@@ -63,7 +65,7 @@ func (c *cfg) exchange() {
 	// osc: where the subscription with its result comes
 	isc := make(chan *scanner.Subscription, 64) // XXX: May have to be extended
 	osc := make(chan *scanner.Subscription, 64) // XXX: May have to be extended
-	go dispatch(isc, osc, c.scanner)
+	go dispatch(isc, osc, c.scanner, c.pathtempl)
 	for {
 		select {
 		case res := <-osc:
@@ -124,11 +126,14 @@ func (c *cfg) exchange() {
 func main() {
 	log.SetPrefix("detect:\t")
 	log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime)
+	templhelp := "Template path for perf-log search.\n variables:\n\t$any: matches any\n" +
+		"\t$env: mathes any string and returned as name of environment" +
+		"\t$app: mathes any string and returned as name of application" +
+		"\t$pod: mathes any string and returned as name of pod"
 	dbconf := flag.String("db", "example:example@localhost?parseTime=True", "DB address")
 	logdir := flag.String("logLocation", "http://akashic.example.com/logs", "URL for log storage location")
 	logtype := flag.String("logType", "nginx", "log storage type: nginx, disk (will be implemented for s3, disk)")
-	logname := flag.String("logName", "perf-record", "Name of the performance log to look for")
-
+	logtempl := flag.String("logTempl", "log/ap-$any/stg-$env/$app/var/log/$pod/perf-log", templhelp)
 	flag.Parse()
 	args := flag.Args()
 	log.Println(args)
@@ -143,14 +148,14 @@ func main() {
 	default:
 		fallthrough
 	case "nginx":
-		s = scanner.Nginx{*logdir, *logname}
+		s = &scanner.Nginx{*logdir, 0}
 	case "disk":
-		s = scanner.Disk{*logdir, *logname}
+		s = &scanner.Disk{*logdir, 0}
 	}
 
 	t := true
 	es := environ.ListConfig(db, nil, &t)
-	x := cfg{make(chan *ScannerRequest), db, s, make(chan struct{})}
+	x := cfg{make(chan *ScannerRequest), db, s, make(chan struct{}), *logtempl}
 	go x.exchange()
 
 	/* initial registration for scan */

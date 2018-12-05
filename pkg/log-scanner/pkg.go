@@ -41,6 +41,7 @@ type Scanner interface {
 
 type Driver interface {
 	list(target string) []string
+	nReq() int
 }
 
 type matchToken struct {
@@ -185,13 +186,17 @@ func toApp(s []scanCur) []App {
 	return apps
 }
 
-func Scan(root, path string, driver Driver) ([]App, error) {
+func Scan(root, path string, driver *Driver) ([]App, int, time.Duration) {
+	request := -1 * (*driver).nReq()
+	before := time.Now()
 	tokens := tokenize(path)
 	cur := scanCur{
 		found:   map[string]string{},
 		path:    root,
 		matcher: tokens,
 	}
-	r := run(cur, driver)
-	return toApp(r), nil
+	r := run(cur, *driver)
+	request += (*driver).nReq()
+	dur := time.Now().Sub(before)
+	return toApp(r), request, dur
 }

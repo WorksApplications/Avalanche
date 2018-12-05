@@ -10,8 +10,8 @@ import (
 )
 
 type Nginx struct {
-	Server  string
-	LogName string
+	Server string
+	NReq   int
 }
 
 func findNode(z *html.Tokenizer, prefix string) []string {
@@ -121,8 +121,9 @@ func isNotFound(resp *http.Response) bool {
 	}
 }
 
-func (s Nginx) list(dir string) []string {
+func (s *Nginx) list(dir string) []string {
 	links, err := findLink(s.Server + "/" + dir)
+	s.NReq++
 	if err != nil {
 		log.Print(s.Server+"/"+dir, links, err)
 		return []string{}
@@ -131,6 +132,10 @@ func (s Nginx) list(dir string) []string {
 		links[i] = strings.TrimRight(links[i], "/")
 	}
 	return links
+}
+
+func (s *Nginx) nReq() int {
+	return s.NReq
 }
 
 /* Currently, the implementation is very relying on the structure of our internal staging evironments.

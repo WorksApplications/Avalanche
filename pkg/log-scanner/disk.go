@@ -2,30 +2,24 @@ package scanner
 
 import (
 	"io/ioutil"
-	"log"
+	"strings"
 )
 
 type Disk struct {
 	RootDir string
-	LogName string
+	NReq    int
 }
 
-func (s Disk) Scan(dir string) ([]App, error) {
-	log.Print("[Scan] " + dir)
-	sub, _ := ioutil.ReadDir(s.RootDir + dir)
-	for _, x := range sub {
-		if x.Name() == s.LogName {
-		}
-	}
-	return make([]App, 0), nil
-}
-
-func (s Disk) list(dir string) []string {
-	log.Print("[Scan] " + dir)
-	sub, _ := ioutil.ReadDir(s.RootDir + dir)
-	ret := make([]string, len(sub))
-	for i, s := range sub {
-		ret[i] = s.Name()
+func (s *Disk) list(dir string) []string {
+	sub, _ := ioutil.ReadDir(s.RootDir + "/" + dir)
+	s.NReq++
+	ret := make([]string, 0, len(sub))
+	for _, s := range sub {
+		ret = append(ret, strings.TrimRight(s.Name(), "/"))
 	}
 	return ret
+}
+
+func (s *Disk) nReq() int {
+	return s.NReq
 }
