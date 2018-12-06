@@ -12,6 +12,7 @@ export interface ITreeElement {
   immediateRatio: number;
   relativeRatio: number;
   id: number;
+  hasCode: boolean;
 }
 
 export interface IProperty {
@@ -258,6 +259,7 @@ class PerfCallTree extends React.Component<IProperty, State> {
                 <button
                   className={styles.seeCode}
                   onClick={this.onSeeCodeClick(hoveringElement.id)}
+                  disabled={!hoveringElement.hasCode}
                 >
                   See code
                 </button>

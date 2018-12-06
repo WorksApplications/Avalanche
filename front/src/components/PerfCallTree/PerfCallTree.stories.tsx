@@ -1,6 +1,8 @@
 // tslint:disable:no-implicit-dependencies no-submodule-imports
 import * as React from "react";
 
+import { action } from "@storybook/addon-actions";
+import { boolean } from "@storybook/addon-knobs";
 import { storiesOf } from "@storybook/react";
 import PerfCallTree, { ITreeElement } from "./PerfCallTree";
 
@@ -27,7 +29,8 @@ function generateBinaryTree(depth: number, rootLabel: string): ITreeElement[] {
       childIds: [],
       relativeRatio: 1 / 2,
       immediateRatio: Math.pow(1 / 2, depth - depthInternal),
-      totalRatio: Math.pow(1 / 2, depth - depthInternal - 1)
+      totalRatio: Math.pow(1 / 2, depth - depthInternal - 1),
+      hasCode: false
     };
     array.push(body);
     counter++;
@@ -67,7 +70,8 @@ function generateTernaryTree(depth: number, rootLabel: string): ITreeElement[] {
       childIds: [],
       relativeRatio: 1 / 3,
       immediateRatio: Math.pow(1 / 3, depth - depthInternal),
-      totalRatio: Math.pow(1 / 3, depth - depthInternal - 1)
+      totalRatio: Math.pow(1 / 3, depth - depthInternal - 1),
+      hasCode: false
     };
     array.push(body);
     counter++;
@@ -102,19 +106,33 @@ storiesOf("PerfCallTree", module)
       <PerfCallTree treeMap={[]} />
     </div>
   ))
-  .add("Binary tree", () => (
-    <div style={commonWrapStyle}>
-      <PerfCallTree
-        treeMap={generateBinaryTree(7, "Lcom/example/avalanche")}
-        targetId={0}
-      />
-    </div>
-  ))
-  .add("Ternary tree", () => (
-    <div style={commonWrapStyle}>
-      <PerfCallTree
-        treeMap={generateTernaryTree(7, "Lcom/example/avalanche")}
-        targetId={0}
-      />
-    </div>
-  ));
+  .add("Binary tree", () => {
+    const hasCode = boolean("has code", true);
+    return (
+      <div style={commonWrapStyle}>
+        <PerfCallTree
+          treeMap={generateBinaryTree(7, "Lcom/example/avalanche").map(x => ({
+            ...x,
+            hasCode
+          }))}
+          targetId={0}
+          onSeeingCodeOf={action("see code of...")}
+        />
+      </div>
+    );
+  })
+  .add("Ternary tree", () => {
+    const hasCode = boolean("has code", true);
+    return (
+      <div style={commonWrapStyle}>
+        <PerfCallTree
+          treeMap={generateTernaryTree(7, "Lcom/example/avalanche").map(x => ({
+            ...x,
+            hasCode
+          }))}
+          targetId={0}
+          onSeeingCodeOf={action("see code of...")}
+        />
+      </div>
+    );
+  });
