@@ -1,0 +1,47 @@
+@import "../../common";
+
+.wrap {
+  background-color: white;
+  padding: $base-space;
+  border: 1px solid $border-color-light;
+}
+
+.header {
+  display: flex;
+  font-size: $font-size-smaller;
+  align-items: center;
+}
+
+.title {
+  font-size: $font-size-normal;
+}
+
+.link {
+  @include link-style-blue();
+}
+
+.codeView {
+  display: grid;
+  grid-template-columns: $base-space * 4 1fr;
+  grid-column-gap: $base-space * 2;
+  margin-top: $base-space;
+}
+
+.code {
+  font-family: $font-family-monospace;
+  font-size: $font-size-smaller;
+  margin: 0;
+  line-height: $base-space * 2;
+}
+
+.lineNumber {
+  @extend .code;
+  direction: rtl; // hack
+  user-select: none;
+  color: $text-color-hint;
+}
+
+.codeLine {
+  @extend .code;
+  text-align: left;
+}

@@ -73,6 +73,33 @@ export function convertHeatMap(
   };
 }
 
+export function convertCode(
+  code: Array<{ snippet: string }>
+): Array<Array<string | { fragment: string }>> {
+  // chunks to lines with chunks
+  const result: Array<Array<{ fragment: string }>> = [];
+  let current: Array<{ fragment: string }> = [];
+  for (const x of code) {
+    const lines = x.snippet.split("\n");
+    const first = lines.shift()!;
+    current.push({ fragment: first });
+    if (lines.length === 0) {
+      continue;
+    }
+    result.push(current);
+    const last = lines.pop()!;
+    current = [{ fragment: last }];
+    for (const y of lines) {
+      result.push([{ fragment: y }]);
+    }
+  }
+  if (current.length > 0) {
+    result.push(current);
+  }
+
+  return result;
+}
+
 export function convertPerfCallTree(tree: IPerfCallTree): IPerfCallTreeData {
   const array: IPerfCallTreeData = [];
   let counter = 0;
@@ -83,6 +110,7 @@ export function convertPerfCallTree(tree: IPerfCallTree): IPerfCallTreeData {
     parentId?: number
   ): number {
     const id = counter;
+    const hasCode = node.code.length > 0;
     const body: IPerfCallTreeElementData = {
       id,
       parentId,
@@ -90,7 +118,9 @@ export function convertPerfCallTree(tree: IPerfCallTree): IPerfCallTreeData {
       relativeRatio: node.totalRatio / parentTotalRatio,
       immediateRatio: node.immediateRatio,
       totalRatio: node.totalRatio,
-      hasCode: node.code.length > 0,
+      hasCode,
+      firstLine: hasCode ? node.firstLine! : undefined,
+      code: convertCode(node.code),
       childIds: []
     };
     array.push(body);

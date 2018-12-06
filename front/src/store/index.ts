@@ -32,6 +32,8 @@ export interface IPerfCallTreeElementData {
   immediateRatio: number;
   totalRatio: number;
   hasCode: boolean;
+  firstLine?: number;
+  code: Array<Array<string | { fragment: string }>>;
 }
 
 export type IPerfCallTreeData = IPerfCallTreeElementData[];

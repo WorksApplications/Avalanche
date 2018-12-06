@@ -9,6 +9,7 @@ import {
   Snapshot
 } from "../generated/collect/api";
 import {
+  Code,
   DefaultApiFactory as suspectApiFactory,
   Report
 } from "../generated/suspect/api";
@@ -63,8 +64,21 @@ export interface IPerfCallTree {
   name: string;
   totalRatio: number;
   immediateRatio: number;
-  code: any[];
+  code: Array<{ snippet: string }>;
+  firstLine?: number;
   children: IPerfCallTree[];
+}
+
+function convertCode(code?: Code[]): Array<{ snippet: string }> {
+  if (typeof code === "undefined") {
+    return [];
+  }
+
+  return code
+    .filter(x => typeof x.snippet !== "undefined")
+    .map(x => ({
+      snippet: x.snippet!
+    }));
 }
 
 function perfCallTreeConvert(report: Report): IPerfCallTree {
@@ -72,7 +86,8 @@ function perfCallTreeConvert(report: Report): IPerfCallTree {
     name: report.name!,
     totalRatio: report.total_ratio!,
     immediateRatio: report.immidiate_ratio!,
-    code: report.code!,
+    code: convertCode(report.code),
+    firstLine: report.line_start_at,
     children: report.children ? report.children.map(perfCallTreeConvert) : []
   };
 }
