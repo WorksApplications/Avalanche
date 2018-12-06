@@ -1,5 +1,5 @@
 imageTags:
-  - name: /resource_optimization/suspect
+  - name: /resource_optimization/scanner
     newTag: $GIT_HASH
   - name: /resource_optimization/enroll
     newTag: $GIT_HASH
