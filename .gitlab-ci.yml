@@ -26,9 +26,9 @@ backend-build:
     artifacts:
         paths:
             - bin/collect
-            - bin/detect
+            - bin/scanner
             - bin/enroll
-            - bin/suspect
+            - bin/blame
         expire_in: 1 hour
 
 front-build:
@@ -65,13 +65,13 @@ push-images:
         - export GIT_HASH=$(git show --quiet --format=%ha)
         - ls -lR
         - apk add make
-        - touch bin/collect bin/detect
+        - touch bin/collect bin/scanner
         - docker build -f image/collect/Dockerfile --tag ${
-        - docker build -f image/detect/Dockerfile  --tag ${
+        - docker build -f image/scanner/Dockerfile  --tag ${
         - docker build -f image/enroll/Dockerfile  --tag ${
 
         - docker build -f image/static/Dockerfile  --tag ${
-        - docker build -f image/suspect/Dockerfile  --tag ${
+        - docker build -f image/blame/Dockerfile  --tag ${
         - docker push ${
         - docker push ${
         - docker push ${
