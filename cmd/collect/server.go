@@ -18,9 +18,9 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type ServerCtx struct {
+type cfg struct {
 	Db        *sql.DB
-	Detect    string /* detect address */
+	Scanner   string /* detect address */
 	Enroll    string
 	Extract   string /* extract address */
 	Pvmount   string
@@ -33,7 +33,7 @@ type ServerCtx struct {
 	RunningPod map[string]struct{}
 }
 
-func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Responder {
+func (s *cfg) HealthzHandler(_ operations.HealthzParams) middleware.Responder {
 	if s.Ready {
 		return operations.NewHealthzOK().WithPayload("Vaer sa godt")
 	} else {
@@ -41,7 +41,7 @@ func (s *ServerCtx) HealthzHandler(_ operations.HealthzParams) middleware.Respon
 	}
 }
 
-func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) middleware.Responder {
+func (s *cfg) ListAvailablePods(_ operations.ListAvailablePodsParams) middleware.Responder {
 	body := make([]*models.Pod, 0)
 	for pf, _ := range s.TracedPod {
 		p := pod.Describe(s.Db, pf)
@@ -68,12 +68,12 @@ func (s *ServerCtx) ListAvailablePods(_ operations.ListAvailablePodsParams) midd
 	return operations.NewListAvailablePodsOK().WithPayload(body)
 }
 
-func (s *ServerCtx) GetAppsHandler(_ operations.GetAppsParams) middleware.Responder {
+func (s *cfg) GetAppsHandler(_ operations.GetAppsParams) middleware.Responder {
 	body := app.ListNames(s.Db)
 	return operations.NewGetAppsOK().WithPayload(body)
 }
 
-func (s *ServerCtx) DescribeAppHandler(params operations.DescribeAppParams) middleware.Responder {
+func (s *cfg) DescribeAppHandler(params operations.DescribeAppParams) middleware.Responder {
 	body := app.Describe(s.Db, &params.Appid)
 	if body == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
@@ -90,7 +90,7 @@ func (s *ServerCtx) DescribeAppHandler(params operations.DescribeAppParams) midd
 	return operations.NewDescribeAppOK().WithPayload(body)
 }
 
-func (s *ServerCtx) GetEnvironmentsHandler(params operations.GetEnvironmentsParams) middleware.Responder {
+func (s *cfg) GetEnvironmentsHandler(params operations.GetEnvironmentsParams) middleware.Responder {
 	app := app.Get(s.Db, &params.Appid)
 	if app == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
@@ -110,7 +110,7 @@ func (s *ServerCtx) GetEnvironmentsHandler(params operations.GetEnvironmentsPara
 	return operations.NewGetEnvironmentsOK().WithPayload(body)
 }
 
-func (s *ServerCtx) DescribeEnvironmentHandler(params operations.DescribeEnvironmentParams) middleware.Responder {
+func (s *cfg) DescribeEnvironmentHandler(params operations.DescribeEnvironmentParams) middleware.Responder {
 	lay := layHelper(s.Db, &params.Appid, &params.Environment)
 	if lay == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
@@ -122,7 +122,7 @@ func (s *ServerCtx) DescribeEnvironmentHandler(params operations.DescribeEnviron
 	return operations.NewDescribeEnvironmentOK().WithPayload(body)
 }
 
-func (s *ServerCtx) GetPodsHandler(params operations.GetPodsParams) middleware.Responder {
+func (s *cfg) GetPodsHandler(params operations.GetPodsParams) middleware.Responder {
 	lay := layHelper(s.Db, &params.Appid, &params.Environment)
 	if lay == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
@@ -132,7 +132,7 @@ func (s *ServerCtx) GetPodsHandler(params operations.GetPodsParams) middleware.R
 	return operations.NewGetPodsOK().WithPayload(body)
 }
 
-func (s *ServerCtx) DescribePodHandler(params operations.DescribePodParams) middleware.Responder {
+func (s *cfg) DescribePodHandler(params operations.DescribePodParams) middleware.Responder {
 	lay := layHelper(s.Db, &params.Appid, &params.Environment) // validate XXX
 	if lay == nil {
 		return operations.NewDescribeAppDefault(404).WithPayload(nil)
@@ -160,7 +160,7 @@ func envDescriber(db *sql.DB, lay *layout.Layout) *models.Environment {
 	return body
 }
 
-func podDescriber(s *ServerCtx, pod *models.Pod) {
+func podDescriber(s *cfg, pod *models.Pod) {
 	sn := snapshot.FromPod(s.Db, pod)
 	pod.Snapshots = make([]*models.Snapshot, len(sn))
 	for i, n := range sn {
@@ -169,7 +169,7 @@ func podDescriber(s *ServerCtx, pod *models.Pod) {
 	_, pod.IsAlive = s.RunningPod[*pod.Name]
 }
 
-func podHelper(s *ServerCtx, ps []*pod.PodInternal) []*models.Pod {
+func podHelper(s *cfg, ps []*pod.PodInternal) []*models.Pod {
 	body := make([]*models.Pod, len(ps))
 	for i, p := range ps {
 		body[i] = p.ToResponse()
@@ -179,7 +179,7 @@ func podHelper(s *ServerCtx, ps []*pod.PodInternal) []*models.Pod {
 	return body
 }
 
-func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) middleware.Responder {
+func (s *cfg) NewSnapshotHandler(params operations.NewSnapshotParams) middleware.Responder {
 	app := app.Describe(s.Db, &params.Appid)
 	env := environ.Get(s.Db, &params.Environment)
 	if app == nil || env == nil {
@@ -204,7 +204,7 @@ func (s *ServerCtx) NewSnapshotHandler(params operations.NewSnapshotParams) midd
 	return operations.NewNewSnapshotOK().WithPayload(body)
 }
 
-func (s *ServerCtx) ShowSnapshotsOfPodHandler(params operations.ShowSnapshotsOfPodParams) middleware.Responder {
+func (s *cfg) ShowSnapshotsOfPodHandler(params operations.ShowSnapshotsOfPodParams) middleware.Responder {
 	app := app.Describe(s.Db, &params.Appid)
 	env := environ.Get(s.Db, &params.Environment)
 	if app == nil || env == nil {
@@ -224,7 +224,7 @@ func (s *ServerCtx) ShowSnapshotsOfPodHandler(params operations.ShowSnapshotsOfP
 	return operations.NewShowSnapshotsOfPodOK().WithPayload(body)
 }
 
-func (s *ServerCtx) ListSnapshotsHandler(params operations.ListSnapshotsParams) middleware.Responder {
+func (s *cfg) ListSnapshotsHandler(params operations.ListSnapshotsParams) middleware.Responder {
 	var ss []*models.Snapshot
 	var max int64
 	if params.Max == nil {
@@ -250,7 +250,7 @@ func (s *ServerCtx) ListSnapshotsHandler(params operations.ListSnapshotsParams) 
 	return operations.NewListSnapshotsOK().WithPayload(ss)
 }
 
-func (s *ServerCtx) GetSnapshotHandler(params operations.GetSnapshotParams) middleware.Responder {
+func (s *cfg) GetSnapshotHandler(params operations.GetSnapshotParams) middleware.Responder {
 	ss, err := snapshot.GetByUuid(s.Db, params.UUID)
 	if err != nil {
 		e := err.Error()
@@ -260,7 +260,7 @@ func (s *ServerCtx) GetSnapshotHandler(params operations.GetSnapshotParams) midd
 	return operations.NewGetSnapshotOK().WithPayload(ss.ToResponse(s.Db, s.Flamescope))
 }
 
-func (s *ServerCtx) InitHandle() {
+func (s *cfg) InitHandle() {
 	environ.InitTable(s.Db)
 	layout.InitTable(s.Db)
 	pod.InitTable(s.Db)

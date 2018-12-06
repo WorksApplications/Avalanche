@@ -36,7 +36,7 @@ func main() {
 	dbconf := flag.String("db", "example:example@localhost?parseTime=True", "DB connexion")
 	port := flag.Int("port", 4981, "Port for this server")
 	slave := flag.Bool("slave", false, "Whether it works as slave (no DB update)")
-	detect := flag.String("detect", "http://localhost:8080", "\"detect\" service address")
+	scanner := flag.String("scanner", "http://localhost:8080", "\"scanner\" service address")
 	enroll := flag.String("enroll", "http://localhost:8080", "\"enroll\" service address")
 	extract := flag.String("extract", "http://localhost:8080", "\"extract\" service address")
 	tempd := flag.String("volatile", "/tmp/debug-collect/collect-volatile", "\"directory for temporal file\"")
@@ -55,9 +55,9 @@ func main() {
 	defer server.Shutdown()
 
 	db := establishDBConn(*dbconf)
-	ctx := ServerCtx{
+	cfg := cfg{
 		Db:         db,
-		Detect:     *detect,
+		Scanner:     *scanner,
 		Enroll:     *enroll,
 		Extract:    *extract,
 		Pvmount:    *ssstore,
@@ -70,29 +70,29 @@ func main() {
 	}
 
 	if *init {
-		ctx.InitHandle()
+		cfg.InitHandle()
 		log.Fatal("Initialize end")
 	}
 
-	ctx.PollPodInfo()
+	cfg.PollPodInfo()
 
-	api.GetAppsHandler = operations.GetAppsHandlerFunc(ctx.GetAppsHandler)
-	api.DescribeAppHandler = operations.DescribeAppHandlerFunc(ctx.DescribeAppHandler)
+	api.GetAppsHandler = operations.GetAppsHandlerFunc(cfg.GetAppsHandler)
+	api.DescribeAppHandler = operations.DescribeAppHandlerFunc(cfg.DescribeAppHandler)
 
-	api.GetEnvironmentsHandler = operations.GetEnvironmentsHandlerFunc(ctx.GetEnvironmentsHandler)
-	api.DescribeEnvironmentHandler = operations.DescribeEnvironmentHandlerFunc(ctx.DescribeEnvironmentHandler)
+	api.GetEnvironmentsHandler = operations.GetEnvironmentsHandlerFunc(cfg.GetEnvironmentsHandler)
+	api.DescribeEnvironmentHandler = operations.DescribeEnvironmentHandlerFunc(cfg.DescribeEnvironmentHandler)
 
-	api.GetPodsHandler = operations.GetPodsHandlerFunc(ctx.GetPodsHandler)
-	api.DescribePodHandler = operations.DescribePodHandlerFunc(ctx.DescribePodHandler)
+	api.GetPodsHandler = operations.GetPodsHandlerFunc(cfg.GetPodsHandler)
+	api.DescribePodHandler = operations.DescribePodHandlerFunc(cfg.DescribePodHandler)
 
-	api.NewSnapshotHandler = operations.NewSnapshotHandlerFunc(ctx.NewSnapshotHandler)
-	api.ShowSnapshotsOfPodHandler = operations.ShowSnapshotsOfPodHandlerFunc(ctx.ShowSnapshotsOfPodHandler)
-	api.ListSnapshotsHandler = operations.ListSnapshotsHandlerFunc(ctx.ListSnapshotsHandler)
-	api.GetSnapshotHandler = operations.GetSnapshotHandlerFunc(ctx.GetSnapshotHandler)
+	api.NewSnapshotHandler = operations.NewSnapshotHandlerFunc(cfg.NewSnapshotHandler)
+	api.ShowSnapshotsOfPodHandler = operations.ShowSnapshotsOfPodHandlerFunc(cfg.ShowSnapshotsOfPodHandler)
+	api.ListSnapshotsHandler = operations.ListSnapshotsHandlerFunc(cfg.ListSnapshotsHandler)
+	api.GetSnapshotHandler = operations.GetSnapshotHandlerFunc(cfg.GetSnapshotHandler)
 
-	api.ListAvailablePodsHandler = operations.ListAvailablePodsHandlerFunc(ctx.ListAvailablePods)
+	api.ListAvailablePodsHandler = operations.ListAvailablePodsHandlerFunc(cfg.ListAvailablePods)
 
-	api.HealthzHandler = operations.HealthzHandlerFunc(ctx.HealthzHandler)
+	api.HealthzHandler = operations.HealthzHandlerFunc(cfg.HealthzHandler)
 
 	if err := server.Serve(); err != nil {
 		log.Fatalln(err)
