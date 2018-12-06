@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: detect
+  name: scanner
 spec:
   template:
     spec:
       containers:
-      - name: detect
+      - name: scanner
         command:
-          - /detect
+          - /scanner
           - -logLocation=$INTERNAL_LOG_LOCATION
           - -db=$DB_CRED_USER:$DB_CRED_PASS@tcp(mariadb)/collekt?parseTime=True
           - -logTempl=$INTERNAL_LOG_TEMPL
@@ -26,7 +26,7 @@ spec:
         command:
           - /collect
           - -port=8080
-          - -detect=http://detect:8080
+          - -scanner=http://scanner:8080
           - -enroll=http://enroll:8080
           - -extract=http://extract:8080
           - -db=$DB_CRED_USER:$DB_CRED_PASS@tcp(mariadb)/collekt?parseTime=True
@@ -38,14 +38,14 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: suspect
+  name: blame
 spec:
   template:
     spec:
       containers:
-      - name: suspect
+      - name: blame
         command:
-          - /suspect
+          - /blame
           - -searchUrl=$INTERNAL_SEARCH_SERVER
           - -searchPost=$INTERNAL_SEARCH_POST
           - -searchType=internal-use

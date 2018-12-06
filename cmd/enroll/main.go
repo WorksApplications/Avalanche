@@ -12,8 +12,8 @@ import (
 )
 
 type Ctx struct {
-	detect string
-	filter func(string) bool
+	scanner string
+	filter  func(string) bool
 }
 
 type MetaResponse struct {
@@ -112,7 +112,7 @@ func getRunningPodsFrom(kapi string, filter func(string) bool) []Response {
 
 func (s *Ctx) handleFunc(w http.ResponseWriter, r *http.Request) {
 	log.Print(r.Proto, r.Method, ": ", r.URL, " | Header: ", r.Header)
-	es := getAllEnvironment(s.detect)
+	es := getAllEnvironment(s.scanner)
 
 	ps := make([]MetaResponse, 0)
 	for _, e := range es {
@@ -133,7 +133,7 @@ func (s *Ctx) handleFunc(w http.ResponseWriter, r *http.Request) {
 func main() {
 	log.SetPrefix("enroll:\t")
 	log.SetFlags(log.Lshortfile)
-	detect := flag.String("detect", "http://detect:8080", "detect server address")
+	scanner := flag.String("scanner", "http://scanner:8080", "scanner server address")
 	perfMonitorImage := flag.String("monitorImage", "release-docker.worksap.com/release-test/tomcat-base-perf-monitor", "the name of monitoring image")
 	perfMonitorLabel := flag.String("monitorLabel", "", "the label of monitoring image")
 	useMonitorImage := flag.Bool("useMonitorImage", true, "indicates whether the \"-monitorImage\" flag determines the monitoring image")
@@ -141,10 +141,10 @@ func main() {
 	port := flag.Int("port", 8080, "Listen port")
 
 	flag.Parse()
-	log.Println("detect address at:", *detect)
+	log.Println("scanner address at:", *scanner)
 	listener, _ := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 
-	c := Ctx{*detect, func(s string) bool {
+	c := Ctx{*scanner, func(s string) bool {
 		im := strings.Split(s, ":")
 		if *useMonitorImage && *useMonitorLabel {
 			return im[0] == *perfMonitorImage && im[1] == *perfMonitorLabel

@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: detect
+  name: scanner
 spec:
   selector:
     matchLabels:
-      run: detect
+      run: scanner
   replicas: 1
   template:
     metadata:
       labels:
-        run: detect
+        run: scanner
     spec:
       containers:
-      - name: detect
+      - name: scanner
         command:
-          - /detect
+          - /scanner
           - --db=example:example@tcp(mariadb)/collekt?parseTime=True
-        image: /resource_optimization/detect
+        image: /resource_optimization/scanner
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -42,7 +42,7 @@ spec:
       - name: enroll
         command:
           - /enroll
-          - --detect=http://detect:8080
+          - -scanner=http://scanner:8080
         image: /resource_optimization/enroll
         imagePullPolicy: Always
         ports:
@@ -102,7 +102,7 @@ spec:
         command:
           - /collect
           - -port=8080
-          - -detect=http://detect:8080
+          - -scanner=http://scanner:8080
           - -enroll=http://enroll:8080
           - -extract=http://extract:8080
           - -db=example:example@tcp(mariadb)/collekt?parseTime=True
@@ -142,23 +142,23 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: suspect
+  name: blame
 spec:
   selector:
     matchLabels:
-      run: suspect
+      run: blame
   replicas: 1
   template:
     metadata:
       labels:
-        run: suspect
+        run: blame
     spec:
       containers:
-      - name: suspect
-        image: /resource_optimization/suspect
+      - name: blame
+        image: /resource_optimization/blame
         ports:
         - containerPort: 8080
         command:
-          - /suspect
+          - /blame
           - -nSearchWorker=8
         imagePullPolicy: Always

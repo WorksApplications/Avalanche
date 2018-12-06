@@ -19,9 +19,9 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func (s *ServerCtx) pull() error {
-	log.Printf("start to pull pods' information from %s", s.Detect+"/logs")
-	r, err := http.Get(s.Detect + "/logs")
+func (s *cfg) pull() error {
+	log.Printf("start to pull pods' information from %s", s.Scanner+"/logs")
+	r, err := http.Get(s.Scanner + "/logs")
 	if err != nil {
 		log.Println("Poll failed with ", err)
 		return err
@@ -72,7 +72,7 @@ func recursiveInsert(db *sql.DB, p *scanner.Subscription) []int64 {
 	return found
 }
 
-func (s *ServerCtx) PollPodInfo() {
+func (s *cfg) PollPodInfo() {
 	/* If the retrieving schedule is invoked by detect, the place to post new data is unknown on testing. */
 	t := time.NewTicker(1 * time.Minute)
 	once := make(chan int, 1)
@@ -100,7 +100,7 @@ func (s *ServerCtx) PollPodInfo() {
 
 }
 
-func (s *ServerCtx) checkPodAvailability() error {
+func (s *cfg) checkPodAvailability() error {
 	if s.Enroll == "" {
 		/* disable this feature */
 		return nil
