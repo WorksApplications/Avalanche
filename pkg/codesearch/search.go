@@ -94,7 +94,9 @@ func (s fillingCache) search(api Search, token, hints []string) (*Result, error)
 			return nil, nil
 		}
 		//log.Print("[cache] set: k=", q, r)
-		s.cache.Set(q, *r, cache.DefaultExpiration)
+		if len(Result.Code) != 0 || Result.Ref != "" {
+			s.cache.Set(q, *r, cache.DefaultExpiration)
+		}
 		return r, nil
 	}
 }
@@ -125,7 +127,7 @@ func (api Search) Runner(name string) {
 			continue
 		}
 		t := time.Now()
-		if api.Cache != nil {
+		if api.Cache != nil && r.Engine != Undefined {
 			res, err = api.run(r.Keywords, r.Hints, GoCache, r.Engine)
 		} else {
 			res, err = api.run(r.Keywords, r.Hints, r.Engine, Undefined)
