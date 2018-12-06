@@ -9,6 +9,7 @@ spec:
       - name: detect
         command:
           - /detect
+          - -logLocation=$INTERNAL_LOG_LOCATION
           - -db=$DB_CRED_USER:$DB_CRED_PASS@tcp(mariadb)/collekt?parseTime=True
           - -logTempl=$INTERNAL_LOG_TEMPL
 ---
