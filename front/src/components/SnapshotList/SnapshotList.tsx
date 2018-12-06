@@ -49,12 +49,6 @@ const initialItemState = {
 
 type ItemState = Readonly<typeof initialItemState>;
 
-const spinner = (
-  <div className={styles.spinner}>
-    <Spinner />
-  </div>
-);
-
 // This child component is tightly coupled as a table row element
 export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
   public static getDerivedStateFromProps(
@@ -115,16 +109,24 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
     );
   }
 
+  private renderSpinner() {
+    return (
+      <div className={styles.spinner}>
+        <Spinner />
+      </div>
+    );
+  }
+
   private renderGraphBody() {
     switch (this.props.heatMapStatus) {
       case "empty":
         return <div />;
       case "loading":
-        return spinner;
+        return this.renderSpinner();
       case "loaded":
         if (this.props.heatMap) {
           return (
-            <React.Suspense fallback={spinner}>
+            <React.Suspense fallback={this.renderSpinner()}>
               <div className={styles.heatMap}>
                 <HeatLineChart
                   {...this.props.heatMap}
@@ -152,16 +154,17 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
       case "empty":
         return <div />;
       case "loading":
-        return spinner;
+        return this.renderSpinner();
       case "loaded":
         if (this.props.perfCallTree) {
           const targetId = this.props.perfCallTree.keys().next().value; // root element first
           return (
-            <React.Suspense fallback={spinner}>
+            <React.Suspense fallback={this.renderSpinner()}>
               <div>
                 <PerfCallTree
                   treeMap={this.props.perfCallTree}
                   targetId={targetId}
+                  onSeeingCodeOf={this.onOpenCode}
                 />
               </div>
             </React.Suspense>

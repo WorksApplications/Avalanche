@@ -90,6 +90,7 @@ export function convertPerfCallTree(tree: IPerfCallTree): IPerfCallTreeData {
       relativeRatio: node.totalRatio / parentTotalRatio,
       immediateRatio: node.immediateRatio,
       totalRatio: node.totalRatio,
+      hasCode: node.code.length > 0,
       childIds: []
     };
     array.push(body);

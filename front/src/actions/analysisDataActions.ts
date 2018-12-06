@@ -63,6 +63,7 @@ export interface IPerfCallTree {
   name: string;
   totalRatio: number;
   immediateRatio: number;
+  code: any[];
   children: IPerfCallTree[];
 }
 
@@ -71,6 +72,7 @@ function perfCallTreeConvert(report: Report): IPerfCallTree {
     name: report.name!,
     totalRatio: report.total_ratio!,
     immediateRatio: report.immidiate_ratio!,
+    code: report.code!,
     children: report.children ? report.children.map(perfCallTreeConvert) : []
   };
 }

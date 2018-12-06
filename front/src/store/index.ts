@@ -31,6 +31,7 @@ export interface IPerfCallTreeElementData {
   relativeRatio: number;
   immediateRatio: number;
   totalRatio: number;
+  hasCode: boolean;
 }
 
 export type IPerfCallTreeData = IPerfCallTreeElementData[];
