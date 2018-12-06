@@ -205,6 +205,96 @@
          style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
          transform="matrix(-0.8,0,0,-0.8,-10,0)" />
     </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker5922-4"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5920-87"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker5922-5-3"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5920-8-3"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker5922-5-1-5"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5920-8-7-0"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker5972-1"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5970-4"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker5972-6"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5970-0"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker5972-69"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5970-3"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)" />
+    </marker>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -214,8 +304,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.70710678"
-     inkscape:cx="329.31769"
-     inkscape:cy="588.79786"
+     inkscape:cx="174.68993"
+     inkscape:cy="610.35211"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -241,23 +331,23 @@
      inkscape:groupmode="layer"
      id="layer1">
     <rect
-       style="opacity:1;fill:none;fill-opacity:0;stroke:#000000;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect815"
        width="53.483627"
        height="19.087799"
-       x="74.385712"
-       y="6.9032788"
+       x="74.914879"
+       y="7.6007009"
        ry="2.9433048" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="101.34715"
-       y="19.204119"
+       x="101.87632"
+       y="20.791615"
        id="text819"><tspan
          sodipodi:role="line"
          id="tspan817"
-         x="101.34715"
-         y="19.204119"
+         x="101.87632"
+         y="20.791615"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';stroke-width:0.26458332px">Apps</tspan></text>
     <g
        id="g5178"
@@ -294,7 +384,7 @@
          style="fill:#effb4a;fill-opacity:1;fill-rule:evenodd;stroke:#949494;stroke-width:0.30000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     </g>
     <rect
-       style="opacity:1;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="opacity:1;fill:#505050;fill-opacity:1;stroke:#505050;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect815-90"
        width="53.483631"
        height="19.087799"
@@ -305,18 +395,18 @@
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:55.50000668%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="147.85712"
-       y="64.901436"
+       y="64.592903"
        id="text819-8"><tspan
          sodipodi:role="line"
          x="147.85712"
-         y="64.901436"
+         y="64.592903"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px"
          id="tspan5228"><tspan
    id="tspan5230"
    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px">Apps</tspan></tspan><tspan
          sodipodi:role="line"
          x="147.85712"
-         y="70.775185"
+         y="70.466652"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px"
          id="tspan5232">extractor</tspan></text>
     <g
@@ -345,78 +435,78 @@
          y="42.470837"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px">`av-convert`</tspan></text>
     <rect
-       style="opacity:1;fill:#1a1a1a;fill-opacity:0.03864734;stroke:#949494;stroke-width:0.565;stroke-miterlimit:4;stroke-dasharray:0.565, 3.39000000000000012;stroke-dashoffset:0;stroke-opacity:1"
+       style="opacity:1;fill:#1a1a1a;fill-opacity:0.03864734;stroke:#949494;stroke-width:0.62067097;stroke-miterlimit:4;stroke-dasharray:0.62067097, 3.72402579;stroke-dashoffset:0;stroke-opacity:1"
        id="rect5120"
-       width="80.168747"
-       height="124.08958"
-       x="12.170835"
-       y="84.076569"
-       ry="2.9433043" />
+       width="80.113075"
+       height="149.85214"
+       x="12.19867"
+       y="84.104401"
+       ry="3.5543716" />
     <rect
-       style="opacity:1;fill:#1a1a1a;fill-opacity:0.07246377;stroke:#949494;stroke-width:0.56499997;stroke-miterlimit:4;stroke-dasharray:0.56499997,3.38999982;stroke-dashoffset:0;stroke-opacity:1"
+       style="opacity:1;fill:#1a1a1a;fill-opacity:0.07246375;stroke:#949494;stroke-width:0.61990017;stroke-miterlimit:4;stroke-dasharray:0.61990013, 3.71940077;stroke-dashoffset:0;stroke-opacity:1"
        id="rect5120-9"
-       width="80.168747"
-       height="124.08958"
-       x="110.19896"
-       y="84.076569"
-       ry="2.9433043" />
+       width="80.113846"
+       height="149.47873"
+       x="110.22641"
+       y="84.104019"
+       ry="3.5455146" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:7.74707556px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.19367689px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="-102.82355"
-       y="119.41217"
+       style="font-style:normal;font-weight:normal;font-size:9.16572475px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.22914311px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-122.08003"
+       y="119.12295"
        id="text5139"
-       transform="rotate(-61.866468)"><tspan
+       transform="rotate(-64.608974)"><tspan
          sodipodi:role="line"
          id="tspan5137"
-         x="-102.82355"
-         y="119.41217"
-         style="fill:#8b8b8b;fill-opacity:1;stroke-width:0.19367689px">Your (staging, testing) environment</tspan></text>
+         x="-122.08003"
+         y="119.12295"
+         style="fill:#8b8b8b;fill-opacity:1;stroke-width:0.22914311px">Your (staging, testing) environment</tspan></text>
     <rect
        style="opacity:1;fill:#b1b1b1;fill-opacity:1;stroke:#000000;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect815-9-7"
        width="53.483631"
        height="19.087799"
        x="27.819048"
-       y="118.32298"
+       y="107.73965"
        ry="2.9433048" />
     <text
        id="text819-1-6"
-       y="130.54146"
+       y="119.95812"
        x="54.768749"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:52.48000026%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        xml:space="preserve"><tspan
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:52.48000026%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#000000;fill-opacity:1;stroke-width:0.26458332px"
-         y="130.54146"
+         y="119.95812"
          x="54.768749"
          id="tspan817-1-3"
          sodipodi:role="line">Apps</tspan><tspan
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:52.48000026%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#000000;fill-opacity:1;stroke-width:0.26458332px"
-         y="136.0956"
+         y="125.51226"
          x="54.768749"
          sodipodi:role="line"
          id="tspan5234-8">perf-loging</tspan></text>
     <path
        style="fill:#effb4a;fill-opacity:1;fill-rule:evenodd;stroke:#949494;stroke-width:0.30000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 38.110178,112.31479 5.042444,-1.35112 -4.356831,8.60451 3.054249,-1.21081 -3.626402,5.3701 1.18599,-0.40458 -5.727455,6.34441 3.858105,-5.80154 -1.231161,0.40938 2.074732,-4.97843 -2.002704,0.67201 z"
+       d="m 38.110178,101.73145 5.042444,-1.35112 -4.356831,8.60451 3.054249,-1.21081 -3.626402,5.3701 1.18599,-0.40458 -5.727455,6.34441 3.858105,-5.80154 -1.231161,0.40938 2.074732,-4.97843 -2.002704,0.67201 z"
        id="path4533-0"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cccccccccccc" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.565;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none;marker-end:url(#marker5190)"
-       d="M 55.562499,71.839584 V 118.14167"
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.47420833;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5190)"
+       d="M 55.562499,71.839584 V 104.45643"
        id="path5186"
        inkscape:connector-curvature="0" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="43.127083"
-       y="98.82708"
+       x="43.65625"
+       y="82.422897"
        id="text5226"><tspan
          sodipodi:role="line"
          id="tspan5224"
-         x="43.127083"
-         y="98.82708"
+         x="43.65625"
+         y="82.422897"
          style="font-size:7.05555534px;stroke-width:0.26458332px">deploy</tspan></text>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.37602133;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5190-6)"
@@ -434,64 +524,476 @@
          x="135.14311"
          y="82.535919"
          style="font-size:7.05555534px;stroke-width:0.26458332px">deploy</tspan></text>
-    <rect
-       style="opacity:1;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       id="rect815-90-1"
-       width="53.483631"
-       height="19.087799"
-       x="120.6311"
-       y="93.781113"
-       ry="2.9433048" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:14.85154819px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.37128869px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="143.16255"
-       y="-176.8941"
+       style="font-style:normal;font-weight:normal;font-size:12.69999981px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.37128869px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="157.43694"
+       y="-180.64807"
        id="text10257"
        transform="rotate(90.199601)"
        inkscape:transform-center-x="-6.8161807"
        inkscape:transform-center-y="-12.138895"><tspan
          sodipodi:role="line"
          id="tspan10255"
-         x="143.16255"
-         y="-176.8941"
-         style="font-size:19.8020649px;fill:#ffffff;fill-opacity:1;stroke-width:0.37128869px">Web server</tspan></text>
+         x="157.43694"
+         y="-180.64807"
+         style="font-size:12.69999981px;fill:#ffffff;fill-opacity:1;stroke-width:0.37128869px">analyser environment</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="102.92293"
+       y="289.59161"
+       id="text8760"><tspan
+         sodipodi:role="line"
+         id="tspan8758"
+         x="102.92293"
+         y="289.59161"
+         style="stroke-width:0.26458332px">Tester/Developer</tspan></text>
+    <rect
+       style="opacity:1;fill:#e5f105;fill-opacity:1;stroke:none;stroke-width:0.82254583;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect6040-9"
+       width="26.722914"
+       height="13.758333"
+       x="133.35002"
+       y="241.96669"
+       ry="3.6440911" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#1a1a1a;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="146.31461"
+       y="251.76558"
+       id="text6050-3"><tspan
+         sodipodi:role="line"
+         id="tspan6048-5"
+         x="146.31461"
+         y="251.76558"
+         style="fill:#1a1a1a;fill-opacity:1;stroke-width:0.26458332px">code</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5190-6-1)"
+       d="M 145.67713,241.8548 V 218.73377"
+       id="path5186-8-1"
+       inkscape:connector-curvature="0" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="133.24168"
+       y="234.25795"
+       id="text5226-5-0"><tspan
+         sodipodi:role="line"
+         id="tspan5224-6-9"
+         x="133.24168"
+         y="234.25795"
+         style="font-size:7.05555534px;stroke-width:0.26458332px">search</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:7.05555534px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="134.93808"
+       y="227.05403"
+       id="text9965"
+       transform="rotate(17.673453)"><tspan
+         sodipodi:role="line"
+         id="tspan9963"
+         x="134.93808"
+         y="227.05403"
+         style="font-size:7.05555534px;stroke-width:0.26458332px">Test (load-test, scenario...)</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="29.39801"
+       y="314.27386"
+       id="text10053"
+       transform="rotate(-28.215166)"><tspan
+         sodipodi:role="line"
+         id="tspan10051"
+         x="29.39801"
+         y="314.27386"
+         style="font-size:7.05555534px;stroke-width:0.26458332px">Interact &amp; get report</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.30000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker10159)"
+       d="m 114.3,280.86043 c -2.38125,-19.31459 18.78541,-32.01458 18.78541,-32.01458"
+       id="path10155"
+       inkscape:connector-curvature="0" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-85.411385"
+       y="273.7713"
+       id="text10253"
+       transform="rotate(-42.016189)"><tspan
+         sodipodi:role="line"
+         id="tspan10251"
+         x="-85.411385"
+         y="273.7713"
+         style="font-size:7.05555534px;stroke-width:0.26458332px">fix</tspan></text>
+    <rect
+       style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect815-4"
+       width="53.483631"
+       height="19.087799"
+       x="74.306198"
+       y="6.8007011"
+       ry="2.9433048" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="101.26762"
+       y="19.798021"
+       id="text819-5"><tspan
+         sodipodi:role="line"
+         id="tspan817-6"
+         x="101.26762"
+         y="19.798021"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';stroke-width:0.26458332px">Apps</tspan></text>
+    <rect
+       style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect815-4-2"
+       width="53.483631"
+       height="19.087799"
+       x="73.861382"
+       y="6.000701"
+       ry="2.9433048" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="100.82278"
+       y="18.540636"
+       id="text819-5-5"><tspan
+         sodipodi:role="line"
+         id="tspan817-6-9"
+         x="100.82278"
+         y="18.540636"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';stroke-width:0.26458332px">Apps</tspan></text>
+    <g
+       id="g5178-4"
+       transform="translate(-0.64885104,-0.79989647)">
+      <rect
+         ry="2.9433048"
+         y="52.600597"
+         x="27.875744"
+         height="19.087799"
+         width="53.483631"
+         id="rect815-9-9"
+         style="opacity:1;fill:#b1b1b1;fill-opacity:1;stroke:#000000;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <text
+         id="text819-1-3"
+         y="64.901436"
+         x="54.837185"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:52.48000026%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:52.48000026%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#000000;fill-opacity:1;stroke-width:0.26458332px"
+           y="64.901436"
+           x="54.837185"
+           id="tspan817-1-1"
+           sodipodi:role="line">Apps</tspan><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:52.48000026%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#000000;fill-opacity:1;stroke-width:0.26458332px"
+           y="70.455566"
+           x="54.837185"
+           sodipodi:role="line"
+           id="tspan5234-3">perf-loging</tspan></text>
+      <path
+         sodipodi:nodetypes="cccccccccccc"
+         inkscape:connector-curvature="0"
+         id="path4533-8"
+         d="m 38.166875,46.592399 5.042444,-1.351119 -4.356831,8.60451 3.054249,-1.210812 -3.626402,5.370109 1.18599,-0.404581 -5.727455,6.344406 3.858105,-5.801536 -1.231161,0.409374 2.074732,-4.978431 -2.002704,0.67201 z"
+         style="fill:#effb4a;fill-opacity:1;fill-rule:evenodd;stroke:#949494;stroke-width:0.30000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
+    <g
+       id="g5178-7"
+       transform="translate(-1.0744815,-1.5998965)">
+      <rect
+         ry="2.9433048"
+         y="52.600597"
+         x="27.875744"
+         height="19.087799"
+         width="53.483631"
+         id="rect815-9-93"
+         style="opacity:1;fill:#b1b1b1;fill-opacity:1;stroke:#000000;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <text
+         id="text819-1-8"
+         y="64.901436"
+         x="54.837185"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:52.48000026%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:52.48000026%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#000000;fill-opacity:1;stroke-width:0.26458332px"
+           y="64.901436"
+           x="54.837185"
+           id="tspan817-1-8"
+           sodipodi:role="line">Apps</tspan><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:52.48000026%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#000000;fill-opacity:1;stroke-width:0.26458332px"
+           y="70.455566"
+           x="54.837185"
+           sodipodi:role="line"
+           id="tspan5234-4">perf-loging</tspan></text>
+      <path
+         sodipodi:nodetypes="cccccccccccc"
+         inkscape:connector-curvature="0"
+         id="path4533-00"
+         d="m 38.166875,46.592399 5.042444,-1.351119 -4.356831,8.60451 3.054249,-1.210812 -3.626402,5.370109 1.18599,-0.404581 -5.727455,6.344406 3.858105,-5.801536 -1.231161,0.409374 2.074732,-4.978431 -2.002704,0.67201 z"
+         style="fill:#effb4a;fill-opacity:1;fill-rule:evenodd;stroke:#949494;stroke-width:0.30000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
+    <rect
+       style="opacity:1;fill:#b1b1b1;fill-opacity:1;stroke:#000000;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect815-9-7-8"
+       width="53.483631"
+       height="19.087799"
+       x="20.883179"
+       y="129.30325"
+       ry="2.9433048" />
+    <text
+       id="text819-1-6-6"
+       y="141.52173"
+       x="47.832897"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:52.48000026%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:52.48000026%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#000000;fill-opacity:1;stroke-width:0.26458332px"
+         y="141.52173"
+         x="47.832897"
+         id="tspan817-1-3-8"
+         sodipodi:role="line">Apps</tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:52.48000026%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#000000;fill-opacity:1;stroke-width:0.26458332px"
+         y="147.07587"
+         x="47.832897"
+         sodipodi:role="line"
+         id="tspan5234-8-2">perf-loging</tspan></text>
+    <path
+       style="fill:#effb4a;fill-opacity:1;fill-rule:evenodd;stroke:#949494;stroke-width:0.30000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 31.174316,123.29497 5.042444,-1.35112 -4.356831,8.60451 3.054249,-1.21081 -3.626402,5.3701 1.18599,-0.40458 -5.727455,6.34441 3.858105,-5.80154 -1.231161,0.40938 2.074732,-4.97843 -2.002704,0.67201 z"
+       id="path4533-0-3"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccccccc" />
+    <rect
+       style="opacity:1;fill:#2e2e2e;fill-opacity:1;stroke:#2e2e2e;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect815-90-5"
+       width="53.483631"
+       height="19.087799"
+       x="120.2342"
+       y="51.800701"
+       ry="2.9433048" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:55.50000668%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="147.59254"
-       y="106.08194"
-       id="text819-8-3"><tspan
+       x="147.19572"
+       y="64.101532"
+       id="text819-8-0"><tspan
          sodipodi:role="line"
-         x="147.59254"
-         y="106.08194"
+         x="147.19572"
+         y="64.101532"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px"
-         id="tspan5228-3"><tspan
-           id="tspan5230-1"
+         id="tspan5228-5"><tspan
+           id="tspan5230-9"
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px">Apps</tspan></tspan><tspan
          sodipodi:role="line"
-         x="147.59254"
-         y="111.95569"
+         x="147.19572"
+         y="69.975281"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px"
-         id="tspan5232-5">extractor</tspan></text>
+         id="tspan5232-2">extractor</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:55.50000668%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="147.26183"
+       y="63.792915"
+       id="text819-8-5"><tspan
+         sodipodi:role="line"
+         x="147.26183"
+         y="63.792915"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px"
+         id="tspan5228-2"><tspan
+           id="tspan5230-8"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px">Apps</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="147.26183"
+         y="69.666664"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px"
+         id="tspan5232-3">extractor</tspan></text>
+    <rect
+       style="opacity:1;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect815-90-5-6"
+       width="53.483631"
+       height="19.087799"
+       x="119.63892"
+       y="51.000702"
+       ry="2.9433048" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:55.50000668%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="146.60043"
+       y="63.301544"
+       id="text819-8-0-7"><tspan
+         sodipodi:role="line"
+         x="146.60043"
+         y="63.301544"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px"
+         id="tspan5228-5-8"><tspan
+           id="tspan5230-9-7"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px">Apps</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="146.60043"
+         y="69.175293"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px"
+         id="tspan5232-2-2">extractor</tspan></text>
+    <rect
+       style="opacity:1;fill:#505050;fill-opacity:1;stroke:#505050;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect815-90-6"
+       width="53.483631"
+       height="19.087799"
+       x="121.50139"
+       y="94.484421"
+       ry="2.9433048" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:55.50000668%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="148.46281"
+       y="106.47672"
+       id="text819-8-6"><tspan
+         sodipodi:role="line"
+         x="148.46281"
+         y="106.47672"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px"
+         id="tspan5228-29"><tspan
+           id="tspan5230-7"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px">Apps</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="148.46281"
+         y="112.35047"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px"
+         id="tspan5232-0">extractor</tspan></text>
+    <rect
+       style="opacity:1;fill:#2e2e2e;fill-opacity:1;stroke:#2e2e2e;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect815-90-5-3"
+       width="53.483631"
+       height="19.087799"
+       x="120.8399"
+       y="93.684525"
+       ry="2.9433048" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:55.50000668%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="147.80142"
+       y="105.98534"
+       id="text819-8-0-72"><tspan
+         sodipodi:role="line"
+         x="147.80142"
+         y="105.98534"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px"
+         id="tspan5228-5-3"><tspan
+           id="tspan5230-9-5"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px">Apps</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="147.80142"
+         y="111.85909"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px"
+         id="tspan5232-2-1">extractor</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:55.50000668%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="147.86752"
+       y="105.67672"
+       id="text819-8-5-7"><tspan
+         sodipodi:role="line"
+         x="147.86752"
+         y="105.67672"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px"
+         id="tspan5228-2-8"><tspan
+           id="tspan5230-8-9"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px">Apps</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="147.86752"
+         y="111.55047"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px"
+         id="tspan5232-3-4">extractor</tspan></text>
+    <rect
+       style="opacity:1;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect815-90-5-6-1"
+       width="53.483631"
+       height="19.087799"
+       x="120.24463"
+       y="92.884529"
+       ry="2.9433048" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:55.50000668%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="147.20613"
+       y="105.18536"
+       id="text819-8-0-7-6"><tspan
+         sodipodi:role="line"
+         x="147.20613"
+         y="105.18536"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px"
+         id="tspan5228-5-8-4"><tspan
+           id="tspan5230-9-7-3"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px">Apps</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="147.20613"
+         y="111.05911"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:55.50000668%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px"
+         id="tspan5232-2-2-5">extractor</tspan></text>
+    <rect
+       style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect815-0-7"
+       width="53.483631"
+       height="19.087799"
+       x="121.14137"
+       y="115.76044"
+       ry="2.9433048" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="148.10281"
+       y="128.06131"
+       id="text819-7-07"><tspan
+         sodipodi:role="line"
+         id="tspan817-4-8"
+         x="148.10281"
+         y="128.06131"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8.46666622px;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';stroke-width:0.26458332px">flamescope</tspan></text>
+    <rect
+       style="opacity:1;fill:#b1b1b1;fill-opacity:1;stroke:#000000;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect815-9-7-8-3"
+       width="53.483631"
+       height="19.087799"
+       x="15.591514"
+       y="151.13138"
+       ry="2.9433048" />
+    <text
+       id="text819-1-6-6-8"
+       y="163.34985"
+       x="42.541229"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:52.48000026%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:52.48000026%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#000000;fill-opacity:1;stroke-width:0.26458332px"
+         y="163.34985"
+         x="42.541229"
+         id="tspan817-1-3-8-6"
+         sodipodi:role="line">Apps</tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:52.48000026%;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';fill:#000000;fill-opacity:1;stroke-width:0.26458332px"
+         y="168.90399"
+         x="42.541229"
+         sodipodi:role="line"
+         id="tspan5234-8-2-7">perf-loging</tspan></text>
+    <path
+       style="fill:#effb4a;fill-opacity:1;fill-rule:evenodd;stroke:#949494;stroke-width:0.30000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 25.882655,145.1231 5.042444,-1.35112 -4.356831,8.60451 3.054249,-1.21081 -3.626402,5.3701 1.18599,-0.40458 -5.727456,6.34441 3.858106,-5.80154 -1.231161,0.40938 2.074732,-4.97843 -2.002705,0.67201 z"
+       id="path4533-0-3-3"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccccccc" />
     <rect
        style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect815-0"
        width="53.483631"
        height="19.087799"
        x="120.6311"
-       y="114.45642"
+       y="136.68143"
        ry="2.9433048" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="147.59254"
-       y="126.75725"
+       y="148.98227"
        id="text819-7"><tspan
          sodipodi:role="line"
          id="tspan817-4"
          x="147.59254"
-         y="126.75725"
+         y="148.98227"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';stroke-width:0.26458332px">collect</tspan></text>
     <rect
        style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
@@ -499,18 +1001,18 @@
        width="53.483631"
        height="19.087799"
        x="120.6311"
-       y="177.38954"
+       y="199.61456"
        ry="2.9433048" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="147.59254"
-       y="189.69034"
+       y="211.91536"
        id="text819-7-0"><tspan
          sodipodi:role="line"
          id="tspan817-4-2"
          x="147.59254"
-         y="189.69034"
+         y="211.91536"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';stroke-width:0.26458332px">blame</tspan></text>
     <rect
        style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
@@ -518,18 +1020,18 @@
        width="53.483631"
        height="19.087799"
        x="120.6311"
-       y="135.58524"
+       y="157.81026"
        ry="2.9433048" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="147.59254"
-       y="147.88603"
+       y="170.11105"
        id="text819-7-0-6"><tspan
          sodipodi:role="line"
          id="tspan817-4-2-9"
          x="147.59254"
-         y="147.88603"
+         y="170.11105"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';stroke-width:0.26458332px">enroll</tspan></text>
     <rect
        style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.62300003;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
@@ -537,56 +1039,51 @@
        width="53.483631"
        height="19.087799"
        x="120.6311"
-       y="156.48735"
+       y="178.71237"
        ry="2.9433048" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="147.59256"
-       y="168.91997"
+       y="191.14499"
        id="text819-7-0-6-3"><tspan
          sodipodi:role="line"
          id="tspan817-4-2-9-5"
          x="147.59256"
-         y="168.91997"
+         y="191.14499"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Noto Sans Oriya UI';-inkscape-font-specification:'Noto Sans Oriya UI';stroke-width:0.26458332px">scanner</tspan></text>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4115966;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5922)"
-       d="M 92.074999,144.3354 H 120.65"
+       d="M 92.074999,166.56042 H 120.65"
        id="path5918"
        inkscape:connector-curvature="0" />
-    <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5972)"
-       d="m 55.297916,137.98542 v 20.16451"
-       id="path5968"
-       inkscape:connector-curvature="0" />
     <rect
-       style="opacity:1;fill:#007953;fill-opacity:1;stroke:none;stroke-width:0.67492247;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="opacity:1;fill:#01ffaf;fill-opacity:1;stroke:none;stroke-width:0.67492247;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect6040"
        width="17.991665"
        height="13.758333"
-       x="46.566666"
-       y="158.62292"
+       x="47.095833"
+       y="181.90627"
        ry="3.6440911" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="55.5625"
-       y="168.42181"
+       x="56.091667"
+       y="191.70515"
        id="text6050"><tspan
          sodipodi:role="line"
          id="tspan6048"
-         x="55.5625"
-         y="168.42181"
+         x="56.091667"
+         y="191.70515"
          style="fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px">log</tspan></text>
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5922-5)"
-       d="M 64.652021,165.50208 H 120.65737"
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.40000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5922-5)"
+       d="M 64.652021,187.7271 H 120.65737"
        id="path5918-7"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5922-5-1)"
-       d="M 64.649938,165.50422 120.6394,110.98113"
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.46984199;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5922-5-1)"
+       d="M 64.649938,187.72924 120.8399,112.77233"
        id="path5918-7-0"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
@@ -594,134 +1091,103 @@
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="102.30418"
-       y="169.82976"
+       y="192.05478"
        id="text5226-4"><tspan
          sodipodi:role="line"
          id="tspan5224-1"
          x="102.30418"
-         y="169.82976"
+         y="192.05478"
          style="font-size:7.05555534px;stroke-width:0.26458332px">scan</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="102.30418"
-       y="150.25061"
+       y="172.47563"
        id="text5226-3"><tspan
          sodipodi:role="line"
          id="tspan5224-0"
          x="102.30418"
-         y="150.25061"
+         y="172.47563"
          style="font-size:7.05555534px;stroke-width:0.26458332px">info</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="-16.883396"
-       y="162.6992"
+       x="-49.919216"
+       y="162.23222"
        id="text5226-2"
-       transform="rotate(-45.024108)"><tspan
+       transform="rotate(-54.193019)"><tspan
          sodipodi:role="line"
          id="tspan5224-9"
-         x="-16.883396"
-         y="162.6992"
+         x="-49.919216"
+         y="162.23222"
          style="font-size:7.05555534px;stroke-width:0.26458332px">analyze</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="102.92293"
-       y="268.42499"
-       id="text8760"><tspan
-         sodipodi:role="line"
-         id="tspan8758"
-         x="102.92293"
-         y="268.42499"
-         style="stroke-width:0.26458332px">Tester/Developer</tspan></text>
-    <rect
-       style="opacity:1;fill:#e3ef00;fill-opacity:1;stroke:none;stroke-width:0.82254583;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       id="rect6040-9"
-       width="26.722914"
-       height="13.758333"
-       x="133.35002"
-       y="220.8"
-       ry="3.6440911" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#1a1a1a;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="146.31461"
-       y="230.59889"
-       id="text6050-3"><tspan
-         sodipodi:role="line"
-         id="tspan6048-5"
-         x="146.31461"
-         y="230.59889"
-         style="fill:#1a1a1a;fill-opacity:1;stroke-width:0.26458332px">code</tspan></text>
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.40080103;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5190-6-1)"
-       d="M 145.67713,220.18821 V 196.88793"
-       id="path5186-8-1"
+       sodipodi:nodetypes="cc"
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.39609519;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5972)"
+       d="m 55.69479,147.92325 v 32.28669"
+       id="path5968"
        inkscape:connector-curvature="0" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="133.24168"
-       y="206.74127"
-       id="text5226-5-0"><tspan
-         sodipodi:role="line"
-         id="tspan5224-6-9"
-         x="133.24168"
-         y="206.74127"
-         style="font-size:7.05555534px;stroke-width:0.26458332px">search</tspan></text>
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none;marker-start:url(#Arrow1Lstart)"
-       d="m 33.602083,137.98542 c -1.322917,32.27916 -32.76285058,76.60231 18.785416,89.95833 73.259181,18.98125 34.395833,33.3375 34.395833,33.3375"
-       id="path9881"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="csc" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:7.05555534px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="128.51205"
-       y="206.88637"
-       id="text9965"
-       transform="rotate(17.673453)"><tspan
-         sodipodi:role="line"
-         id="tspan9963"
-         x="128.51205"
-         y="206.88637"
-         style="font-size:7.05555534px;stroke-width:0.26458332px">Test (load-test, scenario...)</tspan></text>
+       sodipodi:nodetypes="cc"
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.3994855;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5972-6)"
+       d="m 60.721874,126.49332 v 53.66276"
+       id="path5968-2"
+       inkscape:connector-curvature="0" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none;marker-end:url(#marker9971);marker-start:url(#marker10063)"
-       d="m 174.625,123.69792 c 52.91666,12.43541 20.76811,112.28962 -0.79376,93.39792 -27.86348,-24.41294 56.07196,-11.45012 11.90626,12.43541 l -51.85833,28.04583"
+       sodipodi:nodetypes="cc"
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.39825097;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5972-69)"
+       d="m 51.329166,170.31707 v 9.85674"
+       id="path5968-0"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.40000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#marker10063);marker-end:url(#marker9971)"
+       d="m 174.99918,147.45818 c 52.91666,12.43541 12.76003,69.72099 4.12373,42.38558 -8.5489,-27.05878 54.74902,25.46933 11.37709,50.79999 l -62.97083,36.77708"
        id="path9967"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cssc" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="39.405273"
-       y="295.62225"
-       id="text10053"
-       transform="rotate(-28.215166)"><tspan
-         sodipodi:role="line"
-         id="tspan10051"
-         x="39.405273"
-         y="295.62225"
-         style="font-size:7.05555534px;stroke-width:0.26458332px">Interact &amp; get report</tspan></text>
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none;marker-end:url(#marker10159)"
-       d="m 114.3,259.69375 c -2.38125,-19.31459 18.78541,-32.01458 18.78541,-32.01458"
-       id="path10155"
-       inkscape:connector-curvature="0" />
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow1Lstart)"
+       d="m 28.310416,177.01146 c -1.322917,32.27916 -30.3816002,54.24502 21.166666,67.60104 73.259178,18.98125 54.768748,35.98333 54.768748,35.98333"
+       id="path9881"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="csc" />
+    <rect
+       style="opacity:1;fill:#00ca8b;fill-opacity:1;stroke:none;stroke-width:0.67492247;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect6040-8"
+       width="17.991665"
+       height="13.758333"
+       x="46.751106"
+       y="181.39519"
+       ry="3.6440911" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="-71.24369"
-       y="258.04535"
-       id="text10253"
-       transform="rotate(-42.016189)"><tspan
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="55.746941"
+       y="191.19408"
+       id="text6050-7"><tspan
          sodipodi:role="line"
-         id="tspan10251"
-         x="-71.24369"
-         y="258.04535"
-         style="font-size:7.05555534px;stroke-width:0.26458332px">fix</tspan></text>
+         id="tspan6048-6"
+         x="55.746941"
+         y="191.19408"
+         style="fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px">log</tspan></text>
+    <rect
+       style="opacity:1;fill:#007953;fill-opacity:1;stroke:none;stroke-width:0.67492247;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect6040-8-5"
+       width="17.991665"
+       height="13.758333"
+       x="46.221939"
+       y="180.86603"
+       ry="3.6440911" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="55.217773"
+       y="190.66492"
+       id="text6050-7-2"><tspan
+         sodipodi:role="line"
+         id="tspan6048-6-4"
+         x="55.217773"
+         y="190.66492"
+         style="fill:#ffffff;fill-opacity:1;stroke-width:0.26458332px">log</tspan></text>
   </g>
 </svg>
