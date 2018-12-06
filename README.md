@@ -4,10 +4,13 @@ Avalanche is a new open-source set of service & tool to manage, examine and visu
 
 ## Concept
 
-1. Application emits performance logs using `perf-tools`.
-1. Analyze the log on-demand.
+1. Applications emit pre-recorded performance logs using `perf-tools`.
+1. Take log snapshot on-demand (eg. on incident response).
+1. Explore the performance snapshots and find bottlenecks.
 
-![concept image](./avalanche-scheme.png)
+![]
+
+![system concept image](./avalanche-scheme.png)
 
 ## How it works
 
@@ -20,6 +23,9 @@ Avalanche is a new open-source set of service & tool to manage, examine and visu
 
 ## Requirements
 
+Hence we have started to develop this tool for internal use, the target environment (application environment) has several prerequisite.
+Additionally, this tool must be deployed with several runtime dependencies (eg. MySQL).
+
 ### Build
 
 - go
@@ -30,11 +36,12 @@ Avalanche is a new open-source set of service & tool to manage, examine and visu
 ### Target
 
 - containered apps - This tool requires a container for generating performance observation images.
+- log server - The log server exposes applications' log directories; currently, we supports nginx or local disk.
 
 ### Runtime dependencies
 - [flamescope](https://github.com/Netflix/flamescope)
 - MySQL
-- Storage - We store some data in a disk; if you run this server in kubernetes, you have to provide persistentVolume.
+- storage - We store some data in a disk; if you run this server in kubernetes, you have to provide persistentVolume.
 - code search engine - a search engine for your repository must be provided to suggest a bottleneck code.
 - kubernetes - This tool is built for kubernetes-hosted apps and most of our terminology in both aspect of API and example follows kubernetes naming.
 - kustomize - Not only target is assumed to be hosted in kubernetes, our service itself can be hosted in kubernetes. We provide kustomize template.
