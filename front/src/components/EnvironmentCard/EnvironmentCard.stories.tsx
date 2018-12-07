@@ -4,6 +4,7 @@ import * as React from "react";
 import { action } from "@storybook/addon-actions";
 import { select, withKnobs } from "@storybook/addon-knobs";
 import { storiesOf } from "@storybook/react";
+import * as ReactTooltip from "react-tooltip";
 import "../../App.scss";
 import EnvironmentCard from "./EnvironmentCard";
 
@@ -32,5 +33,6 @@ storiesOf("EnvironmentCard", module)
         version="18.06-"
         onEdit={action("Start editing")}
       />
+      <ReactTooltip effect="solid" place="top" aria-haspopup="true" />
     </div>
   ));

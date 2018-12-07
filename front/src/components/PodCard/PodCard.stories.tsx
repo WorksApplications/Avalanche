@@ -4,6 +4,7 @@ import * as React from "react";
 import { action } from "@storybook/addon-actions";
 import { boolean, withKnobs } from "@storybook/addon-knobs";
 import { storiesOf } from "@storybook/react";
+import * as ReactTooltip from "react-tooltip";
 import "../../App.scss";
 import PodCard from "./PodCard";
 
@@ -32,6 +33,7 @@ storiesOf("PodCard", module)
           boolean("Can take snaphost", true) ? action("Saved!") : undefined
         }
       />
+      <ReactTooltip effect="solid" place="top" aria-haspopup="true" />
     </div>
   ))
   .add("1 snapshot", () => (
@@ -55,6 +57,7 @@ storiesOf("PodCard", module)
           boolean("Can take snaphost", true) ? action("Saved!") : undefined
         }
       />
+      <ReactTooltip effect="solid" place="top" aria-haspopup="true" />
     </div>
   ))
   .add("3 snapshots", () => (
@@ -90,5 +93,6 @@ storiesOf("PodCard", module)
           boolean("Can take snaphost", true) ? action("Saved!") : undefined
         }
       />
+      <ReactTooltip effect="solid" place="top" aria-haspopup="true" />
     </div>
   ));

@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as ReactModal from "react-modal";
 import { connect } from "react-redux";
+import * as ReactTooltip from "react-tooltip";
 import { bindActionCreators, Dispatch } from "redux";
 import {
   addEnvironmentConfigOperation,
@@ -61,6 +62,7 @@ export class ConfigPage extends React.Component<Props, State> {
 
   public componentDidMount() {
     this.updateConfigData();
+    ReactTooltip.rebuild(); // for Fab
   }
 
   public render() {

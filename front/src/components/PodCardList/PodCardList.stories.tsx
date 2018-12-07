@@ -4,6 +4,7 @@ import * as React from "react";
 import { action } from "@storybook/addon-actions";
 import { text, withKnobs } from "@storybook/addon-knobs";
 import { storiesOf } from "@storybook/react";
+import * as ReactTooltip from "react-tooltip";
 import PodCardList from "./PodCardList";
 
 const commonWrapStyle: React.CSSProperties = {
@@ -21,6 +22,7 @@ storiesOf("PodCardList", module)
         kind={text("Kind", "all")}
         noDataMessage={text("No data message", "No pods")}
       />
+      <ReactTooltip effect="solid" place="top" aria-haspopup="true" />
     </div>
   ))
   .add("1 pod", () => (
@@ -47,6 +49,7 @@ storiesOf("PodCardList", module)
         ]}
         kind={text("Kind", "all")}
       />
+      <ReactTooltip effect="solid" place="top" aria-haspopup="true" />
     </div>
   ))
   .add("3 pods", () => (
@@ -71,5 +74,6 @@ storiesOf("PodCardList", module)
         }))}
         kind={text("Kind", "all")}
       />
+      <ReactTooltip effect="solid" place="top" aria-haspopup="true" />
     </div>
   ));
