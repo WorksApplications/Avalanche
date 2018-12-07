@@ -14,10 +14,6 @@
   }
 }
 
-.isOpen {
-  //background-color: $bg-color-active;
-}
-
 .indicatorWrap {
   float: left;
   height: 2em;
@@ -128,9 +124,6 @@
   color: $text-color-hint;
   display: inline-block;
   margin-left: $base-space;
-}
-
-.snapshotsArea {
 }
 
 .snapshotList {
