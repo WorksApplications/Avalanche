@@ -38,6 +38,8 @@ front-build:
     script:
         - cd front
         - yarn install
+        - yarn test
+        - yarn lint
         - PATH=$PATH:$(pwd)/node_modules/.bin yarn build --env.COLLECT_API_BASE=${COLLECT_API_BASE} --env.FLAMESCOPE_API_BASE=${FLAMESCOPE_API_BASE}
     cache:
         key: react
@@ -51,21 +53,6 @@ front-build:
         COLLECT_API_BASE: "/api"
         SUSPECT_API_BASE: "/api"
         FLAMESCOPE_API_BASE: "http://flamescope.internal.worksap.com"
-
-front-test:
-    except:
-        - develop/backend
-    stage: test
-    image: node:10
-    script:
-        - cd front
-        - yarn install
-        - yarn test
-        - yarn lint
-    cache:
-        key: react
-        paths:
-            - front/node_modules
 
 push-images:
     only:
