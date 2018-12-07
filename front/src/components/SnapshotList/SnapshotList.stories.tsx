@@ -4,7 +4,7 @@ import * as React from "react";
 import { action } from "@storybook/addon-actions";
 import { select, text, withKnobs } from "@storybook/addon-knobs";
 import { storiesOf } from "@storybook/react";
-import { DataState } from "../../store";
+import { DataState, IPerfCallTreeData } from "../../store";
 import SnapshotList from "./SnapshotList";
 
 const commonWrapStyle: React.CSSProperties = {
@@ -26,6 +26,52 @@ const statusSelection: { [key: string]: DataState } = {
   Loaded: "loaded",
   Failed: "failed"
 };
+
+const perfCallTree: IPerfCallTreeData = [
+  {
+    id: 0,
+    label: "root",
+    childIds: [1, 3],
+    relativeRatio: 1.0,
+    immediateRatio: 0.05,
+    totalRatio: 1.0,
+    hasCode: true,
+    code: [["final var value = model.getValue();"], ["return value * value;"]]
+  },
+  {
+    id: 1,
+    label: "big",
+    childIds: [2],
+    parentId: 0,
+    relativeRatio: 0.7,
+    immediateRatio: 1.0,
+    totalRatio: 0.7,
+    hasCode: true,
+    code: [["public int getValue() {"], ["    return this.value;"], ["}"]]
+  },
+  {
+    id: 2,
+    label: "sub",
+    childIds: [],
+    parentId: 1,
+    relativeRatio: 1.0,
+    immediateRatio: 1.0,
+    totalRatio: 0.7,
+    hasCode: false,
+    code: []
+  },
+  {
+    id: 3,
+    label: "small",
+    childIds: [],
+    parentId: 0,
+    relativeRatio: 0.25,
+    immediateRatio: 1.0,
+    totalRatio: 0.25,
+    hasCode: false,
+    code: []
+  }
+];
 
 storiesOf("SnapshotList", module)
   .addDecorator(withKnobs)
@@ -74,6 +120,7 @@ storiesOf("SnapshotList", module)
               heatMapStatus,
               heatMapId: "d7eec7c1-daf5-4198-9503-6957aea0bf90",
               perfCallTreeStatus,
+              perfCallTree,
               onRangeSelect: action("Selected")
             }
           ]}
@@ -139,6 +186,7 @@ storiesOf("SnapshotList", module)
               heatMapStatus: heatMapStatus1,
               heatMapId: "d7eec7c1-daf5-4198-9503-6957aea0bf90",
               perfCallTreeStatus: perfCallTreeStatus1,
+              perfCallTree,
               onRangeSelect: action("Selected")
             },
             {
@@ -163,6 +211,7 @@ storiesOf("SnapshotList", module)
               heatMapStatus: heatMapStatus2,
               heatMapId: "e7eec7c1-daf5-4198-9503-6957aea0bf90",
               perfCallTreeStatus: perfCallTreeStatus2,
+              perfCallTree,
               onRangeSelect: action("Selected")
             },
             {
@@ -187,6 +236,7 @@ storiesOf("SnapshotList", module)
               heatMapStatus: heatMapStatus3,
               heatMapId: "f7eec7c1-daf5-4198-9503-6957aea0bf90",
               perfCallTreeStatus: perfCallTreeStatus3,
+              perfCallTree,
               onRangeSelect: action("Selected")
             }
           ]}
