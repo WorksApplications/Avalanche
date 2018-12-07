@@ -57,7 +57,7 @@ func main() {
 	db := establishDBConn(*dbconf)
 	cfg := cfg{
 		Db:         db,
-		Scanner:     *scanner,
+		Scanner:    *scanner,
 		Enroll:     *enroll,
 		Extract:    *extract,
 		Pvmount:    *ssstore,
