@@ -7,6 +7,7 @@ spec:
     spec:
       containers:
       - name: scanner
+        image: ${DOCKERREG}/scanner:${GIT_HASH}
         command:
           - /scanner
           - -logLocation=$INTERNAL_LOG_LOCATION
@@ -23,6 +24,7 @@ spec:
     spec:
       containers:
       - name: collect
+        image: ${DOCKERREG}/collect:${GIT_HASH}
         command:
           - /collect
           - -port=8080
@@ -44,9 +46,36 @@ spec:
     spec:
       containers:
       - name: blame
+        image: ${DOCKERREG}/blame:${GIT_HASH}
         command:
           - /blame
           - -searchUrl=$INTERNAL_SEARCH_SERVER
           - -searchPost=$INTERNAL_SEARCH_POST
           - -searchType=internal-use
           - -nSearchWorker=8
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enroll
+spec:
+  template:
+    spec:
+      containers:
+      - name: enroll
+        image: ${DOCKERREG}/enroll:${GIT_HASH}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: static
+spec:
+  template:
+    spec:
+      containers:
+      - name: static
+        image: ${DOCKERREG}/static:${GIT_HASH}

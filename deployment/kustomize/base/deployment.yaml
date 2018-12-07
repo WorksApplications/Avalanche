@@ -17,7 +17,7 @@ spec:
         command:
           - /scanner
           - --db=example:example@tcp(mariadb)/collekt?parseTime=True
-        image: /resource_optimization/scanner
+        image: scanner
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -43,32 +43,10 @@ spec:
         command:
           - /enroll
           - -scanner=http://scanner:8080
-        image: /resource_optimization/enroll
+        image: enroll
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
-
----
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: extract
-spec:
-  selector:
-    matchLabels:
-      run: extract
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        run: extract
-    spec:
-      containers:
-      - name: extract
-        image: /resource_optimization/extract
-        ports:
-        - containerPort: 5000
 
 ---
 
@@ -88,7 +66,7 @@ spec:
     spec:
       containers:
       - name: collect
-        image: /resource_optimization/collect
+        image: collect
         ports:
         - containerPort: 8080
         imagePullPolicy: Always
@@ -132,7 +110,7 @@ spec:
     spec:
       containers:
       - name: static
-        image: /resource_optimization/static
+        image: static
         ports:
         - containerPort: 80
         imagePullPolicy: Always
@@ -155,7 +133,7 @@ spec:
     spec:
       containers:
       - name: blame
-        image: /resource_optimization/blame
+        image: blame
         ports:
         - containerPort: 8080
         command:

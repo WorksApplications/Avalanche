@@ -68,21 +68,16 @@ push-images:
         - ls -lR
         - apk add make
         - touch bin/collect bin/scanner
-        - docker build -f image/collect/Dockerfile --tag ${
-        - docker build -f image/scanner/Dockerfile  --tag ${
-        - docker build -f image/enroll/Dockerfile  --tag ${
-
-        - docker build -f image/static/Dockerfile  --tag ${
-        - docker build -f image/blame/Dockerfile  --tag ${
-        - docker push ${
-        - docker push ${
-        - docker push ${
-        - docker push ${
-        - docker push ${
-        - docker push ${
-    variables:
-        DOCKERHOST: ""
-        
+        - docker build -f image/collect/Dockerfile --tag ${DOCKERREG}/collect:${GIT_HASH} .
+        - docker build -f image/scanner/Dockerfile --tag ${DOCKERREG}/scanner:${GIT_HASH} .
+        - docker build -f image/enroll/Dockerfile  --tag ${DOCKERREG}/enroll:${GIT_HASH} .
+        - docker build -f image/static/Dockerfile  --tag ${DOCKERREG}/static:${GIT_HASH} .
+        - docker build -f image/blame/Dockerfile   --tag ${DOCKERREG}/blame:${GIT_HASH} .
+        - docker push ${DOCKERREG}/collect:${GIT_HASH}
+        - docker push ${DOCKERREG}/scanner:${GIT_HASH}
+        - docker push ${DOCKERREG}/enroll:${GIT_HASH}
+        - docker push ${DOCKERREG}/static:${GIT_HASH}
+        - docker push ${DOCKERREG}/blame:${GIT_HASH}
 
 generate-kubefile:
     only:
@@ -94,7 +89,6 @@ generate-kubefile:
         - export GIT_HASH=$(git show --quiet --format=%ha)
         - wget -O /usr/local/bin/kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/v${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_amd64 && chmod +x /usr/local/bin/kustomize
         - apk add gettext
-        - envsubst < deployment/kustomize/template/imageTags.yaml >> deployment/kustomize/base/kustomization.yaml
         - envsubst < deployment/kustomize/template/deployment.yaml > deployment/kustomize/overlays/devel/deployment.yaml
         - envsubst < deployment/kustomize/template/deployment.yaml > deployment/kustomize/overlays/production/deployment.yaml
         - kustomize build deployment/kustomize/overlays/production > production.yaml
