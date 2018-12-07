@@ -9,7 +9,8 @@
   "scripts": {
     "start": "webpack-dev-server --hot",
     "build": "webpack --env.production --profile --display-used-exports",
-    "test": "tslint -p tsconfig.json | jest",
+    "test": "jest",
+    "lint": "tslint -p tsconfig.json",
     "serve": "serve -s ./public",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
