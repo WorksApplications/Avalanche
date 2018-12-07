@@ -94,7 +94,7 @@ func (s fillingCache) search(api Search, token, hints []string) (*Result, error)
 			return nil, nil
 		}
 		//log.Print("[cache] set: k=", q, r)
-		if len(Result.Code) != 0 || Result.Ref != "" {
+		if len(r.Code) != 0 || r.Ref != "" {
 			s.cache.Set(q, *r, cache.DefaultExpiration)
 		}
 		return r, nil
