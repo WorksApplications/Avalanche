@@ -2,6 +2,7 @@ import * as React from "react";
 import { hot } from "react-hot-loader";
 import { Route, Router, Switch } from "react-router";
 import { NavLink } from "react-router-dom";
+import * as ReactTooltip from "react-tooltip";
 import styles from "./App.scss";
 import { APP_NAME } from "./constants";
 import Toastr from "./containers/Toastr";
@@ -52,6 +53,7 @@ class App extends React.Component {
           </Router>
         </div>
         <Toastr />
+        <ReactTooltip effect="solid" place="top" aria-haspopup="true" />
       </div>
     );
   }

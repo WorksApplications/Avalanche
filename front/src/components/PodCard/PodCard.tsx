@@ -22,6 +22,16 @@ type State = Readonly<typeof initialState>;
 export class PodCard extends React.Component<IProperty, State> {
   public readonly state: State = initialState;
 
+  public componentDidMount() {
+    ReactTooltip.rebuild();
+  }
+
+  public componentDidUpdate() {
+    if (this.state.isOpen) {
+      ReactTooltip.rebuild();
+    }
+  }
+
   public render() {
     const hashPart = this.props.name.startsWith(this.props.app)
       ? this.props.name.substring(this.props.app.length)
@@ -54,17 +64,10 @@ export class PodCard extends React.Component<IProperty, State> {
                 onClick={this.onSave}
                 data-testid="save-button-body"
                 data-tip="Save snapshot"
-                data-for={`save-snapshot-${this.props.name}`}
+                data-class={styles.saveTooltip}
               >
                 Save
               </span>
-              <ReactTooltip
-                id={`save-snapshot-${this.props.name}`}
-                effect="solid"
-                place="left"
-                aria-haspopup="true"
-                className={styles.saveTooltip}
-              />
             </button>
           )}
         </div>
@@ -112,18 +115,11 @@ export class PodCard extends React.Component<IProperty, State> {
                         <span
                           className={styles.snapshotHash}
                           data-tip={s.uuid}
-                          data-for={`pod-snapshot-${s.uuid}`}
+                          data-class={styles.snapshotHashTooltip}
                         >
                           {s.uuid.substr(0, 20)}
                           ...
                         </span>
-                        <ReactTooltip
-                          id={`pod-snapshot-${s.uuid}`}
-                          effect="solid"
-                          place="top"
-                          aria-haspopup="true"
-                          className={styles.snapshotHashTooltip}
-                        />
                         <span
                           className={styles.snapshotDate}
                           data-testid="snapshot-date"
