@@ -19,6 +19,10 @@ spec:
           - --db=example:example@tcp(mariadb)/collekt?parseTime=True
         image: scanner
         imagePullPolicy: Always
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
         ports:
         - containerPort: 8080
 

@@ -140,7 +140,7 @@ func (c *cfg) exchange() {
 }
 
 func main() {
-	log.SetPrefix("detect:\t")
+	log.SetPrefix("scanner:\t")
 	log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime)
 	templhelp := "Template path for perf-log search.\n variables:\n\t$any: matches any\n" +
 		"\t$env: mathes any string and returned as name of environment\n" +
@@ -181,22 +181,22 @@ func main() {
 		x.ch <- &sreq
 	}
 
-	/* try to get all environments to see if all of them are scanned */
-	for {
+	/* try to get all environments to see if all of them are scanned (timeout: 1 min) */
+	for i := 0; i < 120; i++ {
 		c := make(chan *scanner.Subscription)
 		req := ScannerRequest{DESC, nil, c}
 		x.ch <- &req
 		i := 0
+		/* Do not use len() because we have to get the number of elements until it is closed */
 		for range c {
 			i++
-			if i == len(es) {
-				log.Print("All initial targets are scanned. Let's start serving...")
-				goto SERVE
-			}
+		}
+		if i == len(es) {
+			log.Print("All initial targets are scanned. Let's start serving...")
+			break
 		}
 		time.Sleep(500 * time.Millisecond)
 	}
-SERVE:
 
 	http.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(200)
