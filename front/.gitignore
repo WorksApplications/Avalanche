@@ -75,3 +75,5 @@ typings/
 .idea
 public
 mock
+
+storybook-static

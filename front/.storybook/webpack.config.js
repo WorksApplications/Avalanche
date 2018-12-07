@@ -10,14 +10,19 @@ const webpackConfig = require("../webpack.config")();
 
 module.exports = (baseConfig, env, config) => {
   config.resolve = webpackConfig.resolve;
-  config.module.rules = webpackConfig.module.rules.map(
-    r =>
-      r.test.test(".tsx")
-        ? {
-            ...r,
-            use: [...r.use, require.resolve("react-docgen-typescript-loader")]
-          }
-        : r
-  );
+  config.module.rules =
+    env !== "PRODUCTION"
+      ? webpackConfig.module.rules
+      : webpackConfig.module.rules.map(r =>
+          r.test.test(".tsx")
+            ? {
+                ...r,
+                use: [
+                  ...r.use,
+                  require.resolve("react-docgen-typescript-loader")
+                ]
+              }
+            : r
+        );
   return config;
 };

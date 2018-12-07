@@ -14,6 +14,10 @@ const PerfCallTree = React.lazy(() =>
   import(/* webpackChunkName: "perf-call-tree" */ "../PerfCallTree")
 );
 
+const CodeReport = React.lazy(() =>
+  import(/* webpackChunkName: "code-report" */ "../CodeReport")
+);
+
 type HeatMapData = HeatLineChartProperty & {
   numColumns: number;
   numRows: number;
@@ -44,16 +48,12 @@ export interface IItemProperty {
 const initialItemState = {
   isGraphOpen: null as boolean | null,
   isTreeOpen: false,
-  previousRange: null as { start: number; end: number } | null
+  previousRange: null as { start: number; end: number } | null,
+  isCodeOpen: false,
+  targetId: null as number | null
 };
 
 type ItemState = Readonly<typeof initialItemState>;
-
-const spinner = (
-  <div className={styles.spinner}>
-    <Spinner />
-  </div>
-);
 
 // This child component is tightly coupled as a table row element
 export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
@@ -111,7 +111,23 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
             <td colSpan={6}>{this.renderTreeBody()}</td>
           </tr>
         )}
+        {this.state.isGraphOpen &&
+          this.state.isTreeOpen &&
+          this.state.isCodeOpen && (
+            <tr>
+              <td colSpan={6}>{this.renderCodeReportBody()}</td>
+            </tr>
+          )}
       </tbody>
+    );
+  }
+
+  // noinspection JSMethodCanBeStatic
+  private renderSpinner() {
+    return (
+      <div className={styles.spinner}>
+        <Spinner />
+      </div>
     );
   }
 
@@ -120,11 +136,11 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
       case "empty":
         return <div />;
       case "loading":
-        return spinner;
+        return this.renderSpinner();
       case "loaded":
         if (this.props.heatMap) {
           return (
-            <React.Suspense fallback={spinner}>
+            <React.Suspense fallback={this.renderSpinner()}>
               <div className={styles.heatMap}>
                 <HeatLineChart
                   {...this.props.heatMap}
@@ -152,16 +168,17 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
       case "empty":
         return <div />;
       case "loading":
-        return spinner;
+        return this.renderSpinner();
       case "loaded":
         if (this.props.perfCallTree) {
           const targetId = this.props.perfCallTree.keys().next().value; // root element first
           return (
-            <React.Suspense fallback={spinner}>
+            <React.Suspense fallback={this.renderSpinner()}>
               <div>
                 <PerfCallTree
                   treeMap={this.props.perfCallTree}
                   targetId={targetId}
+                  onSeeingCodeOf={this.onOpenCode}
                 />
               </div>
             </React.Suspense>
@@ -176,6 +193,21 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
           </div>
         );
     }
+  }
+
+  private renderCodeReportBody() {
+    const targetElement = this.props.perfCallTree![this.state.targetId!];
+    return (
+      <React.Suspense fallback={this.renderSpinner()}>
+        <div>
+          <CodeReport
+            title={targetElement.label}
+            lines={targetElement.code}
+            firstLine={targetElement.firstLine}
+          />
+        </div>
+      </React.Suspense>
+    );
   }
 
   private onInfoRowClick = () => {
@@ -194,6 +226,10 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
     this.setState({ previousRange: { start, end } });
     this.props.onRangeSelect(this.props.uuid, this.props.heatMapId, start, end);
     this.setState({ isTreeOpen: true });
+  };
+
+  private onOpenCode = (targetId: number) => {
+    this.setState({ targetId, isCodeOpen: true });
   };
 }
 

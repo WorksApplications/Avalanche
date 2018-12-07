@@ -11,8 +11,7 @@ import {
 const basicCardProps: EnvironmentCardProperty = {
   name: "jillk",
   version: "18.03-",
-  kind: "observed",
-  onEdit: () => ({})
+  kind: "observed"
 };
 
 describe("<EnvironmentCard />", () => {

@@ -9,10 +9,14 @@ export interface IProperty {
 
   switchEnabled?(): void;
 
-  onEdit(): void;
+  onEdit?(): void;
 }
 
 export class EnvironmentCard extends React.Component<IProperty> {
+  public componentDidMount() {
+    ReactTooltip.rebuild();
+  }
+
   public render() {
     let kind: string | null = null;
     switch (this.props.kind) {
@@ -51,17 +55,10 @@ export class EnvironmentCard extends React.Component<IProperty> {
           <span
             className={styles.editLabel}
             data-tip="Edit this environment"
-            data-for={`env-${this.props.name}`}
+            data-class={styles.editTooltip}
           >
             Edit
           </span>
-          <ReactTooltip
-            id={`env-${this.props.name}`}
-            effect="solid"
-            place="top"
-            aria-haspopup="true"
-            className={styles.editTooltip}
-          />
         </button>
       </div>
     );
