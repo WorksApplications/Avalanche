@@ -9,7 +9,7 @@ export interface IProperty {
 
   switchEnabled?(): void;
 
-  onEdit(): void;
+  onEdit?(): void;
 }
 
 export class EnvironmentCard extends React.Component<IProperty> {
