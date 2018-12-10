@@ -46,7 +46,11 @@ module.exports = env => {
       app: index
     },
     resolve: {
-      extensions: [".mjs", ".ts", ".tsx", ".js", ".json", ".jsx"]
+      extensions: [".mjs", ".ts", ".tsx", ".js", ".json", ".jsx"],
+      alias: {
+        // We don't use moment API.
+        moment: require.resolve("dayjs")
+      }
     },
     module: {
       rules: [

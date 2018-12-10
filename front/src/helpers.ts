@@ -40,3 +40,14 @@ export function operationsToActionCreators(thunks: {
   }
   return result;
 }
+
+export function normalizedToFlamescopePosition(
+  normalizedValue: number,
+  numColumns: number,
+  numRows: number
+) {
+  const decimalValue = normalizedValue * numColumns;
+  const column = Math.floor(decimalValue);
+  const row = Math.floor((decimalValue - column) * numRows);
+  return column + 0.01 * row;
+}

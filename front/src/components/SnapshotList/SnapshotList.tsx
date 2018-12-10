@@ -15,6 +15,8 @@
  */
 // tslint:disable:max-classes-per-file
 import * as React from "react";
+import { FLAMESCOPE_API_BASE } from "../../constants";
+import { normalizedToFlamescopePosition } from "../../helpers";
 import { IPerfCallTreeData } from "../../store";
 import { HeatLineChartProperty } from "../HeatLineChart";
 import Link from "../Link";
@@ -123,7 +125,19 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
         )}
         {this.state.isGraphOpen && this.state.isTreeOpen && (
           <tr>
-            <td colSpan={6}>{this.renderTreeBody()}</td>
+            <td colSpan={6} className={styles.treeArea}>
+              {this.state.previousRange && (
+                <a
+                  className={styles.linkForSelectedRange}
+                  href={this.getFlamescopeLink()}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  View range in Flamescope
+                </a>
+              )}
+              {this.renderTreeBody()}
+            </td>
           </tr>
         )}
         {this.state.isGraphOpen &&
@@ -135,6 +149,25 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
           )}
       </tbody>
     );
+  }
+
+  private getFlamescopeLink() {
+    const { start, end } = this.state.previousRange!;
+    const { numColumns, numRows } = this.props.heatMap!;
+    const startPosition = normalizedToFlamescopePosition(
+      start,
+      numColumns,
+      numRows
+    );
+    const endPosition = normalizedToFlamescopePosition(
+      end,
+      numColumns,
+      numRows
+    );
+
+    return `${FLAMESCOPE_API_BASE}/#/heatmap/${
+      this.props.heatMapId
+    }/flamegraph/${startPosition}/${endPosition}/`;
   }
 
   // noinspection JSMethodCanBeStatic
@@ -178,17 +211,27 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
     }
   }
 
+  private renderSpinnerForTree() {
+    return (
+      <>
+        <div className={styles.spinnerForTree}>
+          <Spinner />
+        </div>
+      </>
+    );
+  }
+
   private renderTreeBody() {
     switch (this.props.perfCallTreeStatus) {
       case "empty":
         return <div />;
       case "loading":
-        return this.renderSpinner();
+        return this.renderSpinnerForTree();
       case "loaded":
         if (this.props.perfCallTree) {
           const targetId = this.props.perfCallTree.keys().next().value; // root element first
           return (
-            <React.Suspense fallback={this.renderSpinner()}>
+            <React.Suspense fallback={this.renderSpinnerForTree()}>
               <div>
                 <PerfCallTree
                   treeMap={this.props.perfCallTree}
@@ -203,7 +246,7 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
       // noinspection FallThroughInSwitchStatementJS
       case "failed":
         return (
-          <div className={styles.errorMessage}>
+          <div className={styles.errorMessageForTree}>
             <span>Failed to load</span>
           </div>
         );
@@ -238,9 +281,12 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
   };
 
   private onRangeSelectWrap = (start: number, end: number) => {
-    this.setState({ previousRange: { start, end } });
     this.props.onRangeSelect(this.props.uuid, this.props.heatMapId, start, end);
-    this.setState({ isTreeOpen: true });
+    this.setState({
+      previousRange: { start, end },
+      isTreeOpen: true,
+      isCodeOpen: false
+    });
   };
 
   private onOpenCode = (targetId: number) => {

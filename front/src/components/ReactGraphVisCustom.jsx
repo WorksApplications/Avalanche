@@ -13,14 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*
+ * react-graph-vis
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2015 Vincent Lecrubier
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 // Copied from https://raw.githubusercontent.com/crubier/react-graph-vis/9091a503ff2971b0645079c77891bc0bc7d8d656/src/index.js
 //   and added some features
+//  * events
+//  * file-size reduction for our use
 
 import React, { Component } from "react";
-import defaultsDeep from "lodash/fp/defaultsDeep";
-import isEqual from "lodash/isEqual";
-import differenceWith from "lodash/differenceWith";
-import vis from "vis";
+import defaultsDeep from "lodash-es/defaultsDeep";
+import isEqual from "lodash-es/isEqual";
+import differenceWith from "lodash-es/differenceWith";
+import DataSet from "vis/lib/DataSet";
+import Network from "vis/lib/network/Network";
 import uuid from "uuid";
 import PropTypes from "prop-types";
 
@@ -35,9 +63,9 @@ class Graph extends Component {
   }
 
   componentDidMount() {
-    this.edges = new vis.DataSet();
+    this.edges = new DataSet();
     this.edges.add(this.props.graph.edges);
-    this.nodes = new vis.DataSet();
+    this.nodes = new DataSet();
     this.nodes.add(this.props.graph.nodes);
     this.updateGraph();
   }
@@ -144,7 +172,7 @@ class Graph extends Component {
     // merge user provied options with our default ones
     let options = defaultsDeep(defaultOptions, this.props.options);
 
-    this.Network = new vis.Network(
+    this.Network = new Network(
       container,
       Object.assign({}, this.props.graph, {
         edges: this.edges,

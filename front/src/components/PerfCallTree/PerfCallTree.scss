@@ -5,9 +5,20 @@
   min-height: $base-space * 15;
   margin: 0;
   padding: 0;
+
+  & canvas {
+    border: 1px solid $border-color-light;
+    box-sizing: border-box;
+  }
+}
+
+.shadow {
+  position: absolute;
 }
 
 .popover {
+  z-index: 150;
+
   :global(.Popover-tip) {
     height: 10px;
   }

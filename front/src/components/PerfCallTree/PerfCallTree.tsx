@@ -47,12 +47,16 @@ function generateGraph(
   const nodes: any[] = [];
   const edges: any[] = [];
 
-  function registerElement(elem: ITreeElement, level: LabelLevel) {
+  function registerElement(
+    elem: ITreeElement,
+    labelLevel: LabelLevel,
+    hierarchicalLevel: number
+  ) {
     const isFirst = typeof elem.parentId === "undefined";
     const tokens = elem.label.split("/");
 
     const label =
-      level === "classOnly"
+      labelLevel === "classOnly"
         ? tokens[tokens.length - 1]
         : tokens.length > 3
         ? `${tokens[0]}/${tokens[1]}/... ${tokens[tokens.length - 1]}`
@@ -66,7 +70,8 @@ function generateGraph(
       id: elem.id,
       label,
       group: elem.relativeRatio > 0.6 ? "important" : "normal",
-      first: isFirst
+      first: isFirst,
+      level: hierarchicalLevel
     });
     if (!isFirst) {
       edges.push({ from: elem.parentId, to: elem.id, label: edgeLabel });
@@ -74,30 +79,30 @@ function generateGraph(
   }
 
   if (root.id === targetId) {
-    registerElement(root, "normal");
+    registerElement(root, "normal", 0);
     for (const c of root.childIds
       .map(i => treeMap[i])
       .filter(x => x.relativeRatio > 0.01)) {
-      registerElement(c, "classOnly");
+      registerElement(c, "classOnly", 2);
     }
   } else {
-    registerElement(root, "normal");
+    registerElement(root, "normal", 0);
 
     // left siblings
     for (const s of root.childIds
       .filter(i => i < root.id)
       .map(i => treeMap[i])) {
-      registerElement(s, "classOnly");
+      registerElement(s, "classOnly", 2);
     }
 
     const target = treeMap[targetId];
-    registerElement(target, "normal");
+    registerElement(target, "normal", 2);
 
     // children of target
     for (const c of target.childIds
       .map(i => treeMap[i])
       .filter(x => x.relativeRatio > 0.01)) {
-      registerElement(c, "classOnly");
+      registerElement(c, "classOnly", 5);
     }
 
     // right siblings
@@ -105,7 +110,7 @@ function generateGraph(
       .filter(i => i > root.id)
       .map(i => treeMap[i])
       .filter(x => x.relativeRatio > 0.01)) {
-      registerElement(s, "classOnly");
+      registerElement(s, "classOnly", 2);
     }
   }
 
@@ -113,6 +118,7 @@ function generateGraph(
 }
 
 const visOptions = {
+  height: "200",
   edges: {
     chosen: false
   },
@@ -178,9 +184,12 @@ const visOptions = {
   layout: {
     hierarchical: {
       enabled: true,
-      levelSeparation: 60,
+      levelSeparation: 30,
       nodeSpacing: 300,
-      sortMethod: "directed"
+      sortMethod: "directed",
+      blockShifting: false,
+      edgeMinimization: true,
+      parentCentralization: true
     }
   },
   interaction: {
@@ -189,7 +198,9 @@ const visOptions = {
     hover: true,
     hoverConnectedEdges: false
   },
-  physics: false
+  physics: {
+    enabled: false
+  }
 };
 
 const initialState = {
@@ -227,6 +238,8 @@ class PerfCallTree extends React.Component<IProperty, State> {
   private network: any = null;
   private edges: any = null;
 
+  private draggedAfterFocus = false;
+
   public render() {
     if (this.state.targetId === null) {
       return <ul className={styles.wrap} />;
@@ -245,13 +258,16 @@ class PerfCallTree extends React.Component<IProperty, State> {
 
     const events = {
       selectNode: (arg: any) => {
+        this.draggedAfterFocus = false;
         this.setState({ targetId: arg.nodes[0] });
       },
       selectEdge: (arg: any) => {
         const edge = this.edges._data[arg.edges[0]];
         if (edge.from === this.state.targetId) {
+          this.draggedAfterFocus = false;
           this.setState({ targetId: edge.to });
         } else if (edge.to === this.state.targetId) {
+          this.draggedAfterFocus = false;
           this.setState({ targetId: edge.from });
         }
       },
@@ -280,7 +296,7 @@ class PerfCallTree extends React.Component<IProperty, State> {
                 </button>
               </>
             ),
-            offsetTop: arg.event.offsetY - 10,
+            offsetTop: arg.event.offsetY - 15,
             offsetLeft:
               arg.event.offsetX - this.wrapRef.current!.clientWidth / 2,
             showing: true
@@ -290,14 +306,17 @@ class PerfCallTree extends React.Component<IProperty, State> {
       blurNode: () => {
         this.popoverTimeout = setTimeout(() => {
           this.setState(s => ({ tooltip: { ...s.tooltip, showing: false } }));
-        }, 500);
+        }, 300);
+      },
+      dragEnd: () => {
+        this.draggedAfterFocus = true;
       }
     };
 
     return (
       <div className={styles.wrap} ref={this.wrapRef}>
         {/*for Filter*/}
-        <svg width="0" height="0">
+        <svg width="0" height="0" className={styles.shadow}>
           <filter id="dropshadow" height="130%">
             <feGaussianBlur in="SourceAlpha" stdDeviation="1" />
             <feOffset dy="1" result="offsetblur" />
@@ -360,7 +379,7 @@ class PerfCallTree extends React.Component<IProperty, State> {
     if (this.popoverTimeout === null) {
       this.popoverTimeout = setTimeout(() => {
         this.setState(s => ({ tooltip: { ...s.tooltip, showing: false } }));
-      }, 500);
+      }, 300);
     }
   };
 
@@ -373,8 +392,10 @@ class PerfCallTree extends React.Component<IProperty, State> {
   };
 
   private onGraphUpdated = () => {
-    this.network.focus(this.state.targetId);
-    this.network.selectNodes([this.state.targetId], false);
+    if (!this.draggedAfterFocus) {
+      this.network.focus(this.state.targetId);
+      this.network.selectNodes([this.state.targetId], false);
+    }
   };
 }
 

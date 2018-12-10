@@ -43,11 +43,29 @@
   height: $base-space * 15;
 }
 
+.treeArea {
+  height: $base-space * 15;
+  position: relative;
+}
+
 .spinner {
   width: $base-space * 3;
   height: $base-space * 3;
   padding: $base-space * 6;
   margin: 0 auto;
+}
+
+.spinnerForTree {
+  @extend .spinner;
+  padding: $base-space * 11;
+}
+
+.linkForSelectedRange {
+  @include link-style-blue();
+  position: absolute;
+  right: 0;
+  margin: 0 $base-space * 2;
+  z-index: 1;
 }
 
 .errorMessage {
@@ -63,6 +81,11 @@
   .table tbody:hover & {
     background-color: $bg-color-gray-4;
   }
+}
+
+.errorMessageForTree {
+  @extend .errorMessage;
+  padding: $base-space * 5;
 }
 
 /*
