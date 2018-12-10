@@ -248,9 +248,12 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
   };
 
   private onRangeSelectWrap = (start: number, end: number) => {
-    this.setState({ previousRange: { start, end } });
     this.props.onRangeSelect(this.props.uuid, this.props.heatMapId, start, end);
-    this.setState({ isTreeOpen: true });
+    this.setState({
+      previousRange: { start, end },
+      isTreeOpen: true,
+      isCodeOpen: false
+    });
   };
 
   private onOpenCode = (targetId: number) => {
