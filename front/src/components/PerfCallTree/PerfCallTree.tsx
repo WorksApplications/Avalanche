@@ -189,7 +189,9 @@ const visOptions = {
     hover: true,
     hoverConnectedEdges: false
   },
-  physics: false
+  physics: {
+    enabled: false
+  }
 };
 
 const initialState = {
