@@ -29,7 +29,10 @@ import {
 import AppSelector from "../components/AppSelector";
 import SnapshotFilter from "../components/SnapshotFilter";
 import SnapshotList, { ISnapshotData } from "../components/SnapshotList";
-import { operationsToActionCreators } from "../helpers";
+import {
+  normalizedToFlamescopePosition,
+  operationsToActionCreators
+} from "../helpers";
 import { IApplicationState, ISnapshotInfo } from "../store";
 import styles from "./SnapshotsView.scss";
 
@@ -240,15 +243,16 @@ export class SnapshotsView extends React.Component<Props> {
   ) => {
     const heatMap = this.props.heatMaps.get(heatMapId);
     if (heatMap && heatMap.data) {
-      const start = normalizedStart * heatMap.data.numColumns;
-      const startColumn = Math.floor(start);
-      const startRow = Math.floor((start - startColumn) * heatMap.data.numRows);
-      const startPosition = startColumn + 0.01 * startRow;
-
-      const end = normalizedEnd * heatMap.data.numColumns;
-      const endColumn = Math.floor(end);
-      const endRow = Math.floor((end - endColumn) * heatMap.data.numRows);
-      const endPosition = endColumn + 0.01 * endRow;
+      const startPosition = normalizedToFlamescopePosition(
+        normalizedStart,
+        heatMap.data.numColumns,
+        heatMap.data.numRows
+      );
+      const endPosition = normalizedToFlamescopePosition(
+        normalizedEnd,
+        heatMap.data.numColumns,
+        heatMap.data.numRows
+      );
 
       this.props
         .getPerfCallTreeOperation({ snapshotId, startPosition, endPosition })
