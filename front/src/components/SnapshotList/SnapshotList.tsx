@@ -123,7 +123,9 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
         )}
         {this.state.isGraphOpen && this.state.isTreeOpen && (
           <tr>
-            <td colSpan={6}>{this.renderTreeBody()}</td>
+            <td colSpan={6} className={styles.treeArea}>
+              {this.renderTreeBody()}
+            </td>
           </tr>
         )}
         {this.state.isGraphOpen &&
@@ -178,17 +180,25 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
     }
   }
 
+  private renderSpinnerForTree() {
+    return (
+      <div className={styles.spinnerForTree}>
+        <Spinner />
+      </div>
+    );
+  }
+
   private renderTreeBody() {
     switch (this.props.perfCallTreeStatus) {
       case "empty":
         return <div />;
       case "loading":
-        return this.renderSpinner();
+        return this.renderSpinnerForTree();
       case "loaded":
         if (this.props.perfCallTree) {
           const targetId = this.props.perfCallTree.keys().next().value; // root element first
           return (
-            <React.Suspense fallback={this.renderSpinner()}>
+            <React.Suspense fallback={this.renderSpinnerForTree()}>
               <div>
                 <PerfCallTree
                   treeMap={this.props.perfCallTree}
@@ -203,7 +213,7 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
       // noinspection FallThroughInSwitchStatementJS
       case "failed":
         return (
-          <div className={styles.errorMessage}>
+          <div className={styles.errorMessageForTree}>
             <span>Failed to load</span>
           </div>
         );
