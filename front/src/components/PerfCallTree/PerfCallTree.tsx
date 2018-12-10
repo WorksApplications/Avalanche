@@ -229,6 +229,8 @@ class PerfCallTree extends React.Component<IProperty, State> {
   private network: any = null;
   private edges: any = null;
 
+  private draggedAfterFocus = false;
+
   public render() {
     if (this.state.targetId === null) {
       return <ul className={styles.wrap} />;
@@ -247,13 +249,16 @@ class PerfCallTree extends React.Component<IProperty, State> {
 
     const events = {
       selectNode: (arg: any) => {
+        this.draggedAfterFocus = false;
         this.setState({ targetId: arg.nodes[0] });
       },
       selectEdge: (arg: any) => {
         const edge = this.edges._data[arg.edges[0]];
         if (edge.from === this.state.targetId) {
+          this.draggedAfterFocus = false;
           this.setState({ targetId: edge.to });
         } else if (edge.to === this.state.targetId) {
+          this.draggedAfterFocus = false;
           this.setState({ targetId: edge.from });
         }
       },
@@ -293,6 +298,9 @@ class PerfCallTree extends React.Component<IProperty, State> {
         this.popoverTimeout = setTimeout(() => {
           this.setState(s => ({ tooltip: { ...s.tooltip, showing: false } }));
         }, 500);
+      },
+      dragEnd: () => {
+        this.draggedAfterFocus = true;
       }
     };
 
@@ -375,8 +383,10 @@ class PerfCallTree extends React.Component<IProperty, State> {
   };
 
   private onGraphUpdated = () => {
-    this.network.focus(this.state.targetId);
-    this.network.selectNodes([this.state.targetId], false);
+    if (!this.draggedAfterFocus) {
+      this.network.focus(this.state.targetId);
+      this.network.selectNodes([this.state.targetId], false);
+    }
   };
 }
 
