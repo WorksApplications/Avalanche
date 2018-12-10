@@ -19,7 +19,7 @@
   "dependencies": {
     "connected-react-router": "^4.5.0",
     "history": "^4.7.2",
-    "lodash": "^4.17.11",
+    "lodash-es": "^4.17.11",
     "memoize-one": "^4.0.3",
     "portable-fetch": "^3.0.0",
     "prop-types": "^15.6.2",

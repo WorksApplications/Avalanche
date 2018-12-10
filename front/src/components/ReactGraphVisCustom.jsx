@@ -44,9 +44,9 @@
 //  * file-size reduction for our use
 
 import React, { Component } from "react";
-import defaultsDeep from "lodash/fp/defaultsDeep";
-import isEqual from "lodash/isEqual";
-import differenceWith from "lodash/differenceWith";
+import defaultsDeep from "lodash-es/defaultsDeep";
+import isEqual from "lodash-es/isEqual";
+import differenceWith from "lodash-es/differenceWith";
 import DataSet from "vis/lib/DataSet";
 import Network from "vis/lib/network/Network";
 import uuid from "uuid";
