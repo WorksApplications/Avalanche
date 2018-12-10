@@ -47,12 +47,16 @@ function generateGraph(
   const nodes: any[] = [];
   const edges: any[] = [];
 
-  function registerElement(elem: ITreeElement, level: LabelLevel) {
+  function registerElement(
+    elem: ITreeElement,
+    labelLevel: LabelLevel,
+    hierarchicalLevel: number
+  ) {
     const isFirst = typeof elem.parentId === "undefined";
     const tokens = elem.label.split("/");
 
     const label =
-      level === "classOnly"
+      labelLevel === "classOnly"
         ? tokens[tokens.length - 1]
         : tokens.length > 3
         ? `${tokens[0]}/${tokens[1]}/... ${tokens[tokens.length - 1]}`
@@ -66,7 +70,8 @@ function generateGraph(
       id: elem.id,
       label,
       group: elem.relativeRatio > 0.6 ? "important" : "normal",
-      first: isFirst
+      first: isFirst,
+      level: hierarchicalLevel
     });
     if (!isFirst) {
       edges.push({ from: elem.parentId, to: elem.id, label: edgeLabel });
@@ -74,30 +79,30 @@ function generateGraph(
   }
 
   if (root.id === targetId) {
-    registerElement(root, "normal");
+    registerElement(root, "normal", 0);
     for (const c of root.childIds
       .map(i => treeMap[i])
       .filter(x => x.relativeRatio > 0.01)) {
-      registerElement(c, "classOnly");
+      registerElement(c, "classOnly", 2);
     }
   } else {
-    registerElement(root, "normal");
+    registerElement(root, "normal", 0);
 
     // left siblings
     for (const s of root.childIds
       .filter(i => i < root.id)
       .map(i => treeMap[i])) {
-      registerElement(s, "classOnly");
+      registerElement(s, "classOnly", 2);
     }
 
     const target = treeMap[targetId];
-    registerElement(target, "normal");
+    registerElement(target, "normal", 2);
 
     // children of target
     for (const c of target.childIds
       .map(i => treeMap[i])
       .filter(x => x.relativeRatio > 0.01)) {
-      registerElement(c, "classOnly");
+      registerElement(c, "classOnly", 5);
     }
 
     // right siblings
@@ -105,7 +110,7 @@ function generateGraph(
       .filter(i => i > root.id)
       .map(i => treeMap[i])
       .filter(x => x.relativeRatio > 0.01)) {
-      registerElement(s, "classOnly");
+      registerElement(s, "classOnly", 2);
     }
   }
 
@@ -179,9 +184,12 @@ const visOptions = {
   layout: {
     hierarchical: {
       enabled: true,
-      levelSeparation: 60,
+      levelSeparation: 30,
       nodeSpacing: 300,
-      sortMethod: "directed"
+      sortMethod: "directed",
+      blockShifting: false,
+      edgeMinimization: true,
+      parentCentralization: true
     }
   },
   interaction: {
