@@ -297,7 +297,7 @@ class PerfCallTree extends React.Component<IProperty, State> {
       blurNode: () => {
         this.popoverTimeout = setTimeout(() => {
           this.setState(s => ({ tooltip: { ...s.tooltip, showing: false } }));
-        }, 500);
+        }, 300);
       },
       dragEnd: () => {
         this.draggedAfterFocus = true;
@@ -370,7 +370,7 @@ class PerfCallTree extends React.Component<IProperty, State> {
     if (this.popoverTimeout === null) {
       this.popoverTimeout = setTimeout(() => {
         this.setState(s => ({ tooltip: { ...s.tooltip, showing: false } }));
-      }, 500);
+      }, 300);
     }
   };
 
