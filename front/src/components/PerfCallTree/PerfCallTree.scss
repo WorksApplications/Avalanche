@@ -17,6 +17,8 @@
 }
 
 .popover {
+  z-index: 150;
+
   :global(.Popover-tip) {
     height: 10px;
   }
