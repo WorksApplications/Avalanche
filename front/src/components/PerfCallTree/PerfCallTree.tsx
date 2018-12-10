@@ -282,7 +282,7 @@ class PerfCallTree extends React.Component<IProperty, State> {
                 </button>
               </>
             ),
-            offsetTop: arg.event.offsetY - 10,
+            offsetTop: arg.event.offsetY - 15,
             offsetLeft:
               arg.event.offsetX - this.wrapRef.current!.clientWidth / 2,
             showing: true
@@ -299,7 +299,7 @@ class PerfCallTree extends React.Component<IProperty, State> {
     return (
       <div className={styles.wrap} ref={this.wrapRef}>
         {/*for Filter*/}
-        <svg width="0" height="0">
+        <svg width="0" height="0" className={styles.shadow}>
           <filter id="dropshadow" height="130%">
             <feGaussianBlur in="SourceAlpha" stdDeviation="1" />
             <feOffset dy="1" result="offsetblur" />
