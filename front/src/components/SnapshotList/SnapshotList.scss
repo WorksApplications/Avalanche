@@ -56,7 +56,7 @@
 
 .spinnerForTree {
   @extend .spinner;
-  padding: $base-space * 8.5 - 1px; // consider border
+  padding: $base-space * 11;
 }
 
 .errorMessage {
@@ -76,7 +76,7 @@
 
 .errorMessageForTree {
   @extend .errorMessage;
-  padding: $base-space * 2.5 - 1px; // consider border
+  padding: $base-space * 5;
 }
 
 /*

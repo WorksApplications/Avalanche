@@ -113,6 +113,7 @@ function generateGraph(
 }
 
 const visOptions = {
+  height: "200",
   edges: {
     chosen: false
   },
