@@ -17,7 +17,6 @@ import * as React from "react";
 import { hot } from "react-hot-loader";
 import { Route, Router, Switch } from "react-router";
 import { NavLink } from "react-router-dom";
-import * as ReactTooltip from "react-tooltip";
 import styles from "./App.scss";
 import { APP_NAME } from "./constants";
 import Toastr from "./containers/Toastr";
@@ -26,6 +25,10 @@ import { history } from "./store";
 
 const ConfigPage = React.lazy(() =>
   import(/* webpackChunkName: "config-page" */ "./pages/ConfigPage")
+);
+
+const ReactTooltip = React.lazy(
+  () => import(/* webpackChunkName: "react-tooltip"*/ "react-tooltip") as any
 );
 
 class App extends React.Component {
@@ -68,7 +71,9 @@ class App extends React.Component {
           </Router>
         </div>
         <Toastr />
-        <ReactTooltip effect="solid" place="top" aria-haspopup="true" />
+        <React.Suspense fallback={/* show nothing*/ null}>
+          <ReactTooltip effect="solid" place="top" aria-haspopup="true" />
+        </React.Suspense>
       </div>
     );
   }
