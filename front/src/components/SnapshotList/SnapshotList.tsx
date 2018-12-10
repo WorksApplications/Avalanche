@@ -15,6 +15,8 @@
  */
 // tslint:disable:max-classes-per-file
 import * as React from "react";
+import { FLAMESCOPE_API_BASE } from "../../constants";
+import { normalizedToFlamescopePosition } from "../../helpers";
 import { IPerfCallTreeData } from "../../store";
 import { HeatLineChartProperty } from "../HeatLineChart";
 import Link from "../Link";
@@ -124,6 +126,16 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
         {this.state.isGraphOpen && this.state.isTreeOpen && (
           <tr>
             <td colSpan={6} className={styles.treeArea}>
+              {this.state.previousRange && (
+                <a
+                  className={styles.linkForSelectedRange}
+                  href={this.getFlamescopeLink()}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  View range in Flamescope
+                </a>
+              )}
               {this.renderTreeBody()}
             </td>
           </tr>
@@ -137,6 +149,25 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
           )}
       </tbody>
     );
+  }
+
+  private getFlamescopeLink() {
+    const { start, end } = this.state.previousRange!;
+    const { numColumns, numRows } = this.props.heatMap!;
+    const startPosition = normalizedToFlamescopePosition(
+      start,
+      numColumns,
+      numRows
+    );
+    const endPosition = normalizedToFlamescopePosition(
+      end,
+      numColumns,
+      numRows
+    );
+
+    return `${FLAMESCOPE_API_BASE}/#/heatmap/${
+      this.props.heatMapId
+    }/flamegraph/${startPosition}/${endPosition}/`;
   }
 
   // noinspection JSMethodCanBeStatic
@@ -182,9 +213,11 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
 
   private renderSpinnerForTree() {
     return (
-      <div className={styles.spinnerForTree}>
-        <Spinner />
-      </div>
+      <>
+        <div className={styles.spinnerForTree}>
+          <Spinner />
+        </div>
+      </>
     );
   }
 
