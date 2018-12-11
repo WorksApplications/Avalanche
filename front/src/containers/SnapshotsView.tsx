@@ -317,5 +317,6 @@ export default connect(
   mapStateToProps,
   mapDispatchToProps,
   null,
-  { withRef: true }
+  // @ts-ignore
+  { forwardRef: true }
 )(SnapshotsView);

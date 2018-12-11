@@ -17,7 +17,7 @@
     "analysis": "webpack --env.production --env.IS_ANALYZING --profile --display-used-exports"
   },
   "dependencies": {
-    "connected-react-router": "^4.5.0",
+    "connected-react-router": "^6.0.0",
     "dayjs": "^1.7.7",
     "history": "^4.7.2",
     "lodash-es": "^4.17.11",
@@ -29,7 +29,7 @@
     "react-hot-loader": "^4.3.11",
     "react-modal": "^3.6.1",
     "react-popover": "^0.5.10",
-    "react-redux": "^5.1.0",
+    "react-redux": "^6.0.0",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
     "react-tooltip": "^3.9.0",
