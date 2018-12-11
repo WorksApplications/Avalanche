@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestToMatch(t *testing.T) {
@@ -190,13 +191,15 @@ func lister(p *testPath, dir []string) *testPath {
 	return nil
 }
 
-func (s *testPath) list(path string) []string {
-	dir := strings.Split(path, "/")
+func (s *testPath) list(p string) []path {
+	dir := strings.Split(p, "/")
 	t := lister(s, dir)
-	p := t.Children
-	r := make([]string, len(p))
-	for i := range p {
-		r[i] = p[i].Path
+	c := t.Children
+	r := make([]path, len(c))
+	for i := range c {
+		r[i].name = c[i].Path
+		r[i].date = time.Unix(1000, 0)
+		r[i].dir = true
 	}
 	return r
 }
@@ -248,13 +251,13 @@ func TestScan(t *testing.T) {
 					Name:       "recommender-5c13933a90",
 					Link:       "server/logs/node-stg/var/log/lisa/recommender/recommender-5c13933a90/perf-log",
 					Profiling:  true,
-					LastUpdate: nil,
+					LastUpdate: time.Unix(1000, 0),
 				},
 				Pod{
 					Name:       "recommender-3ce31309f2",
 					Link:       "server/logs/node-stg/var/log/lisa/recommender/recommender-3ce31309f2/perf-log",
 					Profiling:  true,
-					LastUpdate: nil,
+					LastUpdate: time.Unix(1000, 0),
 				},
 			},
 		},
@@ -265,19 +268,19 @@ func TestScan(t *testing.T) {
 					Name:       "map-c0ae432a90",
 					Link:       "server/logs/node-stg/var/log/lisa/map/map-c0ae432a90/perf-log",
 					Profiling:  true,
-					LastUpdate: nil,
+					LastUpdate: time.Unix(1000, 0),
 				},
 				Pod{
 					Name:       "map-fe9910b219",
 					Link:       "server/logs/node-evl/var/log/gaspard/map/map-fe9910b219/perf-log",
 					Profiling:  true,
-					LastUpdate: nil,
+					LastUpdate: time.Unix(1000, 0),
 				},
 				Pod{
 					Name:       "map-7c780097c9",
 					Link:       "server/logs/node-evl/var/log/gaspard/map/map-7c780097c9/perf-log",
 					Profiling:  true,
-					LastUpdate: nil,
+					LastUpdate: time.Unix(1000, 0),
 				},
 			},
 		},

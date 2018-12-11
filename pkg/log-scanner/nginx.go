@@ -19,6 +19,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"golang.org/x/net/html"
 )
@@ -28,7 +29,7 @@ type Nginx struct {
 	NReq   int
 }
 
-func findLink(site string) ([]string, error) {
+func findLink(site string) ([]path, error) {
 	resp, err := http.Get(site)
 	if err != nil {
 		return nil, err
@@ -36,7 +37,7 @@ func findLink(site string) ([]string, error) {
 	defer resp.Body.Close()
 	z := html.NewTokenizer(resp.Body)
 
-	var links []string
+	var links []path
 	for {
 		tt := z.Next()
 		switch {
@@ -46,9 +47,17 @@ func findLink(site string) ([]string, error) {
 			t := z.Token()
 			if t.Data == "a" {
 				for _, attr := range t.Attr {
+					var p path
 					if attr.Key == "href" && attr.Val != "../" {
-						links = append(links, attr.Val)
+						p.name = strings.TrimRight(attr.Val, "/")
+						p.dir = attr.Val != p.name
 					}
+					/* Next should be string, I swear */
+					_ = z.Next()
+					d := strings.Trim(z.Token().Data, " \n-")
+					nginxForm := "02-Jan-2006 03:04"
+					p.date, _ = time.Parse(nginxForm, d)
+					links = append(links, p)
 				}
 			}
 		}
@@ -56,15 +65,12 @@ func findLink(site string) ([]string, error) {
 	return links, nil
 }
 
-func (s *Nginx) list(dir string) []string {
+func (s *Nginx) list(dir string) []path {
 	links, err := findLink(s.Server + "/" + dir)
 	s.NReq++
 	if err != nil {
 		log.Print(s.Server+"/"+dir, links, err)
-		return []string{}
-	}
-	for i := range links {
-		links[i] = strings.TrimRight(links[i], "/")
+		return []path{}
 	}
 	return links
 }

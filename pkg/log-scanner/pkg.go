@@ -44,18 +44,24 @@ type App struct {
 }
 
 type Pod struct {
-	Name       string     `json:"name"`
-	Link       string     `json:"link"`
-	Profiling  bool       `json:"profiled"`
-	LastUpdate *time.Time `json:"last_update"`
+	Name       string    `json:"name"`
+	Link       string    `json:"link"`
+	Profiling  bool      `json:"profiled"`
+	LastUpdate time.Time `json:"last_update"`
 }
 
 type Scanner interface {
 	Scan(env string) ([]App, error)
 }
 
+type path struct {
+	name string
+	date time.Time
+	dir  bool
+}
+
 type Driver interface {
-	list(target string) []string
+	list(target string) []path
 	nReq() int
 }
 
@@ -115,8 +121,11 @@ type scanCur struct {
 	path string
 	// Rest of matchTokens
 	matcher []matchToken
+	// Last update
+	date time.Time
 }
 
+/* update dictionary `dict` with matching token `m` if the token has variables. */
 func match(m matchToken, cand string, dict map[string]string) (map[string]string, bool, error) {
 	s := make([]string, len(m.key))
 	r := make([]interface{}, len(m.key))
@@ -153,17 +162,18 @@ func run(s scanCur, driver Driver) []scanCur {
 	next := make([]scanCur, 0, len(list))
 	/* let's see if those children mathes the next token */
 	for _, path := range list {
-		f, g, err := match(s.matcher[0], path, s.found)
+		f, g, err := match(s.matcher[0], path.name, s.found)
 		if err != nil {
 			continue
 		}
 		if g {
-			s := scanCur{
+			nys := scanCur{
 				found:   f,
-				path:    s.path + "/" + path,
+				path:    s.path + "/" + path.name,
 				matcher: s.matcher[1:],
+				date:    path.date,
 			}
-			next = append(next, s)
+			next = append(next, nys)
 		}
 	}
 	r := make([]scanCur, 0)
@@ -178,9 +188,10 @@ func toApp(s []scanCur) []App {
 	pods := make(map[string][]Pod)
 	for _, c := range s {
 		pod := Pod{
-			Name:      c.found["pod"],
-			Link:      c.path,
-			Profiling: true,
+			Name:       c.found["pod"],
+			Link:       c.path,
+			Profiling:  true,
+			LastUpdate: c.date,
 		}
 		appname := c.found["app"]
 		p, prs := pods[appname]

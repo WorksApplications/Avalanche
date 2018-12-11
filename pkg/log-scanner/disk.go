@@ -25,12 +25,13 @@ type Disk struct {
 	NReq    int
 }
 
-func (s *Disk) list(dir string) []string {
+func (s *Disk) list(dir string) []path {
 	sub, _ := ioutil.ReadDir(s.RootDir + "/" + dir)
 	s.NReq++
-	ret := make([]string, 0, len(sub))
+	ret := make([]path, 0, len(sub))
 	for _, s := range sub {
-		ret = append(ret, strings.TrimRight(s.Name(), "/"))
+		p := path{strings.TrimRight(s.Name(), "/"), s.ModTime(), s.IsDir()}
+		ret = append(ret, p)
 	}
 	return ret
 }
