@@ -21,6 +21,8 @@
 // When you add this file, we won't add the default configurations which is similar
 // to "React Create App". This only has babel loader to load JavaScript.
 
+const DefinePlugin = require("webpack").DefinePlugin;
+
 const webpackConfig = require("../webpack.config")();
 
 module.exports = (baseConfig, env, config) => {
@@ -39,5 +41,14 @@ module.exports = (baseConfig, env, config) => {
               }
             : r
         );
+  config.plugins.push(
+    // constants for demo
+    new DefinePlugin({
+      COLLECT_API_BASE: JSON.stringify("/#/collect/"),
+      SUSPECT_API_BASE: JSON.stringify("/#/suspect/"),
+      FLAMESCOPE_API_BASE: JSON.stringify("/#/flamescope/"),
+      APP_NAME: `"Avalanche"`
+    })
+  );
   return config;
 };
