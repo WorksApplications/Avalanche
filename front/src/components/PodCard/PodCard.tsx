@@ -61,32 +61,7 @@ export class PodCard extends React.Component<IProperty, State> {
         data-testid="root"
         onClick={this.onClick}
       >
-        <div
-          className={[
-            styles.save,
-            !this.props.onSaveButtonClick ? styles.disabled : undefined
-          ].join(" ")}
-          data-testid="save"
-        >
-          {this.props.isSaving ? (
-            <div className={styles.spinner}>
-              <Spinner />
-            </div>
-          ) : (
-            <button className={styles.saveButton} data-testid="save-button">
-              <span
-                className={styles.saveLabel}
-                onClick={this.onSave}
-                data-testid="save-button-body"
-                data-tip="Save snapshot"
-                data-class={styles.saveTooltip}
-              >
-                Save
-              </span>
-            </button>
-          )}
-        </div>
-        <div data-testid="info-root">
+        <div className={styles.infoRoot} data-testid="info-root">
           <div className={styles.indicatorWrap}>
             <div
               className={[
@@ -111,60 +86,82 @@ export class PodCard extends React.Component<IProperty, State> {
                 : "Unknown"}
             </span>
           </div>
-          {this.state.isOpen && (
-            <div className={styles.snapshotsArea} data-testid="snapshot-area">
-              {this.props.snapshots.length > 0 ? (
-                <ul className={styles.snapshotList}>
-                  {this.props.snapshots
-                    .sort(
-                      (a, b) =>
-                        b!.createdAt!.getTime() - a!.createdAt!.getTime()
-                    )
-                    .slice(0, 3)
-                    .map(s => (
-                      <li
-                        key={s.uuid}
-                        className={styles.snapshot}
-                        data-testid="snapshot"
-                      >
-                        <span
-                          className={styles.snapshotHash}
-                          data-tip={s.uuid}
-                          data-class={styles.snapshotHashTooltip}
-                        >
-                          {s.uuid.substr(0, 20)}
-                          ...
-                        </span>
-                        <span
-                          className={styles.snapshotDate}
-                          data-testid="snapshot-date"
-                        >
-                          {s.createdAt
-                            ? s.createdAt.toLocaleString()
-                            : "Unknown"}
-                        </span>
-                        <a
-                          className={styles.snapshotLink}
-                          href={s.link}
-                          target="_blank"
-                          rel="noopener"
-                        >
-                          Flamescope
-                        </a>
-                      </li>
-                    ))}
-                </ul>
-              ) : (
-                <div
-                  className={styles.emptySnapshots}
-                  data-testid="empty-message"
+          <div
+            className={[
+              styles.save,
+              !this.props.onSaveButtonClick ? styles.disabled : undefined
+            ].join(" ")}
+            data-testid="save"
+          >
+            {this.props.isSaving ? (
+              <div className={styles.spinner}>
+                <Spinner />
+              </div>
+            ) : (
+              <button className={styles.saveButton} data-testid="save-button">
+                <span
+                  className={styles.saveLabel}
+                  onClick={this.onSave}
+                  data-testid="save-button-body"
+                  data-tip="Save snapshot"
+                  data-class={styles.saveTooltip}
                 >
-                  No snapshots for this pod.
-                </div>
-              )}
-            </div>
-          )}
+                  Save
+                </span>
+              </button>
+            )}
+          </div>
         </div>
+        {this.state.isOpen && (
+          <div className={styles.snapshotsArea} data-testid="snapshot-area">
+            {this.props.snapshots.length > 0 ? (
+              <ul className={styles.snapshotList}>
+                {this.props.snapshots
+                  .sort(
+                    (a, b) => b!.createdAt!.getTime() - a!.createdAt!.getTime()
+                  )
+                  .slice(0, 3)
+                  .map(s => (
+                    <li
+                      key={s.uuid}
+                      className={styles.snapshot}
+                      data-testid="snapshot"
+                    >
+                      <span
+                        className={styles.snapshotHash}
+                        data-tip={s.uuid}
+                        data-class={styles.snapshotHashTooltip}
+                      >
+                        {s.uuid.substr(0, 20)}
+                        ...
+                      </span>
+                      <span
+                        className={styles.snapshotDate}
+                        data-testid="snapshot-date"
+                      >
+                        {s.createdAt ? s.createdAt.toLocaleString() : "Unknown"}
+                      </span>
+                      <a
+                        className={styles.snapshotLink}
+                        href={s.link}
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        Flamescope
+                      </a>
+                    </li>
+                  ))}
+              </ul>
+            ) : (
+              <div
+                className={styles.emptySnapshots}
+                data-testid="empty-message"
+              >
+                No snapshots for this pod.
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   }
