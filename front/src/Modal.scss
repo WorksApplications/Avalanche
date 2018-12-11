@@ -149,7 +149,7 @@
   font-weight: 700;
 
   &:hover {
-    background-color: $bg-color-flat-button-hover;
+    background-color: $bg-color-flat-button-gray-hover;
     transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
       border-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -172,7 +172,7 @@
   float: right;
 
   &:hover {
-    background-color: lighten($color-primary-light, 7%);
+    background-color: $bg-color-flat-button-primary-hover;
   }
 
   &[disabled] {

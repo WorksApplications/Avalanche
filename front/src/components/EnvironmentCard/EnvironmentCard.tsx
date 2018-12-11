@@ -61,20 +61,22 @@ export class EnvironmentCard extends React.Component<IProperty> {
             {this.props.kind === "observed" ? "Enabled" : "Disabled"}
           </a>
         )}
-        <button
-          className={styles.edit}
-          onClick={this.props.onEdit}
-          role="button"
-          data-testid="edit-button"
-        >
-          <span
-            className={styles.editLabel}
-            data-tip="Edit this environment"
-            data-class={styles.editTooltip}
+        <div className={styles.edit}>
+          <button
+            className={styles.editButton}
+            onClick={this.props.onEdit}
+            role="button"
+            data-testid="edit-button"
           >
-            Edit
-          </span>
-        </button>
+            <span
+              className={styles.editLabel}
+              data-tip="Edit this environment"
+              data-class={styles.editTooltip}
+            >
+              Edit
+            </span>
+          </button>
+        </div>
       </div>
     );
   }

@@ -55,6 +55,12 @@ public class ExampleController {
 
 }`;
 
+const javaFizzBuzzEE = `	@Override
+	public void print() {
+		throw new UnsupportedOperationException(
+				com.seriouscompany.business.java.fizzbuzz.packagenamingpackage.impl.Constants.COM_SERIOUSCOMPANY_BUSINESS_JAVA_FIZZBUZZ_PACKAGENAMINGPACKAGE_IMPL_PRINTERS_INTEGER_INTEGER_PRINTER_PRINT);
+	}`;
+
 storiesOf("CodeReport", module)
   .addDecorator(withKnobs)
   .add("Hello World", () => (
@@ -73,6 +79,18 @@ storiesOf("CodeReport", module)
         firstLine={17}
         link={
           "https://github.com/spring-projects/spring-boot/blob/master/spring-boot-samples/spring-boot-sample-webflux/src/main/java/sample/webflux/ExampleController.java"
+        }
+      />
+    </div>
+  ))
+  .add("FizzBuzzEnterpriseEdition (long line)", () => (
+    <div style={commonWrapStyle}>
+      <CodeReport
+        title={"IntegerIntegerPrinter.java"}
+        lines={javaFizzBuzzEE.split("\n").map(x => [x])}
+        firstLine={38}
+        link={
+          "https://github.com/EnterpriseQualityCoding/FizzBuzzEnterpriseEdition/blob/master/src/main/java/com/seriouscompany/business/java/fizzbuzz/packagenamingpackage/impl/printers/IntegerIntegerPrinter.java"
         }
       />
     </div>

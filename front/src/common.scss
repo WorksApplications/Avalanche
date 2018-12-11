@@ -9,6 +9,7 @@ $pods-view-width: 22vw;
 
   &::-webkit-scrollbar {
     width: $arranged-scroll-width;
+    height: $arranged-scroll-width;
   }
 
   &::-webkit-scrollbar-track {

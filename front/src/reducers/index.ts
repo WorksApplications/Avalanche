@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { connectRouter } from "connected-react-router";
 import { combineReducers } from "redux";
 import { analysisData } from "./analysisData";
 import { environmentConfig } from "./environmentConfig";
 import { toastNotification } from "./toastNotification";
 
-export default combineReducers({
-  analysisData,
-  toastNotification,
-  environmentConfig
-});
+export default (history: any) =>
+  combineReducers({
+    analysisData,
+    toastNotification,
+    environmentConfig,
+    router: connectRouter(history)
+  });

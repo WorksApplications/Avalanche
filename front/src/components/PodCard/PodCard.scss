@@ -14,6 +14,10 @@
   }
 }
 
+.infoRoot {
+  position: relative;
+}
+
 .indicatorWrap {
   float: left;
   height: 2em;
@@ -63,15 +67,26 @@
   vertical-align: bottom;
 }
 
+.save {
+  font-size: $font-size-normal;
+  position: absolute;
+  right: -$base-space;
+  bottom: -$base-space;
+
+  &.disabled {
+    color: $text-color-disabled;
+  }
+
+  &:not(.disabled) {
+    @include link-style-blue;
+  }
+}
+
 .saveTooltip {
   @include normal-tooltip();
 
   font-weight: normal !important;
   padding: $base-space !important;
-
-  &:global(.place-left) {
-    margin-left: (4px - $base-space) !important; // due to flat button
-  }
 }
 
 .saveButton {
@@ -81,27 +96,17 @@
   color: $color-primary;
   font-family: $font-family-sans-serif;
   padding: $base-space;
-  margin-top: -$base-space;
-  margin-right: -$base-space * 2;
   border-radius: $border-radius;
+  text-transform: uppercase;
+  height: $base-space * 4.5;
+
+  &:hover {
+    background-color: $bg-color-flat-button-primary-hover;
+  }
 }
 
 .saveLabel {
   padding: 0 $base-space;
-}
-
-.save {
-  float: right;
-  font-size: $font-size-normal;
-  position: relative;
-
-  &.disabled {
-    color: $text-color-disabled;
-  }
-
-  &:not(.disabled) {
-    @include link-style-blue;
-  }
 }
 
 .spinner {

@@ -49,15 +49,20 @@ export class CodeReport extends React.Component<IProperty> {
         </div>
         <div className={styles.codeView}>
           {this.props.lines.map((l, i) => {
-            const line = l
-              .map(x => (typeof x === "string" ? x : x.fragment))
-              .join(" ");
             return (
               <React.Fragment key={this.props.title + i}>
                 <pre className={styles.lineNumber}>
                   {this.props.firstLine! + i}
                 </pre>
-                <pre className={styles.codeLine}>{line}</pre>
+                <pre className={styles.codeLine}>
+                  {l.map(e => {
+                    if (typeof e === "string") {
+                      return <span>{e}</span>;
+                    } else {
+                      return <span>{e.fragment}</span>;
+                    }
+                  })}
+                </pre>
               </React.Fragment>
             );
           })}

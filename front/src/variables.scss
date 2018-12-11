@@ -99,7 +99,8 @@ $link-color-blue-hover: lighten($link-color-blue, 20%);
 
 $bg-color-list-hover: $bg-color-gray-3;
 $bg-color-list-active: $bg-color-gray-5;
-$bg-color-flat-button-hover: $bg-color-gray-2;
+$bg-color-flat-button-primary-hover: lighten($color-primary-light, 7%);
+$bg-color-flat-button-gray-hover: $bg-color-gray-2;
 
 // from MDL
 $color-material-red: rgb(244, 67, 54);

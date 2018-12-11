@@ -27,7 +27,7 @@ import {
 import EnvironmentCardList from "../components/EnvironmentCardList";
 import EnvironmentConfigAddModal from "../components/EnvironmentConfigAddModal";
 import EnvironmentConfigModifyModal from "../components/EnvironmentConfigModifyModal";
-import FabButton from "../components/FabButton";
+import Fab from "../components/Fab";
 import FilterInput from "../components/FilterInput";
 import { operationsToActionCreators } from "../helpers";
 import modalStyles from "../Modal.scss";
@@ -142,7 +142,7 @@ export class ConfigPage extends React.Component<Props, State> {
           />
         </div>
 
-        <FabButton
+        <Fab
           tooltip="Add environment"
           onClick={this.addEnvironment}
           icon="add"
