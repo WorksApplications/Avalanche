@@ -1,9 +1,7 @@
 {
-  "name": "dynamic-analysis-front",
+  "name": "avalanche-front",
   "version": "0.1.0",
-  "description": "DYNAMIC analysis frontend implementation.",
-  "repository": "https://git.paas.workslan/resource_optimation/dynamic_analysis",
-  "author": "Takahiro Okada <okada_tak@worksap.co.jp>",
+  "description": "Snapshots view and management console for Avalanche.",
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
