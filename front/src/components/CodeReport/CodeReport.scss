@@ -4,6 +4,9 @@
   background-color: white;
   padding: $base-space;
   border: 1px solid $border-color-light;
+  overflow-x: auto;
+
+  @include narrow-scrollbar();
 }
 
 .header {
