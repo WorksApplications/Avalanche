@@ -262,6 +262,7 @@ export class SnapshotItem extends React.Component<IItemProperty, ItemState> {
             title={targetElement.label}
             lines={targetElement.code}
             firstLine={targetElement.firstLine}
+            link={targetElement.snippetLink}
           />
         </div>
       </React.Suspense>

@@ -44,6 +44,7 @@ export interface IPerfCallTreeElementData {
   totalRatio: number;
   hasCode: boolean;
   firstLine?: number;
+  snippetLink?: string;
   code: Array<Array<string | { fragment: string }>>;
 }
 

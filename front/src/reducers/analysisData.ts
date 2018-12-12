@@ -135,6 +135,7 @@ export function convertPerfCallTree(tree: IPerfCallTree): IPerfCallTreeData {
       totalRatio: node.totalRatio,
       hasCode,
       firstLine: hasCode ? node.firstLine! : undefined,
+      snippetLink: hasCode ? node.snippetLink! : undefined,
       code: convertCode(node.code),
       childIds: []
     };

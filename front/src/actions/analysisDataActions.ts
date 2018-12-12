@@ -81,6 +81,7 @@ export interface IPerfCallTree {
   immediateRatio: number;
   code: Array<{ snippet: string }>;
   firstLine?: number;
+  snippetLink?: string;
   children: IPerfCallTree[];
 }
 
@@ -103,6 +104,7 @@ function perfCallTreeConvert(report: Report): IPerfCallTree {
     immediateRatio: report.immediate_ratio!,
     code: convertCode(report.code),
     firstLine: report.line_start_at,
+    snippetLink: report.primary_link,
     children: report.children ? report.children.map(perfCallTreeConvert) : []
   };
 }
