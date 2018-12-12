@@ -29,8 +29,8 @@ module.exports = env => {
   const isProduction = env && env.production;
   const collectApiBase =
     (env && env.COLLECT_API_BASE) || process.env.COLLECT_API_BASE || "/api";
-  const suspectApiBase =
-    (env && env.SUSPECT_API_BASE) || process.env.SUSPECT_API_BASE || "/api";
+  const blameApiBase =
+    (env && env.BLAME_API_BASE) || process.env.BLAME_API_BASE || "/api";
   const flamescopeBase =
     (env && env.FLAMESCOPE_API_BASE) ||
     process.env.FLAMESCOPE_API_BASE ||
@@ -112,7 +112,7 @@ module.exports = env => {
       }),
       new DefinePlugin({
         COLLECT_API_BASE: JSON.stringify(collectApiBase),
-        SUSPECT_API_BASE: JSON.stringify(suspectApiBase),
+        BLAME_API_BASE: JSON.stringify(blameApiBase),
         FLAMESCOPE_API_BASE: JSON.stringify(flamescopeBase),
         APP_NAME: `"🏔️ Avalanche"`,
         "process.env.NODE_ENV": isProduction

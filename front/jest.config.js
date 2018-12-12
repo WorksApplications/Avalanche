@@ -41,7 +41,7 @@ module.exports = {
   globals: {
     COLLECT_API_BASE: "[collect]",
     FLAMESCOPE_API_BASE: "[flamescope]",
-    SUSPECT_API_BASE: "[suspect]",
+    BLAME_API_BASE: "[blame]",
     APP_NAME: "[Avalanche]"
   }
 };

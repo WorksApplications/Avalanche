@@ -16,18 +16,18 @@
 import actionCreatorFactory from "typescript-fsa";
 import { asyncFactory } from "typescript-fsa-redux-thunk";
 import heatMapClient, { IHeatMap } from "../clients/heatMapClient";
-import { COLLECT_API_BASE, SUSPECT_API_BASE } from "../constants";
+import { BLAME_API_BASE, COLLECT_API_BASE } from "../constants";
+import {
+  Code,
+  DefaultApiFactory as blameApiFactory,
+  Report
+} from "../generated/blame/api";
 import {
   DefaultApiFactory as collectApiFactory,
   Environment,
   Pod,
   Snapshot
 } from "../generated/collect/api";
-import {
-  Code,
-  DefaultApiFactory as suspectApiFactory,
-  Report
-} from "../generated/suspect/api";
 import { IEnvironmentInfo, IPodInfo, ISnapshotInfo } from "../store";
 
 const actionCreator = actionCreatorFactory();
@@ -35,7 +35,7 @@ const asyncActionCreator = asyncFactory(actionCreator);
 
 const collectClient = collectApiFactory({}, undefined, COLLECT_API_BASE);
 
-const suspectClient = suspectApiFactory({}, undefined, SUSPECT_API_BASE);
+const blameClient = blameApiFactory({}, undefined, BLAME_API_BASE);
 
 function environmentInfoConvert(env: Environment): IEnvironmentInfo {
   return {
@@ -100,7 +100,7 @@ function perfCallTreeConvert(report: Report): IPerfCallTree {
   return {
     name: report.name!,
     totalRatio: report.total_ratio!,
-    immediateRatio: report.immidiate_ratio!,
+    immediateRatio: report.immediate_ratio!,
     code: convertCode(report.code),
     firstLine: report.line_start_at,
     children: report.children ? report.children.map(perfCallTreeConvert) : []
@@ -178,7 +178,7 @@ export const getPerfCallTreeOperation = asyncActionCreator<
   { snapshotId: string; startPosition: number; endPosition: number },
   { tree: IPerfCallTree }
 >("GET_PERF_CALL_TREE", ({ snapshotId, startPosition, endPosition }) =>
-  suspectClient
+  blameClient
     .reportsUuidGet(snapshotId, startPosition, endPosition)
     .then(result => {
       return { tree: perfCallTreeConvert(result) };

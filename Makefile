@@ -37,7 +37,7 @@ swagger-client-gen:
 
 swagger-mock-gen:
 	java -jar ./swagger-codegen-cli.jar generate -i ./api/collect.yml -l nodejs-server -o ./front/mock/collect
-	java -jar ./swagger-codegen-cli.jar generate -i ./api/blame.yml -l nodejs-server -o ./front/mock/suspect
+	java -jar ./swagger-codegen-cli.jar generate -i ./api/blame.yml -l nodejs-server -o ./front/mock/blame
 
 front/public/app.js:
 	cd front && yarn build

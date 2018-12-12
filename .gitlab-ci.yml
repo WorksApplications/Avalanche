@@ -41,7 +41,7 @@ front-build:
         - yarn install
         - yarn test
         - yarn lint
-        - PATH=$PATH:$(pwd)/node_modules/.bin yarn build --env.COLLECT_API_BASE=${COLLECT_API_BASE} --env.SUSPECT_API_BASE=${SUSPECT_API_BASE} --env.FLAMESCOPE_API_BASE=${FLAMESCOPE_API_BASE}
+        - PATH=$PATH:$(pwd)/node_modules/.bin yarn build --env.COLLECT_API_BASE=${COLLECT_API_BASE} --env.BLAME_API_BASE=${BLAME_API_BASE} --env.FLAMESCOPE_API_BASE=${FLAMESCOPE_API_BASE}
     cache:
         key: react
         paths:
@@ -52,7 +52,7 @@ front-build:
         expire_in: 1 hour
     variables:
         COLLECT_API_BASE: "/api"
-        SUSPECT_API_BASE: "/api"
+        BLAME_API_BASE: "/api"
         FLAMESCOPE_API_BASE: "http://flamescope.internal.worksap.com"
 
 push-images:

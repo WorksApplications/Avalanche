@@ -45,7 +45,7 @@ module.exports = (baseConfig, env, config) => {
     // constants for demo
     new DefinePlugin({
       COLLECT_API_BASE: JSON.stringify("/#/collect/"),
-      SUSPECT_API_BASE: JSON.stringify("/#/suspect/"),
+      BLAME_API_BASE: JSON.stringify("/#/blame/"),
       FLAMESCOPE_API_BASE: JSON.stringify("/#/flamescope/"),
       APP_NAME: `"Avalanche"`
     })
