@@ -28,6 +28,7 @@ import (
 type Report struct {
 	Name   string  `json:"name"`
 	RefUrl string  `json:"search_url"`
+	Link   string  `json:"primary_link"`
 	Line   int     `json:"line_start_at"`
 	Label  string  `json:"label"`
 	Total  float64 `json:"total_ratio"`
@@ -159,9 +160,13 @@ func (s *Stack) toReport(api codesearch.Search, rootVal float64, depth int) Repo
 
 	close(ch)
 
+	/* XXX: choose primary link in more reasonable way */
+	link := res.Code[0].Link
+
 	node := Report{
 		Name:     s.Name,
 		RefUrl:   res.Ref,
+		Link:     link,
 		Code:     res.Code,
 		Line:     res.Line,
 		Total:    float64(s.Value) / rootVal,

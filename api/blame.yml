@@ -28,6 +28,8 @@ definitions:
         type: string
       search_url:
         type: string
+      primary_link:
+        type: string
       line_start_at:
         type: integer
       total_ratio:
