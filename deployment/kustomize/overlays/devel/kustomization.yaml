@@ -1,5 +1,5 @@
 bases:
   - ../../base
 patchesStrategicMerge:
-  - deployment.yaml
+  - generated.yaml
 namespace: default

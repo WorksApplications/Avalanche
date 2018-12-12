@@ -7,7 +7,7 @@ spec:
     spec:
       containers:
       - name: scanner
-        image: ${DOCKERREG}/scanner:${GIT_HASH}
+        image: ${DOCKERREG}/scanner
         command:
           - /scanner
           - -logLocation=$INTERNAL_LOG_LOCATION
@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: collect
-        image: ${DOCKERREG}/collect:${GIT_HASH}
+        image: ${DOCKERREG}/collect
         command:
           - /collect
           - -port=8080
@@ -46,7 +46,6 @@ spec:
     spec:
       containers:
       - name: blame
-        image: ${DOCKERREG}/blame:${GIT_HASH}
         command:
           - /blame
           - -searchUrl=$INTERNAL_SEARCH_SERVER
@@ -65,7 +64,7 @@ spec:
     spec:
       containers:
       - name: enroll
-        image: ${DOCKERREG}/enroll:${GIT_HASH}
+        image: ${DOCKERREG}/enroll
 
 ---
 
@@ -78,4 +77,14 @@ spec:
     spec:
       containers:
       - name: static
-        image: ${DOCKERREG}/static:${GIT_HASH}
+        image: ${DOCKERREG}/static
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+spec:
+  type: ExternalName
+  externalName: db.example.com

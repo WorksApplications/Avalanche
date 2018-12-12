@@ -147,6 +147,7 @@ func (s *Stack) toReport(api codesearch.Search, rootVal float64, depth int) Repo
 	/* Brand new channel with cap=1. The search-runner can handle another request before this function receives from it,
 	 * which prevent from dead-lock */
 	ch := make(chan codesearch.Result, 1)
+	defer close(ch)
 
 	/* search request. The result will be received after spawning children's reporting. */
 	api.RunReq <- codesearch.Request{t[0:1], t[1:], eng, ch}
@@ -157,8 +158,6 @@ func (s *Stack) toReport(api codesearch.Search, rootVal float64, depth int) Repo
 		v += c.Value
 	}
 	res = <-ch
-
-	close(ch)
 
 	/* XXX: choose primary link in more reasonable way */
 	link := res.Code[0].Link

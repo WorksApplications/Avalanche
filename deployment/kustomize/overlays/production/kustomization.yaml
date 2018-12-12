@@ -3,5 +3,5 @@ bases:
 resources:
   - namespaces.yaml
 patchesStrategicMerge:
-  - deployment.yaml
+  - generated.yaml
 namespace: production

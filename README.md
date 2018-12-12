@@ -14,7 +14,7 @@ Avalanche is a new open-source set of service & tool to manage, examine and visu
 
 ## How it works
 
-### Setup briefing
+### Brief summary
 
 1. Transform your application's container image to "perf-enabled" image and "extractor" image with `provide` tool in this repository
 1. Deploy "perf-enabled" image on your environment
@@ -26,27 +26,27 @@ Avalanche is a new open-source set of service & tool to manage, examine and visu
 Hence we have started to develop this tool for internal use, the target environment (application environment) has several prerequisite.
 Additionally, this tool must be deployed with several runtime dependencies (eg. MySQL).
 
-### Build
+### Build dependencies
 
 - go
 - java
-- swagger
-- yarn
+- yarn (and node, webpack)
+- wget (or fetch, curl...etc)
 
-### Target
+### Target dependencies
 
 - containered apps - This tool requires a container for generating performance observation images.
 - log server - The log server exposes applications' log directories; currently, we supports nginx or local disk.
 
 ### Runtime dependencies
 - [flamescope](https://github.com/Netflix/flamescope)
-- MySQL
+- MySQL (or MariaDB. Our team uses Maria actually)
 - storage - We store some data in a disk; if you run this server in kubernetes, you have to provide persistentVolume.
 - code search engine - a search engine for your repository must be provided to suggest a bottleneck code.
 - kubernetes - This tool is built for kubernetes-hosted apps and most of our terminology in both aspect of API and example follows kubernetes naming.
 - kustomize - Not only target is assumed to be hosted in kubernetes, our service itself can be hosted in kubernetes. We provide kustomize template.
 
-## Components
+## Included Components
 
 - extractor: Create a image to retrieve and convert `perf` output
 - collect: Create, keep and manage all _snapshot_s extracted from perf logs
@@ -57,10 +57,37 @@ Additionally, this tool must be deployed with several runtime dependencies (eg. 
 ## Build binary
 
 ```
-make
+% wget http://central.maven.org/maven2/io/swagger/swagger-codegen-cli/2.4.0/swagger-codegen-2.4.0.jar -O swagger-codegen-cli.jar
+% make dep
+% export API_BASE_URL=http://avalanche.your.network/api
+% make
 ```
 
 ## Deploy
+
+### Common preparation
+
+1. Set up your MySQL server. Note that `collect` has an option `--init` to instruct it to initialize your database.
+1. Deploy `flamescope` to your analysis server.
+
+### To kubernetes
+
+1. Edit (by your editor or `envsubst`) deployment/kustomize/template/template.yaml to make it matches with your configuration.
+1. Place it on deployment/kustomize/.../.
+1. Run `kustomize` to generate kubernetes configuration and feed it to `kubectl`. Note that `flamescope` isn't included in the default configuration.
+
+```
+% export DB_CRED_USER=duke
+% export DB_CRED_PASS=duke's!password
+% export :
+% export :
+% export : # see the file
+% envsubst < deployment/kustomize/template/template.yaml > deployment/kustomize/overlays/devel/generated.yml
+% kustomize build deployment/kustomize/overlays/devel | kubectl apply -f -
+
+```
+
+### To docker-compose
 
 ## Trivia
 
