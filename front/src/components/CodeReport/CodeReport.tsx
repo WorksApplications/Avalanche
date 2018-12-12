@@ -42,7 +42,7 @@ export class CodeReport extends React.Component<IProperty> {
                 target="_blank"
                 rel="noopener"
               >
-                Code
+                Link
               </a>
             </>
           )}
