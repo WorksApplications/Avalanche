@@ -4,15 +4,15 @@ Avalanche is a new open-source set of service & tool to manage, examine and visu
 
 To grasp looks & usage, see our wiki page: [About Avalanche view](https://github.com/WorksApplications/Avalanche/wiki/About-Avalanche-view).
 
+![eye catch](asset/top.png)
+
 ## Concept
 
 1. Applications emit pre-recorded performance logs using `perf-tools`.
 1. Take log snapshot on-demand (eg. on incident response).
 1. Explore the performance snapshots and find bottlenecks.
 
-![]
-
-![system concept image](./avalanche-scheme.png)
+![system concept image](asset/avalanche-scheme.png)
 
 ## How it works
 
