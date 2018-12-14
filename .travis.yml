@@ -1,0 +1,13 @@
+matrix:
+  include:
+    - language: node_js
+      node_js: "lts/*"
+      cache: yarn
+      before_script:
+        - # download swagger-codegen jar
+        - # java swagger-codegen with make command
+        - cd front
+      script:
+        - yarn test
+        - yarn lint
+        - yarn build # only for check and not for deploy
