@@ -7,8 +7,9 @@ matrix:
           - $HOME/.cache/go-build
           - $HOME/gopath/pkg/mod
       before_script:
-        - curl -sS https://github.com/go-swagger/go-swagger/releases/download/v0.17.2/swagger_linux_amd64 -L > /usr/local/bin/swagger
-        - chmod +x /usr/local/bin/swagger
+        - curl -sS https://github.com/go-swagger/go-swagger/releases/download/v0.17.2/swagger_linux_amd64 -L > ./go-swagger/bin/swagger
+        - chmod +x ./go-swagger/bin/swagger
+        - export PATH=$PATH:$PWD/go-swagger/bin/
         - make swagger
       script:
         - make dep
