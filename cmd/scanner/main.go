@@ -24,8 +24,8 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/log-scanner"
+	"github.com/WorksApplications/Avalanche/pkg/environment"
+	"github.com/WorksApplications/Avalanche/pkg/log-scanner"
 )
 
 type Request int

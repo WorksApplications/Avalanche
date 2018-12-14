@@ -22,7 +22,7 @@ import (
 	"sort"
 	"strings"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/codesearch"
+	"github.com/WorksApplications/Avalanche/pkg/codesearch"
 )
 
 type Report struct {

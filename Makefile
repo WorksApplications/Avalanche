@@ -1,7 +1,7 @@
 PKG = $(shell find pkg -name *.go)
 
 
-.PHONY: default clean fmt make_stub dep swagger backend front test
+.PHONY: default clean fmt make_stub dep swagger backend front test openapi-client-gen
 
 default: all
 
@@ -31,13 +31,13 @@ generated_files/stub: api/collect.yml
 	swagger generate server -f api/collect.yml -t generated_files -A collect
 	touch generated_files/stub
 
-swagger-client-gen:
-	java -jar ./swagger-codegen-cli.jar generate -i ./api/collect.yml -l typescript-fetch -o ./front/src/generated/collect -D modelPropertyNaming=original
-	java -jar ./swagger-codegen-cli.jar generate -i ./api/blame.yml -l typescript-fetch -o ./front/src/generated/blame -D modelPropertyNaming=original
+openapi-client-gen:
+	java -jar ./openapi-generator-cli.jar generate -i ./api/collect.yml -g typescript-fetch -o ./front/src/generated/collect -D modelPropertyNaming=original
+	java -jar ./openapi-generator-cli.jar generate -i ./api/blame.yml -g typescript-fetch -o ./front/src/generated/blame -D modelPropertyNaming=original
 
-swagger-mock-gen:
-	java -jar ./swagger-codegen-cli.jar generate -i ./api/collect.yml -l nodejs-server -o ./front/mock/collect
-	java -jar ./swagger-codegen-cli.jar generate -i ./api/blame.yml -l nodejs-server -o ./front/mock/blame
+openapi-mock-gen:
+	java -jar ./openapi-generator-cli.jar generate -i ./api/collect.yml -g nodejs-server -o ./front/mock/collect
+	java -jar ./openapi-generator-cli.jar generate -i ./api/blame.yml -g nodejs-server -o ./front/mock/blame
 
 front/public/app.js:
 	cd front && yarn build

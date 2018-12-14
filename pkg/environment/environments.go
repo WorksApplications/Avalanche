@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"log"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/layout"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/pod"
+	"github.com/WorksApplications/Avalanche/generated_files/models"
+	"github.com/WorksApplications/Avalanche/pkg/layout"
+	"github.com/WorksApplications/Avalanche/pkg/pod"
 )
 
 /* +--+----+---------------------------+

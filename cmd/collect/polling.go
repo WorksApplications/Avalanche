@@ -22,15 +22,15 @@ import (
 	"net/http"
 	"time"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
+	"github.com/WorksApplications/Avalanche/generated_files/models"
 
 	"database/sql"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/app"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/layout"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/pod"
+	"github.com/WorksApplications/Avalanche/pkg/app"
+	"github.com/WorksApplications/Avalanche/pkg/environment"
+	"github.com/WorksApplications/Avalanche/pkg/layout"
+	"github.com/WorksApplications/Avalanche/pkg/pod"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/log-scanner"
+	"github.com/WorksApplications/Avalanche/pkg/log-scanner"
 	_ "github.com/go-sql-driver/mysql"
 )
 
