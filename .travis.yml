@@ -7,6 +7,7 @@ matrix:
         - # download swagger-codegen jar
         - # java swagger-codegen with make command
         - cd front
+        - yarn install
       script:
         - yarn test
         - yarn lint
