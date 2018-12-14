@@ -4,8 +4,8 @@ matrix:
       node_js: "lts/*"
       cache: yarn
       before_script:
-        - # download swagger-codegen jar
-        - # java swagger-codegen with make command
+        - java -jar ./openapi-generator-cli.jar generate -i ./api/collect.yml -g typescript-fetch -o ./front/src/generated/collect -D modelPropertyNaming=original
+        - make openapi-client-gen
         - cd front
         - yarn install
       script:
