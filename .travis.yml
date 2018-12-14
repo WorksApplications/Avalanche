@@ -1,5 +1,14 @@
 matrix:
   include:
+    - language: go
+      go: "1.x"
+      before_script:
+        - curl -sS https://github.com/go-swagger/go-swagger/releases/download/v0.17.2/swagger_linux_amd64 -L > /go/bin/swagger
+        - chmod +x /go/bin/swagger
+        - make swagger
+      script:
+        - make dep
+        - make backend
     - language: node_js
       node_js: "lts/*"
       cache: yarn
