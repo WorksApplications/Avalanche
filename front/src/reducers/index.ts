@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 import { connectRouter } from "connected-react-router";
-import { combineReducers } from "redux";
+import { combineReducers, Reducer } from "redux";
+import { IApplicationState } from "../store";
 import { analysisData } from "./analysisData";
 import { environmentConfig } from "./environmentConfig";
 import { toastNotification } from "./toastNotification";
 
 export default (history: any) =>
+  // tslint:disable-next-line:no-object-literal-type-assertion
   combineReducers({
     analysisData,
     toastNotification,
     environmentConfig,
     router: connectRouter(history)
-  });
+  } as { [P in keyof IApplicationState]: Reducer<IApplicationState[P]> });
