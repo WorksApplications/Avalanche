@@ -2,6 +2,10 @@ matrix:
   include:
     - language: go
       go: "1.x"
+      cache:
+        directories:
+          - $HOME/.cache/go-build
+          - $HOME/gopath/pkg/mod
       before_script:
         - curl -sS https://github.com/go-swagger/go-swagger/releases/download/v0.17.2/swagger_linux_amd64 -L > /usr/local/bin
         - chmod +x /usr/local/bin/swagger
