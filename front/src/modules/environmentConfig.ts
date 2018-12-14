@@ -43,7 +43,7 @@ const asyncActionCreator = asyncFactory(actionCreator);
 
 const collectClient = collectApiFactory({}, undefined, COLLECT_API_BASE);
 
-function environmentConfigConvert(
+function convertEnvironmentConfig(
   config: EnvironmentConfig
 ): IEnvironmentConfig {
   return {
@@ -63,12 +63,9 @@ export const getEnvironmentConfigsOperation = asyncActionCreator<
 >("GET_ENVIRONMENT_CONFIGS", () =>
   collectClient
     .listEnvironmentConfig()
-    .then((configResults: EnvironmentConfig[]) => {
-      const configs = configResults.map(config =>
-        environmentConfigConvert(config)
-      );
-      return { configs };
-    })
+    .then((configResults: EnvironmentConfig[]) => ({
+      configs: configResults.map(config => convertEnvironmentConfig(config))
+    }))
 );
 
 export const postEnvironmentConfigOperation = asyncActionCreator<
@@ -97,10 +94,9 @@ export const postEnvironmentConfigOperation = asyncActionCreator<
           } // This is due to "typescript-fetch")
         }
       )
-      .then((configResult: EnvironmentConfig) => {
-        const config = environmentConfigConvert(configResult);
-        return { config };
-      })
+      .then((configResult: EnvironmentConfig) => ({
+        config: convertEnvironmentConfig(configResult)
+      }))
 );
 
 export const addEnvironmentConfigOperation = asyncActionCreator<
@@ -128,10 +124,9 @@ export const addEnvironmentConfigOperation = asyncActionCreator<
           } // This is due to "typescript-fetch")
         }
       )
-      .then((newConfig: EnvironmentConfig) => {
-        const config = environmentConfigConvert(newConfig);
-        return { config };
-      })
+      .then((newConfig: EnvironmentConfig) => ({
+        config: convertEnvironmentConfig(newConfig)
+      }))
 );
 
 export function reducer(state: IState = INIT, action: Action): IState {

@@ -129,16 +129,16 @@ const collectClient = collectApiFactory({}, undefined, COLLECT_API_BASE);
 
 const blameClient = blameApiFactory({}, undefined, BLAME_API_BASE);
 
-function environmentInfoConvert(env: Environment): IEnvironmentInfo {
+function convertEnvironmentInfo(env: Environment): IEnvironmentInfo {
   return {
     id: env.id,
     name: env.name,
-    pods: (env.pods || []).map<IPodInfo>(p => podInfoConvert(p)),
+    pods: (env.pods || []).map<IPodInfo>(p => convertPodInfo(p)),
     liveCount: env.liveCount
   };
 }
 
-function podInfoConvert(pod: Pod): IPodInfo {
+function convertPodInfo(pod: Pod): IPodInfo {
   const created = new Date(pod.createdAt ? pod.createdAt : 0);
   return {
     id: pod.id,
@@ -147,11 +147,11 @@ function podInfoConvert(pod: Pod): IPodInfo {
     createdAt: created,
     app: pod.app,
     env: pod.environment,
-    snapshots: (pod.snapshots || []).map(s => snapshotInfoConvert(s))
+    snapshots: (pod.snapshots || []).map(s => convertSnapshotInfo(s))
   };
 }
 
-function snapshotInfoConvert(snapshot: Snapshot): ISnapshotInfo {
+function convertSnapshotInfo(snapshot: Snapshot): ISnapshotInfo {
   const created = new Date(snapshot.createdAt ? snapshot.createdAt : 0);
   const tokens = snapshot.flamescopeLink!.split("/");
   const heatMapId = tokens[tokens.length - 1];
@@ -166,118 +166,6 @@ function snapshotInfoConvert(snapshot: Snapshot): ISnapshotInfo {
     heatMapId
   };
 }
-
-export interface IPerfCallTree {
-  name: string;
-  totalRatio: number;
-  immediateRatio: number;
-  code: Array<{ snippet: string }>;
-  firstLine?: number;
-  snippetLink?: string;
-  children: IPerfCallTree[];
-}
-
-function convertCode1(code?: Code[]): Array<{ snippet: string }> {
-  if (typeof code === "undefined") {
-    return [];
-  }
-
-  return code
-    .filter(x => typeof x.snippet !== "undefined")
-    .map(x => ({
-      snippet: x.snippet!
-    }));
-}
-
-function perfCallTreeConvert(report: Report): IPerfCallTree {
-  return {
-    name: report.name!,
-    totalRatio: report.total_ratio!,
-    immediateRatio: report.immediate_ratio!,
-    code: convertCode1(report.code),
-    firstLine: report.line_start_at,
-    snippetLink: report.primary_link,
-    children: report.children ? report.children.map(perfCallTreeConvert) : []
-  };
-}
-
-export const getAppsOperation = asyncActionCreator<{}, { apps: string[] }>(
-  "GET_APPS",
-  () =>
-    collectClient.getApps().then((apps: string[]) => {
-      return { apps };
-    })
-);
-
-export const getEnvironmentsOfAppOperation = asyncActionCreator<
-  { app: string },
-  { envs: IEnvironmentInfo[] }
->("GET_ENVS_OF_APP", ({ app }) =>
-  collectClient.getEnvironments(app).then((envResults: Environment[]) => {
-    const envs = envResults.map(env => environmentInfoConvert(env));
-    return { envs };
-  })
-);
-
-export const getRunningPodsOperation = asyncActionCreator<
-  {},
-  { pods: IPodInfo[] }
->("GET_RUNNING_PODS", () =>
-  collectClient.listAvailablePods().then((podResults: Pod[]) => {
-    const pods = podResults.map(pod => podInfoConvert(pod));
-    return { pods };
-  })
-);
-
-export const postSnapshotOperation = asyncActionCreator<
-  {
-    appId: string;
-    environment: string;
-    podId: string;
-  },
-  { newSnapshot: ISnapshotInfo }
->("POST_NEW_SNAPSHOT", ({ appId, environment, podId }) =>
-  collectClient
-    .newSnapshot(appId, environment, podId, {
-      headers: {
-        "Content-Type": "application/json"
-      } // This is due to "typescript-fetch"
-    })
-    .then((snapshot: Snapshot) => {
-      const newSnapshot = snapshotInfoConvert(snapshot);
-      return { newSnapshot };
-    })
-);
-
-export const getLatestSnapshotsOperation = asyncActionCreator<
-  { count: number },
-  { snapshots: ISnapshotInfo[] }
->("GET_LATEST_SNAPSHOTS", ({ count }) =>
-  collectClient.listSnapshots("date", count).then(snapshotResults => {
-    const snapshots = snapshotResults.map(s => snapshotInfoConvert(s));
-    return { snapshots };
-  })
-);
-
-export const getHeatMapOperation = asyncActionCreator<
-  { snapshotId: string; heatMapId: string },
-  { heatMap: IHeatMap }
->("GET_HEAT_MAP", ({ heatMapId }) =>
-  heatMapClient(heatMapId).then(result => {
-    return { heatMap: result };
-  })
-);
-
-export const getPerfCallTreeOperation = asyncActionCreator<
-  { snapshotId: string; startPosition: number; endPosition: number },
-  { tree: IPerfCallTree }
->("GET_PERF_CALL_TREE", ({ snapshotId, startPosition, endPosition }) =>
-  blameClient
-    .reportsUuidGet(snapshotId, startPosition, endPosition)
-    .then(result => {
-      return { tree: perfCallTreeConvert(result) };
-    })
-);
 
 export function convertHeatMap(
   heatMap: IHeatMap,
@@ -316,13 +204,20 @@ export function convertHeatMap(
 }
 
 export function convertCode(
-  code: Array<{ snippet: string }>
+  code?: Code[]
 ): Array<Array<string | { fragment: string }>> {
+  if (typeof code === "undefined") {
+    return [];
+  }
+
   // chunks to lines with chunks
   const result: Array<Array<{ fragment: string }>> = [];
   let current: Array<{ fragment: string }> = [];
   for (const x of code) {
-    const lines = x.snippet.split("\n");
+    if (typeof x.snippet === "undefined") {
+      continue;
+    }
+    const lines = x.snippet!.split("\n");
     const first = lines.shift()!;
     current.push({ fragment: first });
     if (lines.length === 0) {
@@ -342,42 +237,116 @@ export function convertCode(
   return result;
 }
 
-export function convertPerfCallTree(tree: IPerfCallTree): IPerfCallTreeData {
+export function convertPerfCallTree(report: Report): IPerfCallTreeData {
   const array: IPerfCallTreeData = [];
   let counter = 0;
 
   function convert_(
-    node: IPerfCallTree,
+    node: Report,
     parentTotalRatio: number,
     parentId?: number
   ): number {
     const id = counter;
-    const hasCode = node.code.length > 0;
+    const hasCode = node.code!.length > 0;
+    const totalRatio = node.total_ratio!;
     const body: IPerfCallTreeElementData = {
       id,
       parentId,
-      label: node.name,
-      relativeRatio: node.totalRatio / parentTotalRatio,
-      immediateRatio: node.immediateRatio,
-      totalRatio: node.totalRatio,
+      label: node.name!,
+      relativeRatio: totalRatio! / parentTotalRatio,
+      immediateRatio: node.immediate_ratio!,
+      totalRatio,
       hasCode,
-      firstLine: hasCode ? node.firstLine! : undefined,
-      snippetLink: hasCode ? node.snippetLink! : undefined,
-      code: convertCode(node.code),
+      firstLine: hasCode ? node.line_start_at! : undefined,
+      snippetLink: hasCode ? node.primary_link! : undefined,
+      code: convertCode(node.code!),
       childIds: []
     };
     array.push(body);
     counter++;
-    for (const t of node.children) {
-      const childId = convert_(t, node.totalRatio, id);
+    const children = node.children || [];
+    for (const t of children) {
+      const childId = convert_(t, totalRatio, id);
       body.childIds.push(childId);
     }
     return id;
   }
 
-  convert_(tree, 1.0);
+  convert_(report, 1.0);
   return array;
 }
+
+export const getAppsOperation = asyncActionCreator<{}, { apps: string[] }>(
+  "GET_APPS",
+  () =>
+    collectClient.getApps().then((apps: string[]) => {
+      return { apps };
+    })
+);
+
+export const getEnvironmentsOfAppOperation = asyncActionCreator<
+  { app: string },
+  { envs: IEnvironmentInfo[] }
+>("GET_ENVS_OF_APP", ({ app }) =>
+  collectClient.getEnvironments(app).then((envResults: Environment[]) => {
+    const envs = envResults.map(env => convertEnvironmentInfo(env));
+    return { envs };
+  })
+);
+
+export const getRunningPodsOperation = asyncActionCreator<
+  {},
+  { pods: IPodInfo[] }
+>("GET_RUNNING_PODS", () =>
+  collectClient.listAvailablePods().then((podResults: Pod[]) => {
+    const pods = podResults.map(pod => convertPodInfo(pod));
+    return { pods };
+  })
+);
+
+export const postSnapshotOperation = asyncActionCreator<
+  {
+    appId: string;
+    environment: string;
+    podId: string;
+  },
+  { newSnapshot: ISnapshotInfo }
+>("POST_NEW_SNAPSHOT", ({ appId, environment, podId }) =>
+  collectClient
+    .newSnapshot(appId, environment, podId, {
+      headers: {
+        "Content-Type": "application/json"
+      } // This is due to "typescript-fetch"
+    })
+    .then((snapshot: Snapshot) => ({
+      newSnapshot: convertSnapshotInfo(snapshot)
+    }))
+);
+
+export const getLatestSnapshotsOperation = asyncActionCreator<
+  { count: number },
+  { snapshots: ISnapshotInfo[] }
+>("GET_LATEST_SNAPSHOTS", ({ count }) =>
+  collectClient.listSnapshots("date", count).then(snapshotResults => ({
+    snapshots: snapshotResults.map(s => convertSnapshotInfo(s))
+  }))
+);
+
+export const getHeatMapOperation = asyncActionCreator<
+  { snapshotId: string; heatMapId: string },
+  { heatMap: IHeatMap }
+>("GET_HEAT_MAP", ({ heatMapId }) =>
+  heatMapClient(heatMapId).then(result => ({ heatMap: result }))
+);
+
+export const getPerfCallTreeOperation = asyncActionCreator<
+  { snapshotId: string; startPosition: number; endPosition: number },
+  { tree: IPerfCallTreeData }
+>("GET_PERF_CALL_TREE", ({ snapshotId, startPosition, endPosition }) =>
+  blameClient
+    .reportsUuidGet(snapshotId, startPosition, endPosition)
+    .then(result => ({ tree: convertPerfCallTree(result) }))
+);
 
 function sortApplications(applications: string[]): string[] {
   return applications.sort();
@@ -631,13 +600,11 @@ export function reducer(state: IState = INIT, action: Action): IState {
     return { ...state, perfCallTrees: newTrees };
   }
   if (isType(action, getPerfCallTreeOperation.async.done)) {
-    const perfCallTree = action.payload.result.tree;
-
     const key = action.payload.params.snapshotId;
     const newTrees = new Map(state.perfCallTrees);
     newTrees.set(key, {
       status: "loaded",
-      data: convertPerfCallTree(perfCallTree)
+      data: action.payload.result.tree
     });
     return { ...state, perfCallTrees: newTrees };
   }
