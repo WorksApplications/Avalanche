@@ -20,8 +20,8 @@ import (
 	"log"
 	"os"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/restapi"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/restapi/operations"
+	"github.com/WorksApplications/Avalanche/generated_files/restapi"
+	"github.com/WorksApplications/Avalanche/generated_files/restapi/operations"
 	loads "github.com/go-openapi/loads"
 
 	"database/sql"

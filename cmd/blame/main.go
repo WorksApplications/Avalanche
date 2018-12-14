@@ -29,10 +29,10 @@ import (
 
 	"github.com/patrickmn/go-cache"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/codesearch"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/flamescope/stack"
+	"github.com/WorksApplications/Avalanche/pkg/codesearch"
+	"github.com/WorksApplications/Avalanche/pkg/flamescope/stack"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
+	"github.com/WorksApplications/Avalanche/generated_files/models"
 )
 
 type config struct {
