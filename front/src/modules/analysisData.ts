@@ -379,6 +379,80 @@ export function convertPerfCallTree(tree: IPerfCallTree): IPerfCallTreeData {
   return array;
 }
 
+function sortApplications(applications: string[]): string[] {
+  return applications.sort();
+}
+
+function sortPods(pods: IPodInfo[]): IPodInfo[] {
+  return pods.sort((a, b) => {
+    if (!a) {
+      return 1;
+    }
+    if (!b) {
+      return -1;
+    }
+
+    // living pod first
+    if (a.isAlive && !b.isAlive) {
+      return -1;
+    }
+    if (!a.isAlive && b.isAlive) {
+      return 1;
+    }
+
+    if (!a.createdAt) {
+      return 1;
+    }
+    if (!b.createdAt) {
+      return -1;
+    }
+
+    // newer pod first
+    const timeDiff = b.createdAt.getTime() - a.createdAt.getTime();
+    if (timeDiff !== 0) {
+      return timeDiff;
+    }
+
+    // dictionary order
+    return a.name > b.name ? 1 : -1;
+  });
+}
+
+function sortSnapshots(snapshots: ISnapshotInfo[]): ISnapshotInfo[] {
+  return snapshots.sort((a, b) => {
+    if (!a) {
+      return 1;
+    }
+    if (!b) {
+      return -1;
+    }
+
+    if (!a.createdAt) {
+      return 1;
+    }
+    if (!b.createdAt) {
+      return -1;
+    }
+
+    // newer pod first
+    const timeDiff = b.createdAt.getTime() - a.createdAt.getTime();
+    if (timeDiff !== 0) {
+      return timeDiff;
+    }
+
+    if (!a.name) {
+      return 1;
+    }
+
+    if (!b.name) {
+      return -1;
+    }
+
+    // dictionary order
+    return a.name > b.name ? 1 : -1;
+  });
+}
+
 function paramExists<K extends string>(
   params: any,
   paramName: K
@@ -440,7 +514,10 @@ export function reducer(state: IState = INIT, action: Action): IState {
     }
   }
   if (isType(action, getAppsOperation.async.done)) {
-    return { ...state, applications: action.payload.result.apps };
+    return {
+      ...state,
+      applications: sortApplications(action.payload.result.apps)
+    };
   }
   if (isType(action, getEnvironmentsOfAppOperation.async.done)) {
     const environments = { ...state.environments };
@@ -463,11 +540,11 @@ export function reducer(state: IState = INIT, action: Action): IState {
       ...state,
       environments,
       pods,
-      snapshots
+      snapshots: sortSnapshots(snapshots)
     };
   }
   if (isType(action, getRunningPodsOperation.async.done)) {
-    return { ...state, runningPods: action.payload.result.pods };
+    return { ...state, runningPods: sortPods(action.payload.result.pods) };
   }
   if (isType(action, postSnapshotOperation.async.started)) {
     return {
@@ -506,7 +583,7 @@ export function reducer(state: IState = INIT, action: Action): IState {
   if (isType(action, getLatestSnapshotsOperation.async.done)) {
     return {
       ...state,
-      snapshots: action.payload.result.snapshots
+      snapshots: sortSnapshots(action.payload.result.snapshots)
     };
   }
 

@@ -30,60 +30,20 @@ import {
   getEnvironmentsOfAppOperation,
   getHeatMapOperation,
   getLatestSnapshotsOperation,
-  getPerfCallTreeOperation,
-  ISnapshotInfo
+  getPerfCallTreeOperation
 } from "../modules/analysisData";
 import { toastr } from "../modules/toastNotification";
 import { IApplicationState } from "../store";
 import styles from "./SnapshotsView.scss";
 
-function sortedApplications(applications: string[]): string[] {
-  return applications.sort();
-}
-
-function sortedSnapshots(snapshots: ISnapshotInfo[]): ISnapshotInfo[] {
-  return snapshots.sort((a, b) => {
-    if (!a) {
-      return 1;
-    }
-    if (!b) {
-      return -1;
-    }
-
-    if (!a.createdAt) {
-      return 1;
-    }
-    if (!b.createdAt) {
-      return -1;
-    }
-
-    // newer pod first
-    const timeDiff = b.createdAt.getTime() - a.createdAt.getTime();
-    if (timeDiff !== 0) {
-      return timeDiff;
-    }
-
-    if (!a.name) {
-      return 1;
-    }
-
-    if (!b.name) {
-      return -1;
-    }
-
-    // dictionary order
-    return a.name > b.name ? 1 : -1;
-  });
-}
-
 const mapStateToProps = (state: IApplicationState) => ({
   appName: state.analysisData.applicationName,
-  apps: sortedApplications(state.analysisData.applications),
+  apps: state.analysisData.applications,
   environments: state.analysisData.environments,
   filteringEnvironment: state.analysisData.selectedEnvironment,
   filteringPod: state.analysisData.selectedPod,
   pods: state.analysisData.pods,
-  snapshots: sortedSnapshots(state.analysisData.snapshots),
+  snapshots: state.analysisData.snapshots,
   heatMaps: state.analysisData.heatMaps,
   perfCallTrees: state.analysisData.perfCallTrees
 });

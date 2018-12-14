@@ -21,47 +21,11 @@ import PodFilter from "../components/PodFilter";
 import { operationsToActionCreators } from "../helpers";
 import {
   getRunningPodsOperation,
-  IPodInfo,
   postSnapshotOperation
 } from "../modules/analysisData";
 import { toastr } from "../modules/toastNotification";
 import { IApplicationState } from "../store";
 import styles from "./RunningPodsView.scss";
-
-function sortedPods(pods: IPodInfo[]): IPodInfo[] {
-  return pods.sort((a, b) => {
-    if (!a) {
-      return 1;
-    }
-    if (!b) {
-      return -1;
-    }
-
-    // living pod first
-    if (a.isAlive && !b.isAlive) {
-      return -1;
-    }
-    if (!a.isAlive && b.isAlive) {
-      return 1;
-    }
-
-    if (!a.createdAt) {
-      return 1;
-    }
-    if (!b.createdAt) {
-      return -1;
-    }
-
-    // newer pod first
-    const timeDiff = b.createdAt.getTime() - a.createdAt.getTime();
-    if (timeDiff !== 0) {
-      return timeDiff;
-    }
-
-    // dictionary order
-    return a.name > b.name ? 1 : -1;
-  });
-}
 
 const initialState = {
   filteringValue: ""
@@ -71,7 +35,7 @@ type State = Readonly<typeof initialState>;
 
 const mapStateToProps = (state: IApplicationState) => ({
   applicationName: state.analysisData.applicationName,
-  pods: sortedPods(state.analysisData.runningPods)
+  pods: state.analysisData.runningPods
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) =>
