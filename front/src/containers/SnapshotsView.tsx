@@ -18,14 +18,6 @@ import * as qs from "querystring";
 import * as React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
-import {
-  getAppsOperation,
-  getEnvironmentsOfAppOperation,
-  getHeatMapOperation,
-  getLatestSnapshotsOperation,
-  getPerfCallTreeOperation,
-  toastr
-} from "../actions";
 import AppSelector from "../components/AppSelector";
 import SnapshotFilter from "../components/SnapshotFilter";
 import SnapshotList, { ISnapshotData } from "../components/SnapshotList";
@@ -33,7 +25,16 @@ import {
   normalizedToFlamescopePosition,
   operationsToActionCreators
 } from "../helpers";
-import { IApplicationState, ISnapshotInfo } from "../store";
+import {
+  getAppsOperation,
+  getEnvironmentsOfAppOperation,
+  getHeatMapOperation,
+  getLatestSnapshotsOperation,
+  getPerfCallTreeOperation,
+  ISnapshotInfo
+} from "../modules/analysisData";
+import { toastr } from "../modules/toastNotification";
+import { IApplicationState } from "../store";
 import styles from "./SnapshotsView.scss";
 
 function sortedApplications(applications: string[]): string[] {

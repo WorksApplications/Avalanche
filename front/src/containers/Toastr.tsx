@@ -16,7 +16,7 @@
 import * as React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
-import { hideToastr } from "../actions";
+import { hideToastr } from "../modules/toastNotification";
 import { IApplicationState } from "../store";
 import styles from "./Toastr.scss";
 

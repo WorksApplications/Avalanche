@@ -19,7 +19,7 @@ import * as React from "react";
 import { action } from "@storybook/addon-actions";
 import { select, text, withKnobs } from "@storybook/addon-knobs";
 import { storiesOf } from "@storybook/react";
-import { DataState, IPerfCallTreeData } from "../../store";
+import { DataState, IPerfCallTreeData } from "../../modules/analysisData";
 import SnapshotList from "./SnapshotList";
 
 const commonWrapStyle: React.CSSProperties = {

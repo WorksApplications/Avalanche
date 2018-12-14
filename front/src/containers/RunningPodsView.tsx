@@ -16,15 +16,16 @@
 import * as React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
-import {
-  getRunningPodsOperation,
-  postSnapshotOperation,
-  toastr
-} from "../actions";
 import PodCardList, { IPodCardListData } from "../components/PodCardList";
 import PodFilter from "../components/PodFilter";
 import { operationsToActionCreators } from "../helpers";
-import { IApplicationState, IPodInfo } from "../store";
+import {
+  getRunningPodsOperation,
+  IPodInfo,
+  postSnapshotOperation
+} from "../modules/analysisData";
+import { toastr } from "../modules/toastNotification";
+import { IApplicationState } from "../store";
 import styles from "./RunningPodsView.scss";
 
 function sortedPods(pods: IPodInfo[]): IPodInfo[] {

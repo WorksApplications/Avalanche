@@ -17,7 +17,7 @@
 import * as React from "react";
 import { FLAMESCOPE_API_BASE } from "../../constants";
 import { normalizedToFlamescopePosition } from "../../helpers";
-import { IPerfCallTreeData } from "../../store";
+import { IPerfCallTreeData } from "../../modules/analysisData";
 import { HeatLineChartProperty } from "../HeatLineChart";
 import Link from "../Link";
 import Spinner from "../Spinner";

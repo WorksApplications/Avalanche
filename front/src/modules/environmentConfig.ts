@@ -13,14 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import actionCreatorFactory from "typescript-fsa";
+import { Action } from "redux";
+import actionCreatorFactory, { isType } from "typescript-fsa";
 import { asyncFactory } from "typescript-fsa-redux-thunk";
 import { COLLECT_API_BASE } from "../constants";
 import {
   DefaultApiFactory as collectApiFactory,
   EnvironmentConfig
 } from "../generated/collect/api";
-import { IEnvironmentConfig } from "../store";
+
+export interface IEnvironmentConfig {
+  name: string;
+  version: string | null;
+  isObservationEnabled: boolean | null;
+  isMultiTenant: boolean | null;
+  kubernetesApi: string | null;
+}
+
+export interface IState {
+  readonly environmentConfigs: IEnvironmentConfig[];
+}
+
+const INIT: IState = {
+  environmentConfigs: []
+};
 
 const actionCreator = actionCreatorFactory();
 const asyncActionCreator = asyncFactory(actionCreator);
@@ -117,3 +133,10 @@ export const addEnvironmentConfigOperation = asyncActionCreator<
         return { config };
       })
 );
+
+export function reducer(state: IState = INIT, action: Action): IState {
+  if (isType(action, getEnvironmentConfigsOperation.async.done)) {
+    return { ...state, environmentConfigs: action.payload.result.configs };
+  }
+  return state;
+}

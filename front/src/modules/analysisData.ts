@@ -16,30 +16,100 @@
 import { LOCATION_CHANGE } from "connected-react-router";
 import * as qs from "querystring";
 import { Action } from "redux";
-import { isType } from "typescript-fsa";
+import { actionCreatorFactory, isType } from "typescript-fsa";
+import { asyncFactory } from "typescript-fsa-redux-thunk";
+import heatMapClient, { IHeatMap } from "../clients/heatMapClient";
+import { BLAME_API_BASE, COLLECT_API_BASE } from "../constants";
 import {
-  getAppsOperation,
-  getEnvironmentsOfAppOperation,
-  getHeatMapOperation,
-  getLatestSnapshotsOperation,
-  getPerfCallTreeOperation,
-  getRunningPodsOperation,
-  IPerfCallTree,
-  postSnapshotOperation
-} from "../actions";
-import { IHeatMap } from "../clients/heatMapClient";
+  Code,
+  DefaultApiFactory as blameApiFactory,
+  Report
+} from "../generated/blame/api";
 import {
-  IAnalysisDataState,
-  IHeatMapData,
-  IHeatMapInfo,
-  IPerfCallTreeData,
-  IPerfCallTreeElementData,
-  IPerfCallTreeInfo,
-  IPodInfo,
-  ISnapshotInfo
-} from "../store";
+  DefaultApiFactory as collectApiFactory,
+  Environment,
+  Pod,
+  Snapshot
+} from "../generated/collect/api";
 
-const INIT: IAnalysisDataState = {
+export interface ISnapshotInfo {
+  uuid: string;
+  name?: string;
+  pod?: string;
+  environment?: string;
+  createdAt?: Date;
+  link: string;
+  heatMapId: string;
+}
+
+export interface IPodInfo {
+  id?: number;
+  name: string;
+  isAlive?: boolean;
+  createdAt?: Date;
+  app?: string;
+  env?: string;
+  snapshots?: ISnapshotInfo[];
+  isSaving?: boolean;
+}
+
+export interface IEnvironmentInfo {
+  id: number;
+  name: string;
+  pods: IPodInfo[];
+  liveCount?: number;
+}
+
+export interface IHeatMapData {
+  meanValues: number[];
+  maxValues: number[];
+  maxValueOfData: number;
+  numColumns: number;
+  numRows: number;
+}
+
+export type DataState = "empty" | "loading" | "loaded" | "failed";
+
+export interface IHeatMapInfo {
+  data?: IHeatMapData;
+  status: DataState;
+}
+
+export interface IPerfCallTreeElementData {
+  id: number;
+  parentId?: number;
+  label: string;
+  childIds: number[];
+  relativeRatio: number;
+  immediateRatio: number;
+  totalRatio: number;
+  hasCode: boolean;
+  firstLine?: number;
+  snippetLink?: string;
+  code: Array<Array<string | { fragment: string }>>;
+}
+
+export type IPerfCallTreeData = IPerfCallTreeElementData[];
+
+export interface IPerfCallTreeInfo {
+  data?: IPerfCallTreeData;
+  status: DataState;
+}
+
+export interface IState {
+  readonly applicationName: string | null;
+  readonly applications: string[];
+  readonly selectedEnvironment: string | null;
+  readonly environments: { [appName: string]: IEnvironmentInfo };
+  readonly runningPods: IPodInfo[];
+  readonly selectedPod: string | null;
+  readonly pods: IPodInfo[];
+  readonly snapshots: ISnapshotInfo[];
+  readonly heatMaps: Map<string, IHeatMapInfo>;
+  readonly perfCallTrees: Map<string, IPerfCallTreeInfo>;
+}
+
+const INIT: IState = {
   applicationName: null,
   applications: [],
   selectedEnvironment: null,
@@ -51,6 +121,163 @@ const INIT: IAnalysisDataState = {
   heatMaps: new Map<string, IHeatMapInfo>(),
   perfCallTrees: new Map<string, IPerfCallTreeInfo>()
 };
+
+const actionCreator = actionCreatorFactory();
+const asyncActionCreator = asyncFactory(actionCreator);
+
+const collectClient = collectApiFactory({}, undefined, COLLECT_API_BASE);
+
+const blameClient = blameApiFactory({}, undefined, BLAME_API_BASE);
+
+function environmentInfoConvert(env: Environment): IEnvironmentInfo {
+  return {
+    id: env.id,
+    name: env.name,
+    pods: (env.pods || []).map<IPodInfo>(p => podInfoConvert(p)),
+    liveCount: env.liveCount
+  };
+}
+
+function podInfoConvert(pod: Pod): IPodInfo {
+  const created = new Date(pod.createdAt ? pod.createdAt : 0);
+  return {
+    id: pod.id,
+    name: pod.name,
+    isAlive: pod.isAlive,
+    createdAt: created,
+    app: pod.app,
+    env: pod.environment,
+    snapshots: (pod.snapshots || []).map(s => snapshotInfoConvert(s))
+  };
+}
+
+function snapshotInfoConvert(snapshot: Snapshot): ISnapshotInfo {
+  const created = new Date(snapshot.createdAt ? snapshot.createdAt : 0);
+  const tokens = snapshot.flamescopeLink!.split("/");
+  const heatMapId = tokens[tokens.length - 1];
+
+  return {
+    uuid: snapshot.uuid,
+    name: undefined,
+    pod: snapshot.pod,
+    environment: snapshot.environment,
+    createdAt: created,
+    link: snapshot.flamescopeLink!,
+    heatMapId
+  };
+}
+
+export interface IPerfCallTree {
+  name: string;
+  totalRatio: number;
+  immediateRatio: number;
+  code: Array<{ snippet: string }>;
+  firstLine?: number;
+  snippetLink?: string;
+  children: IPerfCallTree[];
+}
+
+function convertCode1(code?: Code[]): Array<{ snippet: string }> {
+  if (typeof code === "undefined") {
+    return [];
+  }
+
+  return code
+    .filter(x => typeof x.snippet !== "undefined")
+    .map(x => ({
+      snippet: x.snippet!
+    }));
+}
+
+function perfCallTreeConvert(report: Report): IPerfCallTree {
+  return {
+    name: report.name!,
+    totalRatio: report.total_ratio!,
+    immediateRatio: report.immediate_ratio!,
+    code: convertCode1(report.code),
+    firstLine: report.line_start_at,
+    snippetLink: report.primary_link,
+    children: report.children ? report.children.map(perfCallTreeConvert) : []
+  };
+}
+
+export const getAppsOperation = asyncActionCreator<{}, { apps: string[] }>(
+  "GET_APPS",
+  () =>
+    collectClient.getApps().then((apps: string[]) => {
+      return { apps };
+    })
+);
+
+export const getEnvironmentsOfAppOperation = asyncActionCreator<
+  { app: string },
+  { envs: IEnvironmentInfo[] }
+>("GET_ENVS_OF_APP", ({ app }) =>
+  collectClient.getEnvironments(app).then((envResults: Environment[]) => {
+    const envs = envResults.map(env => environmentInfoConvert(env));
+    return { envs };
+  })
+);
+
+export const getRunningPodsOperation = asyncActionCreator<
+  {},
+  { pods: IPodInfo[] }
+>("GET_RUNNING_PODS", () =>
+  collectClient.listAvailablePods().then((podResults: Pod[]) => {
+    const pods = podResults.map(pod => podInfoConvert(pod));
+    return { pods };
+  })
+);
+
+export const postSnapshotOperation = asyncActionCreator<
+  {
+    appId: string;
+    environment: string;
+    podId: string;
+  },
+  { newSnapshot: ISnapshotInfo }
+>("POST_NEW_SNAPSHOT", ({ appId, environment, podId }) =>
+  collectClient
+    .newSnapshot(appId, environment, podId, {
+      headers: {
+        "Content-Type": "application/json"
+      } // This is due to "typescript-fetch"
+    })
+    .then((snapshot: Snapshot) => {
+      const newSnapshot = snapshotInfoConvert(snapshot);
+      return { newSnapshot };
+    })
+);
+
+export const getLatestSnapshotsOperation = asyncActionCreator<
+  { count: number },
+  { snapshots: ISnapshotInfo[] }
+>("GET_LATEST_SNAPSHOTS", ({ count }) =>
+  collectClient.listSnapshots("date", count).then(snapshotResults => {
+    const snapshots = snapshotResults.map(s => snapshotInfoConvert(s));
+    return { snapshots };
+  })
+);
+
+export const getHeatMapOperation = asyncActionCreator<
+  { snapshotId: string; heatMapId: string },
+  { heatMap: IHeatMap }
+>("GET_HEAT_MAP", ({ heatMapId }) =>
+  heatMapClient(heatMapId).then(result => {
+    return { heatMap: result };
+  })
+);
+
+export const getPerfCallTreeOperation = asyncActionCreator<
+  { snapshotId: string; startPosition: number; endPosition: number },
+  { tree: IPerfCallTree }
+>("GET_PERF_CALL_TREE", ({ snapshotId, startPosition, endPosition }) =>
+  blameClient
+    .reportsUuidGet(snapshotId, startPosition, endPosition)
+    .then(result => {
+      return { tree: perfCallTreeConvert(result) };
+    })
+);
 
 export function convertHeatMap(
   heatMap: IHeatMap,
@@ -163,10 +390,7 @@ function paramExists<K extends string>(
   );
 }
 
-export function analysisData(
-  state: IAnalysisDataState = INIT,
-  action: Action
-): IAnalysisDataState {
+export function reducer(state: IState = INIT, action: Action): IState {
   if (action.type === LOCATION_CHANGE) {
     // @ts-ignore
     const search: string = action.payload.location.search;
