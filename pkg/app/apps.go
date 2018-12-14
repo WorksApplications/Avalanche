@@ -23,9 +23,9 @@ import (
 
 	"github.com/go-openapi/strfmt"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/layout"
+	"github.com/WorksApplications/Avalanche/generated_files/models"
+	"github.com/WorksApplications/Avalanche/pkg/environment"
+	"github.com/WorksApplications/Avalanche/pkg/layout"
 )
 
 /* +--+----+---------------------------+

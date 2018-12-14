@@ -1,7 +1,7 @@
 matrix:
   include:
     - language: go
-      go: "1.x"
+      go: "1.11"
       cache:
         directories:
           - $HOME/.cache/go-build

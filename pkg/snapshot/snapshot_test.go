@@ -16,7 +16,7 @@
 package snapshot
 
 import (
-	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
+	"github.com/WorksApplications/Avalanche/generated_files/models"
 	"github.com/DATA-DOG/go-sqlmock"
 	"reflect"
 	//"github.com/google/uuid"

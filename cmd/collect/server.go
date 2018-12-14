@@ -19,16 +19,16 @@ import (
 	"fmt"
 	"log"
 
-	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/models"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/generated_files/restapi/operations"
+	"github.com/WorksApplications/Avalanche/generated_files/models"
+	"github.com/WorksApplications/Avalanche/generated_files/restapi/operations"
 	middleware "github.com/go-openapi/runtime/middleware"
 
 	"database/sql"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/app"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/environment"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/layout"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/pod"
-	"git.paas.workslan/resource_optimization/dynamic_analysis/pkg/snapshot"
+	"github.com/WorksApplications/Avalanche/pkg/app"
+	"github.com/WorksApplications/Avalanche/pkg/environment"
+	"github.com/WorksApplications/Avalanche/pkg/layout"
+	"github.com/WorksApplications/Avalanche/pkg/pod"
+	"github.com/WorksApplications/Avalanche/pkg/snapshot"
 
 	_ "github.com/go-sql-driver/mysql"
 )
