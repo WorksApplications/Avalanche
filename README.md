@@ -89,6 +89,23 @@ Additionally, this tool must be deployed with several runtime dependencies (eg. 
 
 ### To docker-compose
 
+## Development
+
+### Backend
+
+### Frontend (Avalanche view)
+
+Before you start developing, download [openapi-generator](https://github.com/openapitools/openapi-generator) jar file to git root directory and generate API clients by `make openapi-client-gen` or equivalent command.  
+
+When you develop components with Storybook, run `yarn run storybook`.
+
+When you develop the pages, run like `yarn run start --env.COLLECT_API_BASE=http://localhost:5001 --env.BLAME_API_BASE=http://localhost:5002 --env.FLAMESCOPE_API_BASE=http://localhost:5003`. (These `API_BASE` params are optional but recommended to specify on your local.)  
+If you want to use mock server for it, generate mock server files by `make openapi-mock-gen` or equivalent command. Note that "cors" module might be required for express server.
+
+When you build the pages, execute like `yarn run build --env.COLLECT_API_BASE=http://localhost:5001 --env.BLAME_API_BASE=http://localhost:5002 --env.FLAMESCOPE_API_BASE=http://localhost:5003`
+
+TSLint, stylelint and Prettier are enabled. Configure your editor or IDE for them.
+
 ## Trivia
 
 The name, Avalanche, is an analogy standing for that solving an underlaying hardened bottleneck results in super fast move of gigantic pile of stacks.
