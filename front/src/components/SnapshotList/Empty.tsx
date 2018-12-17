@@ -13,9 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as mItem from "./SnapshotItem";
-import * as mList from "./SnapshotList";
+import * as React from "react";
+import styles from "./SnapshotList.scss";
 
-export default mList.default;
-export type ISnapshotList = mList.IProperty;
-export type ISnapshotData = mItem.IItemProperty;
+function Empty(props: { emptyMessage?: string }) {
+  return (
+    <tbody>
+      <tr className={styles.empty} data-testid="empty-message">
+        <td colSpan={6}>{props.emptyMessage}</td>
+      </tr>
+    </tbody>
+  );
+}
+
+export default Empty;
