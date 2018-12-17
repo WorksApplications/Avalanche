@@ -18,12 +18,6 @@ import * as ReactModal from "react-modal";
 import { connect } from "react-redux";
 import * as ReactTooltip from "react-tooltip";
 import { bindActionCreators, Dispatch } from "redux";
-import {
-  addEnvironmentConfigOperation,
-  getEnvironmentConfigsOperation,
-  postEnvironmentConfigOperation,
-  toastr
-} from "../actions";
 import EnvironmentCardList from "../components/EnvironmentCardList";
 import EnvironmentConfigAddModal from "../components/EnvironmentConfigAddModal";
 import EnvironmentConfigModifyModal from "../components/EnvironmentConfigModifyModal";
@@ -31,6 +25,12 @@ import Fab from "../components/Fab";
 import FilterInput from "../components/FilterInput";
 import { operationsToActionCreators } from "../helpers";
 import modalStyles from "../Modal.scss";
+import {
+  addEnvironmentConfigOperation,
+  getEnvironmentConfigsOperation,
+  postEnvironmentConfigOperation
+} from "../modules/environmentConfig";
+import { toastr } from "../modules/toastNotification";
 import { IApplicationState } from "../store";
 import styles from "./ConfigPage.scss";
 

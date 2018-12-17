@@ -19,7 +19,7 @@ import { render } from "react-dom";
 import * as ReactModal from "react-modal";
 import { Provider } from "react-redux";
 import App from "./App";
-import store, { history } from "./store/index";
+import store, { history } from "./store";
 
 if (process.env.NODE_ENV !== "production") {
   // tslint:disable-next-line
