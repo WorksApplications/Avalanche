@@ -11,6 +11,15 @@ To grasp looks & usage, see our wiki page: [About Avalanche view](https://github
 
 ![eye catch](asset/top.png)
 
+## TOC
+
+- [Concept](#concept)
+- [Requirements](#requirements)
+- [Components](#included-components)
+- [Build](#build)
+- [Deploy](#deploy)
+- [Development](#development)
+
 ## Concept
 
 1. Applications emit pre-recorded performance logs using `perf-tools`.
@@ -61,7 +70,7 @@ Additionally, this tool must be deployed with several runtime dependencies (eg. 
 - suspect: Guess code-path by using code search engine and flamescope
 - front: Frontend view to show snapshot list and start collecting analysis result.
 
-## Build binary
+## Build
 
 ```
 % wget http://central.maven.org/maven2/io/swagger/swagger-codegen-cli/2.4.0/swagger-codegen-2.4.0.jar -O swagger-codegen-cli.jar
