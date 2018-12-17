@@ -18,4 +18,4 @@ import * as mList from "./SnapshotList";
 
 export default mList.default;
 export type ISnapshotList = mList.IProperty;
-export type ISnapshotData = mItem.IItemProperty;
+export type ISnapshotData = mItem.IProperty;

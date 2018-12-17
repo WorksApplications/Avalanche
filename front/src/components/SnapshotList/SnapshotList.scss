@@ -17,22 +17,66 @@
 
 .wrap {
   width: 100%;
+  background-color: $bg-color-white;
+  box-shadow: $layer-shadow-2;
+  font-size: $font-size-normal;
+  line-height: $base-space * 2.5;
+}
+
+.list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item {
+  &:not(:first-child) {
+    border-top: 1px solid $border-color-light;
+  }
+}
+
+.header {
+  font-weight: normal;
+  text-align: left;
+  padding: 0;
+  color: $text-color-light;
+  border-bottom: 1px solid $border-color-light;
+
+  & > * {
+    display: inline-block;
+    padding: $base-space $base-space * 2;
+  }
+}
+
+.uuidColumn {
+  width: $base-space * 40;
+}
+
+.podNameColumn {
+  width: $base-space * 40;
+}
+
+.environmentColumn {
+  width: $base-space * 25;
+}
+
+.createdAtColumn {
+  width: $base-space * 25;
+}
+
+.linkColumn {
+  width: $base-space * 20;
+}
+
+.expanderColumn {
+  width: $base-space * 5;
+}
+
+.empty {
+  padding: $base-space * 2;
 }
 
 .table {
-  background-color: $bg-color-white;
-  width: 100%;
-  box-shadow: $layer-shadow-2;
-  border-collapse: collapse;
-  font-size: $font-size-normal;
-  line-height: $base-space * 2.5;
-
-  & th {
-    padding: $base-space $base-space * 2;
-    font-weight: normal;
-    text-align: left;
-  }
-
   & td {
     padding: $base-space * 2;
   }
@@ -46,38 +90,64 @@
   }
 }
 
+.infoRow {
+  display: flex;
+  & > * {
+    display: inline-block;
+    padding: $base-space * 2;
+  }
+}
+
 .statusColumn {
   width: 1em;
 }
 
-.graphArea {
-  padding: 0 $base-space * 2 !important;
+.heatMapArea {
+  display: flex;
+  height: $base-space * 15;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 
 .heatMap {
   height: $base-space * 15;
+  width: 100%;
 }
 
 .treeArea {
-  height: $base-space * 15;
+  display: flex;
+  height: $base-space * 25;
   position: relative;
+  justify-content: center;
+  align-items: center;
+}
+
+.tree {
+  height: $base-space * 25;
+  width: 100%;
+}
+
+.codeArea {
+  display: flex;
+  min-height: $base-space * 10;
+  justify-content: center;
+  align-items: center;
+}
+
+.code {
+  width: 100%;
 }
 
 .spinner {
   width: $base-space * 3;
   height: $base-space * 3;
-  padding: $base-space * 6;
-  margin: 0 auto;
-}
-
-.spinnerForTree {
-  @extend .spinner;
-  padding: $base-space * 11;
 }
 
 .linkForSelectedRange {
   @include link-style-blue();
   position: absolute;
+  top: 0;
   right: 0;
   margin: 1px $base-space * 2 + 1px;
   padding: 1px;
@@ -86,54 +156,25 @@
 }
 
 .errorMessage {
-  height: $base-space * 11;
-  margin: $base-space * 2 0;
   color: $color-danger;
   display: flex;
   justify-content: center;
   align-items: center;
   background-color: $bg-color-gray-1;
-  border-radius: 4px;
+  height: 100%;
+  width: 100%;
 
-  .table tbody:hover & {
+  .item:hover & {
     background-color: $bg-color-gray-4;
   }
 }
 
-.errorMessageForTree {
-  @extend .errorMessage;
-  padding: $base-space * 5;
-}
-
-/*
- prevent layout flash after fonts are loaded
-*/
-.uuidHeader {
-  width: $base-space * 40;
-}
-
-.podNameHeader {
-  width: $base-space * 40;
-}
-
-.environmentHeader {
-  width: $base-space * 25;
-}
-
-.createdAtHeader {
-  width: $base-space * 25;
-}
-
-.linkHeader {
-  //width: $base-space * 25;
-}
-
-.expanderHeader {
-  width: $base-space * 5;
-}
-
 .expander {
-  text-align: right;
+  padding: 0;
+  align-self: center;
+  height: 24px;
+  width: 24px;
+  margin: auto $base-space * 2 auto auto;
 
   & > i {
     overflow: hidden;

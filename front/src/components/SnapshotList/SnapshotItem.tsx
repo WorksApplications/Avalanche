@@ -27,7 +27,7 @@ type HeatMapData = HeatLineChartProperty & {
   numRows: number;
 };
 
-export interface IItemProperty {
+export interface IProperty {
   uuid: string;
   environment: string;
   podName: string;
@@ -69,14 +69,14 @@ const initialItemState = {
   targetId: null as number | null
 };
 
-type ItemState = Readonly<typeof initialItemState>;
+type State = Readonly<typeof initialItemState>;
 
 // This child component is tightly coupled as a table row element
-class SnapshotItem extends React.Component<IItemProperty, ItemState> {
+class SnapshotItem extends React.Component<IProperty, State> {
   public static getDerivedStateFromProps(
-    props: IItemProperty,
-    state: ItemState
-  ): ItemState {
+    props: IProperty,
+    state: State
+  ): State {
     // open the page by default if `openByDefault` is set
     const isGraphOpen =
       state.isGraphOpen !== null
@@ -87,7 +87,7 @@ class SnapshotItem extends React.Component<IItemProperty, ItemState> {
     return { ...state, isGraphOpen };
   }
 
-  public readonly state: ItemState = initialItemState;
+  public readonly state: State = initialItemState;
 
   public componentDidMount() {
     if (this.state.isGraphOpen && this.props.heatMapStatus === "empty") {
@@ -97,56 +97,50 @@ class SnapshotItem extends React.Component<IItemProperty, ItemState> {
 
   public render() {
     return (
-      <tbody data-testid="snapshot">
-        <tr onClick={this.onInfoRowClick}>
-          <td>{this.props.uuid}</td>
-          <td>{this.props.podName}</td>
-          <td>{this.props.environment}</td>
-          <td data-testid="snapshot-date">
+      <div data-testid="snapshot">
+        <div className={styles.infoRow} onClick={this.onInfoRowClick}>
+          <div className={styles.uuidColumn}>{this.props.uuid}</div>
+          <div className={styles.podNameColumn}>{this.props.podName}</div>
+          <div className={styles.environmentColumn}>
+            {this.props.environment}
+          </div>
+          <div className={styles.createdAtColumn} data-testid="snapshot-date">
             {(this.props.createdAt && this.props.createdAt.toLocaleString()) ||
               "Unknown"}
-          </td>
-          <td>
+          </div>
+          <div className={styles.linkColumn}>
             <Link href={this.props.link}>Framescope</Link>
-          </td>
-          <td className={styles.expander}>
+          </div>
+          <div className={[styles.expanderColumn, styles.expander].join(" ")}>
             <i className={"material-icons"}>
               {this.state.isGraphOpen ? "expand_less" : "expand_more"}
             </i>
-          </td>
-        </tr>
+          </div>
+        </div>
         {this.state.isGraphOpen && (
-          <tr>
-            <td colSpan={6} className={styles.graphArea}>
-              {this.renderGraphBody()}
-            </td>
-          </tr>
+          <div className={styles.heatMapArea}>{this.renderGraphBody()}</div>
         )}
         {this.state.isGraphOpen && this.state.isTreeOpen && (
-          <tr>
-            <td colSpan={6} className={styles.treeArea}>
-              {this.state.previousRange && (
-                <a
-                  className={styles.linkForSelectedRange}
-                  href={this.getFlamescopeLink()}
-                  target="_blank"
-                  rel="noopener"
-                >
-                  View range in Flamescope
-                </a>
-              )}
-              {this.renderTreeBody()}
-            </td>
-          </tr>
+          <div className={styles.treeArea}>
+            {this.state.previousRange && (
+              <a
+                className={styles.linkForSelectedRange}
+                href={this.getFlamescopeLink()}
+                target="_blank"
+                rel="noopener"
+              >
+                View range in Flamescope
+              </a>
+            )}
+            {this.renderTreeBody()}
+          </div>
         )}
         {this.state.isGraphOpen &&
           this.state.isTreeOpen &&
           this.state.isCodeOpen && (
-            <tr>
-              <td colSpan={6}>{this.renderCodeReportBody()}</td>
-            </tr>
+            <div className={styles.codeArea}>{this.renderCodeReportBody()}</div>
           )}
-      </tbody>
+      </div>
     );
   }
 
@@ -210,29 +204,18 @@ class SnapshotItem extends React.Component<IItemProperty, ItemState> {
     }
   }
 
-  // noinspection JSMethodCanBeStatic
-  private renderSpinnerForTree() {
-    return (
-      <>
-        <div className={styles.spinnerForTree}>
-          <Spinner />
-        </div>
-      </>
-    );
-  }
-
   private renderTreeBody() {
     switch (this.props.perfCallTreeStatus) {
       case "empty":
         return <div />;
       case "loading":
-        return this.renderSpinnerForTree();
+        return this.renderSpinner();
       case "loaded":
         if (this.props.perfCallTree) {
           const targetId = this.props.perfCallTree.keys().next().value; // root element first
           return (
-            <React.Suspense fallback={this.renderSpinnerForTree()}>
-              <div>
+            <React.Suspense fallback={this.renderSpinner()}>
+              <div className={styles.tree}>
                 <PerfCallTree
                   treeMap={this.props.perfCallTree}
                   targetId={targetId}
@@ -246,7 +229,7 @@ class SnapshotItem extends React.Component<IItemProperty, ItemState> {
       // noinspection FallThroughInSwitchStatementJS
       case "failed":
         return (
-          <div className={styles.errorMessageForTree}>
+          <div className={styles.errorMessage}>
             <span>Failed to load</span>
           </div>
         );
@@ -257,7 +240,7 @@ class SnapshotItem extends React.Component<IItemProperty, ItemState> {
     const targetElement = this.props.perfCallTree![this.state.targetId!];
     return (
       <React.Suspense fallback={this.renderSpinner()}>
-        <div>
+        <div className={styles.code}>
           <CodeReport
             title={targetElement.label}
             lines={targetElement.code}

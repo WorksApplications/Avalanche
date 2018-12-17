@@ -18,7 +18,7 @@ import "jest-dom/extend-expect";
 import * as React from "react";
 import { render } from "react-testing-library";
 import "react-testing-library/cleanup-after-each";
-import { IItemProperty as SnapshotData, SnapshotList } from "./SnapshotList";
+import { IProperty as SnapshotData, SnapshotList } from "./SnapshotList";
 
 const baseDateValue = Date.now();
 
