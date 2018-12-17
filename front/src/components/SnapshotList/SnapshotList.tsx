@@ -17,7 +17,7 @@
 import * as React from "react";
 import { FLAMESCOPE_API_BASE } from "../../constants";
 import { normalizedToFlamescopePosition } from "../../helpers";
-import { IPerfCallTreeData } from "../../modules/analysisData";
+import { DataState, IPerfCallTreeData } from "../../modules/analysisData";
 import { HeatLineChartProperty } from "../HeatLineChart";
 import Link from "../Link";
 import Spinner from "../Spinner";
@@ -48,9 +48,9 @@ export interface IItemProperty {
   link: string;
   heatMap?: HeatMapData;
   heatMapId: string;
-  heatMapStatus: "empty" | "loading" | "loaded" | "failed";
+  heatMapStatus: DataState;
   perfCallTree?: IPerfCallTreeData;
-  perfCallTreeStatus: "empty" | "loading" | "loaded" | "failed";
+  perfCallTreeStatus: DataState;
   openByDefault?: boolean;
 
   getHeatMap(snapshotId: string, heatMapId: string): void;
