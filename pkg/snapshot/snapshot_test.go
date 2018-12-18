@@ -16,8 +16,8 @@
 package snapshot
 
 import (
-	"github.com/WorksApplications/Avalanche/generated_files/models"
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/WorksApplications/Avalanche/generated_files/models"
 	"reflect"
 	//"github.com/google/uuid"
 	"encoding/json"
