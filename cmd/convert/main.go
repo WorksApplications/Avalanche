@@ -60,15 +60,16 @@ func inspectImage(cli *client.Client, ctx context.Context, name string) (string,
 	return image.RepoTags[0], cmds
 }
 
-func genDockerfile(name, cmds, targetProc, javaOptEnv, logDir string) string {
+func genDockerfile(name, cmds, targetProc, javaOptEnv, logDir, perf string) string {
 	templ := `
     FROM %s
     ENV TARGETPROC %s
     ENV PERF_ARCHIVE_FILE %s
     ADD logger.sh .
+    ADD %s %s
     CMD [%s]
     `
-	return fmt.Sprintf(templ, name, targetProc, logDir, cmds)
+	return fmt.Sprintf(templ, name, targetProc, logDir, perf, perf, cmds)
 }
 
 func injectDockerfile(tw *tar.Writer, dockerfile string) {
@@ -116,7 +117,7 @@ func untarOne(tr *tar.Reader, path string) {
 	wt.Flush()
 }
 
-func getPerfBinary(cli *client.Client, name, path string) /*io.Reader*/ {
+func getPerfBinary(cli *client.Client, name, path string) (string, string) {
 	temp, _ := ioutil.TempDir(os.TempDir(), "injector-")
 	f, _ := os.Create(temp + "/" + "image.tar")
 	fmt.Println(temp)
@@ -161,12 +162,14 @@ func getPerfBinary(cli *client.Client, name, path string) /*io.Reader*/ {
 				panic(err)
 			}
 			if ("/" + hdr.Name) == path {
-				fmt.Printf("[found perf binary] saved: %s\n", laybase+"/"+path)
+				binpath := laybase + "/" + path
+				fmt.Printf("[found perf binary] saved: %s\n", binpath)
 				untarOne(lr, laybase+"/"+hdr.Name)
+				return binpath, hdr.Name
 			}
 		}
-
 	}
+	return "", ""
 }
 
 func buildPerfMapAgent() {
@@ -192,26 +195,33 @@ func main() {
 		panic(err)
 	}
 
-	getPerfBinary(cli, *perfBaseImage, *perfPath)
+	perfpath, perfname := getPerfBinary(cli, *perfBaseImage, *perfPath)
 	name, cmds := inspectImage(cli, context.Background(), *imageName)
 
 	options := types.ImageBuildOptions{Platform: "linux"}
 	buf := new(bytes.Buffer)
 	tw := tar.NewWriter(buf)
 
-	f, err := os.Open(*loggerFile)
-	if err != nil {
-		return
-	}
+	for _, file := range []struct {
+		path string
+		name string
+	}{
+		{path: *loggerFile, name: "logger.sh"},
+		{path: perfpath, name: perfname}} {
+		f, err := os.Open(file.path)
+		if err != nil {
+			return
+		}
 
-	info, _ := f.Stat()
+		info, _ := f.Stat()
+		injectFile(tw, file.name, f, info.Size())
+	}
 
 	commandStr := "\"./logger.sh\""
 	for _, cmd := range cmds {
 		commandStr = commandStr + fmt.Sprintf(", \"%s\" ", cmd)
 	}
-	injectDockerfile(tw, genDockerfile(name, commandStr, *targetProc, *javaOptEnv, *logDir))
-	injectFile(tw, "logger.sh", f, info.Size())
+	injectDockerfile(tw, genDockerfile(name, commandStr, *targetProc, *javaOptEnv, *logDir, perfname))
 
 	if err := tw.Close(); err != nil {
 		fmt.Println(err)
