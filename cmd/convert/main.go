@@ -60,16 +60,18 @@ func inspectImage(cli *client.Client, ctx context.Context, name string) (string,
 	return image.RepoTags[0], cmds
 }
 
-func genDockerfile(name, cmds, targetProc, javaOptEnv, logDir, perf string) string {
+func genDockerfile(name, cmds, targetProc, javaOptEnv, logDir, perf, inotify, agent string) string {
 	templ := `
     FROM %s
     ENV TARGETPROC %s
     ENV PERF_ARCHIVE_FILE %s
     ADD logger.sh .
     ADD %s %s
+    ADD %s %s
+    ADD %s /usr/bin/
     CMD [%s]
     `
-	return fmt.Sprintf(templ, name, targetProc, logDir, perf, perf, cmds)
+	return fmt.Sprintf(templ, name, targetProc, logDir, perf, perf, inotify, inotify, agent, cmds)
 }
 
 func injectDockerfile(tw *tar.Writer, dockerfile string) {
@@ -123,8 +125,9 @@ func getBinaryFromFsOrDockerImage(cli *client.Client, name, path string) (string
 			fmt.Println(err)
 			return "", "", ""
 		}
+        fmt.Printf("[dependency binary] using: %s\n", path)
 		/* return local binary. Assume "/bin/" is in $PATH in target image */
-		return path, "/bin/" + filepath.Base(path)
+		return path, "/bin/" + filepath.Base(path), ""
 	}
 	temp, _ := ioutil.TempDir(os.TempDir(), "injector-")
 	f, _ := os.Create(temp + "/" + "image.tar")
@@ -171,7 +174,7 @@ func getBinaryFromFsOrDockerImage(cli *client.Client, name, path string) (string
 			}
 			if ("/" + hdr.Name) == path {
 				binpath := laybase + "/" + path
-				fmt.Printf("[found binary] saved: %s\n", binpath)
+				fmt.Printf("[dependency binary] saved: %s\n", binpath)
 				untarOne(lr, laybase+"/"+hdr.Name)
 				return binpath, hdr.Name, temp
 			}
@@ -209,7 +212,7 @@ func main() {
 
 	/* Prepare perf binary */
 	perfpath, perfname, tempP := getBinaryFromFsOrDockerImage(cli, *perfImage, *perfPath)
-	if temp != "" {
+	if tempP != "" {
 		defer os.RemoveAll(tempP)
 	}
 	if perfpath == "" {
@@ -219,7 +222,7 @@ func main() {
 
 	/* Prepare inotify binary */
 	inotifypath, inotifyname, tempI := getBinaryFromFsOrDockerImage(cli, *inotifyImage, *inotifyPath)
-	if temp != "" {
+	if tempI != "" {
 		defer os.RemoveAll(tempI)
 	}
 	if inotifypath == "" {
@@ -228,8 +231,8 @@ func main() {
 	}
 
 	/* Prepare perf-map-agent */
-	agentpath, agentname, tempA := getBinaryFromFsOrDockerImage(cli, *perfMapAgentImage, *perfMapAgentPath)
-	if temp != "" {
+	agentpath, agentname, tempA := getBinaryFromFsOrDockerImage(cli, *agentImage, *agentPath)
+	if tempA != "" {
 		defer os.RemoveAll(tempA)
 	}
 	if agentpath == "" {
@@ -249,7 +252,9 @@ func main() {
 		name string
 	}{
 		{path: *loggerFile, name: "logger.sh"},
-		{path: perfpath, name: perfname}} {
+		{path: perfpath, name: perfname},
+		{path: inotifypath, name: inotifyname},
+		{path: agentpath, name: agentname}} {
 		f, err := os.Open(file.path)
 		if err != nil {
 			return
@@ -263,7 +268,7 @@ func main() {
 	for _, cmd := range cmds {
 		commandStr = commandStr + fmt.Sprintf(", \"%s\" ", cmd)
 	}
-	injectDockerfile(tw, genDockerfile(name, commandStr, *targetProc, *javaOptEnv, *logDir, perfname))
+	injectDockerfile(tw, genDockerfile(name, commandStr, *targetProc, *javaOptEnv, *logDir, perfname, inotifyname, agentname))
 
 	if err := tw.Close(); err != nil {
 		fmt.Println(err)
