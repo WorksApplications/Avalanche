@@ -117,7 +117,15 @@ func untarOne(tr *tar.Reader, path string) {
 	wt.Flush()
 }
 
-func getPerfBinary(cli *client.Client, name, path string) (string, string) {
+func getBinaryFromFsOrDockerImage(cli *client.Client, name, path string) (string, string, string) {
+	if name == "" {
+		if _, err := os.Stat(path); err != nil {
+			fmt.Println(err)
+			return "", "", ""
+		}
+		/* return local binary. Assume "/bin/" is in $PATH in target image */
+		return path, "/bin/" + filepath.Base(path)
+	}
 	temp, _ := ioutil.TempDir(os.TempDir(), "injector-")
 	f, _ := os.Create(temp + "/" + "image.tar")
 	fmt.Println(temp)
@@ -163,13 +171,13 @@ func getPerfBinary(cli *client.Client, name, path string) (string, string) {
 			}
 			if ("/" + hdr.Name) == path {
 				binpath := laybase + "/" + path
-				fmt.Printf("[found perf binary] saved: %s\n", binpath)
+				fmt.Printf("[found binary] saved: %s\n", binpath)
 				untarOne(lr, laybase+"/"+hdr.Name)
-				return binpath, hdr.Name
+				return binpath, hdr.Name, temp
 			}
 		}
 	}
-	return "", ""
+	return "", "", temp
 }
 
 func buildPerfMapAgent() {
@@ -182,8 +190,12 @@ func main() {
 	javaOptEnv := flag.String("javaOptEnvName", "JAVA_OPTS", "The environment variable name for Java options")
 	logDir := flag.String("logDir", "/var/log/${APPNAME}/perf-record", "log directory for perf output archive")
 	loggerFile := flag.String("logger", "script/perflogger.sh", "Logger script")
-	perfBaseImage := flag.String("perfBaseImage", "linuxkit/kernel-perf:4.14.88", "The image for perf")
-	perfPath := flag.String("perfPath", "/usr/bin/perf", "Path to perf in perfBaseImage")
+	perfImage := flag.String("perfImage", "linuxkit/kernel-perf:4.14.88", "The image for perf. If it is explicitly set empty, use local fs.")
+	perfPath := flag.String("perfPath", "/usr/bin/perf", "Path to perf in perfImage")
+	inotifyImage := flag.String("inotifyImage", "", "The image for inotifywait. If it is left empty, use local fs.")
+	inotifyPath := flag.String("inotifyPath", "/usr/bin/inotifywait", "Path to inotifywait in inotifyImage")
+	agentImage := flag.String("perfMapAgentImage", "", "The image for perf-map-agent.tar.gz. If it is left empty, use local fs.")
+	agentPath := flag.String("perfMapAgentPath", "", "Path to inotifywait in PerfMapAgentImage")
 	dryRun := flag.Bool("dryRun", false, "dry-run")
 	flag.Parse()
 	args := flag.Args()
@@ -195,10 +207,40 @@ func main() {
 		panic(err)
 	}
 
-	perfpath, perfname := getPerfBinary(cli, *perfBaseImage, *perfPath)
+	/* Prepare perf binary */
+	perfpath, perfname, tempP := getBinaryFromFsOrDockerImage(cli, *perfImage, *perfPath)
+	if temp != "" {
+		defer os.RemoveAll(tempP)
+	}
+	if perfpath == "" {
+		fmt.Println("Couldn't find perf binary from specified image or path")
+		return
+	}
+
+	/* Prepare inotify binary */
+	inotifypath, inotifyname, tempI := getBinaryFromFsOrDockerImage(cli, *inotifyImage, *inotifyPath)
+	if temp != "" {
+		defer os.RemoveAll(tempI)
+	}
+	if inotifypath == "" {
+		fmt.Println("Couldn't find inotify binary from specified image or path")
+		return
+	}
+
+	/* Prepare perf-map-agent */
+	agentpath, agentname, tempA := getBinaryFromFsOrDockerImage(cli, *perfMapAgentImage, *perfMapAgentPath)
+	if temp != "" {
+		defer os.RemoveAll(tempA)
+	}
+	if agentpath == "" {
+		fmt.Println("Couldn't find perf-map-agent archive from specified image or path")
+		return
+	}
+
+	/* Prepare base image */
 	name, cmds := inspectImage(cli, context.Background(), *imageName)
 
-	options := types.ImageBuildOptions{Platform: "linux"}
+	/* Prepare docker build context */
 	buf := new(bytes.Buffer)
 	tw := tar.NewWriter(buf)
 
@@ -234,6 +276,7 @@ func main() {
 		return
 	}
 
+	options := types.ImageBuildOptions{Platform: "linux"}
 	options.Dockerfile = "Dockerfile"
 	options.PullParent = true
 	build(cli, context.Background(), buf, options)
