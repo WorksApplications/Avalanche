@@ -1,6 +1,7 @@
 #!/bin/bash
 
-EXTERNAL_JAVA_OPTS="${EXTERNAL_JAVA_OPTS} -XX:+PreserveFramePointer"
+export ${JAVAOPTS_ENVNAME}="$(eval echo '$'${JAVAOPTS_ENVNAME}) -XX:+PreserveFramePointer"
+echo Options for java: $(eval '$'${JAVAOPTS_ENVNAME})
 
 mkdir -p ${PERF_DIR:=/tmp/perf}
 #PERF_ARCHIVE_DIR=/var/log/msa/${COMPANY_APPLICATION_TENANT:-wap}/${COMPANY_APPLICATION_LANDSCAPE:-production}/${COMPANY_APPLICATION_NAME}/${HOSTNAME}/perf-record

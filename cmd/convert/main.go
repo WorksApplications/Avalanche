@@ -60,38 +60,42 @@ func inspectImage(cli *client.Client, ctx context.Context, name string) (string,
 	return image.RepoTags[0], cmds
 }
 
-func genDockerfile(name, cmds, targetProc, javaOptEnv, logDir, perf, inotify, agent string) string {
-	templ := `
-    FROM %s
-    ENV TARGETPROC %s
-    ENV PERF_ARCHIVE_FILE %s
-    ADD logger.sh .
-    ADD %s %s
-    ADD %s %s
-    ADD %s /usr/bin/
-    CMD [%s]
-    `
-	return fmt.Sprintf(templ, name, targetProc, logDir, perf, perf, inotify, inotify, agent, cmds)
+func (s *dockerContext) genDockerfile(name, cmds string) string {
+	templ := "FROM %s\n%s\n%s\nCMD [%s]\n"
+	envs := ""
+	for _, env := range s.envs {
+		envs = envs + fmt.Sprintf("ENV %s %s\n", env.name, env.val)
+	}
+	adds := ""
+	for _, file := range s.files {
+		adds = adds + fmt.Sprintf("ADD %s %s\n", file.src, file.dst)
+	}
+	return fmt.Sprintf(templ, name, envs, adds, cmds)
 }
 
-func injectDockerfile(tw *tar.Writer, dockerfile string) {
-	injectFile(tw, "Dockerfile", strings.NewReader(dockerfile), int64(len(dockerfile)))
+func (s *dockerContext) injectStringFile(file, dst, content string) error {
+	return s.injectFile(file, dst, strings.NewReader(content), int64(len(content)))
 }
 
-func injectFile(tw *tar.Writer, filename string, data io.Reader, length int64) {
+func (s *dockerContext) injectFile(filename, dst string, data io.Reader, length int64) error {
 	hdr := &tar.Header{
 		Name: filename,
 		Mode: 0777,
 		Size: int64(length),
 	}
-	if err := tw.WriteHeader(hdr); err != nil {
+	if err := s.tw.WriteHeader(hdr); err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
-	if _, err := io.Copy(tw, data); err != nil {
+	if _, err := io.Copy(s.tw, data); err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
+	s.files = append(s.files, struct {
+		src string
+		dst string
+	}{filename, dst})
+	return nil
 }
 
 func downloadImage(cli *client.Client, save io.Writer, ctx context.Context, id string) {
@@ -125,7 +129,7 @@ func getBinaryFromFsOrDockerImage(cli *client.Client, name, path string) (string
 			fmt.Println(err)
 			return "", "", ""
 		}
-        fmt.Printf("[dependency binary] using: %s\n", path)
+		fmt.Printf("[dependency binary] using: %s\n", path)
 		/* return local binary. Assume "/bin/" is in $PATH in target image */
 		return path, "/bin/" + filepath.Base(path), ""
 	}
@@ -183,7 +187,16 @@ func getBinaryFromFsOrDockerImage(cli *client.Client, name, path string) (string
 	return "", "", temp
 }
 
-func buildPerfMapAgent() {
+type dockerContext struct {
+	tw    *tar.Writer
+	files []struct {
+		src string
+		dst string
+	}
+	envs []struct {
+		name string
+		val  string
+	}
 }
 
 func main() {
@@ -198,7 +211,8 @@ func main() {
 	inotifyImage := flag.String("inotifyImage", "", "The image for inotifywait. If it is left empty, use local fs.")
 	inotifyPath := flag.String("inotifyPath", "/usr/bin/inotifywait", "Path to inotifywait in inotifyImage")
 	agentImage := flag.String("perfMapAgentImage", "", "The image for perf-map-agent.tar.gz. If it is left empty, use local fs.")
-	agentPath := flag.String("perfMapAgentPath", "", "Path to inotifywait in PerfMapAgentImage")
+	agentPath := flag.String("perfMapAgentPath", "", "Path to inotifywait in PerfMapAgentImage.\n"+
+		"\tThe archive structure must contain perf-map-agent/ as an immediate child, and it must contain bin/perf-map-agent.sh and so on.")
 	dryRun := flag.Bool("dryRun", false, "dry-run")
 	flag.Parse()
 	args := flag.Args()
@@ -245,36 +259,54 @@ func main() {
 
 	/* Prepare docker build context */
 	buf := new(bytes.Buffer)
-	tw := tar.NewWriter(buf)
+	docker := dockerContext{
+		tw: tar.NewWriter(buf),
+	}
 
 	for _, file := range []struct {
 		path string
 		name string
+		dst  string
 	}{
-		{path: *loggerFile, name: "logger.sh"},
-		{path: perfpath, name: perfname},
-		{path: inotifypath, name: inotifyname},
-		{path: agentpath, name: agentname}} {
+		{path: *loggerFile, name: "logger.sh", dst: "logger.sh"},
+		{path: perfpath, name: perfname, dst: perfname},
+		{path: inotifypath, name: inotifyname, dst: inotifyname},
+		/* XXX: use ldd?? */
+		{path: "/usr/lib/libinotifytools.so.0.4.1", name: "libinotifytools.so.0", dst: "/usr/lib/"},
+		{path: agentpath, name: agentname, dst: "/usr/bin/"}} {
 		f, err := os.Open(file.path)
 		if err != nil {
 			return
 		}
 
 		info, _ := f.Stat()
-		injectFile(tw, file.name, f, info.Size())
+		docker.injectFile(file.name, file.dst, f, info.Size())
 	}
 
 	commandStr := "\"./logger.sh\""
 	for _, cmd := range cmds {
 		commandStr = commandStr + fmt.Sprintf(", \"%s\" ", cmd)
 	}
-	injectDockerfile(tw, genDockerfile(name, commandStr, *targetProc, *javaOptEnv, *logDir, perfname, inotifyname, agentname))
+	docker.injectStringFile("/bin/sudo", "/bin/sudo", "#!/bin/sh\n\n$@")
 
-	if err := tw.Close(); err != nil {
+	docker.envs = []struct {
+		name string
+		val  string
+	}{
+		{"TARGETPROC", *targetProc},
+		{"PERF_ARCHIVE_FILE", *logDir},
+		{"JAVAOPTS_ENVNAME", *javaOptEnv},
+	}
+
+	dockerfile := docker.genDockerfile(name, commandStr)
+	fmt.Println("=== Dockerfile generated ===\n" + dockerfile + "============")
+	docker.injectStringFile("Dockerfile", "Dockerfile", dockerfile)
+
+	if err := docker.tw.Close(); err != nil {
 		fmt.Println(err)
 		return
 	}
-	tw.Flush()
+	docker.tw.Flush()
 
 	if *dryRun {
 		fmt.Println(buf)
