@@ -1,18 +1,17 @@
 package main
 
 import (
+	"archive/tar"
 	"bufio"
 	"bytes"
 	"context"
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
-
-	"archive/tar"
-	"io/ioutil"
+    "strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
