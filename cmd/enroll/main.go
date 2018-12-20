@@ -23,6 +23,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+    "regexp"
 	"strings"
 )
 
@@ -149,28 +150,16 @@ func main() {
 	log.SetPrefix("enroll:\t")
 	log.SetFlags(log.Lshortfile)
 	scanner := flag.String("scanner", "http://scanner:8080", "scanner server address")
-	perfMonitorImage := flag.String("monitorImage", "release-docker.worksap.com/release-test/tomcat-base-perf-monitor", "the name of monitoring image")
-	perfMonitorLabel := flag.String("monitorLabel", "", "the label of monitoring image")
-	useMonitorImage := flag.Bool("useMonitorImage", true, "indicates whether the \"-monitorImage\" flag determines the monitoring image")
-	useMonitorLabel := flag.Bool("useMonitorLabel", false, "indicates whether the \"-monitorLabel\" flag determines the monitoring image")
+    perfMonitorName := flag.String("loggingImage", ".*-perf-monitor:.*", "the name of logging image (regex)")
 	port := flag.Int("port", 8080, "Listen port")
 
 	flag.Parse()
+    reImage := regexp.MustCompile(*perfMonitorName)
 	log.Println("scanner address at:", *scanner)
 	listener, _ := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 
 	c := Ctx{*scanner, func(s string) bool {
-		im := strings.Split(s, ":")
-		if *useMonitorImage && *useMonitorLabel {
-			return im[0] == *perfMonitorImage && im[1] == *perfMonitorLabel
-		} else if *useMonitorImage {
-			return im[0] == *perfMonitorImage
-		} else if *useMonitorLabel {
-			return im[1] == *perfMonitorLabel
-		} else {
-			log.Fatal("Neither of useMonitorLabel and useMonitorImage is specified")
-			return false
-		}
+        return reImage.MatchString(s)
 	}}
 
 	http.HandleFunc("/", c.handleFunc)
