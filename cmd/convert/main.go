@@ -38,15 +38,37 @@ func findImage(cli *client.Client, ctx context.Context, name string) *types.Imag
 	return nil
 }
 
-func build(cli *client.Client, ctx context.Context, b io.Reader, options types.ImageBuildOptions) {
+func build(cli *client.Client, ctx context.Context, b io.Reader, options types.ImageBuildOptions) string {
 	resp, err := cli.ImageBuild(ctx, b, options)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return ""
 	}
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
-	fmt.Printf(buf.String())
+	tee := io.TeeReader(resp.Body, os.Stdout)
+	s := "" // Prepare for response parse. Remaining for parsing will goes here
+	read := true
+	id := ""
+	for {
+		p := make([]byte, 1024)
+		if read {
+			_, err = tee.Read(p)
+			read = false
+			if err == io.EOF {
+				break
+			}
+		}
+		s = s + string(p)
+		if end := strings.IndexRune(s, '\n'); end >= 0 {
+			if subs := strings.SplitN(strings.Trim(s[:end-1], "{}"), ":", 2); subs[0] == "\"aux\"" {
+				id = strings.TrimPrefix(strings.Trim(strings.SplitN(subs[1], ":", 2)[1], "\""), "sha256:")
+			}
+			s = s[end+1:]
+		} else {
+			read = true
+			continue // Read more
+		}
+	}
+	return id
 }
 
 func inspectImage(cli *client.Client, ctx context.Context, name string) (string, []string) {
@@ -213,6 +235,7 @@ func main() {
 	agentImage := flag.String("perfMapAgentImage", "", "The image for perf-map-agent.tar.gz. If it is left empty, use local fs.")
 	agentPath := flag.String("perfMapAgentPath", "", "Path to inotifywait in PerfMapAgentImage.\n"+
 		"\tThe archive structure must contain perf-map-agent/ as an immediate child, and it must contain bin/perf-map-agent.sh and so on.")
+	saveAs := flag.String("saveAs", "", "The name for monitoring image (won't tagged if it is left blank)")
 	dryRun := flag.Bool("dryRun", false, "dry-run")
 	flag.Parse()
 	args := flag.Args()
@@ -316,5 +339,9 @@ func main() {
 	options := types.ImageBuildOptions{Platform: "linux"}
 	options.Dockerfile = "Dockerfile"
 	options.PullParent = true
-	build(cli, context.Background(), buf, options)
+	if *saveAs != "" {
+		options.Tags = []string{*saveAs}
+	}
+	id := build(cli, context.Background(), buf, options)
+	fmt.Printf("Image prepared: sha256:%s, tag: \"%s\".\nPush it to publish!\n", id, *saveAs)
 }

@@ -8,12 +8,18 @@ default: all
 all: front backend
 
 backend: bin/scanner bin/collect bin/enroll bin/blame
+
+cli: bin/converter
+
 front: front/public/app.js
 
 collect: collect-img
 
 bin/enroll: $(shell find cmd/enroll -name *.go) $(PKG)
 	CGO_ENABLED=0 go build -o bin/enroll cmd/enroll/*.go
+
+bin/converter: $(shell find cmd/convert -name *.go) $(PKG)
+	CGO_ENABLED=0 go build -o bin/converter cmd/convert/*.go
 
 bin/blame: $(shell find cmd/blame -name *.go) $(PKG)
 	CGO_ENABLED=0 go build -o bin/blame cmd/blame/*.go
