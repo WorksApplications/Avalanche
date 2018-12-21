@@ -38,11 +38,29 @@ func findImage(cli *client.Client, ctx context.Context, name string) *types.Imag
 	return nil
 }
 
-func build(cli *client.Client, ctx context.Context, b io.Reader, options types.ImageBuildOptions) string {
-	resp, err := cli.ImageBuild(ctx, b, options)
+func (docker *dockerContext) build(cli *client.Client, saveAs string) (string, error) {
+	dockerfile := docker.genDockerfile(docker.base, docker.command)
+	fmt.Println("=== Dockerfile generated ===\n" + dockerfile + "============")
+	docker.injectStringFile("Dockerfile", "Dockerfile", dockerfile)
+
+	if err := docker.tw.Close(); err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+	docker.tw.Flush()
+
+	docker.options = types.ImageBuildOptions{
+		Platform:   "linux",
+		Dockerfile: "Dockerfile",
+		PullParent: true,
+	}
+	if saveAs != "" {
+		docker.options.Tags = []string{saveAs}
+	}
+	resp, err := cli.ImageBuild(context.Background(), docker.buf, docker.options)
 	if err != nil {
 		fmt.Println(err)
-		return ""
+		return "", err
 	}
 	tee := io.TeeReader(resp.Body, os.Stdout)
 	s := "" // Prepare for response parse. Remaining for parsing will goes here
@@ -68,7 +86,7 @@ func build(cli *client.Client, ctx context.Context, b io.Reader, options types.I
 			continue // Read more
 		}
 	}
-	return id
+	return id, nil
 }
 
 func inspectImage(cli *client.Client, ctx context.Context, name string) (string, []string) {
@@ -210,8 +228,11 @@ func getBinaryFromFsOrDockerImage(cli *client.Client, name, path string) (string
 }
 
 type dockerContext struct {
-	tw    *tar.Writer
-	files []struct {
+	tw      *tar.Writer
+	buf     *bytes.Buffer
+	base    string
+	command string
+	files   []struct {
 		src string
 		dst string
 	}
@@ -219,6 +240,7 @@ type dockerContext struct {
 		name string
 		val  string
 	}
+	options types.ImageBuildOptions
 }
 
 func main() {
@@ -236,6 +258,7 @@ func main() {
 	agentPath := flag.String("perfMapAgentPath", "", "Path to inotifywait in PerfMapAgentImage.\n"+
 		"\tThe archive structure must contain perf-map-agent/ as an immediate child, and it must contain bin/perf-map-agent.sh and so on.")
 	saveAs := flag.String("saveAs", "", "The name for monitoring image (won't tagged if it is left blank)")
+	extractor := flag.String("extractor", "./bin/extract", "Path to extract command")
 	dryRun := flag.Bool("dryRun", false, "dry-run")
 	flag.Parse()
 	args := flag.Args()
@@ -283,10 +306,12 @@ func main() {
 	/* Prepare docker build context */
 	buf := new(bytes.Buffer)
 	docker := dockerContext{
-		tw: tar.NewWriter(buf),
+		tw:   tar.NewWriter(buf),
+		buf:  buf,
+		base: name,
 	}
 
-	for _, file := range []struct {
+	files := []struct {
 		path string
 		name string
 		dst  string
@@ -296,7 +321,11 @@ func main() {
 		{path: inotifypath, name: inotifyname, dst: inotifyname},
 		/* XXX: use ldd?? */
 		{path: "/usr/lib/libinotifytools.so.0.4.1", name: "libinotifytools.so.0", dst: "/usr/lib/"},
-		{path: agentpath, name: agentname, dst: "/usr/bin/"}} {
+		{path: agentpath, name: agentname, dst: "/usr/bin/"},
+		{path: *extractor, name: filepath.Base(*extractor), dst: "/bin/"},
+	}
+
+	for _, file := range files {
 		f, err := os.Open(file.path)
 		if err != nil {
 			return
@@ -306,9 +335,9 @@ func main() {
 		docker.injectFile(file.name, file.dst, f, info.Size())
 	}
 
-	commandStr := "\"./logger.sh\""
+	docker.command = "\"./logger.sh\""
 	for _, cmd := range cmds {
-		commandStr = commandStr + fmt.Sprintf(", \"%s\" ", cmd)
+		docker.command = docker.command + fmt.Sprintf(", \"%s\" ", cmd)
 	}
 	docker.injectStringFile("/bin/sudo", "/bin/sudo", "#!/bin/sh\n\n$@")
 
@@ -321,27 +350,10 @@ func main() {
 		{"JAVAOPTS_ENVNAME", *javaOptEnv},
 	}
 
-	dockerfile := docker.genDockerfile(name, commandStr)
-	fmt.Println("=== Dockerfile generated ===\n" + dockerfile + "============")
-	docker.injectStringFile("Dockerfile", "Dockerfile", dockerfile)
-
-	if err := docker.tw.Close(); err != nil {
-		fmt.Println(err)
+	if !(*dryRun) {
+		id, _ := docker.build(cli, *saveAs)
+		fmt.Printf("Image prepared: sha256:%s, tag: \"%s\".\nPush it to publish!\n", id, *saveAs)
 		return
 	}
-	docker.tw.Flush()
-
-	if *dryRun {
-		fmt.Println(buf)
-		return
-	}
-
-	options := types.ImageBuildOptions{Platform: "linux"}
-	options.Dockerfile = "Dockerfile"
-	options.PullParent = true
-	if *saveAs != "" {
-		options.Tags = []string{*saveAs}
-	}
-	id := build(cli, context.Background(), buf, options)
-	fmt.Printf("Image prepared: sha256:%s, tag: \"%s\".\nPush it to publish!\n", id, *saveAs)
+	//fmt.Println(buf)
 }

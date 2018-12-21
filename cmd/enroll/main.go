@@ -23,8 +23,7 @@ import (
 	"log"
 	"net"
 	"net/http"
-    "regexp"
-	"strings"
+	"regexp"
 )
 
 type Ctx struct {
@@ -150,16 +149,16 @@ func main() {
 	log.SetPrefix("enroll:\t")
 	log.SetFlags(log.Lshortfile)
 	scanner := flag.String("scanner", "http://scanner:8080", "scanner server address")
-    perfMonitorName := flag.String("loggingImage", ".*-perf-monitor:.*", "the name of logging image (regex)")
+	perfMonitorName := flag.String("loggingImage", ".*-perf-monitor:.*", "the name of logging image (regex)")
 	port := flag.Int("port", 8080, "Listen port")
 
 	flag.Parse()
-    reImage := regexp.MustCompile(*perfMonitorName)
+	reImage := regexp.MustCompile(*perfMonitorName)
 	log.Println("scanner address at:", *scanner)
 	listener, _ := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 
 	c := Ctx{*scanner, func(s string) bool {
-        return reImage.MatchString(s)
+		return reImage.MatchString(s)
 	}}
 
 	http.HandleFunc("/", c.handleFunc)

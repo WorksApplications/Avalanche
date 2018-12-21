@@ -9,7 +9,7 @@ all: front backend
 
 backend: bin/scanner bin/collect bin/enroll bin/blame
 
-cli: bin/converter
+cli: bin/converter bin/extract
 
 front: front/public/app.js
 
@@ -29,6 +29,9 @@ bin/collect: $(shell find cmd/collect -name *.go) $(PKG) generated_files/stub
 
 bin/scanner: $(shell find cmd/scanner -name *.go) $(PKG)
 	CGO_ENABLED=0 go build -o bin/scanner cmd/scanner/*.go
+
+bin/extract: $(shell find cmd/extract -name *.go) $(PKG)
+	CGO_ENABLED=0 go build -o bin/extract cmd/extract/*.go
 
 swagger:
 	swagger generate server -f api/collect.yml -t generated_files -A collect
