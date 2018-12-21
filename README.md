@@ -11,6 +11,19 @@ To grasp looks & usage, see our wiki page: [About Avalanche view](https://github
 
 ![eye catch](asset/top.png)
 
+## Getting started
+
+```
+% # see http://github.com/jvm-profiling-tools/perf-map-agent and build it at first
+% go get -d -u -v github.com/WorksApplications/Avalanche/...
+% cd $GOPATH/src/github.com/WorksApplications/Avalanche
+% make cli
+% bin/convert -image ${_your app_}=-perfMapAgentPath=path/to/perf-map-agent.tar.gz\
+    -saveAs=${_your_app_}-perf-monitor:something
+```
+
+Well done! You have your own "perf-logging" image. Deploy it to log your app's performance. To analyze the "perf-log", deploy analyzer service by seeing the document below.
+
 ## TOC
 
 - [Concept](#concept)
@@ -26,13 +39,13 @@ To grasp looks & usage, see our wiki page: [About Avalanche view](https://github
 1. Take log snapshot on-demand (eg. on incident response).
 1. Explore the performance snapshots and find bottlenecks.
 
-![system concept image](asset/avalanche-scheme.png)
+![system concept image](asset/avalanche-scheme.svg)
 
 ## How it works
 
 ### Brief summary
 
-1. Transform your application's container image to "perf-enabled" image and "extractor" image with `provide` tool in this repository
+1. Transform your application's container image to "perf-enabled" image and "extractor" image with `convert` tool in this repository
 1. Deploy "perf-enabled" image on your environment
 1. Write configurations regarding your target environment, log server and search engine.
 1. Run
