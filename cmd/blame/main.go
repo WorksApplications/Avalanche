@@ -203,7 +203,6 @@ func toSearch(apiurl, apipost, apitype, except *string, nsw, maxdepth int, minra
 }
 
 func main() {
-	log.SetPrefix("suspect:\t")
 	log.SetFlags(log.Lshortfile | log.Ltime | log.Ldate)
 
 	nsw := flag.Int("nSearchWorker", 1, "number of workers for searching")

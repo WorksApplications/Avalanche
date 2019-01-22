@@ -4,10 +4,6 @@ export ${JAVAOPTS_ENVNAME}="$(eval echo '$'${JAVAOPTS_ENVNAME}) -XX:+PreserveFra
 echo Options for java: $(eval '$'${JAVAOPTS_ENVNAME})
 
 mkdir -p ${PERF_DIR:=/tmp/perf}
-#PERF_ARCHIVE_DIR=/var/log/msa/${COMPANY_APPLICATION_TENANT:-wap}/${COMPANY_APPLICATION_LANDSCAPE:-production}/${COMPANY_APPLICATION_NAME}/${HOSTNAME}/perf-record
-#PERF_ARCHIVE_FILE=perf-${COMPANY_APPLICATION_NAME}.tar.gz
-#mkdir -p ${PERF_ARCHIVE_DIR}
-
 mkdir $(dirname ${PERF_ARCHIVE_FILE})
 
 archive-perf-data () {

@@ -140,7 +140,6 @@ func (c *cfg) exchange() {
 }
 
 func main() {
-	log.SetPrefix("scanner:\t")
 	log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime)
 	templhelp := "Template path for perf-log search.\n variables:\n\t$any: matches any\n" +
 		"\t$env: mathes any string and returned as name of environment\n" +

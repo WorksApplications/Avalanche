@@ -113,7 +113,6 @@ func main() {
 	logAt := flag.String("logServer", "http://localhost", "Log server address")
 	flag.Parse()
 
-	log.SetPrefix("extract:\t")
 	log.SetFlags(log.Lshortfile | log.Ltime | log.Ldate)
 
 	//perf_map_regex = re.compile(r'^perf[0-9]+\.map$')

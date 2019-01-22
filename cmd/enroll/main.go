@@ -146,7 +146,6 @@ func (s *Ctx) handleFunc(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	log.SetPrefix("enroll:\t")
 	log.SetFlags(log.Lshortfile)
 	scanner := flag.String("scanner", "http://scanner:8080", "scanner server address")
 	perfMonitorName := flag.String("loggingImage", ".*-perf-monitor:.*", "the name of logging image (regex)")
