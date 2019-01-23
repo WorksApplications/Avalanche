@@ -7,7 +7,7 @@ default: all
 
 all: front backend
 
-backend: bin/scanner bin/collect bin/enroll bin/blame
+backend: bin/scanner bin/collect bin/kube-client bin/blame
 
 cli: bin/converter bin/extract
 
@@ -15,8 +15,8 @@ front: front/public/app.js
 
 collect: collect-img
 
-bin/enroll: $(shell find cmd/enroll -name *.go) $(PKG)
-	CGO_ENABLED=0 go build -o bin/enroll cmd/enroll/*.go
+bin/kube-client: $(shell find cmd/kube-client -name *.go) $(PKG)
+	CGO_ENABLED=0 go build -o bin/kube-client cmd/kube-client/*.go
 
 bin/converter: $(shell find cmd/convert -name *.go) $(PKG)
 	CGO_ENABLED=0 go build -o bin/converter cmd/convert/*.go
