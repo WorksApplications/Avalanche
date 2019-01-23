@@ -27,6 +27,7 @@ while true; do
     if [ "${PID}" ]; then
         break
     fi
+    sleep 1
 done
 
 PID=$(ps ax|grep java|grep catalina|grep -v grep|awk '{print $1}')
