@@ -19,8 +19,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: enroll
-  name: enroll
+    run: kube-client
+  name: kube-client
 spec:
   ports:
   - port: 8080
@@ -28,7 +28,7 @@ spec:
     protocol: TCP
     name: content
   selector:
-    run: enroll
+    run: kube-client
 
 
 ---

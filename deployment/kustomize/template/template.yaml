@@ -29,7 +29,7 @@ spec:
           - /collect
           - -port=8080
           - -scanner=http://scanner:8080
-          - -enroll=http://enroll:8080
+          - -kubeClient=http://kube-client:8080
           - -extract=http://extract:8080
           - -db=$DB_CRED_USER:$DB_CRED_PASS@tcp(mariadb)/collekt?parseTime=True
           - -persistent=/persistent
@@ -58,13 +58,13 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: enroll
+  name: kube-client
 spec:
   template:
     spec:
       containers:
-      - name: enroll
-        image: ${DOCKERREG}/enroll
+      - name: kube-client
+        image: ${DOCKERREG}/kube-client
 
 ---
 

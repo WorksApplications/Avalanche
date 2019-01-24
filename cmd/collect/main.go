@@ -51,7 +51,7 @@ func main() {
 	port := flag.Int("port", 4981, "Port for this server")
 	slave := flag.Bool("slave", false, "Whether it works as slave (no DB update)")
 	scanner := flag.String("scanner", "http://localhost:8080", "\"scanner\" service address")
-	enroll := flag.String("enroll", "http://localhost:8080", "\"enroll\" service address")
+	kubeClient := flag.String("kubeClient", "http://localhost:8080", "\"kube-client\" service address")
 	extract := flag.String("extract", "http://localhost:8080", "\"extract\" service address")
 	tempd := flag.String("volatile", "/tmp/debug-collect/collect-volatile", "\"directory for temporal file\"")
 	ssstore := flag.String("persistent", "/tmp/debug-collect", "mount point of persistent volume for snapshot")
@@ -72,7 +72,7 @@ func main() {
 	cfg := cfg{
 		Db:         db,
 		Scanner:    *scanner,
-		Enroll:     *enroll,
+		KubeClient: *kubeClient,
 		Extract:    *extract,
 		Pvmount:    *ssstore,
 		Temporald:  *tempd,

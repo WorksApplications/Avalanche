@@ -34,15 +34,15 @@ import (
 )
 
 type cfg struct {
-	Db        *sql.DB
-	Scanner   string /* detect address */
-	Enroll    string
-	Extract   string /* extract address */
-	Pvmount   string
-	Temporald string
-	TracedPod map[int64]struct{}
-	IsMaster  bool
-	Ready     bool
+	Db         *sql.DB
+	Scanner    string /* detect address */
+	KubeClient string
+	Extract    string /* extract address */
+	Pvmount    string
+	Temporald  string
+	TracedPod  map[int64]struct{}
+	IsMaster   bool
+	Ready      bool
 
 	Flamescope string
 	RunningPod map[string]struct{}

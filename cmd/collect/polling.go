@@ -116,18 +116,18 @@ func (s *cfg) PollPodInfo() {
 }
 
 func (s *cfg) checkPodAvailability() error {
-	if s.Enroll == "" {
+	if s.KubeClient == "" {
 		/* disable this feature */
 		return nil
 	}
-	r, err := http.Get(s.Enroll)
+	r, err := http.Get(s.KubeClient)
 	if err != nil {
-		log.Println("Poke enroll at ", s.Enroll, " failed!")
+		log.Println("Poke kube-client at ", s.KubeClient, " failed!")
 		return err
 	}
 	d, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Println("Reading enroll at ", s.Enroll, " response failed")
+		log.Println("Reading kube-client at ", s.KubeClient, " response failed")
 		return err
 	}
 	defer r.Body.Close()
