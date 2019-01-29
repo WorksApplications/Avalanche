@@ -18,8 +18,19 @@ archive-perf-data () {
   done
 }
 
-$@ &
-ENTRY_PID=$!
+if [[ "$(basename $1)" == "java" ]]; then
+    javaCmd=$1
+    shift
+    ${javaCmd} "-XX:+PreserveFramePointer" $@
+else
+    if [[ "$(file $1 | grep "text" | wc -l)" == "1" ]]; then
+        $@ &
+        ENTRY_PID=$!
+    else
+        echo Non-text entry point is not supported by our logger
+        exit 1
+    fi
+fi
 
 # Wait for the process to come up
 while true; do
