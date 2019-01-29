@@ -20,14 +20,8 @@ if [[ "$(basename $1)" == "$(basename ${TARGETPROC})" ]]; then # I believe this 
     shift
     ${javaCmd} "-XX:+PreserveFramePointer" $@
 else
-    if [[ "$(file $1 | grep "text" | wc -l)" == "1" ]]; then
-        # XXX: GNU
-        sed -i "s/\(^.*$(basename ${TARGETPROC})\) /\1 -XX:+PreserveFramePointer /g" $1
-        $@ &
-    else
-        echo Non-text entry point is not supported by our logger
-        exit 1
-    fi
+    sed -i "s/\(^.*$(basename ${TARGETPROC})\) /\1 -XX:+PreserveFramePointer /g" $1
+    $@ &
 fi
 ENTRY_PID=$!
 
