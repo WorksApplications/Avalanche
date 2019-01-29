@@ -15,14 +15,14 @@ archive-perf-data () {
   done
 }
 
-if [[ "$(basename $1)" == "java" ]]; then
+if [[ "$(basename $1)" == "$(basename ${TARGETPROC})" ]]; then # I believe this is not a coincidence
     javaCmd=$1
     shift
     ${javaCmd} "-XX:+PreserveFramePointer" $@
 else
     if [[ "$(file $1 | grep "text" | wc -l)" == "1" ]]; then
         # XXX: GNU
-        sed -i 's/java /java -XX:+PreserveFramePointer /g' $1
+        sed -i "s/\(^.*$(basename ${TARGETPROC})\) /\1 -XX:+PreserveFramePointer /g" $1
         $@ &
     else
         echo Non-text entry point is not supported by our logger
