@@ -34,7 +34,7 @@ while true; do
     sleep 1
 done
 
-PID=$(ps ax|grep java|grep catalina|grep -v grep|awk '{print $1}')
+PID=$(ps ax|grep ${TARGETPROC}|grep -v grep|awk '{print $1}')
 e=$(echo perf record --switch-output=1m -o ${PERF_DIR}/perf.data -F ${PERF_RECORD_FREQ:=99} -g -p ${PID} -m ${PERF_MMAP_N_PAGES:=32})
 echo $e
 $e &
