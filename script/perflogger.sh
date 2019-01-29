@@ -1,8 +1,5 @@
 #!/bin/bash
 
-export ${JAVAOPTS_ENVNAME}="$(eval echo '$'${JAVAOPTS_ENVNAME}) -XX:+PreserveFramePointer"
-echo Options for java: $(eval '$'${JAVAOPTS_ENVNAME})
-
 mkdir -p ${PERF_DIR:=/tmp/perf}
 mkdir $(dirname ${PERF_ARCHIVE_FILE})
 
@@ -24,13 +21,15 @@ if [[ "$(basename $1)" == "java" ]]; then
     ${javaCmd} "-XX:+PreserveFramePointer" $@
 else
     if [[ "$(file $1 | grep "text" | wc -l)" == "1" ]]; then
+        # XXX: GNU
+        sed -i 's/java /java -XX:+PreserveFramePointer /g' $1
         $@ &
-        ENTRY_PID=$!
     else
         echo Non-text entry point is not supported by our logger
         exit 1
     fi
 fi
+ENTRY_PID=$!
 
 # Wait for the process to come up
 while true; do
