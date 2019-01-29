@@ -51,7 +51,7 @@ func (docker *dockerContext) build(cli *client.Client, saveAs string) (string, e
 	docker.options = types.ImageBuildOptions{
 		Platform:   "linux",
 		Dockerfile: "Dockerfile",
-		PullParent: true,
+		PullParent: false,
 	}
 	if saveAs != "" {
 		docker.options.Tags = []string{saveAs}
@@ -66,23 +66,29 @@ func (docker *dockerContext) build(cli *client.Client, saveAs string) (string, e
 	read := true
 	id := ""
 	for {
-		p := make([]byte, 1024)
+		/* Do not read more response when there's something to process */
 		if read {
+			p := make([]byte, 1024)
 			_, err = tee.Read(p)
 			read = false
 			if err == io.EOF {
+				/* reached to end of the build response */
 				break
 			}
+			s = s + string(p)
+			/* XXX: what if the daemon go insane? */
 		}
-		s = s + string(p)
 		if end := strings.IndexRune(s, '\n'); end >= 0 {
-			if subs := strings.SplitN(strings.Trim(s[:end-1], "{}"), ":", 2); subs[0] == "\"aux\"" {
+			switch subs := strings.SplitN(strings.Trim(s[:end-1], "{}"), ":", 2); subs[0] {
+			case "\"aux\"":
 				id = strings.TrimPrefix(strings.Trim(strings.SplitN(subs[1], ":", 2)[1], "\""), "sha256:")
+			case "\"errorDetail\"":
+				return id, fmt.Errorf(s)
 			}
 			s = s[end+1:]
 		} else {
 			read = true
-			continue // Read more
+			continue // Read more; we check the response on each line-break
 		}
 	}
 	return id, nil
@@ -219,7 +225,7 @@ func getBinaryFromFsOrDockerImage(cli *client.Client, name, path string) (string
 				binpath := laybase + "/" + path
 				fmt.Printf("[dependency binary] saved: %s\n", binpath)
 				untarOne(lr, laybase+"/"+hdr.Name)
-				return binpath, hdr.Name, temp
+				return binpath, "/" + hdr.Name, temp
 			}
 		}
 	}
@@ -260,8 +266,10 @@ func main() {
 	extractor := flag.String("extractor", "./bin/extract", "Path to extract command")
 	dryRun := flag.Bool("dryRun", false, "dry-run")
 	flag.Parse()
-	args := flag.Args()
-	fmt.Println(args)
+	if *imageName == "" {
+		fmt.Println("Sorry, image name is required.")
+		return
+	}
 
 	cli, err := client.NewEnvClient()
 	client.WithVersion(*apiVer)(cli)
@@ -302,6 +310,11 @@ func main() {
 	/* Prepare base image */
 	name, cmds := inspectImage(cli, context.Background(), *imageName)
 
+	if name == "" {
+		fmt.Println("Couldn't find the image locally.\nNote: To examine the image, it is required to pull the target image first")
+		return
+	}
+
 	/* Prepare docker build context */
 	buf := new(bytes.Buffer)
 	docker := dockerContext{
@@ -316,7 +329,7 @@ func main() {
 		dst  string
 	}{
 		{path: *loggerFile, name: "logger.sh", dst: "logger.sh"},
-		{path: perfpath, name: perfname, dst: perfname},
+		{path: perfpath, name: perfname, dst: "/bin/perf"},
 		{path: inotifypath, name: inotifyname, dst: inotifyname},
 		/* XXX: use ldd?? */
 		{path: "/usr/lib/libinotifytools.so.0.4.1", name: "libinotifytools.so.0", dst: "/usr/lib/"},
@@ -350,7 +363,11 @@ func main() {
 	}
 
 	if !(*dryRun) {
-		id, _ := docker.build(cli, *saveAs)
+		id, err := docker.build(cli, *saveAs)
+		if err != nil {
+			fmt.Println("Failed to build the image.", err)
+			return
+		}
 		fmt.Printf("Image prepared: sha256:%s, tag: \"%s\".\nPush it to publish!\n", id, *saveAs)
 		return
 	}
