@@ -1,7 +1,7 @@
 #!/bin/bash
 
 mkdir -p ${PERF_DIR:=/tmp/perf}
-mkdir $(dirname ${PERF_ARCHIVE_FILE})
+mkdir $(dirname ${PERF_ARCHIVE_FILE:=${PERF_ARCHIVE_FILE_DEFAULT}})
 
 archive-perf-data () {
   while true; do
@@ -20,6 +20,12 @@ if [[ "$(basename $1)" == "$(basename ${TARGETPROC})" ]]; then # I believe this 
     shift
     ${javaCmd} "-XX:+PreserveFramePointer" $@
 else
+    if [[ "$1" == "/bin/bash" || "$1" == "/bin/sh" || "$(basename $(dirname $1))/$(basename $1)" == "bin/zsh" ]]; then
+        shift
+        if [[ $1 == "-c" ]]; then
+            shift
+        fi
+    fi
     sed -i "s/\(^.*$(basename ${TARGETPROC})\) /\1 -XX:+PreserveFramePointer /g" $1
     $@ &
 fi

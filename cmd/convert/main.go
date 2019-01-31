@@ -253,7 +253,7 @@ func main() {
 	imageName := flag.String("image", "", "target docker image")
 	targetProc := flag.String("targetProcName", "java", "The environment variable name for Java options")
 	javaOptEnv := flag.String("javaOptEnvName", "JAVA_OPTS", "The environment variable name for Java options")
-	logDir := flag.String("logDir", "/var/log/${APPNAME}/perf-record", "log directory for perf output archive")
+	archFile := flag.String("archiveFile", "/var/log/${APPNAME}/perf-record.tar.gz", "file name for perf output archive")
 	loggerFile := flag.String("logger", "script/perflogger.sh", "Logger script")
 	perfImage := flag.String("perfImage", "linuxkit/kernel-perf:4.14.88", "The image for perf. If it is explicitly set empty, use local fs.")
 	perfPath := flag.String("perfPath", "/usr/bin/perf", "Path to perf in perfImage")
@@ -358,7 +358,7 @@ func main() {
 		val  string
 	}{
 		{"TARGETPROC", *targetProc},
-		{"PERF_ARCHIVE_FILE", *logDir},
+		{"PERF_ARCHIVE_FILE_DEFAULT", *archFile},
 		{"JAVAOPTS_ENVNAME", *javaOptEnv},
 	}
 
