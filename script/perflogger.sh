@@ -1,7 +1,7 @@
 #!/bin/bash
 
 mkdir -p ${PERF_DIR:=/tmp/perf}
-mkdir $(dirname ${PERF_ARCHIVE_FILE})
+mkdir $(dirname ${PERF_ARCHIVE_FILE:=${PERF_ARCHIVE_FILE_DEFAULT}})
 
 archive-perf-data () {
   while true; do
