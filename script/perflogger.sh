@@ -20,6 +20,12 @@ if [[ "$(basename $1)" == "$(basename ${TARGETPROC})" ]]; then # I believe this 
     shift
     ${javaCmd} "-XX:+PreserveFramePointer" $@
 else
+    if [[ "$1" == "/bin/bash" || "$1" == "/bin/sh" || "$(basename $(dirname $1))/$(basename $1)" == "bin/zsh" ]]; then
+        shift
+        if [[ $1 == "-c" ]]; then
+            shift
+        fi
+    fi
     sed -i "s/\(^.*$(basename ${TARGETPROC})\) /\1 -XX:+PreserveFramePointer /g" $1
     $@ &
 fi
