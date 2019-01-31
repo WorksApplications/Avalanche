@@ -351,7 +351,7 @@ func main() {
 	for _, cmd := range cmds {
 		docker.command = docker.command + fmt.Sprintf(", \"%s\" ", cmd)
 	}
-	docker.injectStringFile("/bin/sudo", "/bin/sudo", "#!/bin/sh\n\n$@")
+	//docker.injectStringFile("/bin/sudo", "/bin/sudo", "#!/bin/sh\n\n$@")
 
 	docker.envs = []struct {
 		name string
