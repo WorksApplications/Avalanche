@@ -21,10 +21,11 @@ import (
 
 func getLog(root *url.URL, resource string) (io.ReadCloser, error) {
 	// TODO: handle trailing slash
-	addr := root.String() + resource
 	if root.Scheme == "file" {
+		addr := root.Path + resource
 		return os.Open(addr)
 	} else {
+		addr := root.String() + resource
 		resp, err := http.Get(addr)
 		if err != nil {
 			return nil, err
